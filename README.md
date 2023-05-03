@@ -12,7 +12,7 @@ Voraussetzungen für das erfolgreiche Weiterentwickeln und lokale Testen dieses 
 1. Zunächst muss das Github-Repository in Visual Studio Code (oder einem anderen geeigneten Quelltext-Editor) zur Verfügung stehen. Hierfür kann der Entwickler:
 > - das Repository als zip herunterladen, entpacken, in Visual Studio Code öffnen und Git initialisieren (`git init`).
 > - das Repository mit Git klonen 
-`git clone git@github.com:sophieStrittti/DHBW_CampusRallyeApp.git` 
+`git clone git@github.com:DHBWLoerrach/CampusRallyeApp.git` 
 und ggf. in das richtige Verzeichnis wechseln.
 
 2. Anschließend müssen mit yarn die Abhängigkeiten bzw. npm-Pakete in NodeJS installiert werden: 
