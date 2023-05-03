@@ -1,6 +1,7 @@
 # DHBW_CampusRallyeApp
 
-Projekt der Studienarbeit an der DHBW Lörrach durch Studierende.
+Basierend auf den Ergebnissen einer Studienarbeit an der DHBW Lörrach durchgeführt 
+durch Studierende des Kurses TIF20A (siehe https://github.com/sophieStrittti/DHBW_CampusRallyeApp).
 
 ## Setup für Entwickler
 Voraussetzungen für das erfolgreiche Weiterentwickeln und lokale Testen dieses Projekts sind folgende:
