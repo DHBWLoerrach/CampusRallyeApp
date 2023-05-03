@@ -1,7 +1,9 @@
-# DHBW_CampusRallyeApp
+# Campus Rallye App
+
+Smartphone App für die Campus Rallye im ersten Semester an der [DHBW Lörrach](https://dhbw-loerrach.de). 
 
 Basierend auf den Ergebnissen einer Studienarbeit an der DHBW Lörrach durchgeführt 
-durch Studierende des Kurses TIF20A (siehe https://github.com/sophieStrittti/DHBW_CampusRallyeApp).
+am [Studienzentrum IT-Management & Informatik](https://dhbw-loerrach.de/szi) durch Studierende des Kurses TIF20A (siehe https://github.com/sophieStrittti/DHBW_CampusRallyeApp).
 
 ## Setup für Entwickler
 Voraussetzungen für das erfolgreiche Weiterentwickeln und lokale Testen dieses Projekts sind folgende:
