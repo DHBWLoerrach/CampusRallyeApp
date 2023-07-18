@@ -18,7 +18,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 function TabScreen(props) {
-  const { confirmedGroup, confirmedGroupMembers } = props;
+  const { confirmedGroup } = props;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -52,11 +52,7 @@ function TabScreen(props) {
         }}
       >
         {(props) => (
-          <GroupScreen
-            {...props}
-            confirmedGroup={confirmedGroup}
-            confirmedGroupMembers={confirmedGroupMembers}
-          />
+          <GroupScreen {...props} confirmedGroup={confirmedGroup} />
         )}
       </Tab.Screen>
       <Tab.Screen
@@ -67,11 +63,7 @@ function TabScreen(props) {
         }}
       >
         {(props) => (
-          <RallyeScreen
-            {...props}
-            confirmedGroup={confirmedGroup}
-            confirmedGroupMembers={confirmedGroupMembers}
-          />
+          <RallyeScreen {...props} confirmedGroup={confirmedGroup} />
         )}
       </Tab.Screen>
       <Tab.Screen
@@ -86,19 +78,12 @@ function TabScreen(props) {
   );
 }
 
-export default function MainNavigator({
-  confirmedGroup,
-  confirmedGroupMembers,
-}) {
+export default function MainNavigator({ confirmedGroup }) {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Rallye" options={{ headerShown: false }}>
         {(props) => (
-          <TabScreen
-            {...props}
-            confirmedGroup={confirmedGroup}
-            confirmedGroupMembers={confirmedGroupMembers}
-          />
+          <TabScreen {...props} confirmedGroup={confirmedGroup} />
         )}
       </Stack.Screen>
       <Stack.Screen
