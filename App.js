@@ -9,25 +9,9 @@ import {
 import React, { useState, useEffect } from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import { createStackNavigator } from '@react-navigation/stack';
 import { supabase } from './supabase';
 
-import Color from './js/styles/Colors';
-
-import RallyeScreen from './js/pages/RallyeScreen';
-import SettingsScreen from './js/pages/SettingsScreen';
-import GroupScreen from './js/pages/GroupScreen';
-import ImpressumScreen from './js/pages/pagesOnSettingsScreen/ImpressumScreen';
-import InformationenScreen from './js/pages/pagesOnSettingsScreen/InformationenScreen';
-import QRCodeFragen from './js/pages/questions/QRCodeFragen';
-import Wissensfragen from './js/pages/questions/Wissensfragen';
-import BildFragen from './js/pages/questions/BildFragen';
-import QRScan from './js/pages/questions/QRScan';
-
-const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+import MainNavigator from './js/screens/MainNavigator';
 
 /* Component to prompt for password input */
 function PasswordPrompt({ onPasswordSubmit }) {
@@ -68,7 +52,7 @@ export default function App() {
 
   useEffect(() => {
     async function getData() {
-      let { data: realpassword, error } = await supabase
+      let { data: realpassword } = await supabase
         .from('Rallye')
         .select('password');
       setrealpassword(realpassword[0].password);
@@ -147,68 +131,10 @@ export default function App() {
   return (
     <NavigationContainer>
       {enabled ? (
-        <Stack.Navigator>
-          <Stack.Screen
-            name="Rallye"
-            options={{ headerShown: false }}
-          >
-            {(props) => (
-              <TabScreen
-                {...props}
-                confirmedGroup={confirmedGroup}
-                confirmedGroupMembers={confirmedGroupMembers}
-              />
-            )}
-          </Stack.Screen>
-          <Stack.Screen
-            name="Impressum"
-            component={ImpressumScreen}
-            options={{
-              headerStyle: { backgroundColor: Color.dhbwRed },
-              headerTintColor: Color.tabHeader,
-            }}
-          />
-          <Stack.Screen
-            name="Informationen"
-            component={InformationenScreen}
-            options={{
-              headerStyle: { backgroundColor: Color.dhbwRed },
-              headerTintColor: Color.tabHeader,
-            }}
-          />
-          <Stack.Screen
-            name="Wissensfragen"
-            component={Wissensfragen}
-            options={{
-              headerStyle: { backgroundColor: Color.dhbwRed },
-              headerTintColor: Color.tabHeader,
-            }}
-          />
-          <Stack.Screen
-            name="QRCodeFragen"
-            component={QRCodeFragen}
-            options={{
-              headerStyle: { backgroundColor: Color.dhbwRed },
-              headerTintColor: Color.tabHeader,
-            }}
-          />
-          <Stack.Screen
-            name="BildFragen"
-            component={BildFragen}
-            options={{
-              headerStyle: { backgroundColor: Color.dhbwRed },
-              headerTintColor: Color.tabHeader,
-            }}
-          />
-          <Stack.Screen
-            name="QRScan"
-            component={QRScan}
-            options={{
-              headerStyle: { backgroundColor: Color.dhbwRed },
-              headerTintColor: Color.tabHeader,
-            }}
-          />
-        </Stack.Navigator>
+        <MainNavigator
+          confirmedGroup={confirmedGroup}
+          confirmedGroupMembers={confirmedGroupMembers}
+        />
       ) : showPasswordPrompt ? (
         <PasswordPrompt onPasswordSubmit={handlePasswordSubmit} />
       ) : showGroupPrompt ? (
@@ -247,75 +173,6 @@ export default function App() {
         </View>
       )}
     </NavigationContainer>
-  );
-}
-
-function TabScreen(props) {
-  const { confirmedGroup, confirmedGroupMembers } = props;
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          if (route.name === 'DHBW Campus Rallye') {
-            iconName = 'map';
-          } else if (route.name === 'Einstellungen') {
-            iconName = 'settings';
-          } else if (route.name === 'Gruppe') {
-            iconName = 'people';
-          }
-          return (
-            <MaterialIcon
-              name={iconName}
-              size={size}
-              color={focused ? Color.dhbwRed : Color.dhbwGray}
-            />
-          );
-        },
-        tabBarActiveTintColor: Color.dhbwRed,
-        tabBarInactiveTintColor: Color.dhbwGray,
-      })}
-    >
-      <Tab.Screen
-        name="Gruppe"
-        options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
-        }}
-      >
-        {(props) => (
-          <GroupScreen
-            {...props}
-            confirmedGroup={confirmedGroup}
-            confirmedGroupMembers={confirmedGroupMembers}
-          />
-        )}
-      </Tab.Screen>
-      <Tab.Screen
-        name="DHBW Campus Rallye"
-        options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
-        }}
-      >
-        {(props) => (
-          <RallyeScreen
-            {...props}
-            confirmedGroup={confirmedGroup}
-            confirmedGroupMembers={confirmedGroupMembers}
-          />
-        )}
-      </Tab.Screen>
-      <Tab.Screen
-        name="Einstellungen"
-        component={SettingsScreen}
-        options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
-        }}
-      />
-    </Tab.Navigator>
   );
 }
 
