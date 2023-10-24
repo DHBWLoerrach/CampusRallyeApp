@@ -38,5 +38,5 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=SUPABASE_ANON_KEY
 
 Dort müssen nun die URL der Supabase-DB und der Anon Key eingefügt werden. Diese sind in den Einstellungen des Supabase Projekts in den API Einstellungen zu finden.
 
-5. Nun kann die App getestet und weiterentwickelt werden. Für das aktive Testen muss nun mit `npx expo start` der Server gestartet werden. Nun kann die entwickelte App in der Expo Go App getestet werden. Entweder über einen Scan des QR-Codes oder einen Login in der App. Des Weiteren kann man die App auf Emulatoren starten. Informationen hierzu werden direkt auf der Konsole angezeigt.
+5. Nun kann die App getestet und weiterentwickelt werden. Für das aktive Testen muss nun mit `npx expo -g` der Server gestartet werden. Nun kann die entwickelte App in der Expo Go App getestet werden. Entweder über einen Scan des QR-Codes oder einen Login in der App. Des Weiteren kann man die App auf Emulatoren starten. Informationen hierzu werden direkt auf der Konsole angezeigt.
    Solange der Server läuft, wird nun jede Änderung des Codes direkt angezeigt, sobald sie gespeichert wurde. So können kleinste Änderungen im Code schnell getestet werden.
