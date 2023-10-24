@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import { Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 
