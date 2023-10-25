@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
   Button,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from 'react-native';
 
 // TODO basically same code as GroupPrompt
@@ -12,10 +13,11 @@ export default function PasswordPrompt({ onPasswordSubmit }) {
   const [password, setPassword] = useState('');
 
   return (
-    <View style={styles.passwordContainer}>
-      <Text style={styles.passwordLabel}>
-        Bitte geben Sie das Passwort ein
-      </Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.passwordContainer}
+    >
+      <Text style={styles.passwordLabel}>Passwort eingeben:</Text>
       <TextInput
         style={styles.passwordInput}
         secureTextEntry={true}
@@ -23,10 +25,10 @@ export default function PasswordPrompt({ onPasswordSubmit }) {
         value={password}
       />
       <Button
-        title="Weiter"
+        title="Anmelden"
         onPress={() => onPasswordSubmit(password)}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -39,7 +41,6 @@ const styles = StyleSheet.create({
   },
   passwordLabel: {
     fontSize: 24,
-    fontWeight: 'bold',
     marginBottom: 16,
   },
   passwordInput: {

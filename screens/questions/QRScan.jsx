@@ -1,49 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Button, Dimensions } from 'react-native';
+import { useState, useEffect } from 'react';
+import {
+  Text,
+  View,
+  StyleSheet,
+  Button,
+  Dimensions,
+} from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
-import {useSharedStates} from '../sharedStates'
+import { useSharedStates } from '../../utils/sharedStates';
 import { useNavigation } from '@react-navigation/native';
-import { supabase } from '../../../supabase';
+import { supabase } from '../../utils/supabase';
 
 export default function QRScan() {
-  const navigation = useNavigation();
-
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState('');
-  const {fragen, setFragen} = useSharedStates();
-
-  // import shared States
-  const {aktuelleFrage, setAktuelleFrage} = useSharedStates();
-  const {qrscan, setQrscan} = useSharedStates();
-
+  const navigation = useNavigation();
+  const {
+    questions,
+    currentQuestion,
+    setCurrentQuestion,
+    setQRScan,
+  } = useSharedStates();
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: answer, error } = await supabase
-      .from('QRFragen')
-      .select('QR_Info') 
-      .eq('fragen_id', fragen[aktuelleFrage].fragen_id);
-      setCorrectAnswer(answer)
+      const { data: answer } = await supabase
+        .from('QRFragen')
+        .select('QR_Info')
+        .eq('fragen_id', questions[currentQuestion].fragen_id);
+      setCorrectAnswer(answer);
     };
     fetchData();
   }, []);
 
   useEffect(() => {
     (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      const { status } =
+        await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = ({ data }) => {
     setScanned(true);
-    if (correctAnswer[0].QR_Info !== data){
-      alert(`Der Barcode ist falsch! Du bist vermutlich nicht am richtigen Ort.`);
+    if (correctAnswer[0].QR_Info !== data) {
+      alert(
+        `Der Barcode ist falsch! Du bist vermutlich nicht am richtigen Ort.`
+      );
     } else if (correctAnswer[0].QR_Info === data) {
-      setAktuelleFrage(aktuelleFrage+1);
+      setCurrentQuestion(currentQuestion + 1);
     }
-    setQrscan(false)
+    setQRScan(false);
     navigation.navigate('Rallye');
   };
 
@@ -55,19 +63,27 @@ export default function QRScan() {
   }
 
   return (
-    <View >
+    <View>
       <View style={styles.mapContainer}>
         <BarCodeScanner
           style={styles.map}
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+          onBarCodeScanned={
+            scanned ? undefined : handleBarCodeScanned
+          }
         />
       </View>
       <View style={styles.buttonContainer}>
-        <Button title='Zurück' onPress={() => setQrscan(false)} color="red"/>
-        <Text style={styles.title}>Hinweis: falls nicht gescannt wird, einmal zurück und neu auf Scannen klicken!</Text>
+        <Button
+          title="Zurück"
+          onPress={() => setQRScan(false)}
+          color="red"
+        />
+        <Text style={styles.title}>
+          Hinweis: falls nicht gescannt wird, einmal zurück und neu
+          auf Scannen klicken!
+        </Text>
       </View>
     </View>
-
   );
 }
 
@@ -86,7 +102,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    position: "absolute",
+    position: 'absolute',
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -97,7 +113,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   title: {
-    fontSize: Dimensions.get("window").height *0.025,
+    fontSize: Dimensions.get('window').height * 0.025,
     textAlign: 'center',
   },
   mapContainer: {
@@ -107,8 +123,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   map: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height * 0.6,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height * 0.6,
     flex: 1,
   },
 });

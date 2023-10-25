@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,25 +8,28 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { useSharedStates } from '../sharedStates';
-import { supabase } from '../../../supabase';
+import { useSharedStates } from '../../utils/sharedStates';
+import { supabase } from '../../utils/supabase';
 
-export default function Wissensfragen() {
-  // import shared States
-  const { fragen, setFragen } = useSharedStates();
-  const { aktuelleFrage, setAktuelleFrage } = useSharedStates();
-  const { points, setPoints } = useSharedStates();
+export default function SkillQuestions() {
   const [answer, setAnswer] = useState('');
   const [correctAnswer, setCorrectAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
+  const {
+    questions,
+    currentQuestion,
+    setCurrentQuestion,
+    points,
+    setPoints,
+  } = useSharedStates();
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: answer, error } = await supabase
+      const { data: answer } = await supabase
         .from('Wissensfragen')
         .select('Antwort, Punkte')
-        .eq('fragen_id', fragen[aktuelleFrage].fragen_id);
+        .eq('fragen_id', questions[currentQuestion].fragen_id);
       setCorrectAnswer(answer);
     };
     fetchData();
@@ -36,7 +39,7 @@ export default function Wissensfragen() {
     if (answer.trim() === correctAnswer[0].Antwort) {
       setPoints(points + correctAnswer[0].Punkte);
     }
-    setAktuelleFrage(aktuelleFrage + 1);
+    setCurrentQuestion(currentQuestion + 1);
     setAnswer('');
     setAnswered(false);
   };
@@ -68,7 +71,7 @@ export default function Wissensfragen() {
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.question}>
-          {fragen[aktuelleFrage].frage}
+          {questions[currentQuestion].frage}
         </Text>
         <Text style={styles.inputLabel}>Antwort:</Text>
         <TextInput

@@ -1,18 +1,26 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.tile} onPress={() => navigation.navigate('Impressum')}>
+      <TouchableOpacity
+        style={styles.tile}
+        onPress={() => navigation.navigate('Impressum')}
+      >
         <Text style={styles.tileText}>Impressum</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity style={styles.tile} onPress={() => navigation.navigate('Informationen')}>
+      <TouchableOpacity
+        style={styles.tile}
+        onPress={() => navigation.navigate('Informationen')}
+      >
         <Text style={styles.tileText}>Informationen</Text>
       </TouchableOpacity>
     </View>

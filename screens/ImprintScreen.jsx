@@ -1,12 +1,17 @@
-import React from 'react';
-import {Linking, ScrollView, View, Text, StyleSheet } from 'react-native';
-import Colors from '../../styles/Colors';
+import {
+  Linking,
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+} from 'react-native';
+import Colors from '../utils//Colors';
 
-export default function ImpressumScreen() {
+export default function ImprintScreen() {
   return (
     <ScrollView>
-      <View style={Styles.Texts.container}>
-        <View style={Styles.Texts.block}>
+      <View style={styles.texts.container}>
+        <View style={styles.texts.block}>
           <Text>
             Duale Hochschule Baden-Württemberg Lörrach
             {'\n'}
@@ -24,17 +29,18 @@ export default function ImpressumScreen() {
             Umsatzsteuergesetz: DE287664832
           </Text>
         </View>
-        <View style={Styles.Texts.block}>
-          <Text style={Styles.Texts.headline}>
+        <View style={styles.texts.block}>
+          <Text style={styles.texts.headline}>
             Rechtsform und zuständige Aufsichtsbehörde
           </Text>
           <Text>
             Die Duale Hochschule Baden-Württemberg ist nach § 1 Abs. 1
             DH-ErrichtG vom 12.12.2008 eine rechtsfähige Körperschaft
-            des öffentlichen Rechts und zugleich staatliche Einrichtung.
-            Die Duale Hochschule Baden-Württemberg Lörrach ist nach § 1
-            Abs. 2 DH-ErrichtG vom 12.12.2008 eine rechtlich
-            unselbständige Untereinheit dieser Hochschule.
+            des öffentlichen Rechts und zugleich staatliche
+            Einrichtung. Die Duale Hochschule Baden-Württemberg
+            Lörrach ist nach § 1 Abs. 2 DH-ErrichtG vom 12.12.2008
+            eine rechtlich unselbständige Untereinheit dieser
+            Hochschule.
             {'\n'}
             {'\n'}
             Dienstanbieter im Sinne des TDG bzw. des MDStV ist als
@@ -61,52 +67,54 @@ export default function ImpressumScreen() {
             http://www.mwk.bwl.de
           </Text>
         </View>
-        <View style={Styles.Texts.block}>
-          <Text style={Styles.Texts.headline}>Externe Links</Text>
+        <View style={styles.texts.block}>
+          <Text style={styles.texts.headline}>Externe Links</Text>
           <Text>
-            Die Campus App enthält Links zu externen Webseiten Dritter,
-            auf deren Inhalte wir keinen Einfluss haben und für welche
-            die DHBW Lörrach keine Gewähr übernehmen kann. Für die
-            Inhalte der verlinkten Seiten ist stets der jeweilige
-            Anbieter oder Betreiber der Seiten verantwortlich. Die
-            verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf
-            mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte
-            waren zum Zeitpunkt der Verlinkung nicht erkennbar. Es ist
-            nicht auszuschließen, dass die Inhalte im Nachhinein von den
-            jeweiligen Anbietern verändert werden. Sollten Sie der
-            Ansicht sein, dass die verlinkten externen Seiten gegen
-            geltendes Recht verstoßen oder sonst unangemessene Inhalte
-            enthalten, teilen Sie uns dies bitte mit.
+            Die Campus App enthält Links zu externen Webseiten
+            Dritter, auf deren Inhalte wir keinen Einfluss haben und
+            für welche die DHBW Lörrach keine Gewähr übernehmen kann.
+            Für die Inhalte der verlinkten Seiten ist stets der
+            jeweilige Anbieter oder Betreiber der Seiten
+            verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt
+            der Verlinkung auf mögliche Rechtsverstöße überprüft.
+            Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung
+            nicht erkennbar. Es ist nicht auszuschließen, dass die
+            Inhalte im Nachhinein von den jeweiligen Anbietern
+            verändert werden. Sollten Sie der Ansicht sein, dass die
+            verlinkten externen Seiten gegen geltendes Recht verstoßen
+            oder sonst unangemessene Inhalte enthalten, teilen Sie uns
+            dies bitte mit.
           </Text>
         </View>
-        <View style={Styles.Texts.block}>
-          <Text style={Styles.Texts.headline}>Urheberrecht</Text>
+        <View style={styles.texts.block}>
+          <Text style={styles.texts.headline}>Urheberrecht</Text>
           <Text>
             Soweit die Inhalte auf dieser Seite nicht vom Betreiber
-            erstellt wurden, werden die Urheberrechte Dritter beachtet.
-            Insbesondere werden Inhalte Dritter als solche
+            erstellt wurden, werden die Urheberrechte Dritter
+            beachtet. Insbesondere werden Inhalte Dritter als solche
             gekennzeichnet. Sollten Sie trotzdem auf eine
             Urheberrechtsverletzung aufmerksam werden, bitten wir um
             einen entsprechenden Hinweis. Bei Bekanntwerden einer
             Urheberrechtsverletzung wird der Inhalte umgehend entfernt
-            bzw. mit dem entsprechenden Urheberrechts-Vermerk kenntlich
-            gemacht.
+            bzw. mit dem entsprechenden Urheberrechts-Vermerk
+            kenntlich gemacht.
           </Text>
         </View>
-        <View style={Styles.Texts.block}>
-          <Text style={Styles.Texts.headline}>Quellcode</Text>
+        <View style={styles.texts.block}>
+          <Text style={styles.texts.headline}>Quellcode</Text>
           <Text>
-            Der Quellcode dieser App wurde als Open Source Projekt angelegt
+            Der Quellcode dieser App wurde als Open Source Projekt
+            angelegt
           </Text>
           <Text
-            style={{color: Colors.dhbwRed}}
+            style={{ color: Colors.dhbwRed }}
             onPress={() =>
               Linking.openURL(
-                'https://github.com/sophieStrittti/DHBW_CampusRallyeApp'
+                'https://github.com/DHBWLoerrach/CampusRallyeApp'
               )
             }
           >
-            https://github.com/sophieStrittti/DHBW_CampusRallyeApp
+            https://github.com/DHBWLoerrach/CampusRallyeApp
           </Text>
         </View>
       </View>
@@ -114,8 +122,7 @@ export default function ImpressumScreen() {
   );
 }
 
-const Styles = StyleSheet.create({
-  //New Styles
+const styles = StyleSheet.create({
   textSizes: {
     small: {
       fontSize: 15,
@@ -154,7 +161,7 @@ const Styles = StyleSheet.create({
       },
     },
   },
-  Texts: {
+  texts: {
     container: {
       padding: 15,
     },

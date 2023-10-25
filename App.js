@@ -1,34 +1,27 @@
-import 'react-native-gesture-handler';
+import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
-
 import { NavigationContainer } from '@react-navigation/native';
-import { supabase } from './supabase';
-
-import MainNavigator from './js/screens/MainNavigator';
-import PasswordPrompt from './js/screens/PasswordPrompt';
-import GroupPrompt from './js/screens/GroupPrompt';
+import { supabase } from './utils/supabase';
+import MainNavigator from './MainNavigator';
+import PasswordPrompt from './screens/PasswordPrompt';
 
 export default function App() {
   const [enabled, setEnabled] = useState(false);
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(true);
-  const [confirmedGroup, setConfirmedGroup] = useState('');
-
-  const [realpassword, setrealpassword] = useState(null);
+  const [realPassword, setRealPassword] = useState(null);
 
   useEffect(() => {
     async function getData() {
-      let { data: realpassword } = await supabase
+      let { data: realPassword } = await supabase
         .from('Rallye')
         .select('password');
-      setrealpassword(realpassword[0].password);
+      setRealPassword(realPassword[0].password);
     }
     getData();
   }, []);
 
   const handlePasswordSubmit = (password) => {
-    if (password === realpassword) {
-      setShowPasswordPrompt(false);
+    if (password === realPassword) {
+      setEnabled(true);
     } else {
       Alert.alert(
         'Falsches Passwort',
@@ -37,39 +30,12 @@ export default function App() {
     }
   };
 
-  const handleGroupSubmit = (group) => {
-    if (group.trim() === '') {
-      Alert.alert('Fehler', 'Bitte gebe einen Gruppennamen ein.');
-      return;
-    }
-
-    Alert.alert(
-      'Sicherheitsfrage',
-      `Bist du sicher, dass "${group}" dein Gruppenname ist?`,
-      [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
-        },
-        {
-          text: 'Ja, Antwort bestätigen',
-          onPress: () => {
-            setConfirmedGroup(group);
-            setEnabled(true);
-          },
-        },
-      ]
-    );
-  };
-
   return (
     <NavigationContainer>
       {enabled ? (
-        <MainNavigator confirmedGroup={confirmedGroup} />
-      ) : showPasswordPrompt ? (
-        <PasswordPrompt onPasswordSubmit={handlePasswordSubmit} />
+        <MainNavigator />
       ) : (
-        <GroupPrompt onGroupSubmit={handleGroupSubmit} />
+        <PasswordPrompt onPasswordSubmit={handlePasswordSubmit} />
       )}
     </NavigationContainer>
   );

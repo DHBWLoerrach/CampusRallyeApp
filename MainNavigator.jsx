@@ -1,24 +1,22 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import MaterialIcon from '@expo/vector-icons/MaterialIcons';
 
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-
-import ImpressumScreen from '../pages/pagesOnSettingsScreen/ImpressumScreen';
-import InformationenScreen from '../pages/pagesOnSettingsScreen/InformationenScreen';
-import QRCodeFragen from '../pages/questions/QRCodeFragen';
-import Wissensfragen from '../pages/questions/Wissensfragen';
-import BildFragen from '../pages/questions/BildFragen';
-import QRScan from '../pages/questions/QRScan';
-import RallyeScreen from '../pages/RallyeScreen';
-import SettingsScreen from '../pages/SettingsScreen';
-import GroupScreen from '../pages/GroupScreen';
-import Color from '../styles/Colors';
+import RallyeScreen from './screens/RallyeScreen';
+import SettingsScreen from './screens/SettingsScreen';
+import GroupScreen from './screens/GroupScreen';
+import ImprintScreen from './screens/ImprintScreen';
+import InformationScreen from './screens/InformationScreen';
+import SkillQuestions from './screens/questions/SkillQuestions';
+import ImageQuestions from './screens/questions/ImageQuestions';
+import QRCodeQuestions from './screens/questions/QRCodeQuestions';
+import QRScan from './screens/questions/QRScan';
+import Color from './utils/Colors';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
-function TabScreen(props) {
-  const { confirmedGroup } = props;
+function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -46,26 +44,20 @@ function TabScreen(props) {
     >
       <Tab.Screen
         name="Gruppe"
+        component={GroupScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
         }}
-      >
-        {(props) => (
-          <GroupScreen {...props} confirmedGroup={confirmedGroup} />
-        )}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="DHBW Campus Rallye"
+        component={RallyeScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
         }}
-      >
-        {(props) => (
-          <RallyeScreen {...props} confirmedGroup={confirmedGroup} />
-        )}
-      </Tab.Screen>
+      />
       <Tab.Screen
         name="Einstellungen"
         component={SettingsScreen}
@@ -78,17 +70,17 @@ function TabScreen(props) {
   );
 }
 
-export default function MainNavigator({ confirmedGroup }) {
+export default function MainNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Rallye" options={{ headerShown: false }}>
-        {(props) => (
-          <TabScreen {...props} confirmedGroup={confirmedGroup} />
-        )}
-      </Stack.Screen>
+      <Stack.Screen
+        name="Rallye"
+        component={MainTabs}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="Impressum"
-        component={ImpressumScreen}
+        component={ImprintScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
@@ -96,7 +88,7 @@ export default function MainNavigator({ confirmedGroup }) {
       />
       <Stack.Screen
         name="Informationen"
-        component={InformationenScreen}
+        component={InformationScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
@@ -104,23 +96,23 @@ export default function MainNavigator({ confirmedGroup }) {
       />
       <Stack.Screen
         name="Wissensfragen"
-        component={Wissensfragen}
+        component={SkillQuestions}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
         }}
       />
       <Stack.Screen
-        name="QRCodeFragen"
-        component={QRCodeFragen}
+        name="ImageQuestions"
+        component={ImageQuestions}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
         }}
       />
       <Stack.Screen
-        name="BildFragen"
-        component={BildFragen}
+        name="QRCodeQuestions"
+        component={QRCodeQuestions}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,

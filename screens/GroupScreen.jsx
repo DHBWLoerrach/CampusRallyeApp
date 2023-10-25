@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Modal } from 'react-native';
-import { useSharedStates } from './sharedStates';
+import { View, Text, StyleSheet } from 'react-native';
+import { useSharedStates } from '../utils/sharedStates';
 
-export default function GroupScreen(props) {
-  // import shared States
-  const { points, fragen, aktuelleFrage } = useSharedStates();
+export default function GroupScreen() {
+  // import shared states
+  const { points, questions, currentQuestion } = useSharedStates();
 
   return (
     <View style={styles.container}>
@@ -11,12 +11,12 @@ export default function GroupScreen(props) {
         <Text style={styles.sectionTitle}>Bestätigte Gruppe</Text>
         <View style={styles.row}>
           <Text style={styles.label}>Name der Gruppe:</Text>
-          <Text style={styles.value}>{props.confirmedGroup}</Text>
+          <Text style={styles.value}>TODO</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Beantwortete Fragen</Text>
           <Text style={styles.value}>
-            {aktuelleFrage} von {fragen.length}
+            {currentQuestion} von {questions.length}
           </Text>
         </View>
         <View style={styles.row}>
