@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { useSharedStates } from '../../utils/sharedStates';
 import { supabase } from '../../utils/supabase';
+import Constants from '../../utils/Constants';
+import Colors from '../../utils/Colors';
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState('');
@@ -68,24 +70,27 @@ export default function SkillQuestions() {
   };
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.container}>
         <Text style={styles.question}>
           {questions[currentQuestion].frage}
         </Text>
-        <Text style={styles.inputLabel}>Antwort:</Text>
         <TextInput
           style={styles.input}
           value={answer}
           onChangeText={setAnswer}
           placeholder="Gib hier deine Antwort ein"
         />
+        <View style={styles.buttonContainer}>
         <Button
+          style={styles.button}
+          color={'white'}
           title="Antwort senden"
           onPress={handleAnswerSubmit}
           disabled={!answer}
         />
-
+        </View>
+        
         {confirmedAnswer ? (
           <View style={styles.answerContainer}>
             <Text style={styles.answerLabel}>
@@ -100,6 +105,10 @@ export default function SkillQuestions() {
 }
 
 const styles = StyleSheet.create({
+  contentContainer:{
+    flexGrow: 1, 
+    justifyContent: 'center'
+  },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -108,7 +117,7 @@ const styles = StyleSheet.create({
   },
   question: {
     fontSize: 20,
-    marginBottom: 20,
+    marginBottom: 30,
     textAlign: 'center',
   },
   inputLabel: {
@@ -122,6 +131,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+    fontSize: Constants.bigFont
   },
   answerContainer: {
     marginTop: 20,
@@ -135,4 +145,9 @@ const styles = StyleSheet.create({
   answer: {
     fontSize: 16,
   },
+  buttonContainer: {
+    backgroundColor: 'red',
+    margin:6,
+    borderRadius: 5
+  }
 });

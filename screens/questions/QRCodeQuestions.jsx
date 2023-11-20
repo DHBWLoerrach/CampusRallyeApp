@@ -7,7 +7,6 @@ import {
   Dimensions,
   ScrollView,
 } from 'react-native';
-// import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useSharedStates } from '../../utils/sharedStates';
@@ -98,46 +97,40 @@ export default function QRCodeQuestions() {
     setQRScan(!qrScan);
   };
 
-  // if (!qrScan) {
-  //   content = (
-  //     <ScrollView>
-  //       <View>
-  //         <View style={styles.header}>
-  //           <Text style={styles.title}>
-  //             {questions[currentQuestion].frage}
-  //           </Text>
-  //         </View>
-  //         <View style={styles.mapContainer}>
-  //           <MapView style={styles.map} region={mapRegion}>
-  //             <Marker coordinate={userlocation}>
-  //               <MaterialIcon
-  //                 name="gps-fixed"
-  //                 size={35}
-  //                 color={'blue'}
-  //               />
-  //             </Marker>
-  //             <Marker coordinate={markerLocation}>
-  //               <MaterialIcon name="place" size={60} color={'red'} />
-  //             </Marker>
-  //           </MapView>
-  //         </View>
-  //         <View style={styles.buttonContainer}>
-  //           <Button
-  //             title={'QR-Code Scannen'}
-  //             onPress={() => handlepress()}
-  //             color={'red'}
-  //           />
-  //         </View>
-  //       </View>
-  //     </ScrollView>
-  //   );
-  // } else if (qrScan) {
+  if (!qrScan) {
+    content = (
+      <ScrollView>
+        <View>
+          <View style={styles.header}>
+            <Text style={styles.title}>
+              {questions[currentQuestion].frage}
+            </Text>
+          </View>
+          <View style={styles.mapContainer}>
+          <MapView
+          animateToPosition={position}
+          clickListener={setClickListener}
+          markersListener={setMarkersListener}
+          markersList={markers}
+          />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Button
+              title={'QR-Code Scannen'}
+              onPress={() => handlepress()}
+              color={'white'}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    );
+  } else if (qrScan) {
   content = (
     <View>
       <QRScan />
     </View>
   );
-  // }
+  }
 
   return <View style={styles.container}>{content}</View>;
 }
@@ -171,9 +164,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignSelf:'center',
+    backgroundColor: 'red',
+    margin:6,
+    borderRadius: 5
   },
   qrscancontainer: {
     flex: 1,
