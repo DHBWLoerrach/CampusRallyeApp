@@ -107,12 +107,12 @@ export default function QRCodeQuestions() {
             </Text>
           </View>
           <View style={styles.mapContainer}>
-          <MapView
+          {/* <MapView
           animateToPosition={position}
           clickListener={setClickListener}
           markersListener={setMarkersListener}
           markersList={markers}
-          />
+          /> */}
           </View>
           <View style={styles.buttonContainer}>
             <Button

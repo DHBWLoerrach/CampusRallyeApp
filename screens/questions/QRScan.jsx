@@ -76,13 +76,15 @@ export default function QRScan() {
         <Button
           title="Zurück"
           onPress={() => setQRScan(false)}
-          color="red"
+          color="white"
         />
+        </View>
+        <View>
         <Text style={styles.title}>
           Hinweis: falls nicht gescannt wird, einmal zurück und neu
           auf Scannen klicken!
         </Text>
-      </View>
+        </View>
     </View>
   );
 }
@@ -96,9 +98,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex:1,
+    alignSelf:'center',
+    backgroundColor: 'red',
+    margin:6,
+    borderRadius: 5
   },
   container: {
     flex: 1,

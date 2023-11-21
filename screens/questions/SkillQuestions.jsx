@@ -81,7 +81,7 @@ export default function SkillQuestions() {
           onChangeText={setAnswer}
           placeholder="Gib hier deine Antwort ein"
         />
-        <View style={styles.buttonContainer}>
+        <View style={!answer?styles.buttonContainerDeactive:styles.buttonContainer}>
         <Button
           style={styles.button}
           color={'white'}
@@ -147,6 +147,11 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     backgroundColor: 'red',
+    margin:6,
+    borderRadius: 5
+  },
+  buttonContainerDeactive:{
+    backgroundColor: 'gray',
     margin:6,
     borderRadius: 5
   }

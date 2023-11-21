@@ -68,8 +68,10 @@ export default function RallyeScreen() {
     content = (
       <View>
         <Text style={styles.endText}>
-          Die Rallye wurde erforderlich beendet! Eure erreichte
-          Punktzahl: {points}
+          Die Rallye wurde erforderlich beendet!
+        </Text>
+        <Text style={styles.endText}>
+        Eure erreichte Punktzahl: {points}
         </Text>
         <Text style={styles.tileText}>
           Ladet gerne euren Gruppennamen und eure Punktzahl hoch, um
@@ -77,12 +79,15 @@ export default function RallyeScreen() {
           klicken.
         </Text>
         <View>
+          <View style={uploaded?styles.buttonContainerDeactive:styles.buttonContainer}>
           <Button
             title="Hochladen"
             onPress={() => savePoints()}
-            color="red"
+            color="white"
             disabled={uploaded}
           />
+          </View>
+          
         </View>
       </View>
     );
@@ -110,15 +115,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'grey',
+    paddingBottom:7
   },
 
   tileText: {
     fontSize: 20,
     color: 'grey',
+    textAlign: 'center',
   },
 
   endText: {
     fontSize: 30,
     color: 'grey',
+    textAlign: 'center',
+    paddingBottom:7
   },
+  buttonContainer: {
+    alignSelf:'center',
+    backgroundColor: 'red',
+    margin:6,
+    borderRadius: 5
+  },
+  buttonContainerDeactive:{
+    alignSelf:'center',
+    backgroundColor: 'gray',
+    margin:6,
+    borderRadius: 5
+  }
 });

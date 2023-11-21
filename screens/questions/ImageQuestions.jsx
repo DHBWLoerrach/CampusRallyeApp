@@ -127,12 +127,16 @@ export default function ImageQuestions() {
             title="Bild aufnehmen"
             onPress={handleLaunchCamera}
             style={styles.button}
+            color = {'white'}
           />
-          <Button
+        </View>
+        <View style={!selectedImage?styles.buttonContainerDeactive:styles.buttonContainer}>
+        <Button
             title="Senden"
             onPress={handleSendEmail}
             disabled={!selectedImage}
             style={styles.button}
+            color={'white'}
           />
         </View>
         <Text style={styles.infoText}>
@@ -149,6 +153,7 @@ export default function ImageQuestions() {
             title="Weiter"
             onPress={handleAnswerSubmit}
             style={styles.button}
+            color={'white'}
           />
         </View>
       </View>
@@ -187,6 +192,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   buttonContainer: {
-    width: '100%',
+    backgroundColor: 'red',
+    margin:6,
+    borderRadius: 5
   },
+  buttonContainerDeactive:{
+    backgroundColor: 'gray',
+    margin:6,
+    borderRadius: 5
+  }
 });
