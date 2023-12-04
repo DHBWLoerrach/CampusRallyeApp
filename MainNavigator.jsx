@@ -33,7 +33,7 @@ function MainTabs() {
           return (
             <MaterialIcon
               name={iconName}
-              size={size}
+              size={30}
               color={focused ? Color.dhbwRed : Color.dhbwGray}
             />
           );
