@@ -12,6 +12,7 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useSharedStates } from '../../utils/sharedStates';
 import { supabase } from '../../utils/supabase';
 import QRScan from './QRScan';
+import Colors from '../../utils/Colors';
 
 export default function QRCodeQuestions() {
   const [location, setLocation] = useState(null);
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignSelf:'center',
-    backgroundColor: 'red',
+    backgroundColor: Colors.dhbwRed,
     margin:6,
     borderRadius: 5
   },

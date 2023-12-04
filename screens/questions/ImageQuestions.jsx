@@ -13,6 +13,7 @@ import * as MediaLibrary from 'expo-media-library';
 import * as MailComposer from 'expo-mail-composer';
 import { useSharedStates } from '../../utils/sharedStates';
 import { supabase } from '../../utils/supabase';
+import Colors from '../../utils/Colors';
 
 export default function ImageQuestions() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -192,12 +193,12 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   buttonContainer: {
-    backgroundColor: 'red',
+    backgroundColor: Colors.dhbwRed,
     margin:6,
     borderRadius: 5
   },
   buttonContainerDeactive:{
-    backgroundColor: 'gray',
+    backgroundColor: Colors.dhbwGray,
     margin:6,
     borderRadius: 5
   }

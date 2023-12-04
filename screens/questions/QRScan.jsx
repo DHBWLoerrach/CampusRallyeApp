@@ -10,6 +10,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useSharedStates } from '../../utils/sharedStates';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../utils/supabase';
+import Colors from '../../utils/Colors';
 
 export default function QRScan() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex:1,
     alignSelf:'center',
-    backgroundColor: 'red',
+    backgroundColor: Colors.dhbwRed,
     margin:6,
     borderRadius: 5
   },

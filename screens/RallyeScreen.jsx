@@ -5,6 +5,7 @@ import SkillQuestions from './questions/SkillQuestions';
 import ImageQuestions from './questions/ImageQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
 import { useSharedStates } from '../utils/sharedStates';
+import Colors from '../utils/Colors';
 
 export default function RallyeScreen() {
   // import shared states
@@ -132,13 +133,13 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignSelf:'center',
-    backgroundColor: 'red',
+    backgroundColor: Colors.dhbwRed,
     margin:6,
     borderRadius: 5
   },
   buttonContainerDeactive:{
     alignSelf:'center',
-    backgroundColor: 'gray',
+    backgroundColor: Colors.dhbwGray,
     margin:6,
     borderRadius: 5
   }

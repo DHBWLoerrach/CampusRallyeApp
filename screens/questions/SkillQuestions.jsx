@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 40,
-    borderColor: 'gray',
+    borderColor: Colors.dhbwGray,
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonContainer: {
-    backgroundColor: 'red',
+    backgroundColor: Colors.dhbwRed,
     margin:6,
     borderRadius: 5
   },
   buttonContainerDeactive:{
-    backgroundColor: 'gray',
+    backgroundColor: Colors.dhbwGray,
     margin:6,
     borderRadius: 5
   }
