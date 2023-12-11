@@ -86,6 +86,7 @@ export default function ImageQuestions() {
 
   const handleNext = () => {
     setCurrentQuestion(currentQuestion + 1);
+    setPoints(points+1);
   };
 
   const handleAnswerSubmit = () => {

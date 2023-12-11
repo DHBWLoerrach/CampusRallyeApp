@@ -51,6 +51,7 @@ export default function QRScan() {
       );
     } else if (correctAnswer[0].QR_Info === data) {
       setCurrentQuestion(currentQuestion + 1);
+      setPoints(points+1);
     }
     setQRScan(false);
     navigation.navigate('Rallye');
