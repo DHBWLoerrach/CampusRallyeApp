@@ -21,6 +21,14 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
+
+  const { currentQuestion, questions } = useSharedStates();
+  var value = 0.0;
+
+  if (questions.length > 0) {
+    value = currentQuestion / questions.length;
+  }
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -61,11 +69,11 @@ function MainTabs() {
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
           headerTitle: () => (
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text>Rallye</Text>
-            <Progress.Bar progress={0.3} width={200} />
-          </View>
-            ),
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: 'white' }}>DHBW Campus Rallye</Text>
+              <Progress.Bar style={{ marginTop: 10 }} progress={value} color='white' />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -105,19 +113,13 @@ export default function MainNavigator() {
         }}
       />
       <Stack.Screen
-  name="Wissensfragen"
-  component={SkillQuestions}
-  options={{
-    // headerStyle: { backgroundColor: Color.dhbwRed },
-    // headerTintColor: Color.tabHeader,
-    // headerTitle: () => (
-    //   <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-    //     <Text style={{color: Color.tabHeader}}>Wissensfragen</Text>
-    //     <ProgressBar progress={0.5} color={Color.tabHeader} />
-    //   </View>
-    // ),
-  }}
-/>
+        name="Wissensfragen"
+        component={SkillQuestions}
+        options={{
+          headerStyle: { backgroundColor: Color.dhbwRed },
+          headerTintColor: Color.tabHeader,
+        }}
+      />
       <Stack.Screen
         name="ImageQuestions"
         component={ImageQuestions}
