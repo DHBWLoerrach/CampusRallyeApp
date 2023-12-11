@@ -11,8 +11,8 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import * as MailComposer from 'expo-mail-composer';
-import { useSharedStates } from '../../utils/sharedStates';
-import { supabase } from '../../utils/supabase';
+import { useSharedStates } from '../../utils/SharedStates';
+import { supabase } from '../../utils/Supabase';
 import Colors from '../../utils/Colors';
 
 export default function ImageQuestions() {

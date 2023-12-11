@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import ImageQuestions from './questions/ImageQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
-import { useSharedStates } from '../utils/sharedStates';
+import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 
 export default function RallyeScreen() {
@@ -20,16 +20,10 @@ export default function RallyeScreen() {
       const { data: questions } = await supabase
         .from('Fragen')
         .select();
-
-      // get random question as start point
-      let startQuestion =
-        questions[Math.floor(Math.random() * questions.length)];
-      let index = questions.indexOf(startQuestion);
-
-      // rotate array until startQuestion is first element in array
-      for (let i = 0; i < index; i++) {
-        let question = questions[0];
-        questions.shift(questions.push(question));
+        //randomise the order of the questions 
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [questions[i], questions[j]] = [questions[j], questions[i]];
       }
       setQuestions(questions);
       setLoading(false);
@@ -72,7 +66,7 @@ export default function RallyeScreen() {
           Die Rallye wurde erforderlich beendet!
         </Text>
         <Text style={styles.endText}>
-        Eure erreichte Punktzahl: {points}
+          Eure erreichte Punktzahl: {points}
         </Text>
         <Text style={styles.tileText}>
           Ladet gerne euren Gruppennamen und eure Punktzahl hoch, um
@@ -80,15 +74,15 @@ export default function RallyeScreen() {
           klicken.
         </Text>
         <View>
-          <View style={uploaded?styles.buttonContainerDeactive:styles.buttonContainer}>
-          <Button
-            title="Hochladen"
-            onPress={() => savePoints()}
-            color="white"
-            disabled={uploaded}
-          />
+          <View style={uploaded ? styles.buttonContainerDeactive : styles.buttonContainer}>
+            <Button
+              title="Hochladen"
+              onPress={() => savePoints()}
+              color="white"
+              disabled={uploaded}
+            />
           </View>
-          
+
         </View>
       </View>
     );
@@ -116,7 +110,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'grey',
-    paddingBottom:7
+    paddingBottom: 7
   },
 
   tileText: {
@@ -129,18 +123,18 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: 'grey',
     textAlign: 'center',
-    paddingBottom:7
+    paddingBottom: 7
   },
   buttonContainer: {
-    alignSelf:'center',
+    alignSelf: 'center',
     backgroundColor: Colors.dhbwRed,
-    margin:6,
+    margin: 6,
     borderRadius: 5
   },
-  buttonContainerDeactive:{
-    alignSelf:'center',
+  buttonContainerDeactive: {
+    alignSelf: 'center',
     backgroundColor: Colors.dhbwGray,
-    margin:6,
+    margin: 6,
     borderRadius: 5
   }
 });

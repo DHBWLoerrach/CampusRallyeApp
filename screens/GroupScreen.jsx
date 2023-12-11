@@ -1,30 +1,69 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useSharedStates } from '../utils/sharedStates';
+import { useSharedStates } from '../utils/SharedStates';
+import Colors from '../utils/Colors';
+import { useState, useEffect } from 'react';
+import { supabase } from '../utils/Supabase';
+import { ScrollView } from 'react-native';
+import { TouchableOpacity } from 'react-native';
+import { getData,storeData } from '../utils/LocalStorage';
 
 export default function GroupScreen() {
   // import shared states
-  const { points, questions, currentQuestion } = useSharedStates();
+  const { groups,setGroups } = useSharedStates();
+  const {group,
+    setGroup} = useSharedStates();
+  const { questions, setQuestions } = useSharedStates();
+  const {currentQuestion} = useSharedStates();
+  const {points,rallye} = useSharedStates();
+  const [loading, setLoading] = useState(true);
+  const [selectionMade, setSelectionMade] = useState(true);
+  const [uploaded, setUploaded] = useState(false);
+
+  useEffect(() => {
+    const fetchDataSupabase = async () => {
+      const { data: groups } = await supabase
+        .from('rallye_group')
+        .select('*')
+        .eq('rallye_id', rallye.id);
+      
+      setGroups(groups);
+      setLoading(false);
+    };
+    const fetchLocalStorage = async () =>{
+      groupId= await getData('group_key')
+      console.log(groupId)
+      if(groupId!== null){
+        setGroup(groupId);
+      }
+    }
+    fetchDataSupabase();
+    fetchLocalStorage();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Bestätigte Gruppe</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>Name der Gruppe:</Text>
-          <Text style={styles.value}>TODO</Text>
+    <ScrollView>
+      {groups && groups.map((group, index) => (
+        <TouchableOpacity key={index} onPress={async () => {setGroup(group.id); setSelectionMade(true);await storeData('group_key',group.id)}}>
+        <View key={index} style={styles.section}>
+          <Text style={styles.sectionTitle}>Gruppe {index + 1}</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>Name der Gruppe:</Text>
+            <Text style={styles.value}>{group.name}</Text>
+          </View>
+          <View style={styles.row}>
+              <Text style={styles.label}>Beantwortete Fragen:</Text>
+            <Text style={styles.value}>
+              {currentQuestion} von {questions.length}
+            </Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Aktuelle Punktzahl:</Text>
+            <Text style={styles.value}>{points}</Text>
+          </View>
         </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Beantwortete Fragen</Text>
-          <Text style={styles.value}>
-            {currentQuestion} von {questions.length}
-          </Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Aktuelle Punktzahl:</Text>
-          <Text style={styles.value}>{points}</Text>
-        </View>
-      </View>
-    </View>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
   );
 }
 
@@ -60,7 +99,7 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 40,
-    borderColor: 'gray',
+    borderColor: Colors.dhbwGray,
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,

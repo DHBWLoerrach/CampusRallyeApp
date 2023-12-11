@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import { useSharedStates } from '../../utils/sharedStates';
-import { supabase } from '../../utils/supabase';
+import { useSharedStates } from '../../utils/SharedStates';
+import { supabase } from '../../utils/Supabase';
 import QRScan from './QRScan';
 import Colors from '../../utils/Colors';
 

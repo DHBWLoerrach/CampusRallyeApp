@@ -8,8 +8,8 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { useSharedStates } from '../../utils/sharedStates';
-import { supabase } from '../../utils/supabase';
+import { useSharedStates } from '../../utils/SharedStates';
+import { supabase } from '../../utils/Supabase';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 

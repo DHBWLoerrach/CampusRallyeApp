@@ -1,6 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
+import * as Progress from 'react-native-progress';
+import { View, Text } from 'react-native';
 
 import RallyeScreen from './screens/RallyeScreen';
 import SettingsScreen from './screens/SettingsScreen';
@@ -12,6 +14,8 @@ import ImageQuestions from './screens/questions/ImageQuestions';
 import QRCodeQuestions from './screens/questions/QRCodeQuestions';
 import QRScan from './screens/questions/QRScan';
 import Color from './utils/Colors';
+import { useSharedStates } from './utils/SharedStates';
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -56,6 +60,12 @@ function MainTabs() {
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
+          headerTitle: () => (
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text>Rallye</Text>
+            <Progress.Bar progress={0.3} width={200} />
+          </View>
+            ),
         }}
       />
       <Tab.Screen
@@ -95,13 +105,19 @@ export default function MainNavigator() {
         }}
       />
       <Stack.Screen
-        name="Wissensfragen"
-        component={SkillQuestions}
-        options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
-        }}
-      />
+  name="Wissensfragen"
+  component={SkillQuestions}
+  options={{
+    // headerStyle: { backgroundColor: Color.dhbwRed },
+    // headerTintColor: Color.tabHeader,
+    // headerTitle: () => (
+    //   <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    //     <Text style={{color: Color.tabHeader}}>Wissensfragen</Text>
+    //     <ProgressBar progress={0.5} color={Color.tabHeader} />
+    //   </View>
+    // ),
+  }}
+/>
       <Stack.Screen
         name="ImageQuestions"
         component={ImageQuestions}

@@ -7,9 +7,9 @@ import {
   Dimensions,
 } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
-import { useSharedStates } from '../../utils/sharedStates';
+import { useSharedStates } from '../../utils/SharedStates';
 import { useNavigation } from '@react-navigation/native';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '../../utils/Supabase';
 import Colors from '../../utils/Colors';
 
 export default function QRScan() {
