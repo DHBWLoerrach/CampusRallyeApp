@@ -1,73 +1,116 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Button,StyleSheet } from 'react-native';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/Supabase';
 import { ScrollView } from 'react-native';
-import { TouchableOpacity } from 'react-native';
-import { getData,storeData } from '../utils/LocalStorage';
+import { getData, storeData,deleteData } from '../utils/LocalStorage';
+
+//todo:potenzielles Problem bei der Gruppen auswahl welches durch Signal R oder Refresh gelöst werden muss
 
 export default function GroupScreen() {
   // import shared states
-  const { groups,setGroups } = useSharedStates();
-  const {group,
-    setGroup} = useSharedStates();
+  
+  const { groups, setGroups } = useSharedStates();
+  const { group,
+    setGroup } = useSharedStates();
   const { questions, setQuestions } = useSharedStates();
-  const {currentQuestion} = useSharedStates();
-  const {points,rallye} = useSharedStates();
+  const { currentQuestion } = useSharedStates();
+  const { points, rallye } = useSharedStates();
+  const { useRallye } = useSharedStates();
   const [loading, setLoading] = useState(true);
-  const [selectionMade, setSelectionMade] = useState(true);
-  const [uploaded, setUploaded] = useState(false);
-
+  const [selectionMade, setSelectionMade] = useState(false);
+  
+if(useRallye){
   useEffect(() => {
     const fetchDataSupabase = async () => {
       const { data: groups } = await supabase
         .from('rallye_group')
         .select('*')
-        .eq('rallye_id', rallye.id);
-      
+        .eq('rallye_id', rallye.id)
+        .order('id',{ascending:false});
       setGroups(groups);
       setLoading(false);
     };
-    const fetchLocalStorage = async () =>{
-      groupId= await getData('group_key')
-      console.log(groupId)
-      if(groupId!== null){
-        setGroup(groupId);
-      }
-    }
     fetchDataSupabase();
-    fetchLocalStorage();
-  }, []);
+
+  const fetchLocalStorage = async () => {
+    groupId = await getData('group_key')
+    console.log(groupId)
+    if (groupId !== null) {
+      setGroup(groupId);
+      setSelectionMade(true);
+    }
+  };
+  fetchLocalStorage();
+
+}, [group]);
+}
+ 
 
   return (
     <ScrollView>
-      {groups && groups.map((group, index) => (
-        <TouchableOpacity key={index} onPress={async () => {setGroup(group.id); setSelectionMade(true);await storeData('group_key',group.id)}}>
-        <View key={index} style={styles.section}>
-          <Text style={styles.sectionTitle}>Gruppe {index + 1}</Text>
-          <View style={styles.row}>
-            <Text style={styles.label}>Name der Gruppe:</Text>
-            <Text style={styles.value}>{group.name}</Text>
-          </View>
-          <View style={styles.row}>
-              <Text style={styles.label}>Beantwortete Fragen:</Text>
-            <Text style={styles.value}>
-              {currentQuestion} von {questions.length}
-            </Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Aktuelle Punktzahl:</Text>
-            <Text style={styles.value}>{points}</Text>
-          </View>
-        </View>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+  {groups && groups.map((item, index) => (
+    <View key={index} style={[styles.section, { backgroundColor:  item.id === group ? 'red' : 'white' }]}>
+      <Text style={[styles.sectionTitle, { color: item.id === group? 'white' : 'black' }]}>Gruppe {index + 1}</Text>
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: item.id === group? 'white' : 'black' }]}>Name der Gruppe:</Text>
+        <Text style={[styles.value, { color: item.id === group ? 'white' : 'black' }]}>{item.name}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: item.id === group ? 'white' : 'black' }]}>Beantwortete Fragen:</Text>
+        <Text style={[styles.value, { color: item.id === group? 'white' : 'black' }]}>{currentQuestion} von {questions.length}</Text>
+      </View>
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: item.id === group ? 'white' : 'black' }]}>Aktuelle Punktzahl:</Text>
+        <Text style={[styles.value, { color: item.id === group ? 'white' : 'black' }]}>{points}</Text>
+      </View>
+      <View style={!item.used && !selectionMade?styles.buttonContainer:styles.buttonContainerDeactive}>
+      <Button
+        title="Auswählen"
+        color={'white'}
+        onPress={async () => {
+          /*if(selectionMade){
+            setGroup(null);
+            setSelectionMade(false);
+            await supabase.from('rallye_group')
+          .update({used:false})
+          .eq('id', item.id);
+            await deleteData('group_key'); //Enables the swapping of groups
+          } else{*/
+          setGroup(item.id); 
+          setSelectionMade(true); 
+          await supabase.from('rallye_group')
+          .update({used:true})
+          .eq('id', item.id);
+          await storeData('group_key', item.id); 
+          //}
+        }}
+        disabled={selectionMade}
+      />
+      </View>
+      
+    </View>
+  ))}
+</ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    backgroundColor: Colors.dhbwRed,
+    margin:6,
+    borderRadius: 5,
+    flex:1,
+    alignSelf:'center',
+  },
+  buttonContainerDeactive:{
+    backgroundColor: Colors.dhbwGray,
+    margin:6,
+    borderRadius: 5,
+    flex:1,
+    alignSelf:'center',
+  },
   container: {
     flex: 1,
     alignItems: 'center',

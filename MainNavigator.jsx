@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
 import * as Progress from 'react-native-progress';
 import { View, Text } from 'react-native';
+import { useEffect } from 'react';
+import { supabase } from './utils/Supabase';
 
 import RallyeScreen from './screens/RallyeScreen';
 import SettingsScreen from './screens/SettingsScreen';
@@ -21,8 +23,25 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
-
+  const {setRallye,rallye} = useSharedStates();
+  const {useRallye} = useSharedStates();
   const { currentQuestion, questions } = useSharedStates();
+
+  useEffect(() => {
+    if(useRallye){
+      const fetchData = async () => {
+        const { data: rallye } = await supabase
+          .from('rallye')
+          .select('*')
+          .eq('is_active_rallye', true);
+        
+        setRallye(rallye[0]);
+      };
+      fetchData();
+    }
+  }, []);
+
+  
   var value = 0.0;
 
   if (questions.length > 0) {

@@ -22,17 +22,12 @@ export default function QRScan() {
     currentQuestion,
     setCurrentQuestion,
     setQRScan,
+    setPoints,
+    points,
+    group
   } = useSharedStates();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: answer } = await supabase
-        .from('QRFragen')
-        .select('QR_Info')
-        .eq('fragen_id', questions[currentQuestion].fragen_id);
-      setCorrectAnswer(answer);
-    };
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -43,14 +38,15 @@ export default function QRScan() {
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ data }) => {
+  const handleBarCodeScanned = async ({ data }) => {
     setScanned(true);
-    if (correctAnswer[0].QR_Info !== data) {
+    if (questions[currentQuestion].answer !== data) {
       alert(
         `Der Barcode ist falsch! Du bist vermutlich nicht am richtigen Ort.`
       );
-    } else if (correctAnswer[0].QR_Info === data) {
+    } else if (questions[currentQuestion].answer === data) {
       setCurrentQuestion(currentQuestion + 1);
+      await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:true})
       setPoints(points+1);
     }
     setQRScan(false);

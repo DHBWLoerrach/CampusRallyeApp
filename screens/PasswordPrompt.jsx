@@ -4,51 +4,125 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  View,
   Text,
   TextInput,
+  Image
 } from 'react-native';
 
-// TODO basically same code as GroupPrompt
-export default function PasswordPrompt({ onPasswordSubmit }) {
-  const [password, setPassword] = useState('');
+import Colors from '../utils/Colors';
 
+// TODO basically same code as GroupPrompt
+export default function PasswordPrompt({ onPasswordSubmit, onContinueWithoutRallye }) {
+  const [password, setPassword] = useState('');
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.passwordContainer}
+      style={styles.container}
     >
-      <Text style={styles.passwordLabel}>Passwort eingeben:</Text>
-      <TextInput
-        style={styles.passwordInput}
-        secureTextEntry={true}
-        onChangeText={setPassword}
-        value={password}
-      />
-      <Button
-        title="Anmelden"
-        onPress={() => onPasswordSubmit(password)}
-      />
+      <View style={styles.upperHalf}>
+        <Text style={styles.text}>Nimmst du an einer Rallye teil ?</Text>
+        <Text style={[styles.passwordLabel, styles.text]}>Passwort eingeben:</Text>
+        <TextInput
+          style={styles.passwordInput}
+          secureTextEntry={true}
+          onChangeText={setPassword}
+          value={password}
+        />
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Anmelden"
+            onPress={() => onPasswordSubmit(password)}
+            color={'white'}
+          />
+        </View>
+      </View>
+      <View style={styles.lowerHalf}>
+        <View style={styles.separator}>
+          <View style={styles.line} />
+          <Image source={require('../assets/favicon.png')} style={styles.image} />
+          <View style={styles.line} />
+        </View>
+        <View style={styles.lowerHalfContainer}>
+          <Text style={styles.text}>
+            Möchtest du das Campus Gelände ohne Rally erforschen ?
+          </Text>
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Erkunden ohne Rallye"
+              onPress={() => onContinueWithoutRallye()}
+              color={'white'}
+            />
+          </View>
+        </View>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  passwordContainer: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#fff',
   },
+  text: {
+    color: Colors.dhbwGray,
+    fontSize: 20, // Erhöhen Sie die Schriftgröße
+    textAlign: 'center',
+    marginBottom: 30, // Erhöhen Sie den Abstand zum Button
+  },
+  upperHalf: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:80,
+    marginBottom: 30
+  },
+  lowerHalf: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
   passwordLabel: {
-    fontSize: 24,
     marginBottom: 16,
   },
   passwordInput: {
     width: '80%',
     height: 48,
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
+    borderColor: Colors.dhbwGray,
+    margin: 6,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  separator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.dhbwGray,
+  },
+  lowerHalfContainer: {
+    justifyContent: 'center',
+    width: '100%',
+    marginTop: 30
+  },
+  buttonContainer: {
+    backgroundColor: Colors.dhbwRed,
+    margin: 6,
+    padding: 5,
+    borderRadius: 5,
+    alignSelf: 'center'
+  },
+  button: {
+    margin: 20, // Erhöhen Sie die Größe des Buttons
+  },
+  image: {
+    width: 100, // Passen Sie die Größe des Bildes an
+    height: 100, // Passen Sie die Größe des Bildes an
+    marginHorizontal: 10,
   },
 });

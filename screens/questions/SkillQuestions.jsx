@@ -15,7 +15,6 @@ import Colors from '../../utils/Colors';
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState('');
-  const [correctAnswer, setCorrectAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
   const {
@@ -24,22 +23,15 @@ export default function SkillQuestions() {
     setCurrentQuestion,
     points,
     setPoints,
+    group
   } = useSharedStates();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: answer } = await supabase
-        .from('Wissensfragen')
-        .select('Antwort, Punkte')
-        .eq('fragen_id', questions[currentQuestion].fragen_id);
-      setCorrectAnswer(answer);
-    };
-    fetchData();
-  }, [!answered]);
-
-  const handleNext = () => {
-    if (answer.trim() === correctAnswer[0].Antwort) {
-      setPoints(points + correctAnswer[0].Punkte);
+  const handleNext = async () => {
+    if (answer.trim() === questions[currentQuestion].answer) {
+      await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:true})
+      setPoints(points +1);
+    } else{
+      await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:false})
     }
     setCurrentQuestion(currentQuestion + 1);
     setAnswer('');
@@ -73,7 +65,7 @@ export default function SkillQuestions() {
     <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.container}>
         <Text style={styles.question}>
-          {questions[currentQuestion].frage}
+          {questions[currentQuestion].question}
         </Text>
         <TextInput
           style={styles.input}

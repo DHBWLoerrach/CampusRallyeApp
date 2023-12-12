@@ -10,26 +10,68 @@ import Colors from '../utils/Colors';
 export default function RallyeScreen() {
   // import shared states
   const { questions, setQuestions } = useSharedStates();
-  const { currentQuestion } = useSharedStates();
-  const { points } = useSharedStates();
+  const { currentQuestion,group } = useSharedStates();
+  const { points,useRallye ,setPoints} = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [uploaded, setUploaded] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: questions } = await supabase
-        .from('Fragen')
-        .select();
-        //randomise the order of the questions 
-      for (let i = questions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [questions[i], questions[j]] = [questions[j], questions[i]];
+  
+  if(useRallye){
+    useEffect(() => {
+      if(group!== null){
+        const fetchData = async () => {
+          let group_id = group;
+          let { data, error } = await supabase
+            .rpc('get_questions', {
+              group_id
+            });
+            console.log(data)
+          for (let i = data.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [data[i], data[j]] = [data[j], data[i]];
+          }
+    
+          setQuestions(data);
+          setLoading(false);
+        };
+
+        fetchData();
       }
-      setQuestions(questions);
-      setLoading(false);
-    };
-    fetchData();
-  }, []);
+    }, [group]); 
+
+
+    useEffect(() => {
+      if( currentQuestion === questions.length){
+        const fetchData = async () =>{
+          let p_group_id = group;
+        let { data, error } = await supabase
+          .rpc('get_correct_answers_count', {
+            p_group_id
+          });
+          
+        setPoints(data);
+        }
+        fetchData();
+        
+      }
+    }, [currentQuestion]);
+  } else{
+    useEffect(() => {
+      const fetchData = async () => {
+        let { data } = await supabase.from('question').select('*').neq('question_type','picture');
+        console.log(data)
+        for (let i = data.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [data[i], data[j]] = [data[j], data[i]];
+        }
+        setQuestions(data);
+        setLoading(false);
+      };
+    
+      fetchData();
+    }, []); 
+  }
+  
 
   async function savePoints() {
     try {
@@ -52,11 +94,11 @@ export default function RallyeScreen() {
 
   let content;
   if (!loading && currentQuestion !== questions.length) {
-    if (questions[currentQuestion].typ === 'Wissensfragen') {
+    if (questions[currentQuestion].question_type === 'knowledge') {
       content = <SkillQuestions />;
-    } else if (questions[currentQuestion].typ === 'Bild') {
+    } else if (questions[currentQuestion].question_type === 'picture') {
       content = <ImageQuestions />;
-    } else if (questions[currentQuestion].typ === 'QRFragen') {
+    } else if (questions[currentQuestion].question_type === 'qr') {
       content = <QRCodeQuestions />;
     }
   } else if (!loading) {
@@ -68,7 +110,7 @@ export default function RallyeScreen() {
         <Text style={styles.endText}>
           Eure erreichte Punktzahl: {points}
         </Text>
-        <Text style={styles.tileText}>
+        {/* <Text style={styles.tileText}>
           Ladet gerne euren Gruppennamen und eure Punktzahl hoch, um
           im Ranking aufgenommen zu werden! Einfach auf 'Hochladen'
           klicken.
@@ -83,7 +125,15 @@ export default function RallyeScreen() {
             />
           </View>
 
-        </View>
+        </View> */}
+      </View>
+    );
+  } else{
+    content = (
+      <View>
+        <Text style={styles.groupSelectionText}>
+          Bitte wähle zuerst eine Gruppe aus.
+        </Text>
       </View>
     );
   }
@@ -136,5 +186,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dhbwGray,
     margin: 6,
     borderRadius: 5
-  }
+  },
+  groupSelectionText: {
+    color: Colors.dhbwGray,
+    fontSize: 30,
+    textAlign: 'center',
+  },
 });

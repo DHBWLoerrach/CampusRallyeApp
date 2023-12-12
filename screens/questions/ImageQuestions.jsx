@@ -17,18 +17,11 @@ import Colors from '../../utils/Colors';
 
 export default function ImageQuestions() {
   const [selectedImage, setSelectedImage] = useState(null);
-  const [mailAddress, setMailAddress] = useState(null);
-  const { questions, currentQuestion, setCurrentQuestion } =
+  const { questions, currentQuestion, setCurrentQuestion,group,rallye,setPoints,
+    points } =
     useSharedStates();
 
   useEffect(() => {
-    async function getData() {
-      let { data: mailadress } = await supabase
-        .from('Rallye')
-        .select('mail');
-      setMailAddress(mailadress[0].mail);
-    }
-    getData();
     (async () => {
       if (Platform.OS !== 'web') {
         const { status } =
@@ -77,15 +70,16 @@ export default function ImageQuestions() {
 
     let asset = await MediaLibrary.createAssetAsync(selectedImage);
     MailComposer.composeAsync({
-      recipients: [mailAddress],
+      recipients: [rallye.mail_adress],
       subject: 'Gruppenfoto Gruppe: ',
       body: 'Das ist unser Gruppenfoto!',
       attachments: [asset.uri],
     });
   };
 
-  const handleNext = () => {
+  const handleNext = async() => {
     setCurrentQuestion(currentQuestion + 1);
+    await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:true})
     setPoints(points+1);
   };
 
@@ -110,7 +104,7 @@ export default function ImageQuestions() {
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.text}>
-          {questions[currentQuestion].frage}
+          {questions[currentQuestion].question}
         </Text>
         <View style={styles.imageContainer}>
           {selectedImage ? (
@@ -148,7 +142,7 @@ export default function ImageQuestions() {
         <Text style={styles.infoText}>
           Falls das Senden über den Button nicht geht, dann macht die
           Fotos in eurer Kamera App und schickt die Fotos
-          selsbtständig mit Gruppenname an {mailAddress}
+          selsbtständig mit Gruppenname an {rallye.mail_adress}
         </Text>
         <View style={styles.buttonContainer}>
           <Button

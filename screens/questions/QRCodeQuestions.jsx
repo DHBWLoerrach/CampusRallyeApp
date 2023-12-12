@@ -8,7 +8,6 @@ import {
   ScrollView,
 } from 'react-native';
 import * as Location from 'expo-location';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
 import QRScan from './QRScan';
@@ -25,19 +24,19 @@ export default function QRCodeQuestions() {
   const { questions, currentQuestion, qrScan, setQRScan } =
     useSharedStates();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: answer } = await supabase
-        .from('QRFragen')
-        .select('Latitude, Longitude, fragen_id')
-        .eq('fragen_id', questions[currentQuestion].fragen_id);
-      setMarkerLocation({
-        latitude: answer[0].Latitude,
-        longitude: answer[0].Longitude,
-      });
-    };
-    fetchData();
-  }, [!qrScan]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const { data: answer } = await supabase
+  //       .from('QRFragen')
+  //       .select('Latitude, Longitude, fragen_id')
+  //       .eq('fragen_id', questions[currentQuestion].fragen_id);
+  //     setMarkerLocation({
+  //       latitude: answer[0].Latitude,
+  //       longitude: answer[0].Longitude,
+  //     });
+  //   };
+  //   fetchData();
+  // }, [!qrScan]);
 
   useEffect(() => {
     (async () => {
@@ -104,7 +103,7 @@ export default function QRCodeQuestions() {
         <View>
           <View style={styles.header}>
             <Text style={styles.title}>
-              {questions[currentQuestion].frage}
+              {questions[currentQuestion].question}
             </Text>
           </View>
           <View style={styles.mapContainer}>

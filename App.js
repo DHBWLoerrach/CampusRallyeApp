@@ -5,38 +5,37 @@ import { supabase } from './utils/Supabase';
 import MainNavigator from './MainNavigator';
 import PasswordPrompt from './screens/PasswordPrompt';
 import { useSharedStates } from './utils/SharedStates';
+import {deleteData} from'./utils/LocalStorage'
 
 export default function App() {
   const [enabled, setEnabled] = useState(false);
   const [realPassword, setRealPassword] = useState(null);
-  const {setRallye,rallye} = useSharedStates();
+  const { useRallye, setUseRallye } = useSharedStates();
+  const { rallye, setRallye } = useSharedStates();
 
   useEffect(() => {
     async function getData() {
-      let { data: realPassword } = await supabase
-        .from('Rallye')
-        .select('password');
-      setRealPassword(realPassword[0].password);
-      console.log(realPassword)
+      const { data: login } = await supabase
+      .from('login')
+      .select('password, rallye!inner(id)')
+      .eq('rallye.is_active_rallye', true);
+      setRealPassword(login[0].password);
     }
     getData();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: rallye } = await supabase
-        .from('rallye')
-        .select('*')
-        .eq('is_active_rallye', true);
-      
-      setRallye(rallye[0]);
-    };
-    fetchData();
-  }, []);
 
-  const handlePasswordSubmit = (password) => {
+  const handlePasswordSubmit = async (password) => {
     if (password === realPassword) {
+      setUseRallye(true);
+      const { data: rallye } = await supabase
+      .from('rallye')
+      .select('*')
+      .eq('is_active_rallye', true);
+      console.log(rallye)
+      setRallye(rallye[0]);
       setEnabled(true);
+      
     } else {
       Alert.alert(
         'Falsches Passwort',
@@ -45,12 +44,18 @@ export default function App() {
     }
   };
 
+  const handleNoPasswordSubmit = async ()=>{
+    await deleteData('group_key'); 
+    setEnabled(true);
+    setUseRallye(false);
+  }
+
   return (
     <NavigationContainer>
       {enabled ? (
         <MainNavigator />
       ) : (
-        <PasswordPrompt onPasswordSubmit={handlePasswordSubmit} />
+        <PasswordPrompt onPasswordSubmit={handlePasswordSubmit} onContinueWithoutRallye={handleNoPasswordSubmit}/>
       )}
     </NavigationContainer>
   );
