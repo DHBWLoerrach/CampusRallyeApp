@@ -9,7 +9,6 @@ import { getData, storeData,deleteData } from '../utils/LocalStorage';
 //todo:potenzielles Problem bei der Gruppen auswahl welches durch Signal R oder Refresh gelöst werden muss
 
 export default function GroupScreen() {
-  // import shared states
   
   const { groups, setGroups } = useSharedStates();
   const { group,
@@ -36,7 +35,6 @@ if(useRallye){
 
   const fetchLocalStorage = async () => {
     groupId = await getData('group_key')
-    console.log(groupId)
     if (groupId !== null) {
       setGroup(groupId);
       setSelectionMade(true);

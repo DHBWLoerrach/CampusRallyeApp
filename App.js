@@ -32,7 +32,6 @@ export default function App() {
       .from('rallye')
       .select('*')
       .eq('is_active_rallye', true);
-      console.log(rallye)
       setRallye(rallye[0]);
       setEnabled(true);
       

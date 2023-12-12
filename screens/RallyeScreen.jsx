@@ -25,7 +25,6 @@ export default function RallyeScreen() {
             .rpc('get_questions', {
               group_id
             });
-            console.log(data)
           for (let i = data.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [data[i], data[j]] = [data[j], data[i]];
@@ -59,7 +58,6 @@ export default function RallyeScreen() {
     useEffect(() => {
       const fetchData = async () => {
         let { data } = await supabase.from('question').select('*').neq('question_type','picture');
-        console.log(data)
         for (let i = data.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [data[i], data[j]] = [data[j], data[i]];

@@ -67,9 +67,9 @@ const styles = StyleSheet.create({
   },
   text: {
     color: Colors.dhbwGray,
-    fontSize: 20, // Erhöhen Sie die Schriftgröße
+    fontSize: 20,
     textAlign: 'center',
-    marginBottom: 30, // Erhöhen Sie den Abstand zum Button
+    marginBottom: 30,
   },
   upperHalf: {
     justifyContent: 'center',
@@ -118,11 +118,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center'
   },
   button: {
-    margin: 20, // Erhöhen Sie die Größe des Buttons
+    margin: 20, 
   },
   image: {
-    width: 100, // Passen Sie die Größe des Bildes an
-    height: 100, // Passen Sie die Größe des Bildes an
+    width: 100, 
+    height: 100,
     marginHorizontal: 10,
   },
 });

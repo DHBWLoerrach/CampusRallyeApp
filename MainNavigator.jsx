@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
 import * as Progress from 'react-native-progress';
 import { View, Text } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from './utils/Supabase';
 
 import RallyeScreen from './screens/RallyeScreen';
@@ -23,30 +23,42 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
-  const {setRallye,rallye} = useSharedStates();
-  const {useRallye} = useSharedStates();
+  const { setRallye, rallye } = useSharedStates();
+  const { useRallye,group } = useSharedStates();
   const { currentQuestion, questions } = useSharedStates();
+  const [percentage, setPercentage] = useState(0.0);
 
-  useEffect(() => {
-    if(useRallye){
+
+  if (useRallye) {
+    useEffect(() => {
+
       const fetchData = async () => {
         const { data: rallye } = await supabase
           .from('rallye')
           .select('*')
           .eq('is_active_rallye', true);
-        
+
         setRallye(rallye[0]);
       };
       fetchData();
-    }
-  }, []);
+    }, []);
 
-  
-  var value = 0.0;
-
-  if (questions.length > 0) {
-    value = currentQuestion / questions.length;
+    useEffect(() => {
+      const fetchData = async () => {
+        let groupid = group;
+        let { data, error } = await supabase
+          .rpc('get_question_count', {
+            groupid
+          });
+          value = parseFloat(data[0].answeredquestions)/parseFloat(data[0].totalquestions)
+          setPercentage(value)
+      };
+      if(group!==null){
+        fetchData();
+      }
+    }, [currentQuestion,group]);
   }
+
 
   return (
     <Tab.Navigator
@@ -90,7 +102,7 @@ function MainTabs() {
           headerTitle: () => (
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: 'white' }}>DHBW Campus Rallye</Text>
-              <Progress.Bar style={{ marginTop: 10 }} progress={value} color='white' />
+              <Progress.Bar style={{ marginTop: 10 }} progress={percentage} color='white' />
             </View>
           ),
         }}
