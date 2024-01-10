@@ -66,7 +66,7 @@ if(useRallye){
       <View style={!item.used && !selectionMade?styles.buttonContainer:styles.buttonContainerDeactive}>
       <Button
         title="Auswählen"
-        color={'white'}
+        color={'grey'}
         onPress={async () => {
           /*if(selectionMade){
             setGroup(null);

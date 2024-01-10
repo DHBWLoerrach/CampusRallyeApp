@@ -123,7 +123,7 @@ export default function ImageQuestions() {
             title="Bild aufnehmen"
             onPress={handleLaunchCamera}
             style={styles.button}
-            color = {'white'}
+            color = {'grey'}
           />
         </View>
         <View style={!selectedImage?styles.buttonContainerDeactive:styles.buttonContainer}>
@@ -132,7 +132,7 @@ export default function ImageQuestions() {
             onPress={handleSendEmail}
             disabled={!selectedImage}
             style={styles.button}
-            color={'white'}
+            color={'dhbwRed'}
           />
         </View>
         <Text style={styles.infoText}>
@@ -149,7 +149,6 @@ export default function ImageQuestions() {
             title="Weiter"
             onPress={handleAnswerSubmit}
             style={styles.button}
-            color={'white'}
           />
         </View>
       </View>

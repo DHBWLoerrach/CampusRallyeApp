@@ -76,7 +76,7 @@ export default function SkillQuestions() {
         <View style={!answer?styles.buttonContainerDeactive:styles.buttonContainer}>
         <Button
           style={styles.button}
-          color={'white'}
+          color={'grey'}
           title="Antwort senden"
           onPress={handleAnswerSubmit}
           disabled={!answer}

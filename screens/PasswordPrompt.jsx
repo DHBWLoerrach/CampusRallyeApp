@@ -33,7 +33,7 @@ export default function PasswordPrompt({ onPasswordSubmit, onContinueWithoutRall
           <Button
             title="Anmelden"
             onPress={() => onPasswordSubmit(password)}
-            color={'white'}
+            color={'grey'}
           />
         </View>
       </View>
@@ -51,7 +51,7 @@ export default function PasswordPrompt({ onPasswordSubmit, onContinueWithoutRall
             <Button
               title="Erkunden ohne Rallye"
               onPress={() => onContinueWithoutRallye()}
-              color={'white'}
+              color={'grey'}
             />
           </View>
         </View>
@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
     margin: 6,
     borderRadius: 5,
     marginBottom: 20,
+    padding: 10,
   },
   separator: {
     flexDirection: 'row',
@@ -111,7 +112,6 @@ const styles = StyleSheet.create({
     marginTop: 30
   },
   buttonContainer: {
-    backgroundColor: Colors.dhbwRed,
     margin: 6,
     padding: 5,
     borderRadius: 5,
