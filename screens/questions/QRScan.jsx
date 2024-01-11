@@ -24,11 +24,10 @@ export default function QRScan() {
     setQRScan,
     setPoints,
     points,
-    group
+    group,
   } = useSharedStates();
 
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     (async () => {
@@ -46,8 +45,14 @@ export default function QRScan() {
       );
     } else if (questions[currentQuestion].answer === data) {
       setCurrentQuestion(currentQuestion + 1);
-      await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:true})
-      setPoints(points+1);
+      await supabase
+        .from('group_questions')
+        .insert({
+          group_id: group,
+          question_id: questions[currentQuestion].id,
+          answered_correctly: true,
+        });
+      setPoints(points + 1);
     }
     setQRScan(false);
     navigation.navigate('Rallye');
@@ -77,13 +82,13 @@ export default function QRScan() {
           color="grey"
           textTransform="none"
         />
-        </View>
-        <View>
+      </View>
+      <View>
         <Text style={styles.title}>
           Hinweis: falls nicht gescannt wird, einmal zurück und neu
           auf Scannen klicken!
         </Text>
-        </View>
+      </View>
     </View>
   );
 }
@@ -97,12 +102,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonContainer: {
-    flex:1,
-    alignSelf:'center',
+    flex: 1,
+    alignSelf: 'center',
     backgroundColor: Colors.dhbwRed,
-    margin:1,
+    margin: 1,
     marginBottom: 15,
-    borderRadius: 5
+    borderRadius: 5,
   },
   container: {
     flex: 1,

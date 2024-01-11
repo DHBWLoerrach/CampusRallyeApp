@@ -7,13 +7,16 @@ import {
   View,
   Text,
   TextInput,
-  Image
+  Image,
 } from 'react-native';
 
 import Colors from '../utils/Colors';
 
 // TODO basically same code as GroupPrompt
-export default function PasswordPrompt({ onPasswordSubmit, onContinueWithoutRallye }) {
+export default function PasswordPrompt({
+  onPasswordSubmit,
+  onContinueWithoutRallye,
+}) {
   const [password, setPassword] = useState('');
   return (
     <KeyboardAvoidingView
@@ -21,8 +24,12 @@ export default function PasswordPrompt({ onPasswordSubmit, onContinueWithoutRall
       style={styles.container}
     >
       <View style={styles.upperHalf}>
-        <Text style={styles.text}>Nimmst du an einer Rallye teil ?</Text>
-        <Text style={[styles.passwordLabel, styles.text]}>Passwort eingeben:</Text>
+        <Text style={styles.text}>
+          Nimmst du an einer Rallye teil ?
+        </Text>
+        <Text style={[styles.passwordLabel, styles.text]}>
+          Passwort eingeben:
+        </Text>
         <TextInput
           style={styles.passwordInput}
           secureTextEntry={true}
@@ -40,7 +47,10 @@ export default function PasswordPrompt({ onPasswordSubmit, onContinueWithoutRall
       <View style={styles.lowerHalf}>
         <View style={styles.separator}>
           <View style={styles.line} />
-          <Image source={require('../assets/favicon.png')} style={styles.image} />
+          <Image
+            source={require('../assets/favicon.png')}
+            style={styles.image}
+          />
           <View style={styles.line} />
         </View>
         <View style={styles.lowerHalfContainer}>
@@ -74,8 +84,8 @@ const styles = StyleSheet.create({
   upperHalf: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:80,
-    marginBottom: 30
+    marginTop: 80,
+    marginBottom: 30,
   },
   lowerHalf: {
     flex: 1,
@@ -109,19 +119,19 @@ const styles = StyleSheet.create({
   lowerHalfContainer: {
     justifyContent: 'center',
     width: '100%',
-    marginTop: 30
+    marginTop: 30,
   },
   buttonContainer: {
     margin: 6,
     padding: 5,
     borderRadius: 5,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   button: {
-    margin: 20, 
+    margin: 20,
   },
   image: {
-    width: 100, 
+    width: 100,
     height: 100,
     marginHorizontal: 10,
   },

@@ -17,9 +17,15 @@ import Colors from '../../utils/Colors';
 
 export default function ImageQuestions() {
   const [selectedImage, setSelectedImage] = useState(null);
-  const { questions, currentQuestion, setCurrentQuestion,group,rallye,setPoints,
-    points } =
-    useSharedStates();
+  const {
+    questions,
+    currentQuestion,
+    setCurrentQuestion,
+    group,
+    rallye,
+    setPoints,
+    points,
+  } = useSharedStates();
 
   useEffect(() => {
     (async () => {
@@ -77,10 +83,16 @@ export default function ImageQuestions() {
     });
   };
 
-  const handleNext = async() => {
+  const handleNext = async () => {
     setCurrentQuestion(currentQuestion + 1);
-    await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:true})
-    setPoints(points+1);
+    await supabase
+      .from('group_questions')
+      .insert({
+        group_id: group,
+        question_id: questions[currentQuestion].id,
+        answered_correctly: true,
+      });
+    setPoints(points + 1);
   };
 
   const handleAnswerSubmit = () => {
@@ -123,11 +135,17 @@ export default function ImageQuestions() {
             title="Bild aufnehmen"
             onPress={handleLaunchCamera}
             style={styles.button}
-            color = {'grey'}
+            color={'grey'}
           />
         </View>
-        <View style={!selectedImage?styles.buttonContainerDeactive:styles.buttonContainer}>
-        <Button
+        <View
+          style={
+            !selectedImage
+              ? styles.buttonContainerDeactive
+              : styles.buttonContainer
+          }
+        >
+          <Button
             title="Senden"
             onPress={handleSendEmail}
             disabled={!selectedImage}
@@ -188,12 +206,12 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     backgroundColor: Colors.dhbwRed,
-    margin:6,
-    borderRadius: 5
+    margin: 6,
+    borderRadius: 5,
   },
-  buttonContainerDeactive:{
+  buttonContainerDeactive: {
     backgroundColor: Colors.dhbwGray,
-    margin:6,
-    borderRadius: 5
-  }
+    margin: 6,
+    borderRadius: 5,
+  },
 });

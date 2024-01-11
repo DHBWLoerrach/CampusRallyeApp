@@ -1,74 +1,134 @@
-import { View, Text, Button,StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/Supabase';
 import { ScrollView } from 'react-native';
-import { getData, storeData,deleteData } from '../utils/LocalStorage';
+import { getData, storeData } from '../utils/LocalStorage';
 
 //todo:potenzielles Problem bei der Gruppen auswahl welches durch Signal R oder Refresh gelöst werden muss
 
 export default function GroupScreen() {
-  
   const { groups, setGroups } = useSharedStates();
-  const { group,
-    setGroup } = useSharedStates();
+  const { group, setGroup } = useSharedStates();
   const { questions, setQuestions } = useSharedStates();
   const { currentQuestion } = useSharedStates();
   const { points, rallye } = useSharedStates();
   const { useRallye } = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [selectionMade, setSelectionMade] = useState(false);
-  
-if(useRallye){
-  useEffect(() => {
-    const fetchDataSupabase = async () => {
-      const { data: groups } = await supabase
-        .from('rallye_group')
-        .select('*')
-        .eq('rallye_id', rallye.id)
-        .order('id',{ascending:false});
-      setGroups(groups);
-      setLoading(false);
-    };
-    fetchDataSupabase();
 
-  const fetchLocalStorage = async () => {
-    groupId = await getData('group_key')
-    if (groupId !== null) {
-      setGroup(groupId);
-      setSelectionMade(true);
-    }
-  };
-  fetchLocalStorage();
+  if (useRallye) {
+    useEffect(() => {
+      const fetchDataSupabase = async () => {
+        const { data: groups } = await supabase
+          .from('rallye_group')
+          .select('*')
+          .eq('rallye_id', rallye.id)
+          .order('id', { ascending: false });
+        setGroups(groups);
+        setLoading(false);
+      };
+      fetchDataSupabase();
 
-}, [group]);
-}
- 
+      const fetchLocalStorage = async () => {
+        groupId = await getData('group_key');
+        if (groupId !== null) {
+          setGroup(groupId);
+          setSelectionMade(true);
+        }
+      };
+      fetchLocalStorage();
+    }, [group]);
+  }
 
   return (
     <ScrollView>
-  {groups && groups.map((item, index) => (
-    <View key={index} style={[styles.section, { backgroundColor:  item.id === group ? 'red' : 'white' }]}>
-      <Text style={[styles.sectionTitle, { color: item.id === group? 'white' : 'black' }]}>Gruppe {index + 1}</Text>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: item.id === group? 'white' : 'black' }]}>Name der Gruppe:</Text>
-        <Text style={[styles.value, { color: item.id === group ? 'white' : 'black' }]}>{item.name}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: item.id === group ? 'white' : 'black' }]}>Beantwortete Fragen:</Text>
-        <Text style={[styles.value, { color: item.id === group? 'white' : 'black' }]}>{currentQuestion} von {questions.length}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: item.id === group ? 'white' : 'black' }]}>Aktuelle Punktzahl:</Text>
-        <Text style={[styles.value, { color: item.id === group ? 'white' : 'black' }]}>{points}</Text>
-      </View>
-      <View style={!item.used && !selectionMade?styles.buttonContainer:styles.buttonContainerDeactive}>
-      <Button
-        title="Auswählen"
-        color={'grey'}
-        onPress={async () => {
-          /*if(selectionMade){
+      {groups &&
+        groups.map((item, index) => (
+          <View
+            key={index}
+            style={[
+              styles.section,
+              {
+                backgroundColor: item.id === group ? 'red' : 'white',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: item.id === group ? 'white' : 'black' },
+              ]}
+            >
+              Gruppe {index + 1}
+            </Text>
+            <View style={styles.row}>
+              <Text
+                style={[
+                  styles.label,
+                  { color: item.id === group ? 'white' : 'black' },
+                ]}
+              >
+                Name der Gruppe:
+              </Text>
+              <Text
+                style={[
+                  styles.value,
+                  { color: item.id === group ? 'white' : 'black' },
+                ]}
+              >
+                {item.name}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text
+                style={[
+                  styles.label,
+                  { color: item.id === group ? 'white' : 'black' },
+                ]}
+              >
+                Beantwortete Fragen:
+              </Text>
+              <Text
+                style={[
+                  styles.value,
+                  { color: item.id === group ? 'white' : 'black' },
+                ]}
+              >
+                {currentQuestion} von {questions.length}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text
+                style={[
+                  styles.label,
+                  { color: item.id === group ? 'white' : 'black' },
+                ]}
+              >
+                Aktuelle Punktzahl:
+              </Text>
+              <Text
+                style={[
+                  styles.value,
+                  { color: item.id === group ? 'white' : 'black' },
+                ]}
+              >
+                {points}
+              </Text>
+            </View>
+            <View
+              style={
+                !item.used && !selectionMade
+                  ? styles.buttonContainer
+                  : styles.buttonContainerDeactive
+              }
+            >
+              <Button
+                title="Auswählen"
+                color={'grey'}
+                onPress={async () => {
+                  /*if(selectionMade){
             setGroup(null);
             setSelectionMade(false);
             await supabase.from('rallye_group')
@@ -76,38 +136,38 @@ if(useRallye){
           .eq('id', item.id);
             await deleteData('group_key'); //Enables the swapping of groups
           } else{*/
-          setGroup(item.id); 
-          setSelectionMade(true); 
-          await supabase.from('rallye_group')
-          .update({used:true})
-          .eq('id', item.id);
-          await storeData('group_key', item.id); 
-          //}
-        }}
-        disabled={selectionMade}
-      />
-      </View>
-      
-    </View>
-  ))}
-</ScrollView>
+                  setGroup(item.id);
+                  setSelectionMade(true);
+                  await supabase
+                    .from('rallye_group')
+                    .update({ used: true })
+                    .eq('id', item.id);
+                  await storeData('group_key', item.id);
+                  //}
+                }}
+                disabled={selectionMade}
+              />
+            </View>
+          </View>
+        ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   buttonContainer: {
     backgroundColor: Colors.dhbwRed,
-    margin:6,
+    margin: 6,
     borderRadius: 5,
-    flex:1,
-    alignSelf:'center',
+    flex: 1,
+    alignSelf: 'center',
   },
-  buttonContainerDeactive:{
+  buttonContainerDeactive: {
     backgroundColor: Colors.dhbwGray,
-    margin:6,
+    margin: 6,
     borderRadius: 5,
-    flex:1,
-    alignSelf:'center',
+    flex: 1,
+    alignSelf: 'center',
   },
   container: {
     flex: 1,
