@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import ImageQuestions from './questions/ImageQuestions';
@@ -9,9 +9,15 @@ import Colors from '../utils/Colors';
 
 export default function RallyeScreen() {
   // import shared states
-  const { questions, setQuestions } = useSharedStates();
-  const { currentQuestion, group } = useSharedStates();
-  const { points, useRallye, setPoints } = useSharedStates();
+  const {
+    questions,
+    setQuestions,
+    currentQuestion,
+    group,
+    points,
+    useRallye,
+    setPoints,
+  } = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [uploaded, setUploaded] = useState(false);
 
@@ -149,7 +155,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#fff',
   },
-
   tile: {
     width: '80%',
     height: 100,
@@ -162,13 +167,11 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
     paddingBottom: 7,
   },
-
   tileText: {
     fontSize: 20,
     color: 'grey',
     textAlign: 'center',
   },
-
   endText: {
     fontSize: 30,
     color: 'grey',
