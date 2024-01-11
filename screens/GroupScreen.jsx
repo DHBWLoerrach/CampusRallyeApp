@@ -1,4 +1,5 @@
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import UIButton from '../ui/UIButton';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 import { useState, useEffect } from 'react';
@@ -51,103 +52,55 @@ export default function GroupScreen() {
             style={[
               styles.section,
               {
-                backgroundColor: item.id === group ? 'red' : 'white',
+                borderColor:
+                  item.id === group ? Colors.dhbwRed : 'white',
               },
             ]}
           >
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: item.id === group ? 'white' : 'black' },
-              ]}
-            >
+            <Text style={styles.sectionTitle}>
               Gruppe {index + 1}
             </Text>
             <View style={styles.row}>
-              <Text
-                style={[
-                  styles.label,
-                  { color: item.id === group ? 'white' : 'black' },
-                ]}
-              >
-                Name der Gruppe:
-              </Text>
-              <Text
-                style={[
-                  styles.value,
-                  { color: item.id === group ? 'white' : 'black' },
-                ]}
-              >
-                {item.name}
-              </Text>
+              <Text style={styles.label}>Name der Gruppe:</Text>
+              <Text style={styles.value}>{item.name}</Text>
             </View>
             <View style={styles.row}>
-              <Text
-                style={[
-                  styles.label,
-                  { color: item.id === group ? 'white' : 'black' },
-                ]}
-              >
-                Beantwortete Fragen:
-              </Text>
-              <Text
-                style={[
-                  styles.value,
-                  { color: item.id === group ? 'white' : 'black' },
-                ]}
-              >
+              <Text style={styles.label}>Beantwortete Fragen:</Text>
+              <Text style={styles.value}>
                 {currentQuestion} von {questions.length}
               </Text>
             </View>
             <View style={styles.row}>
-              <Text
-                style={[
-                  styles.label,
-                  { color: item.id === group ? 'white' : 'black' },
-                ]}
-              >
-                Aktuelle Punktzahl:
-              </Text>
-              <Text
-                style={[
-                  styles.value,
-                  { color: item.id === group ? 'white' : 'black' },
-                ]}
-              >
-                {points}
-              </Text>
+              <Text style={styles.label}>Aktuelle Punktzahl:</Text>
+              <Text style={styles.value}>{points}</Text>
             </View>
-            <View
-              style={
-                !item.used && !selectionMade
-                  ? styles.buttonContainer
-                  : styles.buttonContainerDeactive
-              }
-            >
-              <Button
-                title="Auswählen"
-                color={'grey'}
-                onPress={async () => {
-                  /*if(selectionMade){
-            setGroup(null);
-            setSelectionMade(false);
-            await supabase.from('rallye_group')
-          .update({used:false})
-          .eq('id', item.id);
-            await deleteData('group_key'); //Enables the swapping of groups
-          } else{*/
-                  setGroup(item.id);
-                  setSelectionMade(true);
+            <UIButton
+              size="small"
+              color="grey"
+              outline={true}
+              onClick={async () => {
+                /* if (selectionMade) {
+                  setGroup(null);
+                  setSelectionMade(false);
                   await supabase
                     .from('rallye_group')
-                    .update({ used: true })
+                    .update({ used: false })
                     .eq('id', item.id);
-                  await storeData('group_key', item.id);
-                  //}
-                }}
-                disabled={selectionMade}
-              />
-            </View>
+                  await deleteData('group_key'); //Enables the swapping of groups
+                } else { */
+                setGroup(item.id);
+                setSelectionMade(true);
+                await supabase
+                  .from('rallye_group')
+                  .update({ used: true })
+                  .eq('id', item.id);
+                await storeData('group_key', item.id);
+                /* } */
+              }}
+              disabled={selectionMade}
+            >
+              Auswählen
+            </UIButton>
           </View>
         ))}
     </ScrollView>
@@ -159,13 +112,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dhbwRed,
     margin: 6,
     borderRadius: 5,
-    flex: 1,
-    alignSelf: 'center',
-  },
-  buttonContainerDeactive: {
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
+    borderWidth: 2,
     flex: 1,
     alignSelf: 'center',
   },
