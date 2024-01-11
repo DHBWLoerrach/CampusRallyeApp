@@ -62,15 +62,16 @@ function MainTabs() {
 
   return (
     <Tab.Navigator
+      initialRouteName={useRallye ? 'group' : 'rallye'}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, size }) => {
           let iconName;
 
-          if (route.name === 'DHBW Campus Rallye') {
+          if (route.name === 'rallye') {
             iconName = 'map';
-          } else if (route.name === 'Einstellungen') {
+          } else if (route.name === 'settings') {
             iconName = 'settings';
-          } else if (route.name === 'Gruppe') {
+          } else if (route.name === 'group') {
             iconName = 'people';
           }
           return (
@@ -86,15 +87,16 @@ function MainTabs() {
       })}
     >
       <Tab.Screen
-        name="Gruppe"
+        name="group"
         component={GroupScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
+          title: 'Gruppe',
         }}
       />
       <Tab.Screen
-        name="DHBW Campus Rallye"
+        name="rallye"
         component={RallyeScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
@@ -102,7 +104,7 @@ function MainTabs() {
           headerTitle: () => (
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: 'white' }}>
-                DHBW Campus Rallye
+                Campus Rallye DHBW Lörrach
               </Text>
               <Progress.Bar
                 style={{ marginTop: 10 }}
@@ -111,14 +113,16 @@ function MainTabs() {
               />
             </View>
           ),
+          title: 'Campus Rallye',
         }}
       />
       <Tab.Screen
-        name="Einstellungen"
+        name="settings"
         component={SettingsScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
+          title: 'Einstellungen',
         }}
       />
     </Tab.Navigator>
