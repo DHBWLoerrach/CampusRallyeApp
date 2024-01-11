@@ -1,21 +1,26 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import UIButton from '../ui/UIButton';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/Supabase';
-import { ScrollView } from 'react-native';
 import { getData, storeData } from '../utils/LocalStorage';
 
 //todo:potenzielles Problem bei der Gruppen auswahl welches durch Signal R oder Refresh gelöst werden muss
 
 export default function GroupScreen() {
-  const { groups, setGroups } = useSharedStates();
-  const { group, setGroup } = useSharedStates();
-  const { questions, setQuestions } = useSharedStates();
-  const { currentQuestion } = useSharedStates();
-  const { points, rallye } = useSharedStates();
-  const { useRallye } = useSharedStates();
+  const {
+    groups,
+    setGroups,
+    group,
+    setGroup,
+    questions,
+    currentQuestion,
+    points,
+    rallye,
+    useRallye,
+    setEnabled,
+  } = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [selectionMade, setSelectionMade] = useState(false);
 
@@ -43,43 +48,55 @@ export default function GroupScreen() {
     }, [group]);
   }
 
+  if (!useRallye) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.modalText}>
+          Es ist aktuell keine Rallye aktiv.
+        </Text>
+        <UIButton size="small" onClick={() => setEnabled(false)}>
+          <Text style={{ textAlign: 'center' }}>
+            Zurück zur Anmeldung
+          </Text>
+        </UIButton>
+      </View>
+    );
+  }
+
   return (
     <ScrollView>
-      {groups &&
-        groups.map((item, index) => (
-          <View
-            key={index}
-            style={[
-              styles.section,
-              {
-                borderColor:
-                  item.id === group ? Colors.dhbwRed : 'white',
-              },
-            ]}
-          >
-            <Text style={styles.sectionTitle}>
-              Gruppe {index + 1}
+      {groups?.map((item, index) => (
+        <View
+          key={index}
+          style={[
+            styles.section,
+            {
+              borderColor:
+                item.id === group ? Colors.dhbwRed : 'white',
+            },
+          ]}
+        >
+          <Text style={styles.sectionTitle}>Gruppe {index + 1}</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>Name der Gruppe:</Text>
+            <Text style={styles.value}>{item.name}</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Beantwortete Fragen:</Text>
+            <Text style={styles.value}>
+              {currentQuestion} von {questions.length}
             </Text>
-            <View style={styles.row}>
-              <Text style={styles.label}>Name der Gruppe:</Text>
-              <Text style={styles.value}>{item.name}</Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Beantwortete Fragen:</Text>
-              <Text style={styles.value}>
-                {currentQuestion} von {questions.length}
-              </Text>
-            </View>
-            <View style={styles.row}>
-              <Text style={styles.label}>Aktuelle Punktzahl:</Text>
-              <Text style={styles.value}>{points}</Text>
-            </View>
-            <UIButton
-              size="small"
-              color="grey"
-              outline={true}
-              onClick={async () => {
-                /* if (selectionMade) {
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Aktuelle Punktzahl:</Text>
+            <Text style={styles.value}>{points}</Text>
+          </View>
+          <UIButton
+            size="small"
+            color="grey"
+            outline={true}
+            onClick={async () => {
+              /* if (selectionMade) {
                   setGroup(null);
                   setSelectionMade(false);
                   await supabase
@@ -88,21 +105,21 @@ export default function GroupScreen() {
                     .eq('id', item.id);
                   await deleteData('group_key'); //Enables the swapping of groups
                 } else { */
-                setGroup(item.id);
-                setSelectionMade(true);
-                await supabase
-                  .from('rallye_group')
-                  .update({ used: true })
-                  .eq('id', item.id);
-                await storeData('group_key', item.id);
-                /* } */
-              }}
-              disabled={selectionMade}
-            >
-              Auswählen
-            </UIButton>
-          </View>
-        ))}
+              setGroup(item.id);
+              setSelectionMade(true);
+              await supabase
+                .from('rallye_group')
+                .update({ used: true })
+                .eq('id', item.id);
+              await storeData('group_key', item.id);
+              /* } */
+            }}
+            disabled={selectionMade}
+          >
+            Auswählen
+          </UIButton>
+        </View>
+      ))}
     </ScrollView>
   );
 }

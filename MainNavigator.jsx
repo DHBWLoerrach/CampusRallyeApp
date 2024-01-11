@@ -22,9 +22,8 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
-  const { setRallye, rallye } = useSharedStates();
-  const { useRallye, group } = useSharedStates();
-  const { currentQuestion, questions } = useSharedStates();
+  const { setRallye, useRallye, group, currentQuestion } =
+    useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
 
   if (useRallye) {

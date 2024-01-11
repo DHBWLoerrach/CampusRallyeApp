@@ -8,10 +8,9 @@ import { useSharedStates } from './utils/SharedStates';
 import { deleteData } from './utils/LocalStorage';
 
 export default function App() {
-  const [enabled, setEnabled] = useState(false);
   const [realPassword, setRealPassword] = useState(null);
-  const { useRallye, setUseRallye } = useSharedStates();
-  const { rallye, setRallye } = useSharedStates();
+  const { setRallye, setUseRallye, enabled, setEnabled } =
+    useSharedStates();
 
   useEffect(() => {
     async function getData() {

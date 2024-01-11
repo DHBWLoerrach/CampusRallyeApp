@@ -11,7 +11,9 @@ function sharedStates() {
   const [group, setGroup] = useState(null);
   const [qrScan, setQRScan] = useState(false);
   const [useRallye, setUseRallye] = useState(false);
+  const [enabled, setEnabled] = useState(false);
   useSharedStates;
+
   return {
     questions,
     setQuestions,
@@ -29,6 +31,8 @@ function sharedStates() {
     setGroup,
     useRallye,
     setUseRallye,
+    enabled,
+    setEnabled,
   };
 }
 
