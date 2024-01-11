@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
     justifyContent: 'center',
+    paddingBottom: 200, // quickfix for keyboard covering input on small screens
   },
   container: {
     flex: 1,
