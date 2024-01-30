@@ -64,6 +64,7 @@ export default function RallyeScreen() {
         let { data } = await supabase
           .from('question')
           .select('*')
+          .eq('enabled', true)
           .neq('question_type', 'picture');
         for (let i = data.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
