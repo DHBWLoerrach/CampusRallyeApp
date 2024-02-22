@@ -1,4 +1,4 @@
 module.exports = {
-    smallFont:12,
-    bigFont:17
-}
+  smallFont: 12,
+  bigFont: 17,
+};

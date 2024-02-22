@@ -12,7 +12,7 @@ import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
 import QRScan from './QRScan';
 import Colors, { dhbwRed } from '../../utils/Colors';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 
 export default function QRCodeQuestions() {
   // const [location, setLocation] = useState(null);
@@ -20,12 +20,12 @@ export default function QRCodeQuestions() {
   // const [isLocationEnabled, setIsLocationEnabled] = useState(true);
 
   // const [markerLocation, setMarkerLocation] = useState({
-  //   latitude: 47.61706708166155, 
+  //   latitude: 47.61706708166155,
   //   longitude: 7.678012011562073
   // });
 
-  const [mapRegion, setMapRegion]  = useState({
-    latitude: 47.61706708166155, 
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 47.61706708166155,
     longitude: 7.678012011562073,
     latitudeDelta: 0.0004,
     longitudeDelta: 0.004,
@@ -40,59 +40,60 @@ export default function QRCodeQuestions() {
   const { questions, currentQuestion, qrScan, setQRScan } =
     useSharedStates();
 
-// Daten aus der Datenbank holen
+  // Daten aus der Datenbank holen
 
   useEffect(() => {
-     const fetchData = async () => {
+    const fetchData = async () => {
       const { data: answer } = await supabase
-      .from('QRFragen')
-       .select('Latitude, Longitude, fragen_id')
+        .from('QRFragen')
+        .select('Latitude, Longitude, fragen_id')
         .eq('fragen_id', questions[currentQuestion].fragen_id);
-       setMarkerLocation({
+      setMarkerLocation({
         latitude: answer[0].Latitude,
         longitude: answer[0].Longitude,
-       });
-     };
-     fetchData();
-   }, [!qrScan]);
+      });
+    };
+    fetchData();
+  }, [!qrScan]);
 
-// User Location holen
-   const userLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
+  // User Location holen
+  const userLocation = async () => {
+    let { status } =
+      await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       setErrorMsg('Permission to access location was denied');
     }
 
-     let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
-      setMapRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.0004,
-        longitudeDelta: 0.0009,
-      });
-      setMyPosition({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      console.log(location.coords.latitude, location.coords.longitude);
-    }
+    let location = await Location.getCurrentPositionAsync({
+      enableHighAccuracy: true,
+    });
+    setMapRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.0004,
+      longitudeDelta: 0.0009,
+    });
+    setMyPosition({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
+    console.log(location.coords.latitude, location.coords.longitude);
+  };
 
-    const standardLocation = () => {
-      setMapRegion({
-        latitude: 47.61706708166155,
-        longitude: 7.678012011562073,
-        latitudeDelta: 0.0004,
-        longitudeDelta: 0.004,
-      });
-    };
+  const standardLocation = () => {
+    setMapRegion({
+      latitude: 47.61706708166155,
+      longitude: 7.678012011562073,
+      latitudeDelta: 0.0004,
+      longitudeDelta: 0.004,
+    });
+  };
 
-    useEffect(() => {
-      userLocation();
-    }, []);
+  useEffect(() => {
+    userLocation();
+  }, []);
 
-
-
-//ALT
+  //ALT
   // useEffect(() => {
   //   (async () => {
   //     let { status } =
@@ -142,17 +143,16 @@ export default function QRCodeQuestions() {
   // }
 
   // War in der MapView
-    //animateToPosition={position}
-    //clickListener={setClickListener}
-    //markersListener={setMarkersListener}
-    //markersList={markers}
+  //animateToPosition={position}
+  //clickListener={setClickListener}
+  //markersListener={setMarkersListener}
+  //markersList={markers}
 
-
-   let content;
+  let content;
 
   const handlepress = () => {
-     setQRScan(!qrScan);
-   };
+    setQRScan(!qrScan);
+  };
 
   if (!qrScan) {
     content = (
@@ -164,30 +164,31 @@ export default function QRCodeQuestions() {
             </Text>
           </View>
           <View style={styles.mapContainer}>
-           <MapView style={styles.map}
-            region={mapRegion}
-            >
-            <Marker coordinate={myPosition} title="Meine Position"/>
-            
+            <MapView style={styles.map} region={mapRegion}>
+              <Marker
+                coordinate={myPosition}
+                title="Meine Position"
+              />
             </MapView>
-         
-          <View style={styles.buttonRow}>
-           <Button
-            title = "Aktuelle Position"
-             onPress={userLocation}
-             textTransform = "none"
-            />
-           <Button
-            title = "Zur DHBW" 
-            onPress={standardLocation }
-            color = {dhbwRed}/>
-          </View>
+
+            <View style={styles.buttonRow}>
+              <Button
+                title="Aktuelle Position"
+                onPress={userLocation}
+                textTransform="none"
+              />
+              <Button
+                title="Zur DHBW"
+                onPress={standardLocation}
+                color={dhbwRed}
+              />
+            </View>
           </View>
 
           <View style={styles.buttonContainer}>
             <Button
               title={'QR-Code Scannen'}
-              onPress={() => handlepress()} 
+              onPress={() => handlepress()}
               color={'grey'}
             />
           </View>
@@ -195,11 +196,11 @@ export default function QRCodeQuestions() {
       </ScrollView>
     );
   } else if (qrScan) {
-  content = (
-    <View>
-      <QRScan />
-    </View>
-  );
+    content = (
+      <View>
+        <QRScan />
+      </View>
+    );
   }
 
   return <View style={styles.container}>{content}</View>;
@@ -238,16 +239,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonContainer: {
-    alignSelf:'center',
+    alignSelf: 'center',
     backgroundColor: Colors.dhbwRed,
-    margin:6,
-    borderRadius: 5
+    margin: 6,
+    borderRadius: 5,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     width: '100%',
-    
   },
   qrscancontainer: {
     flex: 1,

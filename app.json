@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "de.dhbwloe.loerrach.CampusRallyeApp"
@@ -31,6 +33,11 @@
     },
     "updates": {
       "url": "https://u.expo.dev/6c9bc5bb-abec-47ce-9cd6-f080aeabae3a"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "6c9bc5bb-abec-47ce-9cd6-f080aeabae3a"
+      }
     }
   }
 }

@@ -18,20 +18,16 @@ import QRScan from './screens/questions/QRScan';
 import Color from './utils/Colors';
 import { useSharedStates } from './utils/SharedStates';
 
-
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
-  const { setRallye, rallye } = useSharedStates();
-  const { useRallye,group } = useSharedStates();
-  const { currentQuestion, questions } = useSharedStates();
+  const { setRallye, useRallye, group, currentQuestion } =
+    useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
-
 
   if (useRallye) {
     useEffect(() => {
-
       const fetchData = async () => {
         const { data: rallye } = await supabase
           .from('rallye')
@@ -46,31 +42,35 @@ function MainTabs() {
     useEffect(() => {
       const fetchData = async () => {
         let groupid = group;
-        let { data, error } = await supabase
-          .rpc('get_question_count', {
-            groupid
-          });
-          value = parseFloat(data[0].answeredquestions)/parseFloat(data[0].totalquestions)
-          setPercentage(value)
+        let { data, error } = await supabase.rpc(
+          'get_question_count',
+          {
+            groupid,
+          }
+        );
+        value =
+          parseFloat(data[0].answeredquestions) /
+          parseFloat(data[0].totalquestions);
+        setPercentage(value);
       };
-      if(group!==null){
+      if (group !== null) {
         fetchData();
       }
-    }, [currentQuestion,group]);
+    }, [currentQuestion, group]);
   }
-
 
   return (
     <Tab.Navigator
+      initialRouteName={useRallye ? 'group' : 'rallye'}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, size }) => {
           let iconName;
 
-          if (route.name === 'DHBW Campus Rallye') {
+          if (route.name === 'rallye') {
             iconName = 'map';
-          } else if (route.name === 'Einstellungen') {
+          } else if (route.name === 'settings') {
             iconName = 'settings';
-          } else if (route.name === 'Gruppe') {
+          } else if (route.name === 'group') {
             iconName = 'people';
           }
           return (
@@ -86,33 +86,42 @@ function MainTabs() {
       })}
     >
       <Tab.Screen
-        name="Gruppe"
+        name="group"
         component={GroupScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
+          title: 'Gruppe',
         }}
       />
       <Tab.Screen
-        name="DHBW Campus Rallye"
+        name="rallye"
         component={RallyeScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
           headerTitle: () => (
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: 'white' }}>DHBW Campus Rallye</Text>
-              <Progress.Bar style={{ marginTop: 10 }} progress={percentage} color='white' />
+              <Text style={{ color: 'white' }}>
+                Campus Rallye DHBW Lörrach
+              </Text>
+              <Progress.Bar
+                style={{ marginTop: 10 }}
+                progress={percentage}
+                color="white"
+              />
             </View>
           ),
+          title: 'Campus Rallye',
         }}
       />
       <Tab.Screen
-        name="Einstellungen"
+        name="settings"
         component={SettingsScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
+          title: 'Einstellungen',
         }}
       />
     </Tab.Navigator>

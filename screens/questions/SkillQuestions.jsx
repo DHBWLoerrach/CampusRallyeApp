@@ -23,15 +23,23 @@ export default function SkillQuestions() {
     setCurrentQuestion,
     points,
     setPoints,
-    group
+    group,
   } = useSharedStates();
 
   const handleNext = async () => {
     if (answer.trim() === questions[currentQuestion].answer) {
-      await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:true})
-      setPoints(points +1);
-    } else{
-      await supabase.from('group_questions').insert({group_id:group,question_id:questions[currentQuestion].id,answered_correctly:false})
+      await supabase.from('group_questions').insert({
+        group_id: group,
+        question_id: questions[currentQuestion].id,
+        answered_correctly: true,
+      });
+      setPoints(points + 1);
+    } else {
+      await supabase.from('group_questions').insert({
+        group_id: group,
+        question_id: questions[currentQuestion].id,
+        answered_correctly: false,
+      });
     }
     setCurrentQuestion(currentQuestion + 1);
     setAnswer('');
@@ -73,16 +81,22 @@ export default function SkillQuestions() {
           onChangeText={setAnswer}
           placeholder="Gib hier deine Antwort ein"
         />
-        <View style={!answer?styles.buttonContainerDeactive:styles.buttonContainer}>
-        <Button
-          style={styles.button}
-          color={'grey'}
-          title="Antwort senden"
-          onPress={handleAnswerSubmit}
-          disabled={!answer}
-        />
+        <View
+          style={
+            !answer
+              ? styles.buttonContainerDeactive
+              : styles.buttonContainer
+          }
+        >
+          <Button
+            style={styles.button}
+            color={'grey'}
+            title="Antwort senden"
+            onPress={handleAnswerSubmit}
+            disabled={!answer}
+          />
         </View>
-        
+
         {confirmedAnswer ? (
           <View style={styles.answerContainer}>
             <Text style={styles.answerLabel}>
@@ -97,9 +111,10 @@ export default function SkillQuestions() {
 }
 
 const styles = StyleSheet.create({
-  contentContainer:{
-    flexGrow: 1, 
-    justifyContent: 'center'
+  contentContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: 200, // quickfix for keyboard covering input on small screens
   },
   container: {
     flex: 1,
@@ -123,7 +138,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
-    fontSize: Constants.bigFont
+    fontSize: Constants.bigFont,
   },
   answerContainer: {
     marginTop: 20,
@@ -139,12 +154,12 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     backgroundColor: Colors.dhbwRed,
-    margin:6,
-    borderRadius: 5
+    margin: 6,
+    borderRadius: 5,
   },
-  buttonContainerDeactive:{
+  buttonContainerDeactive: {
     backgroundColor: Colors.dhbwGray,
-    margin:6,
-    borderRadius: 5
-  }
+    margin: 6,
+    borderRadius: 5,
+  },
 });
