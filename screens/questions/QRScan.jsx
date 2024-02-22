@@ -51,8 +51,9 @@ export default function QRScan() {
           group_id: group,
           question_id: questions[currentQuestion].id,
           answered_correctly: true,
+          points: questions[currentQuestion].points
         });
-      setPoints(points + 1);
+        setPoints(points + questions[currentQuestion].points);
     }
     setQRScan(false);
     navigation.navigate('Rallye');

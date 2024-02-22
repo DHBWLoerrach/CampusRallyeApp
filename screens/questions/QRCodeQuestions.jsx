@@ -15,14 +15,6 @@ import Colors, { dhbwRed } from '../../utils/Colors';
 import MapView, { Marker } from 'react-native-maps';
 
 export default function QRCodeQuestions() {
-  // const [location, setLocation] = useState(null);
-  // const [errorMsg, setErrorMsg] = useState(null);
-  // const [isLocationEnabled, setIsLocationEnabled] = useState(true);
-
-  // const [markerLocation, setMarkerLocation] = useState({
-  //   latitude: 47.61706708166155,
-  //   longitude: 7.678012011562073
-  // });
 
   const [mapRegion, setMapRegion] = useState({
     latitude: 47.61706708166155,
@@ -92,61 +84,6 @@ export default function QRCodeQuestions() {
   useEffect(() => {
     userLocation();
   }, []);
-
-  //ALT
-  // useEffect(() => {
-  //   (async () => {
-  //     let { status } =
-  //       await Location.requestForegroundPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       setErrorMsg('Permission to access location was denied');
-  //       return;
-  //     }
-
-  //     const location = await Location.getCurrentPositionAsync({});
-  //     setLocation(location);
-
-  //   })();
-  //   if (isLocationEnabled) {
-  //     const locationSubscriber = Location.watchPositionAsync(
-  //       {
-  //         accuracy: Location.Accuracy.High,
-  //         timeInterval: 5000,
-  //         distanceInterval: 10,
-  //       },
-  //       setLocation
-  //     );
-  //     if (locationSubscriber && locationSubscriber.remove) {
-  //       return () => {
-  //         locationSubscriber.remove();
-  //       };
-  //     }
-  //   }
-  // }, [isLocationEnabled]);
-
-  // const toggleLocation = () => {
-  //   setIsLocationEnabled(!isLocationEnabled);
-  // };
-
-  // let userlocation = {
-  //   latitude: 47.61709224449131,
-  //   longitude: 7.678051759539827,
-  // };
-
-  // if (errorMsg) {
-  //   console.log(errorMsg);
-  // } else if (location) {
-  //   userlocation = {
-  //     latitude: location.coords.latitude,
-  //     longitude: location.coords.longitude,
-  //   };
-  // }
-
-  // War in der MapView
-  //animateToPosition={position}
-  //clickListener={setClickListener}
-  //markersListener={setMarkersListener}
-  //markersList={markers}
 
   let content;
 

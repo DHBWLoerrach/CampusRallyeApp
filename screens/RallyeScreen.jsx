@@ -6,6 +6,7 @@ import ImageQuestions from './questions/ImageQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
+import MultipleChoiceQuestion from './questions/MultipleChoiceQuestion';
 
 export default function RallyeScreen() {
   // import shared states
@@ -19,21 +20,38 @@ export default function RallyeScreen() {
     setPoints,
   } = useSharedStates();
   const [loading, setLoading] = useState(true);
-  const [uploaded, setUploaded] = useState(false);
 
   if (useRallye) {
     useEffect(() => {
       if (group !== null) {
         const fetchData = async () => {
           let group_id = group;
+          console.log(group_id)
           let { data, error } = await supabase.rpc('get_questions', {
             group_id,
           });
+          if(data){
+            console.log("Data")
+            temp = data.filter(item => item.question_type !== 'multiple_choice');
+          multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
+          multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
+
+          for (let index = 0; index < multiple_choice_parent.length; index++) {
+            const element = multiple_choice_parent[index];
+            childs = multiple_choice_child.filter(item => item.parent_id === element.id)
+            const childAnswers = childs.map(child => child.answer);
+            element.multiple_answer = childAnswers;
+          }
+          
+          data = temp.concat(multiple_choice_parent)
+          console.log(data)
           for (let i = data.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [data[i], data[j]] = [data[j], data[i]];
           }
-
+          
+          } 
+          
           setQuestions(data);
           setLoading(false);
         };
@@ -43,13 +61,26 @@ export default function RallyeScreen() {
     }, [group]);
 
     useEffect(() => {
-      if (currentQuestion === questions.length) {
+      if (currentQuestion === null ) {
         const fetchData = async () => {
-          let p_group_id = group;
+          let group_id_param = group;
           let { data, error } = await supabase.rpc(
-            'get_correct_answers_count',
+            'get_points',
             {
-              p_group_id,
+              group_id_param,
+            }
+          );
+
+          setPoints(data);
+        };
+        fetchData();
+      } else if(currentQuestion === questions.length) {
+        const fetchData = async () => {
+          let group_id_param = group;
+          let { data, error } = await supabase.rpc(
+            'get_points',
+            {
+              group_id_param,
             }
           );
 
@@ -66,6 +97,18 @@ export default function RallyeScreen() {
           .select('*')
           .eq('enabled', true)
           .neq('question_type', 'picture');
+          temp = data.filter(item => item.question_type !== 'multiple_choice');
+          multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
+          multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
+
+          for (let index = 0; index < multiple_choice_parent.length; index++) {
+            const element = multiple_choice_parent[index];
+            childs = multiple_choice_child.filter(item => item.parent_id === element.id)
+            const childAnswers = childs.map(child => child.answer);
+            element.multiple_answer = childAnswers;
+          }
+          
+          data = temp.concat(multiple_choice_parent)
         for (let i = data.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [data[i], data[j]] = [data[j], data[i]];
@@ -78,27 +121,8 @@ export default function RallyeScreen() {
     }, []);
   }
 
-  async function savePoints() {
-    try {
-      const updates = {
-        Gruppenname: 'TODO',
-        Punktzahl: points,
-      };
-
-      let { error } = await supabase.from('Gruppen').insert(updates);
-      setUploaded(true);
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      }
-    }
-  }
-
   let content;
-  if (!loading && currentQuestion !== questions.length) {
+  if (!loading && questions !== null &&currentQuestion !== questions.length) {
     if (questions[currentQuestion].question_type === 'knowledge') {
       content = <SkillQuestions />;
     } else if (
@@ -107,6 +131,8 @@ export default function RallyeScreen() {
       content = <ImageQuestions />;
     } else if (questions[currentQuestion].question_type === 'qr') {
       content = <QRCodeQuestions />;
+    } else if (questions[currentQuestion].question_type === 'multiple_choice'){
+      content = <MultipleChoiceQuestion/>;
     }
   } else if (!loading) {
     content = (

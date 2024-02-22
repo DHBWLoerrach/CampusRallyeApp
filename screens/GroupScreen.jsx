@@ -86,7 +86,7 @@ export default function GroupScreen() {
             <Text style={styles.label}>Name der Gruppe:</Text>
             <Text style={styles.value}>{item.name}</Text>
           </View>
-          <View style={styles.row}>
+          {/* <View style={styles.row}>
             <Text style={styles.label}>Beantwortete Fragen:</Text>
             <Text style={styles.value}>
               {currentQuestion} von {questions.length}
@@ -95,7 +95,7 @@ export default function GroupScreen() {
           <View style={styles.row}>
             <Text style={styles.label}>Aktuelle Punktzahl:</Text>
             <Text style={styles.value}>{points}</Text>
-          </View>
+          </View> */}
           <UIButton
             size="small"
             color="grey"

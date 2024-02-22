@@ -8,12 +8,14 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
+import { RadioButton } from 'react-native-paper';
+import { TouchableOpacity } from 'react-native';
 import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 
-export default function SkillQuestions() {
+export default function MultipleChoiceQuestion() {
   const [answer, setAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
@@ -77,12 +79,21 @@ export default function SkillQuestions() {
         <Text style={styles.question}>
           {questions[currentQuestion].question}
         </Text>
-        <TextInput
-          style={styles.input}
-          value={answer}
-          onChangeText={setAnswer}
-          placeholder="Gib hier deine Antwort ein"
-        />
+        {questions[currentQuestion].multiple_answer.map((option, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.squareButton}
+            onPress={() => setAnswer(option)}
+          >
+            <View
+              style={[
+                styles.innerSquare,
+                { backgroundColor: answer === option ? Colors.dhbwRed : 'white' },
+              ]}
+            />
+            <Text style={styles.answerText} >{option}</Text>
+          </TouchableOpacity>
+        ))}
         <View
           style={
             !answer
@@ -98,7 +109,7 @@ export default function SkillQuestions() {
             disabled={!answer}
           />
         </View>
-
+  
         {confirmedAnswer ? (
           <View style={styles.answerContainer}>
             <Text style={styles.answerLabel}>
@@ -113,6 +124,21 @@ export default function SkillQuestions() {
 }
 
 const styles = StyleSheet.create({
+  squareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  answerText:{
+    fontSize: 20
+  },
+  innerSquare: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: Colors.dhbwGray,
+  },
   contentContainer: {
     flexGrow: 1,
     justifyContent: 'center',
