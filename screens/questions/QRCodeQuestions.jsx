@@ -6,15 +6,28 @@ import {
   Button,
   Dimensions,
   ScrollView,
+  Alert,
+
 } from 'react-native';
 import * as Location from 'expo-location';
 import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
+import { useNavigation } from '@react-navigation/native';
 import QRScan from './QRScan';
 import Colors, { dhbwRed } from '../../utils/Colors';
 import MapView, { Marker } from 'react-native-maps';
 
 export default function QRCodeQuestions() {
+
+  const navigation = useNavigation();
+  const {
+    questions,
+    currentQuestion,
+    setCurrentQuestion,
+    setQRScan,
+    group,
+    qrScan,
+  } = useSharedStates();
 
   const [mapRegion, setMapRegion] = useState({
     latitude: 47.61706708166155,
@@ -28,9 +41,6 @@ export default function QRCodeQuestions() {
     latitude: 47.61706708166155,
     longitude: 7.678012011562073,
   });
-
-  const { questions, currentQuestion, qrScan, setQRScan } =
-    useSharedStates();
 
   // Daten aus der Datenbank holen
 
@@ -87,6 +97,36 @@ export default function QRCodeQuestions() {
 
   let content;
 
+  submitSurrender = async () => {
+    setCurrentQuestion(currentQuestion + 1);
+    await supabase
+      .from('group_questions')
+      .insert({
+        group_id: group,
+        question_id: questions[currentQuestion].id,
+        answered_correctly: false,
+        points: questions[currentQuestion].points
+      });
+  navigation.navigate('Rallye');
+  };
+
+  const handleSurrender = () => {
+    Alert.alert(
+      'Sicherheitsfrage',
+      `Bist du sicher, dass du diese Aufgabe Aufgeben möchtest?`,
+      [
+        {
+          text: 'Abbrechen',
+          style: 'cancel',
+        },
+        {
+          text: 'Ja, ich möchte aufgeben',
+          onPress: () => submitSurrender(),
+        },
+      ]
+    );
+  };
+
   const handlepress = () => {
     setQRScan(!qrScan);
   };
@@ -122,12 +162,18 @@ export default function QRCodeQuestions() {
             </View>
           </View>
 
-          <View style={styles.buttonContainer}>
+          <View style={styles.buttonRow}>
             <Button
               title={'QR-Code Scannen'}
               onPress={() => handlepress()}
               color={'grey'}
             />
+            <Button
+              title={'Aufgeben'}
+              onPress={() => handleSurrender()}
+              color={dhbwRed}
+            />
+
           </View>
         </View>
       </ScrollView>
