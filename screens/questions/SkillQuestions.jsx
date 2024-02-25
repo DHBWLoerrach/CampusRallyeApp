@@ -12,6 +12,7 @@ import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
+import { useSetPoints } from '../../utils/Points';
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState('');
@@ -21,28 +22,13 @@ export default function SkillQuestions() {
     questions,
     currentQuestion,
     setCurrentQuestion,
-    points,
-    setPoints,
     group,
   } = useSharedStates();
+  const setPoints = useSetPoints();
 
   const handleNext = async () => {
-    if (answer.trim() === questions[currentQuestion].answer) {
-      await supabase.from('group_questions').insert({
-        group_id: group,
-        question_id: questions[currentQuestion].id,
-        answered_correctly: true,
-        points: questions[currentQuestion].points
-      });
-      setPoints(points + questions[currentQuestion].points);
-    } else {
-      await supabase.from('group_questions').insert({
-        group_id: group,
-        question_id: questions[currentQuestion].id,
-        answered_correctly: false,
-        points:null
-      });
-    }
+    correctly_answered = answer.trim() === questions[currentQuestion].answer
+    await setPoints(correctly_answered,questions[currentQuestion].points);
     setCurrentQuestion(currentQuestion + 1);
     setAnswer('');
     setAnswered(false);

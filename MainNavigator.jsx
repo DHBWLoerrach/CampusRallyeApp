@@ -12,7 +12,7 @@ import GroupScreen from './screens/GroupScreen';
 import ImprintScreen from './screens/ImprintScreen';
 import InformationScreen from './screens/InformationScreen';
 import SkillQuestions from './screens/questions/SkillQuestions';
-import ImageQuestions from './screens/questions/ImageQuestions';
+import UploadQuestions from './screens/questions/UploadQuestions';
 import QRCodeQuestions from './screens/questions/QRCodeQuestions';
 import QRScan from './screens/questions/QRScan';
 import Color from './utils/Colors';
@@ -162,7 +162,7 @@ export default function MainNavigator() {
       />
       <Stack.Screen
         name="ImageQuestions"
-        component={ImageQuestions}
+        component={UploadQuestions}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,

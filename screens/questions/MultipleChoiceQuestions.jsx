@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
+import { useSetPoints } from '../../utils/Points';
 import { RadioButton } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native';
 import { useSharedStates } from '../../utils/SharedStates';
@@ -15,7 +16,7 @@ import { supabase } from '../../utils/Supabase';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 
-export default function MultipleChoiceQuestion() {
+export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
@@ -23,28 +24,13 @@ export default function MultipleChoiceQuestion() {
     questions,
     currentQuestion,
     setCurrentQuestion,
-    points,
-    setPoints,
     group,
   } = useSharedStates();
+  const setPoints = useSetPoints();
 
   const handleNext = async () => {
-    if (answer.trim() === questions[currentQuestion].answer) {
-      await supabase.from('group_questions').insert({
-        group_id: group,
-        question_id: questions[currentQuestion].id,
-        answered_correctly: true,
-        points: questions[currentQuestion].points
-      });
-      setPoints(points + questions[currentQuestion].points);
-    } else {
-      await supabase.from('group_questions').insert({
-        group_id: group,
-        question_id: questions[currentQuestion].id,
-        answered_correctly: false,
-        points:null
-      });
-    }
+    correctly_answered = answer.trim() === questions[currentQuestion].answer
+    await setPoints(correctly_answered,questions[currentQuestion].points);
     setCurrentQuestion(currentQuestion + 1);
     setAnswer('');
     setAnswered(false);
@@ -69,6 +55,10 @@ export default function MultipleChoiceQuestion() {
           text: 'Ja, Antwort bestätigen',
           onPress: () => handleNext(),
         },
+        {
+          text: 'Ja, Antwort bestätigen und nicht mehr Anzeigen',
+          onPress: () => handleNext(),
+        }
       ]
     );
   };

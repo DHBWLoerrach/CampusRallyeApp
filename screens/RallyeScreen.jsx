@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
-import ImageQuestions from './questions/ImageQuestions';
+import UploadQuestions from './questions/UploadQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
-import MultipleChoiceQuestion from './questions/MultipleChoiceQuestion';
+import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
+import ImageQuestions from './questions/ImageQuestions';
 
 export default function RallyeScreen() {
   // import shared states
@@ -30,6 +31,8 @@ export default function RallyeScreen() {
           let { data, error } = await supabase.rpc('get_questions', {
             group_id,
           });
+          console.log(data)
+          console.log("Data")
           if(data){
             console.log("Data")
             temp = data.filter(item => item.question_type !== 'multiple_choice');
@@ -96,7 +99,7 @@ export default function RallyeScreen() {
           .from('question')
           .select('*')
           .eq('enabled', true)
-          .neq('question_type', 'picture');
+          .neq('question_type', 'upload');
           temp = data.filter(item => item.question_type !== 'multiple_choice');
           multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
           multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
@@ -125,14 +128,14 @@ export default function RallyeScreen() {
   if (!loading && questions !== null &&currentQuestion !== questions.length) {
     if (questions[currentQuestion].question_type === 'knowledge') {
       content = <SkillQuestions />;
-    } else if (
-      questions[currentQuestion].question_type === 'picture'
-    ) {
-      content = <ImageQuestions />;
+    } else if (questions[currentQuestion].question_type === 'upload') {
+      content = <UploadQuestions />;
     } else if (questions[currentQuestion].question_type === 'qr') {
       content = <QRCodeQuestions />;
     } else if (questions[currentQuestion].question_type === 'multiple_choice'){
-      content = <MultipleChoiceQuestion/>;
+      content = <MultipleChoiceQuestions/>;
+    } else if (questions[currentQuestion].question_type === 'picture'){
+      content = <ImageQuestions/>;
     }
   } else if (!loading) {
     content = (
@@ -143,22 +146,6 @@ export default function RallyeScreen() {
         <Text style={styles.endText}>
           Eure erreichte Punktzahl: {points}
         </Text>
-        {/* <Text style={styles.tileText}>
-          Ladet gerne euren Gruppennamen und eure Punktzahl hoch, um
-          im Ranking aufgenommen zu werden! Einfach auf 'Hochladen'
-          klicken.
-        </Text>
-        <View>
-          <View style={uploaded ? styles.buttonContainerDeactive : styles.buttonContainer}>
-            <Button
-              title="Hochladen"
-              onPress={() => savePoints()}
-              color="white"
-              disabled={uploaded}
-            />
-          </View>
-
-        </View> */}
       </View>
     );
   } else {

@@ -1,111 +1,57 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  Button,
+  TextInput,
   Image,
+  Button,
   Alert,
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as MediaLibrary from 'expo-media-library';
-import * as MailComposer from 'expo-mail-composer';
 import { useSharedStates } from '../../utils/SharedStates';
-import { supabase } from '../../utils/Supabase';
+import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
+import { useSetPoints } from '../../utils/Points';
 
 export default function ImageQuestions() {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [answer, setAnswer] = useState('');
+  const [confirmedAnswer, setConfirmedAnswer] = useState('');
+  const [answered, setAnswered] = useState(false);
   const {
     questions,
     currentQuestion,
     setCurrentQuestion,
     group,
-    rallye,
-    setPoints,
-    points,
   } = useSharedStates();
-
-  useEffect(() => {
-    (async () => {
-      if (Platform.OS !== 'web') {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          alert(
-            'Sorry, wir benötigen die Berechtigung zur Nutzung der Kamera!'
-          );
-        }
-      }
-    })();
-  }, []);
-
-  const handleLaunchCamera = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: false,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
-
-  const handleSendEmail = async () => {
-    const hasPermission =
-      await MediaLibrary.requestPermissionsAsync();
-
-    if (!hasPermission.granted) {
-      Alert.alert(
-        'Berechtigung erforderlich',
-        'Bitte gewähren Sie uns Zugriff auf Ihre Mediathek!'
-      );
-      return;
-    }
-
-    if (!selectedImage) {
-      Alert.alert(
-        'Fehler',
-        'Bitte wählen Sie ein Bild oder Video aus!'
-      );
-      return;
-    }
-
-    let asset = await MediaLibrary.createAssetAsync(selectedImage);
-    MailComposer.composeAsync({
-      recipients: [rallye.mail_adress],
-      subject: 'Gruppenfoto Gruppe: ',
-      body: 'Das ist unser Gruppenfoto!',
-      attachments: [asset.uri],
-    });
-  };
+  const setPoints = useSetPoints();
+  console.log(questions[currentQuestion].uri);
 
   const handleNext = async () => {
+    correctly_answered = answer.trim() === questions[currentQuestion].answer
+    await setPoints(correctly_answered, questions[currentQuestion].points);
     setCurrentQuestion(currentQuestion + 1);
-    await supabase
-      .from('group_questions')
-      .insert({
-        group_id: group,
-        question_id: questions[currentQuestion].id,
-        answered_correctly: true,
-      });
-    setPoints(points + 1);
+    setAnswer('');
+    setAnswered(false);
   };
 
   const handleAnswerSubmit = () => {
+    setAnswered(true);
+    if (answer.trim() === '') {
+      Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
+      return;
+    }
+
     Alert.alert(
       'Sicherheitsfrage',
-      ` Hast du die Mail mit dem Bild abgesendet ?`,
+      `Bist du sicher, dass "${answer}" deine endgültige Antwort ist?`,
       [
         {
           text: 'Abbrechen',
           style: 'cancel',
         },
         {
-          text: 'Ja, ich habe die Mail gesendet',
+          text: 'Ja, Antwort bestätigen',
           onPress: () => handleNext(),
         },
       ]
@@ -113,96 +59,91 @@ export default function ImageQuestions() {
   };
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.container}>
-        <Text style={styles.text}>
+        <Text style={styles.question}>
           {questions[currentQuestion].question}
         </Text>
-        <View style={styles.imageContainer}>
-          {selectedImage ? (
-            <Image
-              source={{ uri: selectedImage }}
-              style={styles.image}
-            />
-          ) : (
-            <Text style={styles.noImageText}>
-              Kein Foto ausgewählt
-            </Text>
-          )}
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Bild aufnehmen"
-            onPress={handleLaunchCamera}
-            style={styles.button}
-            color={'grey'}
-          />
-        </View>
+        <Image
+        source={{uri:questions[currentQuestion].uri}}
+        style={{width: 300, height: 300, marginBottom: 20}}
+        />
+        <TextInput
+          style={styles.input}
+          value={answer}
+          onChangeText={setAnswer}
+          placeholder="Gib hier deine Antwort ein"
+        />
         <View
           style={
-            !selectedImage
+            !answer
               ? styles.buttonContainerDeactive
               : styles.buttonContainer
           }
         >
           <Button
-            title="Senden"
-            onPress={handleSendEmail}
-            disabled={!selectedImage}
             style={styles.button}
-            color={'dhbwRed'}
-          />
-        </View>
-        <Text style={styles.infoText}>
-          Das aufgenommene Foto soll über den Button "SENDEN" per
-          E-Mail gesendet werden
-        </Text>
-        <Text style={styles.infoText}>
-          Falls das Senden über den Button nicht geht, dann macht die
-          Fotos in eurer Kamera App und schickt die Fotos
-          selsbtständig mit Gruppenname an {rallye.mail_adress}
-        </Text>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Weiter"
+            color={'grey'}
+            title="Antwort senden"
             onPress={handleAnswerSubmit}
-            style={styles.button}
+            disabled={!answer}
           />
         </View>
+
+        {confirmedAnswer ? (
+          <View style={styles.answerContainer}>
+            <Text style={styles.answerLabel}>
+              Bestätigte Antwort:
+            </Text>
+            <Text style={styles.answer}>{confirmedAnswer}</Text>
+          </View>
+        ) : null}
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: 200, // quickfix for keyboard covering input on small screens
+  },
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
   },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  question: {
+    fontSize: 20,
+    marginBottom: 30,
     textAlign: 'center',
   },
-  imageContainer: {
-    backgroundColor: '#F2F2F2',
-    borderRadius: 10,
-    overflow: 'hidden',
-    width: '100%',
-    aspectRatio: 4 / 3,
-    marginBottom: 20,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  noImageText: {
+  inputLabel: {
     fontSize: 16,
-    textAlign: 'center',
-    paddingVertical: 20,
+    marginBottom: 5,
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderColor: Colors.dhbwGray,
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    fontSize: Constants.bigFont,
+  },
+  answerContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  answerLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  answer: {
+    fontSize: 16,
   },
   buttonContainer: {
     backgroundColor: Colors.dhbwRed,
