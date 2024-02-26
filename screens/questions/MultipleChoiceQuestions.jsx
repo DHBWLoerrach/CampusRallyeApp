@@ -9,7 +9,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { useSetPoints } from '../../utils/Points';
-import { RadioButton } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native';
 import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
