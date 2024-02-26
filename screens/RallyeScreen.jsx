@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, RefreshControl, ScrollView, } from 'react-native';
 import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
@@ -18,80 +18,99 @@ export default function RallyeScreen() {
     group,
     points,
     useRallye,
+    rallye,
+    setRallye,
     setPoints,
   } = useSharedStates();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const reloadRallye = async ()=>{
+    const { data: rallye } = await supabase
+          .from('rallye')
+          .select('*')
+          .eq('is_active_rallye', true);
+          setRallye(rallye[0])
+  }
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    reloadRallye().then(() => setRefreshing(false));
+  }, []);
 
   if (useRallye) {
     useEffect(() => {
-      if (group !== null) {
-        const fetchData = async () => {
-          let group_id = group;
-          console.log(group_id)
-          let { data, error } = await supabase.rpc('get_questions', {
-            group_id,
-          });
-          console.log(data)
-          console.log("Data")
-          if(data){
+      if (rallye.status == "running") {
+        if (group !== null) {
+          const fetchData = async () => {
+            let group_id = group;
+            console.log(group_id)
+            let { data, error } = await supabase.rpc('get_questions', {
+              group_id,
+            });
+            console.log(data)
             console.log("Data")
-            temp = data.filter(item => item.question_type !== 'multiple_choice');
-          multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
-          multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
+            if (data) {
+              console.log("Data")
+              temp = data.filter(item => item.question_type !== 'multiple_choice');
+              multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
+              multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
 
-          for (let index = 0; index < multiple_choice_parent.length; index++) {
-            const element = multiple_choice_parent[index];
-            childs = multiple_choice_child.filter(item => item.parent_id === element.id)
-            const childAnswers = childs.map(child => child.answer);
-            element.multiple_answer = childAnswers;
-          }
-          
-          data = temp.concat(multiple_choice_parent)
-          console.log(data)
-          for (let i = data.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [data[i], data[j]] = [data[j], data[i]];
-          }
-          
-          } 
-          
-          setQuestions(data);
-          setLoading(false);
-        };
+              for (let index = 0; index < multiple_choice_parent.length; index++) {
+                const element = multiple_choice_parent[index];
+                childs = multiple_choice_child.filter(item => item.parent_id === element.id)
+                const childAnswers = childs.map(child => child.answer);
+                element.multiple_answer = childAnswers;
+              }
 
-        fetchData();
+              data = temp.concat(multiple_choice_parent)
+              console.log(data)
+              for (let i = data.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [data[i], data[j]] = [data[j], data[i]];
+              }
+            }
+            setQuestions(data);
+            setLoading(false);
+          };
+
+          fetchData();
+        }
       }
-    }, [group]);
+    }, [rallye, group]);
 
     useEffect(() => {
-      if (currentQuestion === null ) {
-        const fetchData = async () => {
-          let group_id_param = group;
-          let { data, error } = await supabase.rpc(
-            'get_points',
-            {
-              group_id_param,
-            }
-          );
+      if (rallye.status == "running") {
+        if (currentQuestion === null) {
+          const fetchData = async () => {
+            let group_id_param = group;
+            let { data, error } = await supabase.rpc(
+              'get_points',
+              {
+                group_id_param,
+              }
+            );
 
-          setPoints(data);
-        };
-        fetchData();
-      } else if(currentQuestion === questions.length) {
-        const fetchData = async () => {
-          let group_id_param = group;
-          let { data, error } = await supabase.rpc(
-            'get_points',
-            {
-              group_id_param,
-            }
-          );
+            setPoints(data);
+          };
+          fetchData();
+        } else if (currentQuestion === questions.length) {
+          const fetchData = async () => {
+            let group_id_param = group;
+            let { data, error } = await supabase.rpc(
+              'get_points',
+              {
+                group_id_param,
+              }
+            );
 
-          setPoints(data);
-        };
-        fetchData();
+            setPoints(data);
+          };
+          fetchData();
+        }
       }
-    }, [currentQuestion]);
+    }, [rallye, currentQuestion]);
+
   } else {
     useEffect(() => {
       const fetchData = async () => {
@@ -100,18 +119,18 @@ export default function RallyeScreen() {
           .select('*')
           .eq('enabled', true)
           .neq('question_type', 'upload');
-          temp = data.filter(item => item.question_type !== 'multiple_choice');
-          multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
-          multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
+        temp = data.filter(item => item.question_type !== 'multiple_choice');
+        multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
+        multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
 
-          for (let index = 0; index < multiple_choice_parent.length; index++) {
-            const element = multiple_choice_parent[index];
-            childs = multiple_choice_child.filter(item => item.parent_id === element.id)
-            const childAnswers = childs.map(child => child.answer);
-            element.multiple_answer = childAnswers;
-          }
-          
-          data = temp.concat(multiple_choice_parent)
+        for (let index = 0; index < multiple_choice_parent.length; index++) {
+          const element = multiple_choice_parent[index];
+          childs = multiple_choice_child.filter(item => item.parent_id === element.id)
+          const childAnswers = childs.map(child => child.answer);
+          element.multiple_answer = childAnswers;
+        }
+
+        data = temp.concat(multiple_choice_parent)
         for (let i = data.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [data[i], data[j]] = [data[j], data[i]];
@@ -125,17 +144,17 @@ export default function RallyeScreen() {
   }
 
   let content;
-  if (!loading && questions !== null &&currentQuestion !== questions.length) {
+  if (!loading && rallye.status === "running" && questions !== null && currentQuestion !== questions.length) {
     if (questions[currentQuestion].question_type === 'knowledge') {
       content = <SkillQuestions />;
     } else if (questions[currentQuestion].question_type === 'upload') {
       content = <UploadQuestions />;
     } else if (questions[currentQuestion].question_type === 'qr') {
       content = <QRCodeQuestions />;
-    } else if (questions[currentQuestion].question_type === 'multiple_choice'){
-      content = <MultipleChoiceQuestions/>;
-    } else if (questions[currentQuestion].question_type === 'picture'){
-      content = <ImageQuestions/>;
+    } else if (questions[currentQuestion].question_type === 'multiple_choice') {
+      content = <MultipleChoiceQuestions />;
+    } else if (questions[currentQuestion].question_type === 'picture') {
+      content = <ImageQuestions />;
     }
   } else if (!loading) {
     content = (
@@ -148,7 +167,7 @@ export default function RallyeScreen() {
         </Text>
       </View>
     );
-  } else {
+  } else if(loading && group === null) {
     content = (
       <View>
         <Text style={styles.groupSelectionText}>
@@ -156,6 +175,22 @@ export default function RallyeScreen() {
         </Text>
       </View>
     );
+  } else if(rallye.status == "preparation"){
+    content = (
+      <ScrollView
+      contentContainerStyle={{ flex: 1 }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      }
+    >
+      <Text style={styles.groupSelectionText}>
+          Die Rallye hat noch nicht angefangen. 
+      </Text>
+    </ScrollView>
+    )
   }
 
   return <View style={styles.container}>{content}</View>;
