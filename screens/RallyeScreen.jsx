@@ -6,6 +6,7 @@ import UploadQuestions from './questions/UploadQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
+import Scoreboard from '../ui/Scoreboard';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
 import ImageQuestions from './questions/ImageQuestions';
 
@@ -191,6 +192,14 @@ export default function RallyeScreen() {
       </Text>
     </ScrollView>
     )
+  }
+
+  else if(rallye.status == "ended"){
+      content = (
+     
+          Scoreboard()
+    
+      )
   }
 
   return <View style={styles.container}>{content}</View>;
