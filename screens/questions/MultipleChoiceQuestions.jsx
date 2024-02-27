@@ -14,6 +14,7 @@ import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
+import { confirmAlert } from '../../utils/ConfirmAlert';
 
 export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState('');
@@ -41,25 +42,7 @@ export default function MultipleChoiceQuestions() {
       Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
       return;
     }
-
-    Alert.alert(
-      'Sicherheitsfrage',
-      `Bist du sicher, dass "${answer}" deine endgültige Antwort ist?`,
-      [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
-        },
-        {
-          text: 'Ja, Antwort bestätigen',
-          onPress: () => handleNext(),
-        },
-        {
-          text: 'Ja, Antwort bestätigen und nicht mehr Anzeigen',
-          onPress: () => handleNext(),
-        }
-      ]
-    );
+    confirmAlert(answer, handleNext);
   };
 
   return (

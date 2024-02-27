@@ -13,6 +13,7 @@ import { useSharedStates } from '../../utils/SharedStates';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 import { useSetPoints } from '../../utils/Points';
+import { confirmAlert } from '../../utils/ConfirmAlert';
 
 export default function ImageQuestions() {
   const [answer, setAnswer] = useState('');
@@ -41,21 +42,7 @@ export default function ImageQuestions() {
       Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
       return;
     }
-
-    Alert.alert(
-      'Sicherheitsfrage',
-      `Bist du sicher, dass "${answer}" deine endgültige Antwort ist?`,
-      [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
-        },
-        {
-          text: 'Ja, Antwort bestätigen',
-          onPress: () => handleNext(),
-        },
-      ]
-    );
+    confirmAlert(answer, handleNext);
   };
 
   return (

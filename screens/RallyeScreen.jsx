@@ -178,18 +178,18 @@ export default function RallyeScreen() {
   } else if(rallye.status == "preparation"){
     content = (
       <ScrollView
-      contentContainerStyle={{ flex: 1 }}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
-      }
-    >
-      <Text style={styles.groupSelectionText}>
-          Die Rallye hat noch nicht angefangen. 
-      </Text>
-    </ScrollView>
+  contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+  refreshControl={
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    />
+  }
+>
+  <Text style={styles.groupSelectionText}>
+    Die Rallye hat noch nicht angefangen. 
+  </Text>
+</ScrollView>
     )
   }
 

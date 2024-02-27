@@ -13,6 +13,7 @@ import { supabase } from '../../utils/Supabase';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 import { useSetPoints } from '../../utils/Points';
+import { confirmAlert } from '../../utils/ConfirmAlert';
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState('');
@@ -41,20 +42,7 @@ export default function SkillQuestions() {
       return;
     }
 
-    Alert.alert(
-      'Sicherheitsfrage',
-      `Bist du sicher, dass "${answer}" deine endgültige Antwort ist?`,
-      [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
-        },
-        {
-          text: 'Ja, Antwort bestätigen',
-          onPress: () => handleNext(),
-        },
-      ]
-    );
+    confirmAlert(answer, handleNext);
   };
 
   return (

@@ -7,7 +7,6 @@ import {
   Dimensions,
   ScrollView,
   Alert,
-
 } from 'react-native';
 import * as Location from 'expo-location';
 import { useSharedStates } from '../../utils/SharedStates';
@@ -42,21 +41,6 @@ export default function QRCodeQuestions() {
     longitude: 7.678012011562073,
   });
 
-  // Daten aus der Datenbank holen
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: answer } = await supabase
-        .from('QRFragen')
-        .select('Latitude, Longitude, fragen_id')
-        .eq('fragen_id', questions[currentQuestion].fragen_id);
-      setMarkerLocation({
-        latitude: answer[0].Latitude,
-        longitude: answer[0].Longitude,
-      });
-    };
-    fetchData();
-  }, [!qrScan]);
 
   // User Location holen
   const userLocation = async () => {
