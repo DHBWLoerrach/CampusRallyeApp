@@ -19,14 +19,16 @@
       "bundleIdentifier": "de.dhbwloe.loerrach.CampusRallyeApp",
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "de.dhbwloe.loerrach.CampusRallyeApp"
+      "package": "de.dhbwloe.loerrach.CampusRallyeApp",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
