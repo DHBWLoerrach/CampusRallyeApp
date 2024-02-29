@@ -33,7 +33,6 @@ export default function RallyeScreen() {
             const j = Math.floor(Math.random() * (i + 1));
             [data[i], data[j]] = [data[j], data[i]];
           }
-
           setQuestions(data);
           setLoading(false);
         };
@@ -65,7 +64,10 @@ export default function RallyeScreen() {
           .from('question')
           .select('*')
           .eq('enabled', true)
-          .neq('question_type', 'picture');
+          .neq('question_type', 'picture') // TODO: remove to enable question type
+          .neq('question_type', 'upload') // TODO: remove, same reason as above
+          .neq('question_type', 'qr') // TODO: remove, same reason as above
+          .neq('question_type', 'multiple_choice'); // TODO: remove, same reason as above
         for (let i = data.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [data[i], data[j]] = [data[j], data[i]];
