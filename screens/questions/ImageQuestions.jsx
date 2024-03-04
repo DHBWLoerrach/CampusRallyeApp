@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,38 +8,36 @@ import {
   Alert,
   StyleSheet,
   ScrollView,
-} from 'react-native';
-import { useSharedStates } from '../../utils/SharedStates';
-import Constants from '../../utils/Constants';
-import Colors from '../../utils/Colors';
-import { useSetPoints } from '../../utils/Points';
-import { confirmAlert } from '../../utils/ConfirmAlert';
+} from "react-native";
+import { useSharedStates } from "../../utils/SharedStates";
+import Constants from "../../utils/Constants";
+import Colors from "../../utils/Colors";
+import { useSetPoints } from "../../utils/Points";
+import { confirmAlert } from "../../utils/ConfirmAlert";
+import HintComponent from "../../ui/HintComponent";
 
 export default function ImageQuestions() {
-  const [answer, setAnswer] = useState('');
-  const [confirmedAnswer, setConfirmedAnswer] = useState('');
+  const [answer, setAnswer] = useState("");
+  const [confirmedAnswer, setConfirmedAnswer] = useState("");
   const [answered, setAnswered] = useState(false);
-  const {
-    questions,
-    currentQuestion,
-    setCurrentQuestion,
-    group,
-  } = useSharedStates();
+  const { questions, currentQuestion, setCurrentQuestion, group } =
+    useSharedStates();
   const setPoints = useSetPoints();
   console.log(questions[currentQuestion].uri);
 
   const handleNext = async () => {
-    correctly_answered = answer.trim() === questions[currentQuestion].answer
+    correctly_answered = answer.trim() === questions[currentQuestion].answer;
     await setPoints(correctly_answered, questions[currentQuestion].points);
     setCurrentQuestion(currentQuestion + 1);
-    setAnswer('');
+    setAnswer("");
     setAnswered(false);
+    setHints([]); // Reset hints
   };
 
   const handleAnswerSubmit = () => {
     setAnswered(true);
-    if (answer.trim() === '') {
-      Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
+    if (answer.trim() === "") {
+      Alert.alert("Fehler", "Bitte gebe eine Antwort ein.");
       return;
     }
     confirmAlert(answer, handleNext);
@@ -52,8 +50,8 @@ export default function ImageQuestions() {
           {questions[currentQuestion].question}
         </Text>
         <Image
-        source={{uri:questions[currentQuestion].uri}}
-        style={{width: 300, height: 300, marginBottom: 20}}
+          source={{ uri: questions[currentQuestion].uri }}
+          style={{ width: 300, height: 300, marginBottom: 20 }}
         />
         <TextInput
           style={styles.input}
@@ -63,14 +61,12 @@ export default function ImageQuestions() {
         />
         <View
           style={
-            !answer
-              ? styles.buttonContainerDeactive
-              : styles.buttonContainer
+            !answer ? styles.buttonContainerDeactive : styles.buttonContainer
           }
         >
           <Button
             style={styles.button}
-            color={'grey'}
+            color={"grey"}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}
@@ -79,12 +75,11 @@ export default function ImageQuestions() {
 
         {confirmedAnswer ? (
           <View style={styles.answerContainer}>
-            <Text style={styles.answerLabel}>
-              Bestätigte Antwort:
-            </Text>
+            <Text style={styles.answerLabel}>Bestätigte Antwort:</Text>
             <Text style={styles.answer}>{confirmedAnswer}</Text>
           </View>
         ) : null}
+        <HintComponent questionId={questions[currentQuestion].id} />
       </View>
     </ScrollView>
   );
@@ -93,26 +88,26 @@ export default function ImageQuestions() {
 const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingBottom: 200, // quickfix for keyboard covering input on small screens
   },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 20,
   },
   question: {
     fontSize: 20,
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: "center",
   },
   inputLabel: {
     fontSize: 16,
     marginBottom: 5,
   },
   input: {
-    width: '100%',
+    width: "100%",
     height: 40,
     borderColor: Colors.dhbwGray,
     borderWidth: 1,
@@ -122,11 +117,11 @@ const styles = StyleSheet.create({
   },
   answerContainer: {
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   answerLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   answer: {

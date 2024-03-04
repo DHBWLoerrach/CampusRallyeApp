@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,39 +7,37 @@ import {
   Alert,
   StyleSheet,
   ScrollView,
-} from 'react-native';
-import { useSetPoints } from '../../utils/Points';
-import { TouchableOpacity } from 'react-native';
-import { useSharedStates } from '../../utils/SharedStates';
-import { supabase } from '../../utils/Supabase';
-import Constants from '../../utils/Constants';
-import Colors from '../../utils/Colors';
-import { confirmAlert } from '../../utils/ConfirmAlert';
+} from "react-native";
+import { useSetPoints } from "../../utils/Points";
+import { TouchableOpacity } from "react-native";
+import { useSharedStates } from "../../utils/SharedStates";
+import { supabase } from "../../utils/Supabase";
+import Constants from "../../utils/Constants";
+import Colors from "../../utils/Colors";
+import { confirmAlert } from "../../utils/ConfirmAlert";
+import HintComponent from "../../ui/HintComponent";
 
 export default function MultipleChoiceQuestions() {
-  const [answer, setAnswer] = useState('');
-  const [confirmedAnswer, setConfirmedAnswer] = useState('');
+  const [answer, setAnswer] = useState("");
+  const [confirmedAnswer, setConfirmedAnswer] = useState("");
   const [answered, setAnswered] = useState(false);
-  const {
-    questions,
-    currentQuestion,
-    setCurrentQuestion,
-    group,
-  } = useSharedStates();
+  const { questions, currentQuestion, setCurrentQuestion, group } =
+    useSharedStates();
   const setPoints = useSetPoints();
 
   const handleNext = async () => {
-    correctly_answered = answer.trim() === questions[currentQuestion].answer
-    await setPoints(correctly_answered,questions[currentQuestion].points);
+    correctly_answered = answer.trim() === questions[currentQuestion].answer;
+    await setPoints(correctly_answered, questions[currentQuestion].points);
     setCurrentQuestion(currentQuestion + 1);
-    setAnswer('');
+    setAnswer("");
     setAnswered(false);
+    setHints([]); // Reset hints
   };
 
   const handleAnswerSubmit = () => {
     setAnswered(true);
-    if (answer.trim() === '') {
-      Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
+    if (answer.trim() === "") {
+      Alert.alert("Fehler", "Bitte gebe eine Antwort ein.");
       return;
     }
     confirmAlert(answer, handleNext);
@@ -60,36 +58,35 @@ export default function MultipleChoiceQuestions() {
             <View
               style={[
                 styles.innerSquare,
-                { backgroundColor: answer === option ? Colors.dhbwRed : 'white' },
+                {
+                  backgroundColor: answer === option ? Colors.dhbwRed : "white",
+                },
               ]}
             />
-            <Text style={styles.answerText} >{option}</Text>
+            <Text style={styles.answerText}>{option}</Text>
           </TouchableOpacity>
         ))}
         <View
           style={
-            !answer
-              ? styles.buttonContainerDeactive
-              : styles.buttonContainer
+            !answer ? styles.buttonContainerDeactive : styles.buttonContainer
           }
         >
           <Button
             style={styles.button}
-            color={'grey'}
+            color={"grey"}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}
           />
         </View>
-  
+
         {confirmedAnswer ? (
           <View style={styles.answerContainer}>
-            <Text style={styles.answerLabel}>
-              Bestätigte Antwort:
-            </Text>
+            <Text style={styles.answerLabel}>Bestätigte Antwort:</Text>
             <Text style={styles.answer}>{confirmedAnswer}</Text>
           </View>
         ) : null}
+        <HintComponent questionId={questions[currentQuestion].id} />
       </View>
     </ScrollView>
   );
@@ -97,12 +94,12 @@ export default function MultipleChoiceQuestions() {
 
 const styles = StyleSheet.create({
   squareButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
   },
-  answerText:{
-    fontSize: 20
+  answerText: {
+    fontSize: 20,
   },
   innerSquare: {
     width: 24,
@@ -113,26 +110,26 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingBottom: 200, // quickfix for keyboard covering input on small screens
   },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 20,
   },
   question: {
     fontSize: 20,
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: "center",
   },
   inputLabel: {
     fontSize: 16,
     marginBottom: 5,
   },
   input: {
-    width: '100%',
+    width: "100%",
     height: 40,
     borderColor: Colors.dhbwGray,
     borderWidth: 1,
@@ -142,11 +139,11 @@ const styles = StyleSheet.create({
   },
   answerContainer: {
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   answerLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   answer: {
