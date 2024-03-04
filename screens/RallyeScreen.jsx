@@ -9,7 +9,7 @@ import Colors from '../utils/Colors';
 import Scoreboard from '../ui/Scoreboard';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
 import ImageQuestions from './questions/ImageQuestions';
-import VotingScreen from '../ui/Voting';
+import VotingScreen from './Voting';
 
 export default function RallyeScreen() {
   // import shared states
@@ -146,6 +146,7 @@ export default function RallyeScreen() {
   }
 
   let content;
+  console.log("loading")
   if (!loading && rallye.status === "running" && questions !== null && currentQuestion !== questions.length) {
     if (questions[currentQuestion].question_type === 'knowledge') {
       content = <SkillQuestions />;
@@ -158,7 +159,8 @@ export default function RallyeScreen() {
     } else if (questions[currentQuestion].question_type === 'picture') {
       content = <ImageQuestions />;
     }
-  } else if (!loading && rallye.status === "post_processing"){
+  } else 
+  if (rallye.status === "post_processing"){
     content = <VotingScreen />;
   }
   else if (!loading) {
