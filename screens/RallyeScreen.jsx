@@ -9,6 +9,7 @@ import Colors from '../utils/Colors';
 import Scoreboard from '../ui/Scoreboard';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
 import ImageQuestions from './questions/ImageQuestions';
+import VotingScreen from '../ui/Voting';
 
 export default function RallyeScreen() {
   // import shared states
@@ -157,8 +158,17 @@ export default function RallyeScreen() {
     } else if (questions[currentQuestion].question_type === 'picture') {
       content = <ImageQuestions />;
     }
-  } else if (!loading) {
+  } else if (!loading && rallye.status === "post_processing"){
+    content = <VotingScreen />;
+  }
+  else if (!loading) {
     content = (
+      <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View>
         <Text style={styles.endText}>
           Die Rallye wurde erforderlich beendet!
@@ -167,6 +177,7 @@ export default function RallyeScreen() {
           Eure erreichte Punktzahl: {points}
         </Text>
       </View>
+    </ScrollView>
     );
   } else if(loading && group === null) {
     content = (

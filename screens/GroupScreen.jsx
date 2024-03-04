@@ -86,30 +86,11 @@ export default function GroupScreen() {
             <Text style={styles.label}>Name der Gruppe:</Text>
             <Text style={styles.value}>{item.name}</Text>
           </View>
-          {/* <View style={styles.row}>
-            <Text style={styles.label}>Beantwortete Fragen:</Text>
-            <Text style={styles.value}>
-              {currentQuestion} von {questions.length}
-            </Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Aktuelle Punktzahl:</Text>
-            <Text style={styles.value}>{points}</Text>
-          </View> */}
           <UIButton
             size="small"
             color="grey"
             outline={true}
             onClick={async () => {
-              /* if (selectionMade) {
-                  setGroup(null);
-                  setSelectionMade(false);
-                  await supabase
-                    .from('rallye_group')
-                    .update({ used: false })
-                    .eq('id', item.id);
-                  await deleteData('group_key'); //Enables the swapping of groups
-                } else { */
               setGroup(item.id);
               setSelectionMade(true);
               await supabase
@@ -117,7 +98,6 @@ export default function GroupScreen() {
                 .update({ used: true })
                 .eq('id', item.id);
               await storeData('group_key', item.id);
-              /* } */
             }}
             disabled={selectionMade}
           >
