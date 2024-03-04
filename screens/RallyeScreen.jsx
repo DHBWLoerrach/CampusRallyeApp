@@ -161,10 +161,12 @@ export default function RallyeScreen() {
     content = (
       <View>
         <Text style={styles.endText}>
-          Die Rallye wurde erforderlich beendet!
+        Ihr habt alle Fragen beantwortet, Glückwunsch!
         </Text>
         <Text style={styles.endText}>
-          Eure erreichte Punktzahl: {points}
+        Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.        </Text>
+        <Text style={styles.endText}>
+        Eure erreichte Punktzahl: {points}
         </Text>
       </View>
     );
