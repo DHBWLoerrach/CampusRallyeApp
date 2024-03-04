@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, Button } from 'react-native';
 import UIButton from '../ui/UIButton';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
@@ -23,6 +23,8 @@ export default function GroupScreen() {
   } = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [selectionMade, setSelectionMade] = useState(false);
+
+  const [newGroupName, setNewGroupName] = useState('');
 
   if (useRallye) {
     useEffect(() => {
@@ -61,6 +63,24 @@ export default function GroupScreen() {
     );
   }
 
+  const renameGroup = async (groupId) => {
+    if (newGroupName !== '') {
+      await supabase
+        .from('rallye_group')
+        .update({ name: newGroupName })
+        .eq('id', groupId);
+      setNewGroupName('');
+
+          // Refresh groups
+       const { data: groups } = await supabase
+      .from('rallye_group')
+      .select('*')
+      .eq('rallye_id', rallye.id)
+      .order('id', { ascending: false });
+     setGroups(groups);
+    }
+  };
+
   return (
     <ScrollView>
       {groups?.map((item, index) => (
@@ -86,6 +106,22 @@ export default function GroupScreen() {
             <Text style={styles.label}>Name der Gruppe:</Text>
             <Text style={styles.value}>{item.name}</Text>
           </View>
+          {item.id === group && (
+          <View style={styles.row}>
+            <TextInput
+              style={styles.input}
+              onChangeText={setNewGroupName}
+              value={newGroupName}
+              placeholder="Neuer Gruppenname"
+            />
+          </View>)}
+
+          {item.id === group && (
+           <View style={styles.row}>
+           <Button title="Umbenennen" onPress={() => renameGroup(item.id)} />
+           </View>
+               )}
+    
           {/* <View style={styles.row}>
             <Text style={styles.label}>Beantwortete Fragen:</Text>
             <Text style={styles.value}>
@@ -167,5 +203,12 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '100%',
+    padding: 10,
   },
 });
