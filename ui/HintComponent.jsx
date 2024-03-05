@@ -2,16 +2,33 @@ import React, { useState } from 'react';
 import { Button, Text, Alert, View, StyleSheet } from 'react-native';
 import { supabase } from "../utils/Supabase";
 import { useSetPoints } from "../utils/Points";
+import { useSharedStates } from '../utils/SharedStates';
+
 
 export default function HintComponent({ questionId }) {
   const [hints, setHints] = useState([]);
   const setPoints = useSetPoints();
 
+  const {
+    groups,
+    setGroups,
+    group,
+    setGroup,
+    questions,
+    currentQuestion,
+    points,
+    rallye,
+    useRallye,
+    setEnabled,
+  } = useSharedStates();
+
   const fetchHints = async () => {
     const { data: hints, error } = await supabase
       .from("questions_hints")
       .select("*")
-      .eq("id", questionId);
+      .eq("id", questionId)
+      .limit(1);
+      console.log(hints);
 
     if (error) {
       console.error("Error fetching hints:", error);
@@ -24,7 +41,7 @@ export default function HintComponent({ questionId }) {
         "Für diese Frage sind keine Tipps angelegt."
       );
     } else {
-      setPoints(points => points - 3);
+        questions[currentQuestion].points = questions[currentQuestion].points - hints[0].points;
     }
 
     setHints(hints);
@@ -33,7 +50,7 @@ export default function HintComponent({ questionId }) {
   const handleHint = () => {
     Alert.alert(
       "Sicherheitsfrage",
-      `Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Ihr bekommt dann weniger Punkte.`,
+      `Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.`,
       [
         {
           text: "Abbrechen",
