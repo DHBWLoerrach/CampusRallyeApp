@@ -16,11 +16,12 @@ export default function VotingScreen() {
   const [voting, setVoting] = useState([]);
   const [currentVoting, setCurrentVoting] = useState(0);
   const [disabledGroups, setDisabledGroups] = useState([]); 
+  const [sendingResult,setSendingResult]=useState(false);
 
   useEffect(() => {
     const fetchDataSupabase = async () => {
       const { data: vote } = await supabase
-    .rpc('get_unvoted_questions', { group_id: group });
+    .rpc('get_unvoted_questions', { input_group_id: group });
       if(vote!==null){
         setVoting(vote);
       }
@@ -30,12 +31,17 @@ export default function VotingScreen() {
   }, []);
 
   const handleNextQuestion = async () => {
+    console.log("Handling")
+    setSendingResult(true)
+    console.log(voting)
+    console.log(group)
+    console.log(selectedGroups)
     // Update Supabase table
     for (let vote of selectedGroups) {
       await supabase
         .from('question_voting')
         .insert([
-          { question_id: voting[currentVoting]?.id, group_id: group.id, voted_group_id: vote.id },
+          { question_id: voting[currentVoting]?.id, group_id: group, voted_group_id: vote.id },
         ]);
     }
 
@@ -43,20 +49,24 @@ export default function VotingScreen() {
     setSelectedGroups([]);
     setDisabledGroups([]);
     setSelectionMade(false);
+    setSendingResult(false);
   };
-
 
   if (!voting[currentVoting]) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Voting wurde beendet</Text>
+        <Text style={{fontSize: 20,
+    color: 'grey',
+    textAlign: 'center',}}>Voting wurde beendet</Text>
       </View>
     );
   } else{
     return (
       <ScrollView style={styles.main}>
         <View>
-          <Text>{voting[currentVoting]?.question}</Text>
+          <Text style = {{fontSize: 20,
+    color: 'grey',
+    textAlign: 'center',}}>{voting[currentVoting]?.question}</Text>
         </View>
         {groups?.filter(item => item.id !== group).map((item, index) => (
           <View
@@ -78,9 +88,6 @@ export default function VotingScreen() {
               color="grey"
               outline={true}
               onClick={async () => {
-                console.log("Groups:")
-                console.log(groups.length)
-                console.log(selectedGroups.length)
                 if(groups.length===1){
                     setSelectionMade(true);
                 }
@@ -110,7 +117,7 @@ export default function VotingScreen() {
         ))}
         <View
             style={
-              !selectionMade
+              !selectionMade||sendingResult
                 ? styles.buttonContainerDeactive
                 : styles.buttonContainer
             }
@@ -120,7 +127,7 @@ export default function VotingScreen() {
               color={'grey'}
               title="Nächste Abstimmung"
               onPress={handleNextQuestion}
-              disabled={!selectionMade}
+              disabled={!selectionMade||sendingResult}
             />
           </View>
       </ScrollView>
