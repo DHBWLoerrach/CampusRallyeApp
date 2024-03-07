@@ -31,7 +31,6 @@ export default function ImageQuestions() {
     setCurrentQuestion(currentQuestion + 1);
     setAnswer("");
     setAnswered(false);
-    setHints([]); // Reset hints
   };
 
   const handleAnswerSubmit = () => {

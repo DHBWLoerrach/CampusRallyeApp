@@ -10,17 +10,13 @@ export default function HintComponent({ questionId }) {
   const setPoints = useSetPoints();
 
   const {
-    groups,
-    setGroups,
-    group,
-    setGroup,
     questions,
     currentQuestion,
-    points,
-    rallye,
-    useRallye,
-    setEnabled,
   } = useSharedStates();
+
+  useEffect(() => {
+    setHints([]);
+  }, [currentQuestion]);
 
   const fetchHints = async () => {
     const { data: hints, error } = await supabase
