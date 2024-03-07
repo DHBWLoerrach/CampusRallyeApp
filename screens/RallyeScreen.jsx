@@ -36,8 +36,10 @@ export default function RallyeScreen() {
   }
 
   const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    reloadRallye().then(() => setRefreshing(false));
+    if(useRallye){
+      setRefreshing(true);
+      reloadRallye().then(() => setRefreshing(false));
+    }
   }, []);
 
   if (useRallye) {
@@ -146,77 +148,109 @@ export default function RallyeScreen() {
   }
 
   let content;
-  console.log("loading")
-  if (!loading && rallye.status === "running" && questions !== null && currentQuestion !== questions.length) {
-    if (questions[currentQuestion].question_type === 'knowledge') {
-      content = <SkillQuestions />;
-    } else if (questions[currentQuestion].question_type === 'upload') {
-      content = <UploadQuestions />;
-    } else if (questions[currentQuestion].question_type === 'qr') {
-      content = <QRCodeQuestions />;
-    } else if (questions[currentQuestion].question_type === 'multiple_choice') {
-      content = <MultipleChoiceQuestions />;
-    } else if (questions[currentQuestion].question_type === 'picture') {
-      content = <ImageQuestions />;
-    }
-  } else 
-  if (rallye.status === "post_processing"){
-    content = <VotingScreen />;
-  }
-  else if (!loading) {
-    content = (
-      <ScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  if(useRallye){
+    if (!loading && rallye.status === "running" && questions !== null && currentQuestion !== questions.length) {
+      if (questions[currentQuestion].question_type === 'knowledge') {
+        content = <SkillQuestions />;
+      } else if (questions[currentQuestion].question_type === 'upload') {
+        content = <UploadQuestions />;
+      } else if (questions[currentQuestion].question_type === 'qr') {
+        content = <QRCodeQuestions />;
+      } else if (questions[currentQuestion].question_type === 'multiple_choice') {
+        content = <MultipleChoiceQuestions />;
+      } else if (questions[currentQuestion].question_type === 'picture') {
+        content = <ImageQuestions />;
       }
-    >
-      <View>
-        <Text style={styles.endText}>
-        Ihr habt alle Fragen beantwortet, Glückwunsch!
-        </Text>
-        <Text style={styles.endText}>
-        Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.        </Text>
-        <Text style={styles.endText}>
-        Eure erreichte Punktzahl: {points}
-        </Text>
-      </View>
-    </ScrollView>
-    );
-  } else if(loading && group === null) {
-    content = (
-      <View>
-        <Text style={styles.groupSelectionText}>
-          Bitte wähle zuerst eine Gruppe aus.
-        </Text>
-      </View>
-    );
-  } else if(rallye.status == "preparation"){
-    content = (
-      <ScrollView
-  contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-  refreshControl={
-    <RefreshControl
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-    />
-  }
->
-  <Text style={styles.groupSelectionText}>
-    Die Rallye hat noch nicht angefangen. 
-  </Text>
-</ScrollView>
-    )
-  }
-
-  else if(rallye.status == "ended"){
+    } else if (useRallye&&rallye.status === "post_processing"){
+      content = <VotingScreen />;
+    }
+    else if (!loading) {
       content = (
-     
-          Scoreboard()
-    
+        <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View>
+          <Text style={styles.endText}>
+          Ihr habt alle Fragen beantwortet, Glückwunsch!
+          </Text>
+          <Text style={styles.endText}>
+          Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.</Text>
+          <Text style={styles.endText}>
+          Eure erreichte Punktzahl: {points}
+          </Text>
+        </View>
+      </ScrollView>
+      );
+    } else if(useRallye&&loading && group === null) {
+      content = (
+        <View>
+          <Text style={styles.groupSelectionText}>
+            Bitte wähle zuerst eine Gruppe aus.
+          </Text>
+        </View>
+      );
+    } else if(useRallye&&rallye.status == "preparation"){
+      content = (
+        <ScrollView
+    contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+    refreshControl={
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
+    }
+  >
+    <Text style={styles.groupSelectionText}>
+      Die Rallye hat noch nicht angefangen. 
+    </Text>
+  </ScrollView>
       )
+    }
+  
+    else if(rallye.status == "ended"){
+        content = (
+       
+            Scoreboard()
+      
+        )
+    }
+  }else{
+    if (!loading && questions !== null && currentQuestion !== questions.length) {
+      if (questions[currentQuestion].question_type === 'knowledge') {
+        content = <SkillQuestions />;
+      } else if (questions[currentQuestion].question_type === 'qr') {
+        content = <QRCodeQuestions />;
+      } else if (questions[currentQuestion].question_type === 'multiple_choice') {
+        content = <MultipleChoiceQuestions />;
+      } else if (questions[currentQuestion].question_type === 'picture') {
+        content = <ImageQuestions />;
+      }
+    } 
+    else if (!loading) {
+      content = (
+        <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View>
+          <Text style={styles.endText}>
+          Ihr habt alle Fragen beantwortet, Glückwunsch!
+          </Text>
+          <Text style={styles.endText}>
+          Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.</Text>
+          <Text style={styles.endText}>
+          Eure erreichte Punktzahl: {points}
+          </Text>
+        </View>
+      </ScrollView>
+      );
+    }
   }
-
   return <View style={styles.container}>{content}</View>;
 }
 
