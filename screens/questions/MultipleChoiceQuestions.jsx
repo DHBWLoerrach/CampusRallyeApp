@@ -3,27 +3,27 @@ import {
   View,
   Text,
   TextInput,
-  Image,
   Button,
   Alert,
   StyleSheet,
   ScrollView,
 } from "react-native";
+import { useSetPoints } from "../../utils/Points";
+import { TouchableOpacity } from "react-native";
 import { useSharedStates } from "../../utils/SharedStates";
+import { supabase } from "../../utils/Supabase";
 import Constants from "../../utils/Constants";
 import Colors from "../../utils/Colors";
-import { useSetPoints } from "../../utils/Points";
 import { confirmAlert } from "../../utils/ConfirmAlert";
 import HintComponent from "../../ui/HintComponent";
 
-export default function ImageQuestions() {
+export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState("");
   const [confirmedAnswer, setConfirmedAnswer] = useState("");
   const [answered, setAnswered] = useState(false);
   const { questions, currentQuestion, setCurrentQuestion, group } =
     useSharedStates();
   const setPoints = useSetPoints();
-  console.log(questions[currentQuestion].uri);
 
   const handleNext = async () => {
     correctly_answered = answer.trim() === questions[currentQuestion].answer;
@@ -49,16 +49,23 @@ export default function ImageQuestions() {
         <Text style={styles.question}>
           {questions[currentQuestion].question}
         </Text>
-        <Image
-          source={{ uri: questions[currentQuestion].uri }}
-          style={{ width: 300, height: 300, marginBottom: 20 }}
-        />
-        <TextInput
-          style={styles.input}
-          value={answer}
-          onChangeText={setAnswer}
-          placeholder="Gib hier deine Antwort ein"
-        />
+        {questions[currentQuestion].multiple_answer.map((option, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.squareButton}
+            onPress={() => setAnswer(option)}
+          >
+            <View
+              style={[
+                styles.innerSquare,
+                {
+                  backgroundColor: answer === option ? Colors.dhbwRed : "white",
+                },
+              ]}
+            />
+            <Text style={styles.answerText}>{option}</Text>
+          </TouchableOpacity>
+        ))}
         <View
           style={
             !answer ? styles.buttonContainerDeactive : styles.buttonContainer
@@ -86,6 +93,21 @@ export default function ImageQuestions() {
 }
 
 const styles = StyleSheet.create({
+  squareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  answerText: {
+    fontSize: 20,
+  },
+  innerSquare: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: Colors.dhbwGray,
+  },
   contentContainer: {
     flexGrow: 1,
     justifyContent: "center",

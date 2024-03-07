@@ -11,6 +11,7 @@ import { useSharedStates } from '../../utils/SharedStates';
 import { useNavigation } from '@react-navigation/native';
 import { supabase } from '../../utils/Supabase';
 import Colors from '../../utils/Colors';
+import { useSetPoints } from '../../utils/Points';
 
 export default function QRScan() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -22,11 +23,10 @@ export default function QRScan() {
     currentQuestion,
     setCurrentQuestion,
     setQRScan,
-    setPoints,
-    points,
     group,
   } = useSharedStates();
-
+  const setPoints = useSetPoints();
+  
   useEffect(() => {}, []);
 
   useEffect(() => {
@@ -45,14 +45,8 @@ export default function QRScan() {
       );
     } else if (questions[currentQuestion].answer === data) {
       setCurrentQuestion(currentQuestion + 1);
-      await supabase
-        .from('group_questions')
-        .insert({
-          group_id: group,
-          question_id: questions[currentQuestion].id,
-          answered_correctly: true,
-        });
-      setPoints(points + 1);
+      correctly_answered = answer.trim() === questions[currentQuestion].answer
+    await setPoints(correctly_answered,questions[currentQuestion].points);
     }
     setQRScan(false);
     navigation.navigate('Rallye');

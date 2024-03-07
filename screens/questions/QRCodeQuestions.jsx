@@ -6,23 +6,27 @@ import {
   Button,
   Dimensions,
   ScrollView,
+  Alert,
 } from 'react-native';
 import * as Location from 'expo-location';
 import { useSharedStates } from '../../utils/SharedStates';
 import { supabase } from '../../utils/Supabase';
+import { useNavigation } from '@react-navigation/native';
 import QRScan from './QRScan';
 import Colors, { dhbwRed } from '../../utils/Colors';
 import MapView, { Marker } from 'react-native-maps';
 
 export default function QRCodeQuestions() {
-  // const [location, setLocation] = useState(null);
-  // const [errorMsg, setErrorMsg] = useState(null);
-  // const [isLocationEnabled, setIsLocationEnabled] = useState(true);
 
-  // const [markerLocation, setMarkerLocation] = useState({
-  //   latitude: 47.61706708166155,
-  //   longitude: 7.678012011562073
-  // });
+  const navigation = useNavigation();
+  const {
+    questions,
+    currentQuestion,
+    setCurrentQuestion,
+    setQRScan,
+    group,
+    qrScan,
+  } = useSharedStates();
 
   const [mapRegion, setMapRegion] = useState({
     latitude: 47.61706708166155,
@@ -37,24 +41,6 @@ export default function QRCodeQuestions() {
     longitude: 7.678012011562073,
   });
 
-  const { questions, currentQuestion, qrScan, setQRScan } =
-    useSharedStates();
-
-  // Daten aus der Datenbank holen
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: answer } = await supabase
-        .from('QRFragen')
-        .select('Latitude, Longitude, fragen_id')
-        .eq('fragen_id', questions[currentQuestion].fragen_id);
-      setMarkerLocation({
-        latitude: answer[0].Latitude,
-        longitude: answer[0].Longitude,
-      });
-    };
-    fetchData();
-  }, [!qrScan]);
 
   // User Location holen
   const userLocation = async () => {
@@ -93,62 +79,37 @@ export default function QRCodeQuestions() {
     userLocation();
   }, []);
 
-  //ALT
-  // useEffect(() => {
-  //   (async () => {
-  //     let { status } =
-  //       await Location.requestForegroundPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       setErrorMsg('Permission to access location was denied');
-  //       return;
-  //     }
-
-  //     const location = await Location.getCurrentPositionAsync({});
-  //     setLocation(location);
-
-  //   })();
-  //   if (isLocationEnabled) {
-  //     const locationSubscriber = Location.watchPositionAsync(
-  //       {
-  //         accuracy: Location.Accuracy.High,
-  //         timeInterval: 5000,
-  //         distanceInterval: 10,
-  //       },
-  //       setLocation
-  //     );
-  //     if (locationSubscriber && locationSubscriber.remove) {
-  //       return () => {
-  //         locationSubscriber.remove();
-  //       };
-  //     }
-  //   }
-  // }, [isLocationEnabled]);
-
-  // const toggleLocation = () => {
-  //   setIsLocationEnabled(!isLocationEnabled);
-  // };
-
-  // let userlocation = {
-  //   latitude: 47.61709224449131,
-  //   longitude: 7.678051759539827,
-  // };
-
-  // if (errorMsg) {
-  //   console.log(errorMsg);
-  // } else if (location) {
-  //   userlocation = {
-  //     latitude: location.coords.latitude,
-  //     longitude: location.coords.longitude,
-  //   };
-  // }
-
-  // War in der MapView
-  //animateToPosition={position}
-  //clickListener={setClickListener}
-  //markersListener={setMarkersListener}
-  //markersList={markers}
-
   let content;
+
+  submitSurrender = async () => {
+    setCurrentQuestion(currentQuestion + 1);
+    await supabase
+      .from('group_questions')
+      .insert({
+        group_id: group,
+        question_id: questions[currentQuestion].id,
+        answered_correctly: false,
+        points: questions[currentQuestion].points
+      });
+  navigation.navigate('Rallye');
+  };
+
+  const handleSurrender = () => {
+    Alert.alert(
+      'Sicherheitsfrage',
+      `Bist du sicher, dass du diese Aufgabe Aufgeben möchtest?`,
+      [
+        {
+          text: 'Abbrechen',
+          style: 'cancel',
+        },
+        {
+          text: 'Ja, ich möchte aufgeben',
+          onPress: () => submitSurrender(),
+        },
+      ]
+    );
+  };
 
   const handlepress = () => {
     setQRScan(!qrScan);
@@ -185,12 +146,18 @@ export default function QRCodeQuestions() {
             </View>
           </View>
 
-          <View style={styles.buttonContainer}>
+          <View style={styles.buttonRow}>
             <Button
               title={'QR-Code Scannen'}
               onPress={() => handlepress()}
               color={'grey'}
             />
+            <Button
+              title={'Aufgeben'}
+              onPress={() => handleSurrender()}
+              color={dhbwRed}
+            />
+
           </View>
         </View>
       </ScrollView>
