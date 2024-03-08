@@ -26,6 +26,7 @@ export default function QRCodeQuestions() {
     setQRScan,
     group,
     qrScan,
+    useRallye
   } = useSharedStates();
 
   const [mapRegion, setMapRegion] = useState({
@@ -83,6 +84,7 @@ export default function QRCodeQuestions() {
 
   submitSurrender = async () => {
     setCurrentQuestion(currentQuestion + 1);
+    if(useRallye){
     await supabase
       .from('group_questions')
       .insert({
@@ -92,6 +94,7 @@ export default function QRCodeQuestions() {
         points: questions[currentQuestion].points
       });
   navigation.navigate('Rallye');
+    }
   };
 
   const handleSurrender = () => {
@@ -117,8 +120,8 @@ export default function QRCodeQuestions() {
 
   if (!qrScan) {
     content = (
-      <ScrollView>
-        <View>
+      <ScrollView keyboardShouldPersistTaps='always' contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={{ marginTop: 50 }}>
           <View style={styles.header}>
             <Text style={styles.title}>
               {questions[currentQuestion].question}
@@ -145,12 +148,11 @@ export default function QRCodeQuestions() {
               />
             </View>
           </View>
-
           <View style={styles.buttonRow}>
             <Button
               title={'QR-Code Scannen'}
               onPress={() => handlepress()}
-              color={'grey'}
+              color={dhbwRed}
             />
             <Button
               title={'Aufgeben'}

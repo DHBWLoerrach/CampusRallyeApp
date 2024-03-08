@@ -22,9 +22,10 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
-  const { setRallye, useRallye, group, currentQuestion } =
+  const { setRallye, useRallye, rallye ,group, currentQuestion, questions } =
     useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
+  const [remainingTime, setRemainingTime] = useState(0);
 
   if (useRallye) {
     useEffect(() => {
@@ -40,24 +41,48 @@ function MainTabs() {
     }, []);
 
     useEffect(() => {
-      const fetchData = async () => {
-        let groupid = group;
-        let { data, error } = await supabase.rpc(
-          'get_question_count',
-          {
-            groupid,
-          }
-        );
-        value =
-          parseFloat(data[0].answeredquestions) /
-          parseFloat(data[0].totalquestions);
-        setPercentage(value);
-      };
-      if (group !== null) {
-        fetchData();
-      }
-    }, [currentQuestion, group]);
+      const intervalId = setInterval(() => {
+        const endTime = new Date(rallye.end_time); // replace end_time with your timestamp
+        const currentTime = new Date();
+        const diffInMilliseconds = endTime - currentTime;
+        const diffInMinutes = Math.round(diffInMilliseconds / 1000 / 60);
+        setRemainingTime(diffInMinutes);
+      }, 60000); // update every minute
+    
+      // clear interval on component unmount
+      return () => clearInterval(intervalId);
+    }, []);
+
+    
   }
+
+  useEffect(() => {
+    if(useRallye){
+    const fetchData = async () => {
+      
+        let groupid = group;
+      let { data, error } = await supabase.rpc(
+        'get_question_count',
+        {
+          groupid,
+        }
+      );
+      value =
+        parseFloat(data[0].answeredquestions) /
+        parseFloat(data[0].totalquestions);
+      setPercentage(value);
+    };
+    if (group !== null) {
+      fetchData();
+    }
+      } else{
+        console.log(percentage)
+        value =
+        parseFloat(currentQuestion) / parseFloat(questions.length)
+      setPercentage(value);
+      }
+      
+  }, [currentQuestion, group]);
 
   return (
     <Tab.Navigator
@@ -65,7 +90,6 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, size }) => {
           let iconName;
-
           if (route.name === 'rallye') {
             iconName = 'map';
           } else if (route.name === 'settings') {
@@ -101,16 +125,26 @@ function MainTabs() {
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
           headerTitle: () => (
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: 'white' }}>
-                Campus Rallye DHBW Lörrach
-              </Text>
-              <Progress.Bar
-                style={{ marginTop: 10 }}
-                progress={percentage}
-                color="white"
-              />
-            </View>
+            useRallye ? (
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{ color: 'white' }}>
+                  Verbleibende Zeit: {remainingTime} Minuten
+                </Text>
+                <Progress.Bar
+                  style={{ marginTop: 10 }}
+                  progress={percentage}
+                  color="white"
+                />
+              </View>
+            ) : (
+              <View style={{ alignItems: 'center' }}>
+                <Progress.Bar
+                  style={{ marginTop: 10 }}
+                  progress={percentage}
+                  color="white"
+                />
+              </View>
+            )
           ),
           title: 'Campus Rallye',
         }}
