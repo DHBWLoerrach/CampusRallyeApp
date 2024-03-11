@@ -257,16 +257,11 @@ export default function RallyeScreen() {
       content = (
         <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
       >
         <View>
           <Text style={styles.endText}>
           Ihr habt alle Fragen beantwortet, Glückwunsch!
           </Text>
-          <Text style={styles.endText}>
-          Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.</Text>
           <Text style={styles.endText}>
           Eure erreichte Punktzahl: {points}
           </Text>

@@ -5,7 +5,6 @@ import * as Progress from 'react-native-progress';
 import { View, Text } from 'react-native';
 import { useEffect, useState } from 'react';
 import { supabase } from './utils/Supabase';
-
 import RallyeScreen from './screens/RallyeScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import GroupScreen from './screens/GroupScreen';
@@ -75,17 +74,18 @@ function MainTabs() {
       value =
         parseFloat(data[0].answeredquestions) /
         parseFloat(data[0].totalquestions);
-      console.log("Percentage:")
-      console.log(value);
       setPercentage(value);
     };
     if (group !== null) {
       fetchData();
     }
       } else{
-        console.log(percentage)
-        value =
+        value=0.0
+        if(currentQuestion && questions!=null){
+          value =
         parseFloat(currentQuestion) / parseFloat(questions.length)
+        }
+        
       setPercentage(value);
       }
       
@@ -132,30 +132,40 @@ function MainTabs() {
     headerStyle: { backgroundColor: Color.dhbwRed },
     headerTintColor: Color.tabHeader,
     headerTitle: () => (
-      rallye.status === "running" ? (
+      useRallye ? (
+        rallye.status === "running" ? (
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
+              Verbleibende Zeit: {remainingTime} Minuten
+            </Text>
+            <Progress.Bar
+              style={{ marginTop: 10 }}
+              progress={percentage}
+              color="white"
+            />
+          </View>
+        ) : rallye.status === "post_processing" ? (
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Abstimmung</Text>
+          </View>
+        ) : rallye.status === "pre_processing" ? (
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Vorbereitungen</Text>
+          </View>
+        ) : rallye.status === "ended" ? (
+          <View style={{ alignItems: 'center' }}>
+            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Beendet</Text>
+          </View>
+        ) : null
+      ) : (
         <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: 'white', fontSize: 14 }}>
-            Verbleibende Zeit: {remainingTime} Minuten
-          </Text>
           <Progress.Bar
             style={{ marginTop: 10 }}
             progress={percentage}
             color="white"
           />
         </View>
-      ) : rallye.status === "post_processing" ? (
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: 'white', fontSize: 18, fontWeight:500 }}>Abstimmung</Text>
-        </View>
-      ) : rallye.status === "pre_processing" ? (
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: 'white', fontSize: 18, fontWeight:500 }}>Vorbereitungen</Text>
-        </View>
-      ) : rallye.status === "ended" ? (
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: 'white', fontSize: 18, fontWeight:500  }}>Beendet</Text>
-        </View>
-      ) : null
+      )
     ),
     title: 'Campus Rallye',
   }}
