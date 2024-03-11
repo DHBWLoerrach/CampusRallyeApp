@@ -84,6 +84,8 @@ export default function QRCodeQuestions() {
 
   submitSurrender = async () => {
     setCurrentQuestion(currentQuestion + 1);
+    console.log("Current")
+    console.log(currentQuestion)
     if(useRallye){
     await supabase
       .from('group_questions')
@@ -120,7 +122,7 @@ export default function QRCodeQuestions() {
 
   if (!qrScan) {
     content = (
-      <ScrollView keyboardShouldPersistTaps='always' contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView keyboardShouldPersistTaps='always' contentContainerStyle={{ flexGrow: 1, flex:1,paddingBottom: 30,paddingTop:30 }}>
         <View style={{ marginTop: 50 }}>
           <View style={styles.header}>
             <Text style={styles.title}>
@@ -128,14 +130,7 @@ export default function QRCodeQuestions() {
             </Text>
           </View>
           <View style={styles.mapContainer}>
-            <MapView style={styles.map} region={mapRegion}>
-              <Marker
-                coordinate={myPosition}
-                title="Meine Position"
-              />
-            </MapView>
-
-            <View style={styles.buttonRow}>
+          <View style={styles.buttonRow}>
               <Button
                 title="Aktuelle Position"
                 onPress={userLocation}
@@ -159,8 +154,13 @@ export default function QRCodeQuestions() {
               onPress={() => handleSurrender()}
               color={dhbwRed}
             />
-
           </View>
+          <MapView style={styles.map} region={mapRegion}>
+              <Marker
+                coordinate={myPosition}
+                title="Meine Position"
+              />
+            </MapView>
         </View>
       </ScrollView>
     );

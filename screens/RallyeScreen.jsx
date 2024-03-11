@@ -23,6 +23,7 @@ export default function RallyeScreen() {
     rallye,
     setRallye,
     setPoints,
+    remainingTime
   } = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,10 +53,7 @@ export default function RallyeScreen() {
             let { data, error } = await supabase.rpc('get_questions', {
               group_id,
             });
-            console.log(data)
-            console.log("Data")
             if (data) {
-              console.log("Data")
               temp = data.filter(item => item.question_type !== 'multiple_choice');
               multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
               multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
@@ -149,7 +147,7 @@ export default function RallyeScreen() {
 
   let content;
   if(useRallye){
-    if (!loading && rallye.status === "running" && questions !== null && currentQuestion !== questions.length) {
+    if (!loading && rallye.status === "running" && remainingTime >= 0&&questions !== null && currentQuestion < questions.length) {
       if (questions[currentQuestion].question_type === 'knowledge') {
         content = <SkillQuestions />;
       } else if (questions[currentQuestion].question_type === 'upload') {
@@ -162,9 +160,18 @@ export default function RallyeScreen() {
         content = <ImageQuestions />;
       }
     } else if (useRallye&&rallye.status === "post_processing"){
-      content = <VotingScreen />;
+      content = (
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <VotingScreen />
+        </ScrollView>
+      );
     }
-    else if (!loading) {
+    else if (!loading&&rallye.status=="running"&&remainingTime>=0) {
       content = (
         <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -175,6 +182,26 @@ export default function RallyeScreen() {
         <View>
           <Text style={styles.endText}>
           Ihr habt alle Fragen beantwortet, Glückwunsch!
+          </Text>
+          <Text style={styles.endText}>
+          Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.</Text>
+          <Text style={styles.endText}>
+          Eure erreichte Punktzahl: {points}
+          </Text>
+        </View>
+      </ScrollView>
+      );
+    } else if(!loading&&rallye.status=="running"&&remainingTime<0){
+      content = (
+        <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View>
+          <Text style={styles.endText}>
+          Die Zeit für die Rallye ist abgelaufen.
           </Text>
           <Text style={styles.endText}>
           Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.</Text>
@@ -212,9 +239,7 @@ export default function RallyeScreen() {
   
     else if(rallye.status == "ended"){
         content = (
-       
             Scoreboard()
-      
         )
     }
   }else{

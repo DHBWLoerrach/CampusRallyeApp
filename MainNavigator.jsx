@@ -22,10 +22,9 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
-  const { setRallye, useRallye, rallye ,group, currentQuestion, questions } =
+  const { setRallye, useRallye, rallye ,group, currentQuestion, questions,remainingTime, setRemainingTime } =
     useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
-  const [remainingTime, setRemainingTime] = useState(0);
 
   if (useRallye) {
     useEffect(() => {
@@ -42,14 +41,20 @@ function MainTabs() {
 
     useEffect(() => {
       const intervalId = setInterval(() => {
-        const endTime = new Date(rallye.end_time); // replace end_time with your timestamp
+        const endTime = new Date(rallye.end_time);
         const currentTime = new Date();
         const diffInMilliseconds = endTime - currentTime;
         const diffInMinutes = Math.round(diffInMilliseconds / 1000 / 60);
         setRemainingTime(diffInMinutes);
-      }, 60000); // update every minute
+      }, 60000);
+      
+      //execute it one time to set the time directly
+      const endTime = new Date(rallye.end_time); 
+        const currentTime = new Date();
+        const diffInMilliseconds = endTime - currentTime;
+        const diffInMinutes = Math.round(diffInMilliseconds / 1000 / 60);
+        setRemainingTime(diffInMinutes);
     
-      // clear interval on component unmount
       return () => clearInterval(intervalId);
     }, []);
 
@@ -70,6 +75,8 @@ function MainTabs() {
       value =
         parseFloat(data[0].answeredquestions) /
         parseFloat(data[0].totalquestions);
+      console.log("Percentage:")
+      console.log(value);
       setPercentage(value);
     };
     if (group !== null) {
@@ -119,36 +126,40 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="rallye"
-        component={RallyeScreen}
-        options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
-          headerTitle: () => (
-            useRallye ? (
-              <View style={{ alignItems: 'center' }}>
-                <Text style={{ color: 'white' }}>
-                  Verbleibende Zeit: {remainingTime} Minuten
-                </Text>
-                <Progress.Bar
-                  style={{ marginTop: 10 }}
-                  progress={percentage}
-                  color="white"
-                />
-              </View>
-            ) : (
-              <View style={{ alignItems: 'center' }}>
-                <Progress.Bar
-                  style={{ marginTop: 10 }}
-                  progress={percentage}
-                  color="white"
-                />
-              </View>
-            )
-          ),
-          title: 'Campus Rallye',
-        }}
-      />
+  name="rallye"
+  component={RallyeScreen}
+  options={{
+    headerStyle: { backgroundColor: Color.dhbwRed },
+    headerTintColor: Color.tabHeader,
+    headerTitle: () => (
+      rallye.status === "running" ? (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: 'white', fontSize: 14 }}>
+            Verbleibende Zeit: {remainingTime} Minuten
+          </Text>
+          <Progress.Bar
+            style={{ marginTop: 10 }}
+            progress={percentage}
+            color="white"
+          />
+        </View>
+      ) : rallye.status === "post_processing" ? (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: 'white', fontSize: 18, fontWeight:500 }}>Abstimmung</Text>
+        </View>
+      ) : rallye.status === "pre_processing" ? (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: 'white', fontSize: 18, fontWeight:500 }}>Vorbereitungen</Text>
+        </View>
+      ) : rallye.status === "ended" ? (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: 'white', fontSize: 18, fontWeight:500  }}>Beendet</Text>
+        </View>
+      ) : null
+    ),
+    title: 'Campus Rallye',
+  }}
+/>
       <Tab.Screen
         name="settings"
         component={SettingsScreen}
