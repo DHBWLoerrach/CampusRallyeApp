@@ -199,14 +199,8 @@ export default function UploadQuestions() {
         <Text style={styles.text}>{questions[currentQuestion].question}</Text>
 
         <View style={styles.buttonRow}>
-          <Button
-            title="Foto Modus"
-            onPress={() => setMode("photo")}
-          />
-          <Button
-            title="Video Modus"
-            onPress={() => setMode("video")}
-          />
+          <Button title="Foto Modus" onPress={() => setMode("photo")} />
+          <Button title="Video Modus" onPress={() => setMode("video")} />
         </View>
         {mode === "video" && hasAudioPermission && hasCameraPermission && (
           <>
@@ -219,18 +213,17 @@ export default function UploadQuestions() {
               />
             </View>
             <View style={styles.buttons}>
-
-            <Button
-              style={styles.buttons}
-              title="Kamera wechseln"
-              onPress={() => {
-                setType(
-                  type === Camera.Constants.Type.back
-                    ? Camera.Constants.Type.front
-                    : Camera.Constants.Type.back
-                );
-              }}
-            ></Button>
+              <Button
+                style={styles.buttons}
+                title="Kamera wechseln"
+                onPress={() => {
+                  setType(
+                    type === Camera.Constants.Type.back
+                      ? Camera.Constants.Type.front
+                      : Camera.Constants.Type.back
+                  );
+                }}
+              ></Button>
             </View>
 
             <View style={styles.buttons}>
@@ -281,25 +274,26 @@ export default function UploadQuestions() {
                 onPress={handleSendEmail}
                 disabled={!isMediaSelected}
                 style={styles.button}
-                color={"red"}
-              />
+                color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
+                />
             </View>
             <View style={styles.container}>
-            <Text style={styles.infoText}>
-              Das aufgenommene Video soll über den Button "SENDEN" per E-Mail
-              gesendet werden
-            </Text>
-            <Text style={styles.infoText}>
-              Falls das Senden über den Button nicht geht, dann macht das Video
-              in eurer Kamera App und schickt es selsbtständig mit eurem
-              Gruppennamen an: {rallye.mail_adress}
-            </Text>
-            <Text style={styles.infoText}>
-              Das Video bricht ab 15MB Dateigröße automatisch ab.
-            </Text>
+              <Text style={styles.infoText}>
+                Das aufgenommene Video soll über den Button "SENDEN" per E-Mail
+                gesendet werden
+              </Text>
+              <Text style={styles.infoText}>
+                Falls das Senden über den Button nicht geht, dann macht das
+                Video in eurer Kamera App und schickt es selsbtständig mit eurem
+                Gruppennamen an: {rallye.mail_adress}
+              </Text>
+              <Text style={styles.infoText}>
+                Das Video bricht ab 15MB Dateigröße automatisch ab.
+              </Text>
             </View>
             <View style={styles.buttonContainer}>
               <Button
+                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
                 title="Weiter"
                 onPress={handleAnswerSubmit}
                 style={styles.buttons}
@@ -332,6 +326,7 @@ export default function UploadQuestions() {
               }
             >
               <Button
+                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
                 style={styles.buttons}
                 title="Senden"
                 onPress={handleSendEmail}
@@ -339,18 +334,19 @@ export default function UploadQuestions() {
               />
             </View>
             <View style={styles.container}>
-            <Text style={styles.infoText}>
-              Das aufgenommene Foto soll über den Button "SENDEN" per E-Mail
-              gesendet werden
-            </Text>
-            <Text style={styles.infoText}>
-              Falls das Senden über den Button nicht geht, dann macht die Fotos
-              in eurer Kamera App und schickt die Fotos selsbtständig mit
-              Gruppenname an {rallye.mail_adress}
-            </Text>
+              <Text style={styles.infoText}>
+                Das aufgenommene Foto soll über den Button "SENDEN" per E-Mail
+                gesendet werden
+              </Text>
+              <Text style={styles.infoText}>
+                Falls das Senden über den Button nicht geht, dann macht die
+                Fotos in eurer Kamera App und schickt die Fotos selsbtständig
+                mit Gruppenname an {rallye.mail_adress}
+              </Text>
             </View>
             <View style={styles.buttonContainer}>
               <Button
+                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
                 title="Weiter"
                 onPress={handleAnswerSubmit}
                 style={styles.buttons}
@@ -426,9 +422,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    width: "100%",
     marginBottom: 15,
   },
 });

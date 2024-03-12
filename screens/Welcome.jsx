@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Dimensions,
   Image,
@@ -9,19 +9,16 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Colors from '../utils/Colors';
-import UIButton from '../ui/UIButton';
+} from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Colors from "../utils/Colors";
+import UIButton from "../ui/UIButton";
 
-export default function Welcome({
-  onPasswordSubmit,
-  onContinueWithoutRallye,
-}) {
+export default function Welcome({ onPasswordSubmit, onContinueWithoutRallye }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const PasswordModal = ({ onStart }) => {
-    const [password, setPassword] = useState('');
+    const [password, setPassword] = useState("");
     return (
       <Modal
         transparent
@@ -32,7 +29,7 @@ export default function Welcome({
           style={styles.modalOverlay}
           onPress={() => {
             setModalVisible(false);
-            setPassword('');
+            setPassword("");
           }}
         >
           <View style={styles.popoverContent}>
@@ -48,6 +45,7 @@ export default function Welcome({
                 name="arrow-right"
                 size={32}
                 color={Colors.dhbwRed}
+                marginRight={5}
               />
             </Pressable>
           </View>
@@ -60,7 +58,7 @@ export default function Welcome({
     <View style={styles.container}>
       <Image
         style={styles.headerImage}
-        source={require('../assets/dhbw-campus-header.png')}
+        source={require("../assets/dhbw-campus-header.png")}
       />
       <View style={styles.header}>
         <Text style={[styles.text, styles.title]}>
@@ -68,24 +66,21 @@ export default function Welcome({
         </Text>
         <Image
           style={styles.logo}
-          source={require('../assets/dhbw-logo.png')}
+          source={require("../assets/dhbw-logo.png")}
         />
       </View>
       <View style={styles.content}>
         <View style={styles.button}>
           <PasswordModal onStart={onPasswordSubmit} />
-          <UIButton
-            size="small"
-            onClick={() => setModalVisible(true)}
-          >
-            <Text style={{ textAlign: 'center' }}>
-              An Campus Rallye teilnehmen{'\n'}(Passwort erforderlich)
+          <UIButton size="small" onClick={() => setModalVisible(true)}>
+            <Text style={{ textAlign: "center" }}>
+              An Campus Rallye teilnehmen{"\n"}(Passwort erforderlich)
             </Text>
           </UIButton>
         </View>
         <UIButton size="small" onClick={onContinueWithoutRallye}>
-          <Text style={{ textAlign: 'center' }}>
-            Campus-Gelände erkunden{'\n'}(ohne Rallye)
+          <Text style={{ textAlign: "center" }}>
+            Campus-Gelände erkunden{"\n"}(ohne Rallye)
           </Text>
         </UIButton>
       </View>
@@ -96,17 +91,17 @@ export default function Welcome({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    alignItems: "center",
+    backgroundColor: "#fff",
     paddingHorizontal: 10,
   },
   headerImage: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height / 3,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height / 3,
   },
   header: {
     marginTop: 10,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   logo: {
     marginLeft: 20,
@@ -121,28 +116,28 @@ const styles = StyleSheet.create({
     flex: 1,
     color: Colors.dhbwRed,
     fontWeight: 500,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   content: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   button: {
-    width: '100%',
+    width: "100%",
     marginVertical: 60,
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.75)",
   },
   popoverContent: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '90%',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "90%",
+    backgroundColor: "#fff",
     borderRadius: 5,
     borderWidth: 1,
     borderColor: Colors.dhbwRed,

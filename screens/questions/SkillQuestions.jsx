@@ -61,7 +61,7 @@ export default function SkillQuestions() {
         >
           <Button
             style={styles.button}
-            color={Platform.OS === 'ios' ? 'white' : 'grey'}
+            color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,17 +7,17 @@ import {
   Dimensions,
   ScrollView,
   Alert,
-} from 'react-native';
-import * as Location from 'expo-location';
-import { useSharedStates } from '../../utils/SharedStates';
-import { supabase } from '../../utils/Supabase';
-import { useNavigation } from '@react-navigation/native';
-import QRScan from './QRScan';
-import Colors, { dhbwRed } from '../../utils/Colors';
-import MapView, { Marker } from 'react-native-maps';
+  Platform
+} from "react-native";
+import * as Location from "expo-location";
+import { useSharedStates } from "../../utils/SharedStates";
+import { supabase } from "../../utils/Supabase";
+import { useNavigation } from "@react-navigation/native";
+import QRScan from "./QRScan";
+import Colors, { dhbwRed } from "../../utils/Colors";
+import MapView, { Marker } from "react-native-maps";
 
 export default function QRCodeQuestions() {
-
   const navigation = useNavigation();
   const {
     questions,
@@ -26,7 +26,7 @@ export default function QRCodeQuestions() {
     setQRScan,
     group,
     qrScan,
-    useRallye
+    useRallye,
   } = useSharedStates();
 
   const [mapRegion, setMapRegion] = useState({
@@ -42,13 +42,11 @@ export default function QRCodeQuestions() {
     longitude: 7.678012011562073,
   });
 
-
   // User Location holen
   const userLocation = async () => {
-    let { status } =
-      await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      setErrorMsg('Permission to access location was denied');
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setErrorMsg("Permission to access location was denied");
     }
 
     let location = await Location.getCurrentPositionAsync({
@@ -84,32 +82,30 @@ export default function QRCodeQuestions() {
 
   submitSurrender = async () => {
     setCurrentQuestion(currentQuestion + 1);
-    console.log("Current")
-    console.log(currentQuestion)
-    if(useRallye){
-    await supabase
-      .from('group_questions')
-      .insert({
+    console.log("Current");
+    console.log(currentQuestion);
+    if (useRallye) {
+      await supabase.from("group_questions").insert({
         group_id: group,
         question_id: questions[currentQuestion].id,
         answered_correctly: false,
-        points: questions[currentQuestion].points
+        points: questions[currentQuestion].points,
       });
-  navigation.navigate('Rallye');
+      navigation.navigate("Rallye");
     }
   };
 
   const handleSurrender = () => {
     Alert.alert(
-      'Sicherheitsfrage',
+      "Sicherheitsfrage",
       `Bist du sicher, dass du diese Aufgabe Aufgeben möchtest?`,
       [
         {
-          text: 'Abbrechen',
-          style: 'cancel',
+          text: "Abbrechen",
+          style: "cancel",
         },
         {
-          text: 'Ja, ich möchte aufgeben',
+          text: "Ja, ich möchte aufgeben",
           onPress: () => submitSurrender(),
         },
       ]
@@ -122,7 +118,15 @@ export default function QRCodeQuestions() {
 
   if (!qrScan) {
     content = (
-      <ScrollView keyboardShouldPersistTaps='always' contentContainerStyle={{ flexGrow: 1, flex:1,paddingBottom: 30,paddingTop:30 }}>
+      <ScrollView
+        keyboardShouldPersistTaps="always"
+        contentContainerStyle={{
+          flexGrow: 1,
+          flex: 1,
+          paddingBottom: 30,
+          paddingTop: 30,
+        }}
+      >
         <View style={{ marginTop: 50 }}>
           <View style={styles.header}>
             <Text style={styles.title}>
@@ -130,37 +134,30 @@ export default function QRCodeQuestions() {
             </Text>
           </View>
           <View style={styles.mapContainer}>
-          <View style={styles.buttonRow}>
+            <View style={styles.buttonRow}>
               <Button
                 title="Aktuelle Position"
                 onPress={userLocation}
                 textTransform="none"
               />
-              <Button
-                title="Zur DHBW"
-                onPress={standardLocation}
-                color={dhbwRed}
-              />
+              <Button title="Zur DHBW" onPress={standardLocation} />
             </View>
           </View>
           <View style={styles.buttonRow}>
             <Button
-              title={'QR-Code Scannen'}
+              title={"QR-Code Scannen"}
               onPress={() => handlepress()}
-              color={dhbwRed}
+              color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
             />
             <Button
-              title={'Aufgeben'}
+              title={"Aufgeben"}
               onPress={() => handleSurrender()}
-              color={dhbwRed}
+              color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
             />
           </View>
           <MapView style={styles.map} region={mapRegion}>
-              <Marker
-                coordinate={myPosition}
-                title="Meine Position"
-              />
-            </MapView>
+            <Marker coordinate={myPosition} title="Meine Position" />
+          </MapView>
         </View>
       </ScrollView>
     );
@@ -178,51 +175,51 @@ export default function QRCodeQuestions() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'absolute',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "absolute",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   header: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 10,
   },
   title: {
-    fontSize: Dimensions.get('window').height * 0.025,
-    textAlign: 'center',
+    fontSize: Dimensions.get("window").height * 0.025,
+    textAlign: "center",
   },
   mapContainer: {
     marginTop: 10,
     marginBottom: 10,
     flex: 6,
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   map: {
     marginBottom: 10,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height * 0.6,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height * 0.6,
     flex: 1,
   },
   buttonContainer: {
-    alignSelf: 'center',
+    alignSelf: "center",
     backgroundColor: Colors.dhbwRed,
     margin: 6,
     borderRadius: 5,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    width: "100%",
   },
   qrscancontainer: {
     flex: 1,
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height * 0.6,
-    flexDirection: 'column',
-    justifyContent: 'center',
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height * 0.6,
+    flexDirection: "column",
+    justifyContent: "center",
   },
 });
