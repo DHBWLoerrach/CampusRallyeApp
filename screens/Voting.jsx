@@ -1,28 +1,33 @@
-import { View, Text, ScrollView, StyleSheet,Button,Platform } from 'react-native';
-import UIButton from '../ui/UIButton';
-import { useSharedStates } from '../utils/SharedStates';
-import Colors from '../utils/Colors';
-import { useState, useEffect } from 'react';
-import { supabase } from '../utils/Supabase';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Button,
+  Platform,
+} from "react-native";
+import UIButton from "../ui/UIButton";
+import { useSharedStates } from "../utils/SharedStates";
+import Colors from "../utils/Colors";
+import { useState, useEffect } from "react";
+import { supabase } from "../utils/Supabase";
 
 export default function VotingScreen() {
-  const {
-    groups,
-    group,
-  } = useSharedStates();
+  const { groups, group } = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [selectionMade, setSelectionMade] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState([]);
   const [voting, setVoting] = useState([]);
   const [currentVoting, setCurrentVoting] = useState(0);
-  const [disabledGroups, setDisabledGroups] = useState([]); 
-  const [sendingResult,setSendingResult]=useState(false);
+  const [disabledGroups, setDisabledGroups] = useState([]);
+  const [sendingResult, setSendingResult] = useState(false);
 
   useEffect(() => {
     const fetchDataSupabase = async () => {
-      const { data: vote } = await supabase
-    .rpc('get_unvoted_questions', { input_group_id: group });
-      if(vote!==null){
+      const { data: vote } = await supabase.rpc("get_unvoted_questions", {
+        input_group_id: group,
+      });
+      if (vote !== null) {
         setVoting(vote);
       }
       setLoading(false);
@@ -31,12 +36,16 @@ export default function VotingScreen() {
   }, []);
 
   const handleNextQuestion = async () => {
-    setSendingResult(true)
+    setSendingResult(true);
     for (let vote of selectedGroups) {
       await supabase
-        .from('question_voting')
+        .from("question_voting")
         .insert([
-          { question_id: voting[currentVoting]?.id, group_id: group, voted_group_id: vote.id },
+          {
+            question_id: voting[currentVoting]?.id,
+            group_id: group,
+            voted_group_id: vote.id,
+          },
         ]);
     }
 
@@ -49,137 +58,140 @@ export default function VotingScreen() {
 
   if (!voting[currentVoting]) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{fontSize: 20,
-    color: 'grey',
-    textAlign: 'center',}}>Voting wurde beendet</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontSize: 20, color: "grey", textAlign: "center" }}>
+          Voting wurde beendet
+        </Text>
       </View>
     );
-  } else{
+  } else {
     return (
       <ScrollView style={styles.main}>
         <View>
-          <Text style = {{fontSize: 20,
-    color: 'grey',
-    textAlign: 'center',}}>{voting[currentVoting]?.question}</Text>
+          <Text style={{ fontSize: 20, color: "grey", textAlign: "center" }}>
+            {voting[currentVoting]?.question}
+          </Text>
         </View>
-        {groups?.filter(item => item.id !== group).map((item, index) => (
-          <View
-            key={index}
-            style={[
-              styles.section,
-              {
-                borderColor:
-                disabledGroups.includes(item.id) ? 'red' : 'white',
-              },
-            ]}
-          >
-            <View style={styles.row}>
-          <Text style={styles.label}>Name der Gruppe:</Text>
-          <Text style={styles.value}>{item.name}</Text>
-          </View>
-            <UIButton
-              size="small"
-              color="grey"
-              outline={true}
-              onClick={async () => {
-                if(groups.length===1){
-                    setSelectionMade(true);
-                }
-                if(groups.length>3){
-                  if(!selectionMade){
-                    setSelectedGroups([...selectedGroups, item]);
-                    setDisabledGroups([...disabledGroups, item.id]);
-                    if(groups.length-4===selectedGroups.length){
-                      setSelectionMade(true);
-                    }
-                  }
-                }else{
-                  if(!selectionMade){
-                    setSelectedGroups([...selectedGroups, item.id]);
-                    if(groups.length-1===selectedGroups.length){
-                      setSelectionMade(true);
-                    }
-                  }
-                }
-              }}
-              disabled={selectionMade || disabledGroups.includes(item.id)}
+        {groups
+          ?.filter((item) => item.id !== group)
+          .map((item, index) => (
+            <View
+              key={index}
+              style={[
+                styles.section,
+                {
+                  borderColor: disabledGroups.includes(item.id)
+                    ? "red"
+                    : "white",
+                },
+              ]}
             >
-              Punkt vergeben
-            </UIButton>
-            
-          </View>
-        ))}
+              <View style={styles.row}>
+                <Text style={styles.label}>Name der Gruppe:</Text>
+                <Text style={styles.value}>{item.name}</Text>
+              </View>
+              <UIButton
+                size="small"
+                color="grey"
+                outline={true}
+                onClick={async () => {
+                  if (groups.length === 1) {
+                    setSelectionMade(true);
+                  }
+                  if (groups.length > 3) {
+                    if (!selectionMade) {
+                      setSelectedGroups([...selectedGroups, item]);
+                      setDisabledGroups([...disabledGroups, item.id]);
+                      if (groups.length - 4 === selectedGroups.length) {
+                        setSelectionMade(true);
+                      }
+                    }
+                  } else {
+                    if (!selectionMade) {
+                      setSelectedGroups([...selectedGroups, item.id]);
+                      if (groups.length - 1 === selectedGroups.length) {
+                        setSelectionMade(true);
+                      }
+                    }
+                  }
+                }}
+                disabled={selectionMade || disabledGroups.includes(item.id)}
+              >
+                Punkt vergeben
+              </UIButton>
+            </View>
+          ))}
         <View
-            style={
-              !selectionMade||sendingResult
-                ? styles.buttonContainerDeactive
-                : styles.buttonContainer
-            }
-          >
-            <Button
-              style={styles.button}
-              color={Platform.OS === 'ios' ? 'white' : 'grey'}
-              title="Nächste Abstimmung"
-              onPress={handleNextQuestion}
-              disabled={!selectionMade||sendingResult}
-            />
-          </View>
+          style={
+            !selectionMade || sendingResult
+              ? styles.buttonContainerDeactive
+              : styles.buttonContainer
+          }
+        >
+          <Button
+            style={styles.button}
+            color={Platform.OS === "ios" ? "White" : Colors.dhbwGray}
+            backgroundColor={Colors.dhbwGray}
+            title="Nächste Abstimmung"
+            onPress={handleNextQuestion}
+            disabled={!selectionMade || sendingResult}
+          />
+        </View>
       </ScrollView>
     );
   }
-  }
-  
+}
 
 const styles = StyleSheet.create({
-  main:{
-    backgroundColor: '#F5F5F5',
+  main: {
+    backgroundColor: "#F5F5F5",
   },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 20,
   },
   text: {
     fontSize: 20,
-    color: 'grey',
-    textAlign: 'center',
+    color: "grey",
+    textAlign: "center",
   },
   section: {
     marginTop: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     borderWidth: 1,
     padding: 20,
-    width: '100%',
+    width: "100%",
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 5,
   },
   label: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginRight: 5,
   },
   value: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: "gray",
     borderWidth: 1,
-    width: '100%',
+    width: "100%",
     padding: 10,
-  },buttonContainer: {
+  },
+  buttonContainer: {
     backgroundColor: Colors.dhbwRed,
     margin: 6,
     borderRadius: 5,

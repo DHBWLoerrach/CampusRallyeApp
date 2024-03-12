@@ -7,6 +7,7 @@ module.exports = {
   mediumGray: '#777777',
   dhbwGray: '#5C6971',
   dhbwRed: '#E2001A',
+  lightBlue: '#55bae6',
   dhbwRedWebView: 'rgb(226,0,26)', // FIXME: needed by WebView
   lightText: '#7F91A7',
   link: '#E2001A',

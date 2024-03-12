@@ -1,18 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Button, Text, Alert, View, StyleSheet } from 'react-native';
+import { useState, useEffect } from "react";
+import { Button, Text, Alert, View, StyleSheet, Platform} from "react-native";
 import { supabase } from "../utils/Supabase";
 import { useSetPoints } from "../utils/Points";
-import { useSharedStates } from '../utils/SharedStates';
-
+import { useSharedStates } from "../utils/SharedStates";
+import Colors from "../utils/Colors";
 
 export default function HintComponent({ questionId }) {
   const [hints, setHints] = useState([]);
   const setPoints = useSetPoints();
 
-  const {
-    questions,
-    currentQuestion,
-  } = useSharedStates();
+  const { questions, currentQuestion } = useSharedStates();
 
   useEffect(() => {
     setHints([]);
@@ -24,7 +21,7 @@ export default function HintComponent({ questionId }) {
       .select("*")
       .eq("id", questionId)
       .limit(1);
-      console.log(hints);
+    console.log(hints);
 
     if (error) {
       console.error("Error fetching hints:", error);
@@ -37,7 +34,8 @@ export default function HintComponent({ questionId }) {
         "Für diese Frage sind keine Tipps angelegt."
       );
     } else {
-        questions[currentQuestion].points = questions[currentQuestion].points - hints[0].points;
+      questions[currentQuestion].points =
+        questions[currentQuestion].points - hints[0].points;
     }
 
     setHints(hints);
@@ -62,7 +60,12 @@ export default function HintComponent({ questionId }) {
 
   return (
     <View style={styles.hintContainer}>
-      <Button title="Tipp anfordern" onPress={handleHint} />
+      <Button //Blue Button
+        title="Tipp anfordern"
+        onPress={handleHint}
+        color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+        backgroundColor={Colors.lightBlue}
+      />
       {hints.length > 0 && <Text style={styles.hintTitle}>Tipp:</Text>}
       {hints.map((hint, index) => (
         <Text key={index} style={styles.hintText}>
@@ -73,16 +76,16 @@ export default function HintComponent({ questionId }) {
   );
 }
 const styles = StyleSheet.create({
-    hintTitle: {
-      fontSize: 20,
-      fontWeight: "bold",
-      marginTop: 20,
-    },
-    hintText: {
-      fontSize: 18,
-      marginTop: 10,
-    },
-    hintContainer: {
-      marginTop: 20,
-    },
-  });
+  hintTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 20,
+  },
+  hintText: {
+    fontSize: 18,
+    marginTop: 10,
+  },
+  hintContainer: {
+    marginTop: 20,
+  },
+});

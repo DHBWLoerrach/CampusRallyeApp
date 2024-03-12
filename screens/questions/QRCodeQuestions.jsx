@@ -7,7 +7,7 @@ import {
   Dimensions,
   ScrollView,
   Alert,
-  Platform
+  Platform,
 } from "react-native";
 import * as Location from "expo-location";
 import { useSharedStates } from "../../utils/SharedStates";
@@ -135,24 +135,34 @@ export default function QRCodeQuestions() {
           </View>
           <View style={styles.mapContainer}>
             <View style={styles.buttonRow}>
-              <Button
+              <Button //Blue Button
                 title="Aktuelle Position"
                 onPress={userLocation}
                 textTransform="none"
+                backgroundColor={Colors.lightBlue}
+                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
               />
-              <Button title="Zur DHBW" onPress={standardLocation} />
+              <Button //Blue Button
+                title="Zur DHBW"
+                onPress={standardLocation}
+                textTransform="none"
+                backgroundColor={Colors.lightBlue}
+                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+              />
             </View>
           </View>
           <View style={styles.buttonRow}>
-            <Button
+            <Button //Red Button
               title={"QR-Code Scannen"}
               onPress={() => handlepress()}
               color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+              backgroundColor={Colors.dhbwRed}
             />
-            <Button
+            <Button //Red Button
               title={"Aufgeben"}
               onPress={() => handleSurrender()}
               color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+              backgroundColor={Colors.dhbwRed}
             />
           </View>
           <MapView style={styles.map} region={mapRegion}>

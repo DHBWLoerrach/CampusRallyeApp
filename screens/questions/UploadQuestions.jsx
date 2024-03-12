@@ -199,8 +199,18 @@ export default function UploadQuestions() {
         <Text style={styles.text}>{questions[currentQuestion].question}</Text>
 
         <View style={styles.buttonRow}>
-          <Button title="Foto Modus" onPress={() => setMode("photo")} />
-          <Button title="Video Modus" onPress={() => setMode("video")} />
+          <Button
+            title="Foto Modus"
+            onPress={() => setMode("photo")}
+            color={Platform.OS === "ios" ? "White" : Colors.dhbwGray}
+            backgroundColor={Colors.dhbwGray}
+          />
+          <Button
+            title="Video Modus"
+            onPress={() => setMode("video")}
+            color={Platform.OS === "ios" ? "White" : Colors.dhbwGray}
+            backgroundColor={Colors.dhbwGray}
+          />
         </View>
         {mode === "video" && hasAudioPermission && hasCameraPermission && (
           <>
@@ -214,6 +224,8 @@ export default function UploadQuestions() {
             </View>
             <View style={styles.buttons}>
               <Button
+                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                backgroundColor={Colors.lightBlue}
                 style={styles.buttons}
                 title="Kamera wechseln"
                 onPress={() => {
@@ -228,6 +240,8 @@ export default function UploadQuestions() {
 
             <View style={styles.buttons}>
               <Button
+                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                backgroundColor={Colors.lightBlue}
                 style={styles.buttons}
                 title="Aufnahme starten"
                 onPress={() => takeVideo()}
@@ -235,6 +249,8 @@ export default function UploadQuestions() {
             </View>
             <View style={styles.buttons}>
               <Button
+                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                backgroundColor={Colors.lightBlue}
                 style={styles.button}
                 title="Aufnahme stoppen"
                 onPress={() => stopVideo()}
@@ -252,7 +268,9 @@ export default function UploadQuestions() {
               onPlaybackStatusUpdate={(status) => setStatus(() => status)}
             />
             <View style={styles.buttonContainer}>
-              <Button
+              <Button //Blue Button
+                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                backgroundColor={Colors.lightBlue}
                 style={styles.buttons}
                 title={status.isPlaying ? "Pause" : "Play"}
                 onPress={() =>
@@ -269,13 +287,14 @@ export default function UploadQuestions() {
                   : styles.buttonContainer
               }
             >
-              <Button
+              <Button //Red Button
                 title="Senden"
                 onPress={handleSendEmail}
                 disabled={!isMediaSelected}
                 style={styles.button}
-                color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
-                />
+                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+                backgroundColor={Colors.dhbwRed}
+              />
             </View>
             <View style={styles.container}>
               <Text style={styles.infoText}>
@@ -292,8 +311,9 @@ export default function UploadQuestions() {
               </Text>
             </View>
             <View style={styles.buttonContainer}>
-              <Button
+              <Button //Red Button
                 color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+                backgroundColor={Colors.dhbwRed}
                 title="Weiter"
                 onPress={handleAnswerSubmit}
                 style={styles.buttons}
@@ -312,7 +332,9 @@ export default function UploadQuestions() {
               )}
             </View>
             <View style={styles.buttonContainer}>
-              <Button
+              <Button //Blue Button
+                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                backgroundColor={Colors.lightBlue}
                 title="Bild aufnehmen"
                 onPress={handleTakePhoto}
                 style={styles.button}
@@ -325,8 +347,9 @@ export default function UploadQuestions() {
                   : styles.buttonContainer
               }
             >
-              <Button
+              <Button //Red Button
                 color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+                backgroundColor={Colors.dhbwRed}
                 style={styles.buttons}
                 title="Senden"
                 onPress={handleSendEmail}
@@ -345,8 +368,9 @@ export default function UploadQuestions() {
               </Text>
             </View>
             <View style={styles.buttonContainer}>
-              <Button
+              <Button //Red Button
                 color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+                backgroundColor={Colors.dhbwRed}
                 title="Weiter"
                 onPress={handleAnswerSubmit}
                 style={styles.buttons}
