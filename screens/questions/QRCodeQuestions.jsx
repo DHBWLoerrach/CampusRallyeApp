@@ -140,7 +140,7 @@ export default function QRCodeQuestions() {
                   title="Aktuelle Position"
                   onPress={userLocation}
                   textTransform="none"
-                  color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                  color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 />
               </View>
               <View style={styles.blueButtonContainer}>
@@ -148,7 +148,7 @@ export default function QRCodeQuestions() {
                   title="Zur DHBW"
                   onPress={standardLocation}
                   textTransform="none"
-                  color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                  color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 />
               </View>
             </View>

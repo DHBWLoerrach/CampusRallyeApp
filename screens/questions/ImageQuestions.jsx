@@ -67,7 +67,6 @@ export default function ImageQuestions() {
           <Button //Red Button
             style={styles.button}
             color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-            backgroundColor={Colors.dhbwRed}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}
