@@ -5,6 +5,7 @@ import {
   TextInput,
   Image,
   Button,
+  Platform,
   Alert,
   StyleSheet,
   ScrollView,
@@ -65,7 +66,7 @@ export default function ImageQuestions() {
         >
           <Button
             style={styles.button}
-            color={"grey"}
+            color={Platform.OS === 'ios' ? 'white' : 'grey'}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}

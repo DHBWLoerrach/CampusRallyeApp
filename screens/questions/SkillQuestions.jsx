@@ -7,6 +7,7 @@ import {
   Alert,
   StyleSheet,
   ScrollView,
+  Platform
 } from "react-native";
 import { useSharedStates } from "../../utils/SharedStates";
 import Constants from "../../utils/Constants";
@@ -60,7 +61,7 @@ export default function SkillQuestions() {
         >
           <Button
             style={styles.button}
-            color={"grey"}
+            color={Platform.OS === 'ios' ? 'white' : 'grey'}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}

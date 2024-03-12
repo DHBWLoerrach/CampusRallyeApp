@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet,Button } from 'react-native';
+import { View, Text, ScrollView, StyleSheet,Button,Platform } from 'react-native';
 import UIButton from '../ui/UIButton';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
@@ -119,7 +119,7 @@ export default function VotingScreen() {
           >
             <Button
               style={styles.button}
-              color={'grey'}
+              color={Platform.OS === 'ios' ? 'white' : 'grey'}
               title="Nächste Abstimmung"
               onPress={handleNextQuestion}
               disabled={!selectionMade||sendingResult}

@@ -7,6 +7,7 @@ import {
   Alert,
   StyleSheet,
   ScrollView,
+  Platform
 } from "react-native";
 import { useSetPoints } from "../../utils/Points";
 import { TouchableOpacity } from "react-native";
@@ -72,7 +73,7 @@ export default function MultipleChoiceQuestions() {
         >
           <Button
             style={styles.button}
-            color={"grey"}
+            color={Platform.OS === 'ios' ? 'white' : 'grey'}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}
