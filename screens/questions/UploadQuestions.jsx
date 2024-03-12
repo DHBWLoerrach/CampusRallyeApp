@@ -62,13 +62,20 @@ export default function UploadQuestions() {
 
   useEffect(() => {
     (async () => {
+      if (hasCameraPermission === null || hasCameraPermission === false) {
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(cameraStatus.status === "granted");
-
+      }
+      console.log("hasCameraPermission ", hasCameraPermission);
+      if (hasAudioPermission === null || hasAudioPermission === false) {
       const audioStatus = await Camera.requestMicrophonePermissionsAsync();
       setHasAudioPermission(audioStatus.status === "granted");
+      }
+      console.log("hasAudioPermission ", hasAudioPermission);
     })();
-  }, []);
+  }, [mode]);
+
+
 
   const handleTakePhoto = async () => {
     let result = await ImagePicker.launchCameraAsync({
