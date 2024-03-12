@@ -31,12 +31,7 @@ export default function VotingScreen() {
   }, []);
 
   const handleNextQuestion = async () => {
-    console.log("Handling")
     setSendingResult(true)
-    console.log(voting)
-    console.log(group)
-    console.log(selectedGroups)
-    // Update Supabase table
     for (let vote of selectedGroups) {
       await supabase
         .from('question_voting')

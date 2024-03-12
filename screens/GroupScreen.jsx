@@ -26,8 +26,9 @@ export default function GroupScreen() {
 
   const [newGroupName, setNewGroupName] = useState('');
 
-  if (useRallye) {
+
     useEffect(() => {
+      if(!useRallye){return}
       const fetchDataSupabase = async () => {
         const { data: groups } = await supabase
           .from('rallye_group')
@@ -48,7 +49,7 @@ export default function GroupScreen() {
       };
       fetchLocalStorage();
     }, [group]);
-  }
+
 
   if (!useRallye) {
     return (

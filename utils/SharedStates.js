@@ -13,7 +13,6 @@ function sharedStates() {
   const [useRallye, setUseRallye] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [remainingTime,setRemainingTime] = useState(0);
-  useSharedStates;
 
   return {
     questions,

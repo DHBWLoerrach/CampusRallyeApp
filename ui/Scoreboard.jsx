@@ -7,22 +7,14 @@ import { supabase } from '../utils/Supabase';
 const Scoreboard = () => {
 
   const {
-    questions,
-    setQuestions,
-    currentQuestion,
-    group,
-    points,
-    useRallye,
-    rallye,
-    setRallye,
-    setPoints,
+    rallye
   } = useSharedStates();
 
   const [sortedGroups, setSortedGroups] = useState([]);
 
-   //Total Points
    useEffect(() => {
-    if(rallye.status === "ended"){ 
+    console.log('useEffect start Scoreboard');
+    if(rallye.status !== "ended"){return}
     const fetchData = async () => {
       try {
         let rallye_id_param = rallye.id;
@@ -40,8 +32,8 @@ const Scoreboard = () => {
     };
       
   fetchData();
-    }
-}, []);
+  console.log('useEffect start Scoreboard');
+}, [rallye]);
 
   return (
     <View style={styles.scoreboardContainer}>

@@ -43,44 +43,46 @@ export default function RallyeScreen() {
     }
   }, []);
 
-  if (useRallye) {
     useEffect(() => {
-      if (rallye.status == "running") {
-        if (group !== null) {
-          const fetchData = async () => {
-            let group_id = group;
-            console.log(group_id)
-            let { data, error } = await supabase.rpc('get_questions', {
-              group_id,
-            });
-            if (data) {
-              temp = data.filter(item => item.question_type !== 'multiple_choice');
-              multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
-              multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
-
-              for (let index = 0; index < multiple_choice_parent.length; index++) {
-                const element = multiple_choice_parent[index];
-                childs = multiple_choice_child.filter(item => item.parent_id === element.id)
-                const childAnswers = childs.map(child => child.answer);
-                element.multiple_answer = childAnswers;
+      if(!useRallye){return}
+        if (rallye.status == "running") {
+          if (group !== null) {
+            const fetchData = async () => {
+              let group_id = group;
+              console.log(group_id)
+              let { data, error } = await supabase.rpc('get_questions', {
+                group_id,
+              });
+              if (data) {
+                temp = data.filter(item => item.question_type !== 'multiple_choice');
+                multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
+                multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
+  
+                for (let index = 0; index < multiple_choice_parent.length; index++) {
+                  const element = multiple_choice_parent[index];
+                  childs = multiple_choice_child.filter(item => item.parent_id === element.id)
+                  const childAnswers = childs.map(child => child.answer);
+                  element.multiple_answer = childAnswers;
+                }
+                data = temp.concat(multiple_choice_parent)
+                console.log(data)
+                for (let i = data.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [data[i], data[j]] = [data[j], data[i]];
+                }
               }
-              data = temp.concat(multiple_choice_parent)
-              console.log(data)
-              for (let i = data.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [data[i], data[j]] = [data[j], data[i]];
-              }
-            }
-            setQuestions(data);
-            setLoading(false);
-          };
-
-          fetchData();
+              setQuestions(data);
+              setLoading(false);
+            };
+  
+            fetchData();
+          }
         }
-      }
+
     }, [rallye, group]);
 
     useEffect(() => {
+      if(!useRallye){return}
       if (rallye.status == "running") {
         if (currentQuestion === null) {
           const fetchData = async () => {
@@ -112,37 +114,37 @@ export default function RallyeScreen() {
       }
     }, [rallye, currentQuestion]);
 
-  } else {
     useEffect(() => {
-      const fetchData = async () => {
-        let { data } = await supabase
-          .from('question')
-          .select('*')
-          .eq('enabled', true)
-          .neq('question_type', 'upload');
-        temp = data.filter(item => item.question_type !== 'multiple_choice');
-        multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
-        multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
-
-        for (let index = 0; index < multiple_choice_parent.length; index++) {
-          const element = multiple_choice_parent[index];
-          childs = multiple_choice_child.filter(item => item.parent_id === element.id)
-          const childAnswers = childs.map(child => child.answer);
-          element.multiple_answer = childAnswers;
-        }
-
-        data = temp.concat(multiple_choice_parent)
-        for (let i = data.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [data[i], data[j]] = [data[j], data[i]];
-        }
-        setQuestions(data);
-        setLoading(false);
-      };
-
-      fetchData();
+      if(useRallye){return}
+        const fetchData = async () => {
+          let { data } = await supabase
+            .from('question')
+            .select('*')
+            .eq('enabled', true)
+            .neq('question_type', 'upload');
+          temp = data.filter(item => item.question_type !== 'multiple_choice');
+          multiple_choice_parent = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id === null);
+          multiple_choice_child = data.filter(item => item.question_type === 'multiple_choice' && item.parent_id !== null);
+  
+          for (let index = 0; index < multiple_choice_parent.length; index++) {
+            const element = multiple_choice_parent[index];
+            childs = multiple_choice_child.filter(item => item.parent_id === element.id)
+            const childAnswers = childs.map(child => child.answer);
+            element.multiple_answer = childAnswers;
+          }
+  
+          data = temp.concat(multiple_choice_parent)
+          for (let i = data.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [data[i], data[j]] = [data[j], data[i]];
+          }
+          setQuestions(data);
+          setLoading(false);
+        };
+        fetchData();
+      
     }, []);
-  }
+  
 
   let content;
   if(useRallye){
@@ -200,7 +202,7 @@ export default function RallyeScreen() {
       >
         <View>
           <Text style={styles.endText}>
-          Die Zeit für die Rallye ist abgelaufen.
+          Die Zeit für die Rallye ist abgelaufen. Geht zum Treffpunkt.
           </Text>
           <Text style={styles.endText}>
           Wartet bis die Rallye beendet wird um das Ergebnis zu sehen.</Text>

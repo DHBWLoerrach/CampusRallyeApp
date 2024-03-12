@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   ScrollView,
 } from "react-native";
 import { useSharedStates } from "../../utils/SharedStates";
-import { supabase } from "../../utils/Supabase";
 import Constants from "../../utils/Constants";
 import Colors from "../../utils/Colors";
 import { useSetPoints } from "../../utils/Points";
@@ -20,12 +19,12 @@ export default function SkillQuestions() {
   const [answer, setAnswer] = useState("");
   const [confirmedAnswer, setConfirmedAnswer] = useState("");
   const [answered, setAnswered] = useState(false);
-  const { questions, currentQuestion, setCurrentQuestion, group } =
+  const { questions, currentQuestion, setCurrentQuestion, } =
     useSharedStates();
   const setPoints = useSetPoints();
 
   const handleNext = async () => {
-    correctly_answered = answer.trim() === questions[currentQuestion].answer;
+    correctly_answered = answer.trim().toLowerCase() === questions[currentQuestion].answer.toLowerCase();
     await setPoints(correctly_answered, questions[currentQuestion].points);
     setCurrentQuestion(currentQuestion + 1);
     setAnswer("");

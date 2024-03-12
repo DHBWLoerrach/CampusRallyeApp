@@ -26,8 +26,6 @@ export default function QRScan() {
     group,
   } = useSharedStates();
   const setPoints = useSetPoints();
-  
-  useEffect(() => {}, []);
 
   useEffect(() => {
     (async () => {

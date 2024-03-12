@@ -25,8 +25,8 @@ function MainTabs() {
     useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
 
-  if (useRallye) {
     useEffect(() => {
+      if(!useRallye){return}
       const fetchData = async () => {
         const { data: rallye } = await supabase
           .from('rallye')
@@ -39,6 +39,7 @@ function MainTabs() {
     }, []);
 
     useEffect(() => {
+      if(!useRallye){return}
       const intervalId = setInterval(() => {
         const endTime = new Date(rallye.end_time);
         const currentTime = new Date();
@@ -57,8 +58,6 @@ function MainTabs() {
       return () => clearInterval(intervalId);
     }, []);
 
-    
-  }
 
   useEffect(() => {
     if(useRallye){
@@ -71,7 +70,7 @@ function MainTabs() {
           groupid,
         }
       );
-      value =
+      let value =
         parseFloat(data[0].answeredquestions) /
         parseFloat(data[0].totalquestions);
       setPercentage(value);
@@ -80,7 +79,7 @@ function MainTabs() {
       fetchData();
     }
       } else{
-        value=0.0
+        let value=0.0
         if(currentQuestion && questions!=null){
           value =
         parseFloat(currentQuestion) / parseFloat(questions.length)
