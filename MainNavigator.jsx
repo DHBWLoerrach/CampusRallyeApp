@@ -146,15 +146,15 @@ function MainTabs() {
           </View>
         ) : rallye.status === "post_processing" ? (
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Abstimmung</Text>
+            <Text style={{ color: 'white', fontSize: 18, fontWeight: '500' }}>Abstimmung</Text>
           </View>
         ) : rallye.status === "pre_processing" ? (
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Vorbereitungen</Text>
+            <Text style={{ color: 'white', fontSize: 18, fontWeight: '500' }}>Vorbereitungen</Text>
           </View>
         ) : rallye.status === "ended" ? (
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Beendet</Text>
+            <Text style={{ color: 'white', fontSize: 18, fontWeight: '500' }}>Beendet</Text>
           </View>
         ) : null
       ) : (
