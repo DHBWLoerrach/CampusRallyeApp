@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TextInput,
   Button,
+  Platform,
 } from "react-native";
 import UIButton from "../ui/UIButton";
 import { useSharedStates } from "../utils/SharedStates";
@@ -125,8 +126,15 @@ export default function GroupScreen() {
           )}
 
           {item.id === group && (
-            <View style={styles.row}>
-              <Button title="Umbenennen" onPress={() => renameGroup(item.id)} />
+            <View           style={
+              !newGroupName ? styles.buttonContainerDeactive : styles.buttonContainer
+            }>
+              <Button
+                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
+                title="Umbenennen"
+                onPress={() => renameGroup(item.id)}
+                disabled={!newGroupName}
+              />
             </View>
           )}
           <UIButton
@@ -142,7 +150,7 @@ export default function GroupScreen() {
                 .eq("id", item.id);
               await storeData("group_key", item.id);
             }}
-            //disabled={selectionMade}
+            disabled={selectionMade}
           >
             Auswählen
           </UIButton>
@@ -197,5 +205,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: "100%",
     padding: 10,
+  },
+  buttonContainer: {
+    backgroundColor: Colors.contrastBlue,
+    margin: 6,
+    borderRadius: 5,
+  },
+  buttonContainerDeactive: {
+    backgroundColor: Colors.dhbwGray,
+    margin: 6,
+    borderRadius: 5,
   },
 });
