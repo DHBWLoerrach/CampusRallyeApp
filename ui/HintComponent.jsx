@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Text, Alert, View, StyleSheet, Platform} from "react-native";
+import { Button, Text, Alert, View, StyleSheet, Platform } from "react-native";
 import { supabase } from "../utils/Supabase";
 import { useSetPoints } from "../utils/Points";
 import { useSharedStates } from "../utils/SharedStates";
@@ -60,12 +60,14 @@ export default function HintComponent({ questionId }) {
 
   return (
     <View style={styles.hintContainer}>
-      <Button //Blue Button
-        title="Tipp anfordern"
-        onPress={handleHint}
-        color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-        backgroundColor={Colors.lightBlue}
-      />
+      <View style={styles.blueButtonContainer}>
+        <Button //Blue Button
+          title="Tipp anfordern"
+          onPress={handleHint}
+          color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+        />
+      </View>
+
       {hints.length > 0 && <Text style={styles.hintTitle}>Tipp:</Text>}
       {hints.map((hint, index) => (
         <Text key={index} style={styles.hintText}>
@@ -87,5 +89,10 @@ const styles = StyleSheet.create({
   },
   hintContainer: {
     marginTop: 20,
+  },
+  blueButtonContainer: {
+    backgroundColor: Colors.lightBlue,
+    margin: 6,
+    borderRadius: 5,
   },
 });
