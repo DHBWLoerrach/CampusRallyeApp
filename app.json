@@ -28,7 +28,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "de.dhbwloe.loerrach.CampusRallyeApp",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
