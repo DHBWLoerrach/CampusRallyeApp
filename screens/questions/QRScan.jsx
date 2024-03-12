@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Button, Dimensions } from "react-native";
+import { Text, View, StyleSheet, Button, Dimensions,Platform } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useSharedStates } from "../../utils/SharedStates";
 import { useNavigation } from "@react-navigation/native";
@@ -57,7 +57,7 @@ export default function QRScan() {
         <Button
           title="Zurück"
           onPress={() => setQRScan(false)}
-          color={Platform.OS === "ios" ? "White" : Colors.dhbwGray}
+          color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
           backgroundColor={Colors.dhbwGray}
           textTransform="none"
         />

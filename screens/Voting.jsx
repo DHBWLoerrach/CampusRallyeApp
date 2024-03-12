@@ -130,7 +130,7 @@ export default function VotingScreen() {
         >
           <Button
             style={styles.button}
-            color={Platform.OS === "ios" ? "White" : Colors.dhbwGray}
+            color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
             backgroundColor={Colors.dhbwGray}
             title="Nächste Abstimmung"
             onPress={handleNextQuestion}

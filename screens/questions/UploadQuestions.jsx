@@ -202,13 +202,13 @@ export default function UploadQuestions() {
           <Button
             title="Foto Modus"
             onPress={() => setMode("photo")}
-            color={Platform.OS === "ios" ? "White" : Colors.dhbwGray}
+            color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
             backgroundColor={Colors.dhbwGray}
           />
           <Button
             title="Video Modus"
             onPress={() => setMode("video")}
-            color={Platform.OS === "ios" ? "White" : Colors.dhbwGray}
+            color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
             backgroundColor={Colors.dhbwGray}
           />
         </View>
