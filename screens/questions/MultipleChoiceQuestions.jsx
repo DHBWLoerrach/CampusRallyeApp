@@ -95,9 +95,10 @@ export default function MultipleChoiceQuestions() {
 const styles = StyleSheet.create({
   squareButton: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
+    justifyContent: "flex-start",
     marginStart: 30,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   answerText: {
     fontSize: 20,
