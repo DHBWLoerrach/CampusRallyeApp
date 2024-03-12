@@ -64,7 +64,7 @@ export default function HintComponent({ questionId }) {
         <Button //Blue Button
           title="Tipp anfordern"
           onPress={handleHint}
-          color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+          color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
         />
       </View>
 
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   blueButtonContainer: {
-    backgroundColor: Colors.lightBlue,
+    backgroundColor: Colors.contrastBlue,
     margin: 6,
     borderRadius: 5,
   },

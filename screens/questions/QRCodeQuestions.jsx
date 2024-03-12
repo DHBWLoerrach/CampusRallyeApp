@@ -135,35 +135,39 @@ export default function QRCodeQuestions() {
           </View>
           <View style={styles.mapContainer}>
             <View style={styles.buttonRow}>
-              <Button //Blue Button
-                title="Aktuelle Position"
-                onPress={userLocation}
-                textTransform="none"
-                backgroundColor={Colors.lightBlue}
-                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-              />
-              <Button //Blue Button
-                title="Zur DHBW"
-                onPress={standardLocation}
-                textTransform="none"
-                backgroundColor={Colors.lightBlue}
-                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-              />
+              <View style={styles.blueButtonContainer}>
+                <Button //Blue Button
+                  title="Aktuelle Position"
+                  onPress={userLocation}
+                  textTransform="none"
+                  color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                />
+              </View>
+              <View style={styles.blueButtonContainer}>
+                <Button //Blue Button
+                  title="Zur DHBW"
+                  onPress={standardLocation}
+                  textTransform="none"
+                  color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
+                />
+              </View>
             </View>
           </View>
           <View style={styles.buttonRow}>
-            <Button //Red Button
-              title={"QR-Code Scannen"}
-              onPress={() => handlepress()}
-              color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-              backgroundColor={Colors.dhbwRed}
-            />
-            <Button //Red Button
-              title={"Aufgeben"}
-              onPress={() => handleSurrender()}
-              color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-              backgroundColor={Colors.dhbwRed}
-            />
+            <View style={styles.redButtonContainer}>
+              <Button //Red Button
+                title={"QR-Code Scannen"}
+                onPress={() => handlepress()}
+                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+              />
+            </View>
+            <View style={styles.redButtonContainer}>
+              <Button //Red Button
+                title={"Aufgeben"}
+                onPress={() => handleSurrender()}
+                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+              />
+            </View>
           </View>
           <MapView style={styles.map} region={mapRegion}>
             <Marker coordinate={myPosition} title="Meine Position" />
@@ -231,5 +235,15 @@ const styles = StyleSheet.create({
     height: Dimensions.get("window").height * 0.6,
     flexDirection: "column",
     justifyContent: "center",
+  },
+  blueButtonContainer: {
+    backgroundColor: Colors.contrastBlue,
+    margin: 6,
+    borderRadius: 5,
+  },
+  redButtonContainer: {
+    backgroundColor: Colors.dhbwRed,
+    margin: 6,
+    borderRadius: 5,
   },
 });

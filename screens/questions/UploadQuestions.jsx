@@ -199,18 +199,20 @@ export default function UploadQuestions() {
         <Text style={styles.text}>{questions[currentQuestion].question}</Text>
 
         <View style={styles.buttonRow}>
+        <View style={styles.greyButtonContainer}>
           <Button
             title="Foto Modus"
             onPress={() => setMode("photo")}
             color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
-            backgroundColor={Colors.dhbwGray}
           />
-          <Button
+          </View>
+          <View style={styles.greyButtonContainer}>
+          <Button //grey Button
             title="Video Modus"
             onPress={() => setMode("video")}
             color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
-            backgroundColor={Colors.dhbwGray}
           />
+          </View>
         </View>
         {mode === "video" && hasAudioPermission && hasCameraPermission && (
           <>
@@ -222,10 +224,9 @@ export default function UploadQuestions() {
                 ratio={"4:3"}
               />
             </View>
-            <View style={styles.buttons}>
-              <Button
-                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-                backgroundColor={Colors.lightBlue}
+            <View style={styles.blueButtonContainer}>
+              <Button //Blue Button
+                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 style={styles.buttons}
                 title="Kamera wechseln"
                 onPress={() => {
@@ -238,20 +239,16 @@ export default function UploadQuestions() {
               ></Button>
             </View>
 
-            <View style={styles.buttons}>
+            <View style={styles.blueButtonContainer}>
               <Button
-                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-                backgroundColor={Colors.lightBlue}
-                style={styles.buttons}
+                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 title="Aufnahme starten"
                 onPress={() => takeVideo()}
               />
             </View>
-            <View style={styles.buttons}>
-              <Button
-                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-                backgroundColor={Colors.lightBlue}
-                style={styles.button}
+            <View style={styles.blueButtonContainer}>
+              <Button //Blue Button
+                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 title="Aufnahme stoppen"
                 onPress={() => stopVideo()}
               />
@@ -267,11 +264,9 @@ export default function UploadQuestions() {
               isLooping
               onPlaybackStatusUpdate={(status) => setStatus(() => status)}
             />
-            <View style={styles.buttonContainer}>
+            <View style={styles.blueButtonContainer}>
               <Button //Blue Button
-                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-                backgroundColor={Colors.lightBlue}
-                style={styles.buttons}
+                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 title={status.isPlaying ? "Pause" : "Play"}
                 onPress={() =>
                   status.isPlaying
@@ -291,9 +286,7 @@ export default function UploadQuestions() {
                 title="Senden"
                 onPress={handleSendEmail}
                 disabled={!isMediaSelected}
-                style={styles.button}
                 color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-                backgroundColor={Colors.dhbwRed}
               />
             </View>
             <View style={styles.container}>
@@ -310,13 +303,11 @@ export default function UploadQuestions() {
                 Das Video bricht ab 15MB Dateigröße automatisch ab.
               </Text>
             </View>
-            <View style={styles.buttonContainer}>
+            <View style={styles.redButtonContainer}>
               <Button //Red Button
                 color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-                backgroundColor={Colors.dhbwRed}
                 title="Weiter"
                 onPress={handleAnswerSubmit}
-                style={styles.buttons}
               />
             </View>
           </>
@@ -331,10 +322,9 @@ export default function UploadQuestions() {
                 <Text style={styles.noImageText}>Kein Foto ausgewählt</Text>
               )}
             </View>
-            <View style={styles.buttonContainer}>
+            <View style={styles.blueButtonContainer}>
               <Button //Blue Button
-                color={Platform.OS === "ios" ? "white" : Colors.lightBlue}
-                backgroundColor={Colors.lightBlue}
+                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 title="Bild aufnehmen"
                 onPress={handleTakePhoto}
                 style={styles.button}
@@ -349,7 +339,6 @@ export default function UploadQuestions() {
             >
               <Button //Red Button
                 color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-                backgroundColor={Colors.dhbwRed}
                 style={styles.buttons}
                 title="Senden"
                 onPress={handleSendEmail}
@@ -367,10 +356,9 @@ export default function UploadQuestions() {
                 mit Gruppenname an {rallye.mail_adress}
               </Text>
             </View>
-            <View style={styles.buttonContainer}>
+            <View style={styles.redButtonContainer}>
               <Button //Red Button
                 color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-                backgroundColor={Colors.dhbwRed}
                 title="Weiter"
                 onPress={handleAnswerSubmit}
                 style={styles.buttons}
@@ -428,6 +416,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginRight: 10,
     marginLeft: 5,
+    marginBottom: 15,
   },
   fixedRatio: {
     flex: 1,
@@ -450,5 +439,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     width: "100%",
     marginBottom: 15,
+  },
+  blueButtonContainer: {
+    backgroundColor: Colors.contrastBlue,
+    margin: 6,
+    borderRadius: 5,
+  },
+  redButtonContainer: {
+    backgroundColor: Colors.dhbwRed,
+    margin: 6,
+    borderRadius: 5,
+  },
+  greyButtonContainer: {
+    backgroundColor: Colors.dhbwGray,
+    margin: 6,
+    borderRadius: 5,
   },
 });

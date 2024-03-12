@@ -58,7 +58,6 @@ export default function QRScan() {
           title="Zurück"
           onPress={() => setQRScan(false)}
           color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
-          backgroundColor={Colors.dhbwGray}
           textTransform="none"
         />
       </View>
@@ -83,7 +82,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex: 1,
     alignSelf: "center",
-    backgroundColor: Colors.dhbwRed,
+    backgroundColor: Colors.dhbwGray,
     margin: 1,
     marginBottom: 15,
     borderRadius: 5,

@@ -130,8 +130,6 @@ export default function VotingScreen() {
         >
           <Button
             style={styles.button}
-            color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
-            backgroundColor={Colors.dhbwGray}
             title="Nächste Abstimmung"
             onPress={handleNextQuestion}
             disabled={!selectionMade || sendingResult}
@@ -198,6 +196,11 @@ const styles = StyleSheet.create({
   },
   buttonContainerDeactive: {
     backgroundColor: Colors.dhbwGray,
+    margin: 6,
+    borderRadius: 5,
+  },
+  blueButtonContainer: {
+    backgroundColor: Colors.lightBlue,
     margin: 6,
     borderRadius: 5,
   },
