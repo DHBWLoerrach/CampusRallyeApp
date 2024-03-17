@@ -71,12 +71,10 @@ export default function UploadQuestions() {
         const cameraStatus = await Camera.requestCameraPermissionsAsync();
         setHasCameraPermission(cameraStatus.status === "granted");
       }
-      console.log("hasCameraPermission ", hasCameraPermission);
       if (hasAudioPermission === null || hasAudioPermission === false) {
         const audioStatus = await Camera.requestMicrophonePermissionsAsync();
         setHasAudioPermission(audioStatus.status === "granted");
       }
-      console.log("hasAudioPermission ", hasAudioPermission);
     })();
   }, [mode]);
 
@@ -99,7 +97,6 @@ export default function UploadQuestions() {
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(cameraStatus.status === "granted");
     }
-    console.log("hasCameraPermission ", hasCameraPermission);
     if (hasAudioPermission === null || hasAudioPermission === false) {
       const audioStatus = await Camera.requestMicrophonePermissionsAsync();
       setHasAudioPermission(audioStatus.status === "granted");
@@ -115,7 +112,6 @@ export default function UploadQuestions() {
         setRecord(data.uri);
         setSelectedMedia(data.uri);
         setIsMediaSelected(true);
-        console.log(data.uri);
       }
     }
   };

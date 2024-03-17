@@ -62,7 +62,6 @@ export default function QRCodeQuestions() {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
     });
-    console.log(location.coords.latitude, location.coords.longitude);
   };
 
   const standardLocation = () => {
@@ -82,8 +81,6 @@ export default function QRCodeQuestions() {
 
   submitSurrender = async () => {
     setCurrentQuestion(currentQuestion + 1);
-    console.log("Current");
-    console.log(currentQuestion);
     if (useRallye) {
       await supabase.from("group_questions").insert({
         group_id: group,

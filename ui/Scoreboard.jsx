@@ -13,7 +13,6 @@ const Scoreboard = () => {
   const [sortedGroups, setSortedGroups] = useState([]);
 
    useEffect(() => {
-    console.log('useEffect start Scoreboard');
     if(rallye.status !== "ended"){return}
     const fetchData = async () => {
       try {
@@ -32,7 +31,6 @@ const Scoreboard = () => {
     };
       
   fetchData();
-  console.log('useEffect start Scoreboard');
 }, [rallye]);
 
   return (

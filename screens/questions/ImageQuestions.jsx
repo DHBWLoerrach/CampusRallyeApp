@@ -21,13 +21,12 @@ export default function ImageQuestions() {
   const [answer, setAnswer] = useState("");
   const [confirmedAnswer, setConfirmedAnswer] = useState("");
   const [answered, setAnswered] = useState(false);
-  const { questions, currentQuestion, setCurrentQuestion, group } =
+  const { questions, currentQuestion, setCurrentQuestion } =
     useSharedStates();
   const setPoints = useSetPoints();
-  console.log(questions[currentQuestion].uri);
 
   const handleNext = async () => {
-    correctly_answered = answer.trim() === questions[currentQuestion].answer;
+    const correctly_answered = answer.trim() === questions[currentQuestion].answer;
     await setPoints(correctly_answered, questions[currentQuestion].points);
     setCurrentQuestion(currentQuestion + 1);
     setAnswer("");
@@ -51,7 +50,7 @@ export default function ImageQuestions() {
         </Text>
         <Image
           source={{ uri: questions[currentQuestion].uri }}
-          style={{ width: 300, height: 300, marginBottom: 20 }}
+          style={styles.picture}
         />
         <TextInput
           style={styles.input}
@@ -137,4 +136,9 @@ const styles = StyleSheet.create({
     margin: 6,
     borderRadius: 5,
   },
+  picture:{
+    width: 300, 
+    height: 300, 
+    marginBottom: 20 
+  }
 });

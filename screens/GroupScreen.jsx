@@ -62,7 +62,7 @@ export default function GroupScreen() {
   if (!useRallye) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.text, { marginBottom: 20 }]}>
+        <Text style={[styles.text, styles.TextDeactivated]}>
           Es ist aktuell keine Rallye aktiv.
         </Text>
         <UIButton size="small" onClick={() => setEnabled(false)}>
@@ -216,4 +216,7 @@ const styles = StyleSheet.create({
     margin: 6,
     borderRadius: 5,
   },
+  TextDeactivated: {
+    marginBottom: 20 
+  }
 });

@@ -58,8 +58,8 @@ export default function VotingScreen() {
 
   if (!voting[currentVoting]) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 20, color: "grey", textAlign: "center" }}>
+      <View style={styles.deactivatedContainer}>
+        <Text style={styles.Text}>
           Voting wurde beendet
         </Text>
       </View>
@@ -68,7 +68,7 @@ export default function VotingScreen() {
     return (
       <ScrollView style={styles.main}>
         <View>
-          <Text style={{ fontSize: 20, color: "grey", textAlign: "center" }}>
+          <Text style={styles.Text}>
             {voting[currentVoting]?.question}
           </Text>
         </View>
@@ -204,4 +204,14 @@ const styles = StyleSheet.create({
     margin: 6,
     borderRadius: 5,
   },
+  Text: { 
+    fontSize: 20, 
+    color: "grey", 
+    textAlign: "center" 
+  },
+  deactivatedContainer: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center" 
+  }
 });

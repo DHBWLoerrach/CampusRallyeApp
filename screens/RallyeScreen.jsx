@@ -49,7 +49,6 @@ export default function RallyeScreen() {
           if (group !== null) {
             const fetchData = async () => {
               let group_id = group;
-              console.log(group_id)
               let { data, error } = await supabase.rpc('get_questions', {
                 group_id,
               });
@@ -65,7 +64,6 @@ export default function RallyeScreen() {
                   element.multiple_answer = childAnswers;
                 }
                 data = temp.concat(multiple_choice_parent)
-                console.log(data)
                 for (let i = data.length - 1; i > 0; i--) {
                   const j = Math.floor(Math.random() * (i + 1));
                   [data[i], data[j]] = [data[j], data[i]];
@@ -163,7 +161,7 @@ export default function RallyeScreen() {
     } else if (useRallye&&rallye.status === "post_processing"){
       content = (
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={styles.refreshContainer}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -175,7 +173,7 @@ export default function RallyeScreen() {
     else if (!loading&&rallye.status=="running"&&remainingTime>=0) {
       content = (
         <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.refreshContainer}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -198,7 +196,7 @@ export default function RallyeScreen() {
     } else if(!loading&&rallye.status=="running"&&remainingTime<0){
       content = (
         <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.refreshContainer}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -226,7 +224,7 @@ export default function RallyeScreen() {
     } else if(useRallye&&rallye.status == "preparation"){
       content = (
         <ScrollView
-    contentContainerStyle={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+    contentContainerStyle={styles.specialRefreshConatiner}
     refreshControl={
       <RefreshControl
         refreshing={refreshing}
@@ -325,5 +323,13 @@ const styles = StyleSheet.create({
     color: Colors.dhbwGray,
     fontSize: 30,
     textAlign: 'center',
+  },
+  refreshContainer:{ 
+    flexGrow: 1 
+  },
+  specialRefreshConatiner:{ 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
   },
 });

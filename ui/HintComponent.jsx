@@ -21,7 +21,6 @@ export default function HintComponent({ questionId }) {
       .select("*")
       .eq("id", questionId)
       .limit(1);
-    console.log(hints);
 
     if (error) {
       console.error("Error fetching hints:", error);
