@@ -275,7 +275,7 @@ export default function UploadQuestions() {
               style={
                 !isMediaSelected
                   ? styles.buttonContainerDeactive
-                  : styles.buttonContainer
+                  : styles.redButtonContainer
               }
             >
               <Button //Red Button
@@ -323,14 +323,14 @@ export default function UploadQuestions() {
                 color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
                 title="Bild aufnehmen"
                 onPress={handleTakePhoto}
-                style={styles.button}
+                style={styles.buttons}
               />
             </View>
             <View
               style={
                 !isMediaSelected
                   ? styles.buttonContainerDeactive
-                  : styles.buttonContainer
+                  : styles.redButtonContainer
               }
             >
               <Button //Red Button
