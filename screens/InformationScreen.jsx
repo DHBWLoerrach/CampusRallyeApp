@@ -12,20 +12,24 @@ export default function InformationScreen() {
     <ScrollView>
       <View style={styles.container}>
         <Text>
-          Die Idee zu dieser Campus Rallye App entstand als Idee der
-          Managerin des Studienzentrums IT-Management und Informatik
-          der DHBW Lörrach Ulrike Menke. Die Konzeption und Umsetzung
-          erfolgte an der DHBW Lörrach im Rahmen eines Projekts für
-          die Studienarbeit des Studiengangs Informatik durch
-          Studierende unter Betreuung und Leitung von Ulrike Menke
+          Die Idee zu dieser Campus Rallye App entstand als Idee von
+          Ulrike Menke, Managerin Studienzentrum IT-Management und
+          Informatik der DHBW Lörrach (SZI). Die Konzeption und
+          Umsetzung erfolgte an der DHBW Lörrach durch Studierende im
+          Rahmen von Studienarbeiten und Projekten am SZI unter
+          Betreuung und Leitung von Ulrike Menke und Selina Quade
           (Konzeptgestaltung und Projektbetreuung) und Prof. Dr. Erik
           Behrends (technische Umsetzung).
+          {'\n\n'}
+          Bisher haben folgende Studierende an der Entwicklung dieser
+          App mitgewirkt:
           {'\n'}
+          Patrick Furtwängler, Marvin Obert (TIF21)
           {'\n'}
-          Die Campus Rallye App soll kontinuierlich weiterentwickelt
-          werden.
-          {'\n'}
-          {'\n'}
+          Fabian Kaiser, Sophie Strittmatter (TIF20)
+          {'\n\n'}
+          Die Campus Rallye App wird kontinuierlich weiterentwickelt.
+          {'\n\n'}
           Die App ist ein Open Source Projekt:
         </Text>
         <Text
