@@ -11,41 +11,43 @@ export default function InformationScreen() {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text>
-          Die Idee zu dieser Campus Rallye App entstand als Idee von
-          Ulrike Menke, Managerin Studienzentrum IT-Management und
-          Informatik der DHBW Lörrach (SZI). Die Konzeption und
-          Umsetzung erfolgte an der DHBW Lörrach durch Studierende im
-          Rahmen von Studienarbeiten und Projekten am SZI unter
-          Betreuung und Leitung von Ulrike Menke und Selina Quade
-          (Konzeptgestaltung und Projektbetreuung) und Prof. Dr. Erik
-          Behrends (technische Umsetzung).
-          {'\n\n'}
+        <Text style={styles.paragraph}>
+          Die Idee zu dieser Campus Rallye App entstand aus einer Idee
+          von Ulrike Menke, Managerin Studienzentrum IT-Management und
+          Informatik der DHBW Lörrach (SZI).
+        </Text>
+        <Text style={styles.paragraph}>
+          Die Konzeption und Umsetzung erfolgte an der DHBW Lörrach
+          durch Studierende im Rahmen von Studienarbeiten und
+          Projekten am SZI unter Betreuung und Leitung von Ulrike
+          Menke und Selina Quade (Konzeptgestaltung und
+          Projektbetreuung) und Prof. Dr. Erik Behrends (technische
+          Umsetzung).
+        </Text>
+        <Text style={styles.paragraph}>
           Bisher haben folgende Studierende an der Entwicklung dieser
           App mitgewirkt:
-          {'\n'}
-          Patrick Furtwängler, Marvin Obert (TIF21)
-          {'\n'}
+          {'\n\t'}
           Fabian Kaiser, Sophie Strittmatter (TIF20)
-          {'\n\n'}
-          Die Campus Rallye App wird kontinuierlich weiterentwickelt.
-          {'\n\n'}
-          Die App ist ein Open Source Projekt:
+          {'\n\t'}
+          Patrick Furtwängler, Marvin Obert (TIF21)
         </Text>
-        <Text
-          style={{ color: Colors.dhbwRed }}
-          onPress={() =>
-            Linking.openURL(
-              'https://github.com/DHBWLoerrach/CampusRallyeApp'
-            )
-          }
-        >
-          https://github.com/DHBWLoerrach/CampusRallyeApp
-        </Text>
-        <Text>
+        <Text style={styles.paragraph}>
+          Die Campus Rallye App wird als Open Source Projekt
+          kontinuierlich weiterentwickelt:
           {'\n'}
-          Version (App): 1.0.0
+          <Text
+            style={{ color: Colors.dhbwRed }}
+            onPress={() =>
+              Linking.openURL(
+                'https://github.com/DHBWLoerrach/CampusRallyeApp'
+              )
+            }
+          >
+            https://github.com/DHBWLoerrach/CampusRallyeApp
+          </Text>
         </Text>
+        <Text style={styles.paragraph}>Version (App): 1.0.0</Text>
       </View>
     </ScrollView>
   );
@@ -54,5 +56,8 @@ export default function InformationScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 15,
+  },
+  paragraph: {
+    marginBottom: 10,
   },
 });
