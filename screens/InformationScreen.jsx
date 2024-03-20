@@ -5,7 +5,17 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import * as Application from 'expo-application';
+import Constants from 'expo-constants';
 import Colors from '../utils/Colors';
+
+const AppVersion = () => {
+  let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
+  if (Constants.expoVersion) {
+    versionString = `App runs in Expo version ${Constants.expoVersion}`;
+  }
+  return <Text style={styles.paragraph}>{versionString}</Text>;
+};
 
 export default function InformationScreen() {
   return (
@@ -47,7 +57,7 @@ export default function InformationScreen() {
             https://github.com/DHBWLoerrach/CampusRallyeApp
           </Text>
         </Text>
-        <Text style={styles.paragraph}>Version (App): 1.0.0</Text>
+        <AppVersion />
       </View>
     </ScrollView>
   );
