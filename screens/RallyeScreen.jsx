@@ -13,6 +13,7 @@ import QRCodeQuestions from './questions/QRCodeQuestions';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 import Scoreboard from '../ui/Scoreboard';
+import UIButton from '../ui/UIButton';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
 import ImageQuestions from './questions/ImageQuestions';
 import VotingScreen from './Voting';
@@ -23,6 +24,7 @@ export default function RallyeScreen() {
     questions,
     setQuestions,
     currentQuestion,
+    setCurrentQuestion,
     group,
     points,
     useRallye,
@@ -30,6 +32,7 @@ export default function RallyeScreen() {
     setRallye,
     setPoints,
     remainingTime,
+    setEnabled,
   } = useSharedStates();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,7 +60,7 @@ export default function RallyeScreen() {
       if (group !== null) {
         const fetchData = async () => {
           let group_id = group;
-          let { data, error } = await supabase.rpc('get_questions', {
+          let { data } = await supabase.rpc('get_questions', {
             group_id,
           });
           if (data) {
@@ -112,7 +115,7 @@ export default function RallyeScreen() {
       if (currentQuestion === null) {
         const fetchData = async () => {
           let group_id_param = group;
-          let { data, error } = await supabase.rpc('get_points', {
+          let { data } = await supabase.rpc('get_points', {
             group_id_param,
           });
 
@@ -331,16 +334,24 @@ export default function RallyeScreen() {
       }
     } else if (!loading) {
       content = (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View>
-            <Text style={styles.endText}>
-              Ihr habt alle Fragen beantwortet, Glückwunsch!
-            </Text>
-            <Text style={styles.endText}>
-              Eure erreichte Punktzahl: {points}
-            </Text>
-          </View>
-        </ScrollView>
+        <View style={styles.container}>
+          <Text style={styles.endText}>
+            Alle Fragen wurden beantwortet.
+          </Text>
+          <Text style={styles.endText}>
+            Erreichte Punktzahl: {points}
+          </Text>
+          <UIButton
+            size="small"
+            onClick={() => {
+              setEnabled(false);
+              setPoints(0);
+              setCurrentQuestion(0);
+            }}
+          >
+            Zurück zur Anmeldung
+          </UIButton>
+        </View>
       );
     }
   }
