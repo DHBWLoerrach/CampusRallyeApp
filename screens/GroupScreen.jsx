@@ -6,13 +6,13 @@ import {
   TextInput,
   Button,
   Platform,
-} from "react-native";
-import UIButton from "../ui/UIButton";
-import { useSharedStates } from "../utils/SharedStates";
-import Colors from "../utils/Colors";
-import { useState, useEffect } from "react";
-import { supabase } from "../utils/Supabase";
-import { getData, storeData } from "../utils/LocalStorage";
+} from 'react-native';
+import UIButton from '../ui/UIButton';
+import { useSharedStates } from '../utils/SharedStates';
+import Colors from '../utils/Colors';
+import { useState, useEffect } from 'react';
+import { supabase } from '../utils/Supabase';
+import { getData, storeData } from '../utils/LocalStorage';
 
 //todo:potenzielles Problem bei der Gruppen auswahl welches durch Signal R oder Refresh gelöst werden muss
 
@@ -32,7 +32,7 @@ export default function GroupScreen() {
   const [loading, setLoading] = useState(true);
   const [selectionMade, setSelectionMade] = useState(false);
 
-  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupName, setNewGroupName] = useState('');
 
   useEffect(() => {
     if (!useRallye) {
@@ -40,17 +40,17 @@ export default function GroupScreen() {
     }
     const fetchDataSupabase = async () => {
       const { data: groups } = await supabase
-        .from("rallye_group")
-        .select("*")
-        .eq("rallye_id", rallye.id)
-        .order("id", { ascending: false });
+        .from('rallye_group')
+        .select('*')
+        .eq('rallye_id', rallye.id)
+        .order('id', { ascending: false });
       setGroups(groups);
       setLoading(false);
     };
     fetchDataSupabase();
 
     const fetchLocalStorage = async () => {
-      groupId = await getData("group_key");
+      groupId = await getData('group_key');
       if (groupId !== null) {
         setGroup(groupId);
         setSelectionMade(true);
@@ -73,19 +73,19 @@ export default function GroupScreen() {
   }
 
   const renameGroup = async (groupId) => {
-    if (newGroupName !== "") {
+    if (newGroupName !== '') {
       await supabase
-        .from("rallye_group")
+        .from('rallye_group')
         .update({ name: newGroupName })
-        .eq("id", groupId);
-      setNewGroupName("");
+        .eq('id', groupId);
+      setNewGroupName('');
 
       // Refresh groups
       const { data: groups } = await supabase
-        .from("rallye_group")
-        .select("*")
-        .eq("rallye_id", rallye.id)
-        .order("id", { ascending: false });
+        .from('rallye_group')
+        .select('*')
+        .eq('rallye_id', rallye.id)
+        .order('id', { ascending: false });
       setGroups(groups);
     }
   };
@@ -98,14 +98,15 @@ export default function GroupScreen() {
           style={[
             styles.section,
             {
-              borderColor: item.id === group ? Colors.dhbwRed : "white",
+              borderColor:
+                item.id === group ? Colors.dhbwRed : 'white',
             },
           ]}
         >
           <Text
             style={[
               styles.sectionTitle,
-              { color: item.id === group ? Colors.dhbwRed : "black" },
+              { color: item.id === group ? Colors.dhbwRed : 'black' },
             ]}
           >
             Gruppe {index + 1}
@@ -126,11 +127,19 @@ export default function GroupScreen() {
           )}
 
           {item.id === group && (
-            <View           style={
-              !newGroupName ? styles.buttonContainerDeactive : styles.buttonContainer
-            }>
+            <View
+              style={
+                !newGroupName
+                  ? styles.buttonContainerDeactive
+                  : styles.buttonContainer
+              }
+            >
               <Button
-                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
+                color={
+                  Platform.OS === 'ios'
+                    ? 'white'
+                    : Colors.contrastBlue
+                }
                 title="Umbenennen"
                 onPress={() => renameGroup(item.id)}
                 disabled={!newGroupName}
@@ -145,10 +154,10 @@ export default function GroupScreen() {
               setGroup(item.id);
               setSelectionMade(true);
               await supabase
-                .from("rallye_group")
+                .from('rallye_group')
                 .update({ used: true })
-                .eq("id", item.id);
-              await storeData("group_key", item.id);
+                .eq('id', item.id);
+              await storeData('group_key', item.id);
             }}
             disabled={selectionMade}
           >
@@ -163,47 +172,47 @@ export default function GroupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
   text: {
     fontSize: 20,
-    color: "grey",
-    textAlign: "center",
+    color: 'grey',
+    textAlign: 'center',
   },
   section: {
     marginTop: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 10,
     borderWidth: 1,
     padding: 20,
-    width: "100%",
+    width: '100%',
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 10,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 5,
   },
   label: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
     marginRight: 5,
   },
   value: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   input: {
     height: 40,
-    borderColor: "gray",
+    borderColor: 'gray',
     borderWidth: 1,
-    width: "100%",
+    width: '100%',
     padding: 10,
   },
   buttonContainer: {
@@ -217,6 +226,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   TextDeactivated: {
-    marginBottom: 20 
-  }
+    marginBottom: 20,
+  },
 });
