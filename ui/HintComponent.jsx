@@ -1,40 +1,37 @@
-import { useState, useEffect } from "react";
-import { Button, Text, Alert, View, StyleSheet, Platform } from "react-native";
-import { supabase } from "../utils/Supabase";
-import { useSetPoints } from "../utils/Points";
-import { useSharedStates } from "../utils/SharedStates";
-import Colors from "../utils/Colors";
+import { useState, useEffect } from 'react';
+import {
+  Button,
+  Text,
+  Alert,
+  View,
+  StyleSheet,
+  Platform,
+} from 'react-native';
+import { supabase } from '../utils/Supabase';
+import { useSharedStates } from '../utils/SharedStates';
+import Colors from '../utils/Colors';
 
 export default function HintComponent({ questionId }) {
   const [hints, setHints] = useState([]);
-  const setPoints = useSetPoints();
+  const [showHint, setShowHint] = useState(false);
 
   const { questions, currentQuestion } = useSharedStates();
 
   useEffect(() => {
     setHints([]);
+    fetchHints();
   }, [currentQuestion]);
 
   const fetchHints = async () => {
     const { data: hints, error } = await supabase
-      .from("questions_hints")
-      .select("*")
-      .eq("id", questionId)
+      .from('questions_hints')
+      .select('*')
+      .eq('id', questionId)
       .limit(1);
 
     if (error) {
-      console.error("Error fetching hints:", error);
+      console.error('Error fetching hints:', error);
       return;
-    }
-
-    if (hints.length === 0) {
-      Alert.alert(
-        "Keine Tipps verfügbar",
-        "Für diese Frage sind keine Tipps angelegt."
-      );
-    } else {
-      questions[currentQuestion].points =
-        questions[currentQuestion].points - hints[0].points;
     }
 
     setHints(hints);
@@ -42,44 +39,58 @@ export default function HintComponent({ questionId }) {
 
   const handleHint = () => {
     Alert.alert(
-      "Sicherheitsfrage",
+      'Sicherheitsfrage',
       `Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.`,
       [
         {
-          text: "Abbrechen",
-          style: "cancel",
+          text: 'Abbrechen',
+          style: 'cancel',
         },
         {
-          text: "Ja, ich möchte einen Tipp",
-          onPress: () => fetchHints(),
+          text: 'Ja, ich möchte einen Tipp',
+          onPress: () => {
+            setShowHint(true);
+            questions[currentQuestion].points =
+              questions[currentQuestion].points - hints[0].points;
+          },
         },
       ]
     );
   };
 
+  if (hints.length === 0) return null;
+
   return (
     <View style={styles.hintContainer}>
-      <View style={styles.blueButtonContainer}>
-        <Button //Blue Button
-          title="Tipp anfordern"
-          onPress={handleHint}
-          color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
-        />
-      </View>
+      {!showHint && (
+        <View style={styles.blueButtonContainer}>
+          <Button //Blue Button
+            title="Tipp anfordern"
+            onPress={handleHint}
+            color={
+              Platform.OS === 'ios' ? 'white' : Colors.contrastBlue
+            }
+          />
+        </View>
+      )}
 
-      {hints.length > 0 && <Text style={styles.hintTitle}>Tipp:</Text>}
-      {hints.map((hint, index) => (
-        <Text key={index} style={styles.hintText}>
-          {hint.hint}
-        </Text>
-      ))}
+      {showHint && (
+        <>
+          <Text style={styles.hintTitle}>Tipp:</Text>
+          {hints.map((hint, index) => (
+            <Text key={index} style={styles.hintText}>
+              {hint.hint}
+            </Text>
+          ))}
+        </>
+      )}
     </View>
   );
 }
 const styles = StyleSheet.create({
   hintTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 20,
   },
   hintText: {
