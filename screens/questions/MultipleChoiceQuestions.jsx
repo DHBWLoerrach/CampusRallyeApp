@@ -51,26 +51,28 @@ export default function MultipleChoiceQuestions() {
         <Text style={styles.question}>
           {questions[currentQuestion].question}
         </Text>
-        {questions[currentQuestion].multiple_answer.map(
-          (option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.squareButton}
-              onPress={() => setAnswer(option)}
-            >
-              <View
-                style={[
-                  styles.innerSquare,
-                  {
-                    backgroundColor:
-                      answer === option ? Colors.dhbwRed : 'white',
-                  },
-                ]}
-              />
-              <Text style={styles.answerText}>{option}</Text>
-            </TouchableOpacity>
-          )
-        )}
+        <View>
+          {questions[currentQuestion].multiple_answer.map(
+            (option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.squareButton}
+                onPress={() => setAnswer(option)}
+              >
+                <View
+                  style={[
+                    styles.innerSquare,
+                    {
+                      backgroundColor:
+                        answer === option ? Colors.dhbwRed : 'white',
+                    },
+                  ]}
+                />
+                <Text style={styles.answerText}>{option}</Text>
+              </TouchableOpacity>
+            )
+          )}
+        </View>
         <View
           style={
             !answer
