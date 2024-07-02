@@ -13,10 +13,10 @@
     },
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
+      "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
+      "distribution": "internal"
     },
     "production": {
       "autoIncrement": true
@@ -26,7 +26,7 @@
     "production": {
       "android": {
         "serviceAccountKeyPath": "$HOME/Documents/google-play-upload-key.json",
-        "track": "internal"
+        "track": "beta"
       }
     }
   }
