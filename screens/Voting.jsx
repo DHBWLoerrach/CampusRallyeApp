@@ -4,13 +4,12 @@ import {
   ScrollView,
   StyleSheet,
   Button,
-  Platform,
-} from "react-native";
-import UIButton from "../ui/UIButton";
-import { useSharedStates } from "../utils/SharedStates";
-import Colors from "../utils/Colors";
-import { useState, useEffect } from "react";
-import { supabase } from "../utils/Supabase";
+} from 'react-native';
+import UIButton from '../ui/UIButton';
+import { useSharedStates } from '../utils/SharedStates';
+import Colors from '../utils/Colors';
+import { useState, useEffect } from 'react';
+import { supabase } from '../utils/Supabase';
 
 export default function VotingScreen() {
   const { groups, group } = useSharedStates();
@@ -24,9 +23,12 @@ export default function VotingScreen() {
 
   useEffect(() => {
     const fetchDataSupabase = async () => {
-      const { data: vote } = await supabase.rpc("get_unvoted_questions", {
-        input_group_id: group,
-      });
+      const { data: vote } = await supabase.rpc(
+        'get_unvoted_questions',
+        {
+          input_group_id: group,
+        }
+      );
       if (vote !== null) {
         setVoting(vote);
       }
@@ -38,15 +40,13 @@ export default function VotingScreen() {
   const handleNextQuestion = async () => {
     setSendingResult(true);
     for (let vote of selectedGroups) {
-      await supabase
-        .from("question_voting")
-        .insert([
-          {
-            question_id: voting[currentVoting]?.id,
-            group_id: group,
-            voted_group_id: vote.id,
-          },
-        ]);
+      await supabase.from('question_voting').insert([
+        {
+          question_id: voting[currentVoting]?.id,
+          group_id: group,
+          voted_group_id: vote.id,
+        },
+      ]);
     }
 
     setCurrentVoting(currentVoting + 1);
@@ -59,9 +59,7 @@ export default function VotingScreen() {
   if (!voting[currentVoting]) {
     return (
       <View style={styles.deactivatedContainer}>
-        <Text style={styles.Text}>
-          Voting wurde beendet
-        </Text>
+        <Text style={styles.Text}>Voting wurde beendet</Text>
       </View>
     );
   } else {
@@ -81,8 +79,8 @@ export default function VotingScreen() {
                 styles.section,
                 {
                   borderColor: disabledGroups.includes(item.id)
-                    ? "red"
-                    : "white",
+                    ? 'red'
+                    : 'white',
                 },
               ]}
             >
@@ -102,20 +100,28 @@ export default function VotingScreen() {
                     if (!selectionMade) {
                       setSelectedGroups([...selectedGroups, item]);
                       setDisabledGroups([...disabledGroups, item.id]);
-                      if (groups.length - 4 === selectedGroups.length) {
+                      if (
+                        groups.length - 4 ===
+                        selectedGroups.length
+                      ) {
                         setSelectionMade(true);
                       }
                     }
                   } else {
                     if (!selectionMade) {
                       setSelectedGroups([...selectedGroups, item.id]);
-                      if (groups.length - 1 === selectedGroups.length) {
+                      if (
+                        groups.length - 1 ===
+                        selectedGroups.length
+                      ) {
                         setSelectionMade(true);
                       }
                     }
                   }
                 }}
-                disabled={selectionMade || disabledGroups.includes(item.id)}
+                disabled={
+                  selectionMade || disabledGroups.includes(item.id)
+                }
               >
                 Punkt vergeben
               </UIButton>
@@ -142,51 +148,51 @@ export default function VotingScreen() {
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: "#F5F5F5",
+    backgroundColor: '#F5F5F5',
   },
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
   text: {
     fontSize: 20,
-    color: "grey",
-    textAlign: "center",
+    color: 'grey',
+    textAlign: 'center',
   },
   section: {
     marginTop: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 10,
     borderWidth: 1,
     padding: 20,
-    width: "100%",
+    width: '100%',
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 10,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 5,
   },
   label: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
     marginRight: 5,
   },
   value: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   input: {
     height: 40,
-    borderColor: "gray",
+    borderColor: 'gray',
     borderWidth: 1,
-    width: "100%",
+    width: '100%',
     padding: 10,
   },
   buttonContainer: {
@@ -204,14 +210,14 @@ const styles = StyleSheet.create({
     margin: 6,
     borderRadius: 5,
   },
-  Text: { 
-    fontSize: 20, 
-    color: "grey", 
-    textAlign: "center" 
+  Text: {
+    fontSize: 20,
+    color: 'grey',
+    textAlign: 'center',
   },
-  deactivatedContainer: { 
-    flex: 1, 
-    justifyContent: "center", 
-    alignItems: "center" 
-  }
+  deactivatedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
