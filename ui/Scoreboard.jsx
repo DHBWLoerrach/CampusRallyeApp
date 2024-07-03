@@ -1,25 +1,26 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useSharedStates } from '../utils/SharedStates';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../utils/Supabase';
 
-
 const Scoreboard = () => {
-
-  const {
-    rallye
-  } = useSharedStates();
+  const { rallye } = useSharedStates();
 
   const [sortedGroups, setSortedGroups] = useState([]);
 
-   useEffect(() => {
-    if(rallye.status !== "ended"){return}
+  useEffect(() => {
+    if (rallye.status !== 'ended') {
+      return;
+    }
     const fetchData = async () => {
       try {
         let rallye_id_param = rallye.id;
-        let { data, error } = await supabase.rpc('get_total_points_per_rallye', {
-          rallye_id_param,
-        });
+        let { data, error } = await supabase.rpc(
+          'get_total_points_per_rallye',
+          {
+            rallye_id_param,
+          }
+        );
 
         if (data) {
           data.sort((a, b) => b.total_points - a.total_points);
@@ -29,9 +30,9 @@ const Scoreboard = () => {
         console.error('Error fetching total points data:', error);
       }
     };
-      
-  fetchData();
-}, [rallye]);
+
+    fetchData();
+  }, [rallye]);
 
   return (
     <View style={styles.scoreboardContainer}>
@@ -50,7 +51,7 @@ const Scoreboard = () => {
       ))}
     </View>
   );
-}; 
+};
 
 const styles = StyleSheet.create({
   scoreboardContainer: {
@@ -63,7 +64,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
-
   },
   tableHeader: {
     flexDirection: 'row',
