@@ -39,8 +39,8 @@ const Scoreboard = () => {
       <Text style={styles.scoreboardTitle}>Scoreboard</Text>
       <View style={styles.tableHeader}>
         <Text style={styles.headerText}>Platz</Text>
-        <Text style={styles.headerText}>Gruppen Name</Text>
-        <Text style={styles.headerText}>Erreichte Punkte</Text>
+        <Text style={styles.headerText}>Gruppenname</Text>
+        <Text style={styles.headerText}>Punkte</Text>
       </View>
       {sortedGroups.map((group, index) => (
         <View key={index} style={styles.tableRow}>
