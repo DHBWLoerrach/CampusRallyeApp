@@ -297,7 +297,7 @@ export default function RallyeScreen() {
     } else if (useRallye && rallye.status == 'preparation') {
       content = (
         <ScrollView
-          contentContainerStyle={styles.specialRefreshConatiner}
+          contentContainerStyle={styles.specialRefreshContainer}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   refreshContainer: {
     flexGrow: 1,
   },
-  specialRefreshConatiner: {
+  specialRefreshContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
