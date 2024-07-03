@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,17 +8,17 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
-} from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import * as MediaLibrary from "expo-media-library";
-import * as MailComposer from "expo-mail-composer";
-import { useSharedStates } from "../../utils/SharedStates";
-import { useSetPoints } from "../../utils/Points";
-import Colors from "../../utils/Colors";
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
+import * as MailComposer from 'expo-mail-composer';
+import { useSharedStates } from '../../utils/SharedStates';
+import { useSetPoints } from '../../utils/Points';
+import Colors from '../../utils/Colors';
 
-import { Camera } from "expo-camera";
-import { Video } from "expo-av";
-import * as FileSystem from "expo-file-system";
+import { Camera } from 'expo-camera';
+import { Video } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 
 export default function UploadQuestions() {
   const [selectedMedia, setSelectedMedia] = useState(null);
@@ -37,7 +37,8 @@ export default function UploadQuestions() {
   const setPoints = useSetPoints();
 
   const [hasAudioPermission, setHasAudioPermission] = useState(false);
-  const [hasCameraPermission, setHasCameraPermission] = useState(false);
+  const [hasCameraPermission, setHasCameraPermission] =
+    useState(false);
   const [camera, setCamera] = useState(null);
   const [record, setRecord] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
@@ -46,12 +47,12 @@ export default function UploadQuestions() {
 
   useEffect(() => {
     (async () => {
-      if (Platform.OS !== "web") {
+      if (Platform.OS !== 'web') {
         const { status } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
+        if (status !== 'granted') {
           alert(
-            "Sorry, wir benötigen die Berechtigung zur Nutzung der Kamera!"
+            'Sorry, wir benötigen die Berechtigung zur Nutzung der Kamera!'
           );
         }
       }
@@ -59,21 +60,29 @@ export default function UploadQuestions() {
   }, []);
 
   const getGroupName = (groups, groupId) => {
-    print("groups", groups);
-    print("groupId", groupId);
+    print('groups', groups);
+    print('groupId', groupId);
     const group = groups.find((group) => group.id === groupId);
     return group ? group.name : null;
   };
 
   useEffect(() => {
     (async () => {
-      if (hasCameraPermission === null || hasCameraPermission === false) {
-        const cameraStatus = await Camera.requestCameraPermissionsAsync();
-        setHasCameraPermission(cameraStatus.status === "granted");
+      if (
+        hasCameraPermission === null ||
+        hasCameraPermission === false
+      ) {
+        const cameraStatus =
+          await Camera.requestCameraPermissionsAsync();
+        setHasCameraPermission(cameraStatus.status === 'granted');
       }
-      if (hasAudioPermission === null || hasAudioPermission === false) {
-        const audioStatus = await Camera.requestMicrophonePermissionsAsync();
-        setHasAudioPermission(audioStatus.status === "granted");
+      if (
+        hasAudioPermission === null ||
+        hasAudioPermission === false
+      ) {
+        const audioStatus =
+          await Camera.requestMicrophonePermissionsAsync();
+        setHasAudioPermission(audioStatus.status === 'granted');
       }
     })();
   }, [mode]);
@@ -93,17 +102,22 @@ export default function UploadQuestions() {
   };
 
   const takeVideo = async () => {
-    if (hasCameraPermission === null || hasCameraPermission === false) {
-      const cameraStatus = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(cameraStatus.status === "granted");
+    if (
+      hasCameraPermission === null ||
+      hasCameraPermission === false
+    ) {
+      const cameraStatus =
+        await Camera.requestCameraPermissionsAsync();
+      setHasCameraPermission(cameraStatus.status === 'granted');
     }
     if (hasAudioPermission === null || hasAudioPermission === false) {
-      const audioStatus = await Camera.requestMicrophonePermissionsAsync();
-      setHasAudioPermission(audioStatus.status === "granted");
+      const audioStatus =
+        await Camera.requestMicrophonePermissionsAsync();
+      setHasAudioPermission(audioStatus.status === 'granted');
     } else {
       if (camera) {
         const data = await camera.recordAsync({
-          VideoQuality: ["720p"],
+          VideoQuality: ['720p'],
           maxDuration: 20,
           maxFileSize: 16500000,
           mute: false,
@@ -121,18 +135,22 @@ export default function UploadQuestions() {
   };
 
   const handleSendEmail = async () => {
-    const hasPermission = await MediaLibrary.requestPermissionsAsync();
+    const hasPermission =
+      await MediaLibrary.requestPermissionsAsync();
 
     if (!hasPermission.granted) {
       Alert.alert(
-        "Berechtigung erforderlich",
-        "Bitte gewähren Sie uns Zugriff auf Ihre Mediathek!"
+        'Berechtigung erforderlich',
+        'Bitte gewähren Sie uns Zugriff auf Ihre Mediathek!'
       );
       return;
     }
 
     if (!selectedMedia) {
-      Alert.alert("Fehler", "Bitte wählen Sie ein Bild oder Video aus!");
+      Alert.alert(
+        'Fehler',
+        'Bitte wählen Sie ein Bild oder Video aus!'
+      );
       return;
     }
 
@@ -140,7 +158,7 @@ export default function UploadQuestions() {
     //Erstellen einer Kopie der Datei im temporären Verzeichnis der App
 
     const newUri =
-      FileSystem.documentDirectory + selectedMedia.split("/").pop();
+      FileSystem.documentDirectory + selectedMedia.split('/').pop();
     await FileSystem.copyAsync({
       from: selectedMedia,
       to: newUri,
@@ -151,11 +169,11 @@ export default function UploadQuestions() {
     let mailOptions = {
       recipients: [rallye.mail_adress],
       subject:
-        mode === "photo"
-          ? "Gruppenfoto -- Gruppe: " + groupName
-          : "Gruppenvideo -- Gruppe: " + groupName,
+        mode === 'photo'
+          ? 'Gruppenfoto -- Gruppe: ' + groupName
+          : 'Gruppenvideo -- Gruppe: ' + groupName,
       body:
-        mode === "photo"
+        mode === 'photo'
           ? `Das ist unser Gruppenfoto!\n\nFrage: ${questions[currentQuestion].question}`
           : `Das ist unser Gruppenvideo!\n\nFrage: ${questions[currentQuestion].question}`,
       attachments: [newUri],
@@ -163,7 +181,7 @@ export default function UploadQuestions() {
     try {
       await MailComposer.composeAsync(mailOptions);
     } catch (error) {
-      console.error("Fehler beim Senden der E-Mail: ", error);
+      console.error('Fehler beim Senden der E-Mail: ', error);
     }
   };
 
@@ -174,15 +192,15 @@ export default function UploadQuestions() {
 
   const handleAnswerSubmit = () => {
     Alert.alert(
-      "Sicherheitsfrage",
+      'Sicherheitsfrage',
       ` Hast du die Mail mit dem Bild / Video gesendet ?`,
       [
         {
-          text: "Abbrechen",
-          style: "cancel",
+          text: 'Abbrechen',
+          style: 'cancel',
         },
         {
-          text: "Ja, ich habe die Mail gesendet",
+          text: 'Ja, ich habe die Mail gesendet',
           onPress: () => handleNext(),
         },
       ]
@@ -192,135 +210,175 @@ export default function UploadQuestions() {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.text}>{questions[currentQuestion].question}</Text>
+        <Text style={styles.text}>
+          {questions[currentQuestion].question}
+        </Text>
 
         <View style={styles.buttonRow}>
-        <View style={styles.greyButtonContainer}>
-          <Button
-            title="Foto Modus"
-            onPress={() => setMode("photo")}
-            color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
-          />
+          <View style={styles.greyButtonContainer}>
+            <Button
+              title="Foto Modus"
+              onPress={() => setMode('photo')}
+              color={
+                Platform.OS === 'ios' ? 'white' : Colors.dhbwGray
+              }
+            />
           </View>
           <View style={styles.greyButtonContainer}>
-          <Button //grey Button
-            title="Video Modus"
-            onPress={() => setMode("video")}
-            color={Platform.OS === "ios" ? "white" : Colors.dhbwGray}
-          />
+            <Button //grey Button
+              title="Video Modus"
+              onPress={() => setMode('video')}
+              color={
+                Platform.OS === 'ios' ? 'white' : Colors.dhbwGray
+              }
+            />
           </View>
         </View>
-        {mode === "video" && hasAudioPermission && hasCameraPermission && (
-          <>
-            <View style={styles.cameraContainer}>
-              <Camera
-                ref={(ref) => setCamera(ref)}
-                style={styles.fixedRatio}
-                type={type}
-                ratio={"4:3"}
-              />
-            </View>
-            <View style={styles.blueButtonContainer}>
-              <Button //Blue Button
-                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
-                style={styles.buttons}
-                title="Kamera wechseln"
-                onPress={() => {
-                  setType(
-                    type === Camera.Constants.Type.back
-                      ? Camera.Constants.Type.front
-                      : Camera.Constants.Type.back
-                  );
-                }}
-              ></Button>
-            </View>
+        {mode === 'video' &&
+          hasAudioPermission &&
+          hasCameraPermission && (
+            <>
+              <View style={styles.cameraContainer}>
+                <Camera
+                  ref={(ref) => setCamera(ref)}
+                  style={styles.fixedRatio}
+                  type={type}
+                  ratio={'4:3'}
+                />
+              </View>
+              <View style={styles.blueButtonContainer}>
+                <Button //Blue Button
+                  color={
+                    Platform.OS === 'ios'
+                      ? 'white'
+                      : Colors.contrastBlue
+                  }
+                  style={styles.buttons}
+                  title="Kamera wechseln"
+                  onPress={() => {
+                    setType(
+                      type === Camera.Constants.Type.back
+                        ? Camera.Constants.Type.front
+                        : Camera.Constants.Type.back
+                    );
+                  }}
+                ></Button>
+              </View>
 
-            <View style={styles.blueButtonContainer}>
-              <Button
-                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
-                title="Aufnahme starten"
-                onPress={() => takeVideo()}
-              />
-            </View>
-            <View style={styles.blueButtonContainer}>
-              <Button //Blue Button
-                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
-                title="Aufnahme stoppen"
-                onPress={() => stopVideo()}
-              />
-            </View>
-            <Video
-              ref={video}
-              style={styles.video}
-              source={{
-                uri: record,
-              }}
-              useNativeControls
-              resizeMode="contain"
-              isLooping
-              onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-            />
-            <View style={styles.blueButtonContainer}>
-              <Button //Blue Button
-                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
-                title={status.isPlaying ? "Pause" : "Play"}
-                onPress={() =>
-                  status.isPlaying
-                    ? video.current.pauseAsync()
-                    : video.current.playAsync()
+              <View style={styles.blueButtonContainer}>
+                <Button
+                  color={
+                    Platform.OS === 'ios'
+                      ? 'white'
+                      : Colors.contrastBlue
+                  }
+                  title="Aufnahme starten"
+                  onPress={() => takeVideo()}
+                />
+              </View>
+              <View style={styles.blueButtonContainer}>
+                <Button //Blue Button
+                  color={
+                    Platform.OS === 'ios'
+                      ? 'white'
+                      : Colors.contrastBlue
+                  }
+                  title="Aufnahme stoppen"
+                  onPress={() => stopVideo()}
+                />
+              </View>
+              <Video
+                ref={video}
+                style={styles.video}
+                source={{
+                  uri: record,
+                }}
+                useNativeControls
+                resizeMode="contain"
+                isLooping
+                onPlaybackStatusUpdate={(status) =>
+                  setStatus(() => status)
                 }
               />
-            </View>
-            <View
-              style={
-                !isMediaSelected
-                  ? styles.buttonContainerDeactive
-                  : styles.redButtonContainer
-              }
-            >
-              <Button //Red Button
-                title="Senden"
-                onPress={handleSendEmail}
-                disabled={!isMediaSelected}
-                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-              />
-            </View>
-            <View style={styles.container}>
-              <Text style={styles.infoText}>
-                Das aufgenommene Video soll über den Button "SENDEN" per E-Mail
-                gesendet werden
-              </Text>
-              <Text style={styles.infoText}>
-                Falls das Senden über den Button nicht geht, dann macht das
-                Video in eurer Kamera App und schickt es selsbtständig mit eurem
-                Gruppennamen an: {rallye.mail_adress}
-              </Text>
-              <Text style={styles.infoText}>
-                Das Video bricht ab 15MB Dateigröße automatisch ab.
-              </Text>
-            </View>
-            <View style={styles.redButtonContainer}>
-              <Button //Red Button
-                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
-                title="Weiter"
-                onPress={handleAnswerSubmit}
-              />
-            </View>
-          </>
-        )}
+              <View style={styles.blueButtonContainer}>
+                <Button //Blue Button
+                  color={
+                    Platform.OS === 'ios'
+                      ? 'white'
+                      : Colors.contrastBlue
+                  }
+                  title={status.isPlaying ? 'Pause' : 'Play'}
+                  onPress={() =>
+                    status.isPlaying
+                      ? video.current.pauseAsync()
+                      : video.current.playAsync()
+                  }
+                />
+              </View>
+              <View
+                style={
+                  !isMediaSelected
+                    ? styles.buttonContainerDeactive
+                    : styles.redButtonContainer
+                }
+              >
+                <Button //Red Button
+                  title="Senden"
+                  onPress={handleSendEmail}
+                  disabled={!isMediaSelected}
+                  color={
+                    Platform.OS === 'ios' ? 'white' : Colors.dhbwRed
+                  }
+                />
+              </View>
+              <View style={styles.container}>
+                <Text style={styles.infoText}>
+                  Das aufgenommene Video soll über den Button "SENDEN"
+                  per E-Mail gesendet werden
+                </Text>
+                <Text style={styles.infoText}>
+                  Falls das Senden über den Button nicht geht, dann
+                  macht das Video in eurer Kamera App und schickt es
+                  selsbtständig mit eurem Gruppennamen an:{' '}
+                  {rallye.mail_adress}
+                </Text>
+                <Text style={styles.infoText}>
+                  Das Video bricht ab 15MB Dateigröße automatisch ab.
+                </Text>
+              </View>
+              <View style={styles.redButtonContainer}>
+                <Button //Red Button
+                  color={
+                    Platform.OS === 'ios' ? 'white' : Colors.dhbwRed
+                  }
+                  title="Weiter"
+                  onPress={handleAnswerSubmit}
+                />
+              </View>
+            </>
+          )}
 
-        {mode === "photo" && (
+        {mode === 'photo' && (
           <>
             <View style={styles.imageContainer}>
               {selectedMedia ? (
-                <Image source={{ uri: selectedMedia }} style={styles.image} />
+                <Image
+                  source={{ uri: selectedMedia }}
+                  style={styles.image}
+                />
               ) : (
-                <Text style={styles.noImageText}>Kein Foto ausgewählt</Text>
+                <Text style={styles.noImageText}>
+                  Kein Foto ausgewählt
+                </Text>
               )}
             </View>
             <View style={styles.blueButtonContainer}>
               <Button //Blue Button
-                color={Platform.OS === "ios" ? "white" : Colors.contrastBlue}
+                color={
+                  Platform.OS === 'ios'
+                    ? 'white'
+                    : Colors.contrastBlue
+                }
                 title="Bild aufnehmen"
                 onPress={handleTakePhoto}
                 style={styles.buttons}
@@ -334,7 +392,9 @@ export default function UploadQuestions() {
               }
             >
               <Button //Red Button
-                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+                color={
+                  Platform.OS === 'ios' ? 'white' : Colors.dhbwRed
+                }
                 style={styles.buttons}
                 title="Senden"
                 onPress={handleSendEmail}
@@ -343,18 +403,21 @@ export default function UploadQuestions() {
             </View>
             <View style={styles.container}>
               <Text style={styles.infoText}>
-                Das aufgenommene Foto soll über den Button "SENDEN" per E-Mail
-                gesendet werden
+                Das aufgenommene Foto soll über den Button "SENDEN"
+                per E-Mail gesendet werden
               </Text>
               <Text style={styles.infoText}>
-                Falls das Senden über den Button nicht geht, dann macht die
-                Fotos in eurer Kamera App und schickt die Fotos selsbtständig
-                mit Gruppenname an {rallye.mail_adress}
+                Falls das Senden über den Button nicht geht, dann
+                macht die Fotos in eurer Kamera App und schickt die
+                Fotos selsbtständig mit Gruppenname an{' '}
+                {rallye.mail_adress}
               </Text>
             </View>
             <View style={styles.redButtonContainer}>
               <Button //Red Button
-                color={Platform.OS === "ios" ? "white" : Colors.dhbwRed}
+                color={
+                  Platform.OS === 'ios' ? 'white' : Colors.dhbwRed
+                }
                 title="Weiter"
                 onPress={handleAnswerSubmit}
                 style={styles.buttons}
@@ -370,32 +433,32 @@ export default function UploadQuestions() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginStart: 10,
     marginEnd: 10,
   },
   text: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: "center",
+    textAlign: 'center',
   },
   imageContainer: {
-    backgroundColor: "#F2F2F2",
+    backgroundColor: '#F2F2F2',
     borderRadius: 10,
-    overflow: "hidden",
-    width: "100%",
+    overflow: 'hidden',
+    width: '100%',
     aspectRatio: 4 / 3,
     marginBottom: 20,
   },
   image: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   noImageText: {
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
     paddingVertical: 20,
   },
   buttonContainer: {
@@ -409,7 +472,7 @@ const styles = StyleSheet.create({
   },
   cameraContainer: {
     flex: 1,
-    flexDirection: "row",
+    flexDirection: 'row',
     marginRight: 10,
     marginLeft: 5,
     marginBottom: 15,
@@ -419,21 +482,21 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   video: {
-    alignSelf: "center",
+    alignSelf: 'center',
     width: 350,
     height: 220,
   },
   buttons: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     margin: 10,
     marginBottom: 10,
     padding: 10,
   },
   buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    width: '100%',
     marginBottom: 15,
   },
   blueButtonContainer: {
