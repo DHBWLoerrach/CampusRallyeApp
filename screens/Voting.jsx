@@ -59,17 +59,15 @@ export default function VotingScreen() {
   if (!voting[currentVoting]) {
     return (
       <View style={styles.deactivatedContainer}>
-        <Text style={styles.Text}>Voting wurde beendet</Text>
+        <Text style={styles.text}>Voting wurde beendet</Text>
       </View>
     );
   } else {
     return (
-      <ScrollView style={styles.main}>
-        <View>
-          <Text style={styles.Text}>
-            {voting[currentVoting]?.question}
-          </Text>
-        </View>
+      <View style={styles.main}>
+        <Text style={styles.text}>
+          {voting[currentVoting]?.question}
+        </Text>
         {groups
           ?.filter((item) => item.id !== group)
           .map((item, index) => (
@@ -92,7 +90,7 @@ export default function VotingScreen() {
                 size="small"
                 color="grey"
                 outline={true}
-                onClick={async () => {
+                onClick={() => {
                   if (groups.length === 1) {
                     setSelectionMade(true);
                   }
@@ -141,7 +139,7 @@ export default function VotingScreen() {
             disabled={!selectionMade || sendingResult}
           />
         </View>
-      </ScrollView>
+      </View>
     );
   }
 }
@@ -210,7 +208,7 @@ const styles = StyleSheet.create({
     margin: 6,
     borderRadius: 5,
   },
-  Text: {
+  text: {
     fontSize: 20,
     color: 'grey',
     textAlign: 'center',
