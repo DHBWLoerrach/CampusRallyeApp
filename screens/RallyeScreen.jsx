@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  RefreshControl,
-  ScrollView,
-} from 'react-native';
+import { ActivityIndicator, View, Text } from 'react-native';
 import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
 import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
-import Scoreboard from '../ui/Scoreboard';
-import UIButton from '../ui/UIButton';
+import { globalStyles } from '../utils/Styles';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
 import ImageQuestions from './questions/ImageQuestions';
-import VotingScreen from './Voting';
+import * as RallyeStates from './RallyeStates';
+
+const questionTypeComponents = {
+  knowledge: SkillQuestions,
+  upload: UploadQuestions,
+  qr: QRCodeQuestions,
+  multiple_choice: MultipleChoiceQuestions,
+  picture: ImageQuestions,
+};
 
 export default function RallyeScreen() {
   // import shared states
@@ -25,6 +26,7 @@ export default function RallyeScreen() {
     setQuestions,
     currentQuestion,
     setCurrentQuestion,
+    setEnabled,
     group,
     points,
     useRallye,
@@ -32,23 +34,20 @@ export default function RallyeScreen() {
     setRallye,
     setPoints,
     remainingTime,
-    setEnabled,
   } = useSharedStates();
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const reloadRallye = async () => {
-    const { data: rallye } = await supabase
-      .from('rallye')
-      .select('*')
-      .eq('is_active_rallye', true);
-    setRallye(rallye[0]);
-  };
-
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = React.useCallback(async () => {
     if (useRallye) {
-      setRefreshing(true);
-      reloadRallye().then(() => setRefreshing(false));
+      setLoading(true);
+      const { data: rallye } = await supabase
+        .from('rallye')
+        .select('*')
+        .eq('is_active_rallye', true);
+      if (rallye[0].status !== rallye.status) {
+        setRallye(rallye[0]);
+      }
+      setLoading(false);
     }
   }, []);
 
@@ -56,7 +55,7 @@ export default function RallyeScreen() {
     if (!useRallye) {
       return;
     }
-    if (rallye.status == 'running') {
+    if (rallye.status === 'running') {
       if (group !== null) {
         const fetchData = async () => {
           let group_id = group;
@@ -111,7 +110,7 @@ export default function RallyeScreen() {
     if (!useRallye) {
       return;
     }
-    if (rallye.status == 'running') {
+    if (rallye.status === 'running') {
       if (currentQuestion === null) {
         const fetchData = async () => {
           let group_id_param = group;
@@ -140,6 +139,7 @@ export default function RallyeScreen() {
     if (useRallye) {
       return;
     }
+    setLoading(true);
     const fetchData = async () => {
       let { data } = await supabase
         .from('question')
@@ -184,234 +184,107 @@ export default function RallyeScreen() {
     fetchData();
   }, []);
 
-  let content;
-  if (useRallye) {
-    if (
-      !loading &&
-      rallye.status === 'running' &&
-      remainingTime >= 0 &&
-      questions !== null &&
-      currentQuestion < questions.length
-    ) {
-      if (questions[currentQuestion].question_type === 'knowledge') {
-        content = <SkillQuestions />;
-      } else if (
-        questions[currentQuestion].question_type === 'upload'
-      ) {
-        content = <UploadQuestions />;
-      } else if (questions[currentQuestion].question_type === 'qr') {
-        content = <QRCodeQuestions />;
-      } else if (
-        questions[currentQuestion].question_type === 'multiple_choice'
-      ) {
-        content = <MultipleChoiceQuestions />;
-      } else if (
-        questions[currentQuestion].question_type === 'picture'
-      ) {
-        content = <ImageQuestions />;
-      }
-    } else if (useRallye && rallye.status === 'post_processing') {
-      content = (
-        <ScrollView
-          contentContainerStyle={styles.refreshContainer}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
-          }
-        >
-          <VotingScreen />
-        </ScrollView>
-      );
-    } else if (
-      !loading &&
-      rallye.status == 'running' &&
-      remainingTime >= 0
-    ) {
-      content = (
-        <ScrollView
-          contentContainerStyle={styles.refreshContainer}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
-          }
-        >
-          <View>
-            <Text style={styles.endText}>
-              Ihr habt alle Fragen beantwortet, Glückwunsch!
-            </Text>
-            <Text style={styles.endText}>
-              Wartet bis die Rallye beendet wird, um das Ergebnis zu
-              sehen.
-            </Text>
-            <Text style={styles.endText}>
-              Eure erreichte Punktzahl: {points}
-            </Text>
-            <Text style={styles.endText}>
-              Geht zu eurem vereinbarten Treffpunkt.
-            </Text>
-          </View>
-        </ScrollView>
-      );
-    } else if (
-      !loading &&
-      rallye.status == 'running' &&
-      remainingTime < 0
-    ) {
-      content = (
-        <ScrollView
-          contentContainerStyle={styles.refreshContainer}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
-          }
-        >
-          <View>
-            <Text style={styles.endText}>
-              Die Zeit für die Rallye ist abgelaufen. Geht zum
-              Treffpunkt.
-            </Text>
-            <Text style={styles.endText}>
-              Wartet bis die Rallye beendet wird um das Ergebnis zu
-              sehen.
-            </Text>
-            <Text style={styles.endText}>
-              Eure erreichte Punktzahl: {points}
-            </Text>
-          </View>
-        </ScrollView>
-      );
-    } else if (useRallye && loading && group === null) {
-      content = (
-        <View>
-          <Text style={styles.groupSelectionText}>
-            Bitte wähle zuerst eine Gruppe aus.
-          </Text>
-        </View>
-      );
-    } else if (useRallye && rallye.status == 'preparation') {
-      content = (
-        <ScrollView
-          contentContainerStyle={styles.specialRefreshContainer}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
-          }
-        >
-          <Text style={styles.groupSelectionText}>
-            Die Rallye hat noch nicht angefangen.
-          </Text>
-        </ScrollView>
-      );
-    } else if (rallye.status == 'ended') {
-      content = Scoreboard();
-    }
-  } else {
-    if (
-      !loading &&
-      questions !== null &&
-      currentQuestion !== questions.length
-    ) {
-      if (questions[currentQuestion].question_type === 'knowledge') {
-        content = <SkillQuestions />;
-      } else if (questions[currentQuestion].question_type === 'qr') {
-        content = <QRCodeQuestions />;
-      } else if (
-        questions[currentQuestion].question_type === 'multiple_choice'
-      ) {
-        content = <MultipleChoiceQuestions />;
-      } else if (
-        questions[currentQuestion].question_type === 'picture'
-      ) {
-        content = <ImageQuestions />;
-      }
-    } else if (!loading) {
-      content = (
-        <View style={styles.container}>
-          <Text style={styles.endText}>
-            Alle Fragen wurden beantwortet.
-          </Text>
-          <Text style={styles.endText}>
-            Erreichte Punktzahl: {points}
-          </Text>
-          <UIButton
-            size="small"
-            onClick={() => {
-              setEnabled(false);
-              setPoints(0);
-              setCurrentQuestion(0);
-            }}
-          >
-            Zurück zur Anmeldung
-          </UIButton>
-        </View>
-      );
-    }
+  if (loading) {
+    return (
+      <View style={globalStyles.container}>
+        <ActivityIndicator size="large" color={Colors.dhbwRed} />
+      </View>
+    );
   }
-  return <View style={styles.container}>{content}</View>;
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  tile: {
-    width: '80%',
-    height: 100,
-    marginVertical: 10,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'grey',
-    paddingBottom: 7,
-  },
-  tileText: {
-    fontSize: 20,
-    color: 'grey',
-    textAlign: 'center',
-  },
-  endText: {
-    fontSize: 30,
-    color: 'grey',
-    textAlign: 'center',
-    paddingBottom: 7,
-  },
-  buttonContainer: {
-    alignSelf: 'center',
-    backgroundColor: Colors.dhbwRed,
-    margin: 6,
-    borderRadius: 5,
-  },
-  buttonContainerDeactive: {
-    alignSelf: 'center',
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
-  },
-  groupSelectionText: {
-    color: Colors.dhbwGray,
-    fontSize: 30,
-    textAlign: 'center',
-  },
-  refreshContainer: {
-    flexGrow: 1,
-  },
-  specialRefreshContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+  if (!useRallye) {
+    // exploration mode (Erkundungsmodus ohne Rallye)
+    if (!questions || questions.length === 0) {
+      return <RallyeStates.NoQuestionsAvailableState />;
+    }
+    if (
+      !questions ||
+      questions.length === 0 ||
+      currentQuestion >= questions.length
+    ) {
+      return (
+        <RallyeStates.ExplorationFinishedState
+          points={points}
+          goBackToLogin={() => {
+            setEnabled(false);
+            setPoints(0);
+            setCurrentQuestion(0);
+          }}
+        />
+      );
+    }
+    const QuestionComponent =
+      questionTypeComponents[
+        questions[currentQuestion].question_type
+      ];
+    return (
+      <View style={globalStyles.container}>
+        <QuestionComponent />
+      </View>
+    );
+  }
+
+  if (rallye.status === 'preparation') {
+    return (
+      <RallyeStates.PreparationState
+        loading={loading}
+        onRefresh={onRefresh}
+      />
+    );
+  }
+
+  if (rallye.status === 'post_processing') {
+    return (
+      <RallyeStates.PostProcessingState
+        loading={loading}
+        onRefresh={onRefresh}
+      />
+    );
+  }
+
+  if (rallye.status === 'ended') {
+    return <RallyeStates.EndedState />;
+  }
+
+  if (rallye.status === 'running') {
+    if (remainingTime < 0) {
+      return (
+        <RallyeStates.TimeExpiredState
+          loading={loading}
+          onRefresh={onRefresh}
+          points={points}
+        />
+      );
+    }
+
+    if (group === null) {
+      return <RallyeStates.GroupNotSelectedState />;
+    }
+
+    if (
+      !questions ||
+      questions.length === 0 ||
+      currentQuestion >= questions.length
+    ) {
+      return (
+        <RallyeStates.AllQuestionsAnsweredState
+          loading={loading}
+          onRefresh={onRefresh}
+          points={points}
+        />
+      );
+    }
+
+    const QuestionComponent =
+      questionTypeComponents[
+        questions[currentQuestion].question_type
+      ];
+    return (
+      <View style={globalStyles.container}>
+        <QuestionComponent />
+      </View>
+    );
+  }
+
+  return null;
+}
