@@ -116,7 +116,7 @@ export default function GroupScreen() {
         <View
           key={index}
           style={[
-            styles.section,
+            globalStyles.section,
             {
               borderColor:
                 item.id === group ? Colors.dhbwRed : 'white',
@@ -187,23 +187,6 @@ export default function GroupScreen() {
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginTop: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    padding: 20,
-    width: '100%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    // Elevation for Android
-    elevation: 5,
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',

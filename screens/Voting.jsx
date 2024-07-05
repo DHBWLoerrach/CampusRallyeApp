@@ -79,7 +79,7 @@ export default function VotingScreen() {
           <View
             key={index}
             style={[
-              styles.section,
+              globalStyles.section,
               {
                 borderColor:
                   selectedGroup === item.id
@@ -122,14 +122,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: Colors.dhbwGray,
     textAlign: 'center',
-  },
-  section: {
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    padding: 20,
-    width: '100%',
   },
   row: {
     flexDirection: 'row',
