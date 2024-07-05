@@ -80,19 +80,14 @@ export default function GroupScreen() {
 
   const renameGroup = async (groupId) => {
     if (newGroupName !== '') {
+      setLoading(true);
       await supabase
         .from('rallye_group')
         .update({ name: newGroupName })
         .eq('id', groupId);
       setNewGroupName('');
-
-      // Refresh groups
-      const { data: groups } = await supabase
-        .from('rallye_group')
-        .select('*')
-        .eq('rallye_id', rallye.id)
-        .order('id', { ascending: false });
-      setGroups(groups);
+      onRefresh();
+      setLoading(false);
     }
   };
 
