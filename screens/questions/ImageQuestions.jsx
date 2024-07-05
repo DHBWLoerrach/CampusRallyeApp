@@ -13,6 +13,7 @@ import {
 import { useSharedStates } from '../../utils/SharedStates';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
+import { globalStyles } from '../../utils/Styles';
 import { useSetPoints } from '../../utils/Points';
 import { confirmAlert } from '../../utils/ConfirmAlert';
 import HintComponent from '../../ui/HintComponent';
@@ -49,7 +50,7 @@ export default function ImageQuestions() {
   return (
     <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.container}>
-        <Text style={styles.question}>
+        <Text style={globalStyles.question}>
           {questions[currentQuestion].question}
         </Text>
         <Image
@@ -103,11 +104,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-  },
-  question: {
-    fontSize: 20,
-    marginBottom: 30,
-    textAlign: 'center',
   },
   inputLabel: {
     fontSize: 16,

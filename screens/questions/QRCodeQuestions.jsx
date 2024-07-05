@@ -8,7 +8,6 @@ import {
   View,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { supabase } from '../../utils/Supabase';
 import { useSetPoints } from '../../utils/Points';
 import { useSharedStates } from '../../utils/SharedStates';
 import Colors from '../../utils/Colors';
@@ -19,13 +18,8 @@ export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const {
-    questions,
-    currentQuestion,
-    setCurrentQuestion,
-    group,
-    useRallye,
-  } = useSharedStates();
+  const { questions, currentQuestion, setCurrentQuestion } =
+    useSharedStates();
   const setPoints = useSetPoints();
 
   submitSurrender = () => {
@@ -84,7 +78,7 @@ export default function QRCodeQuestions() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.question}>
+      <Text style={globalStyles.question}>
         {questions[currentQuestion].question}
       </Text>
       <View style={styles.buttonRow}>
@@ -128,10 +122,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 30,
     marginBottom: 30,
-  },
-  question: {
-    fontSize: 20,
-    marginBottom: 30,
-    textAlign: 'center',
   },
 });

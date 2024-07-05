@@ -34,4 +34,9 @@ export const globalStyles = StyleSheet.create({
     // Elevation for Android
     elevation: 5,
   },
+  question: {
+    fontSize: 20,
+    marginBottom: 30,
+    textAlign: 'center',
+  },
 });

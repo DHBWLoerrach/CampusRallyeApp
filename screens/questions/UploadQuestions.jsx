@@ -13,6 +13,7 @@ import * as MailComposer from 'expo-mail-composer';
 import { useSharedStates } from '../../utils/SharedStates';
 import { useSetPoints } from '../../utils/Points';
 import Colors from '../../utils/Colors';
+import { globalStyles } from '../../utils/Styles';
 import UploadPhoto from './UploadPhoto';
 
 export default function UploadQuestions() {
@@ -86,7 +87,7 @@ export default function UploadQuestions() {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.text}>
+        <Text style={globalStyles.question}>
           {questions[currentQuestion].question}
         </Text>
         <UploadPhoto handleSendEmail={handleSendEmail} />
@@ -123,11 +124,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 10,
-  },
-  text: {
-    fontSize: 20,
-    marginBottom: 20,
-    textAlign: 'center',
   },
   buttonContainer: {
     margin: 10,
