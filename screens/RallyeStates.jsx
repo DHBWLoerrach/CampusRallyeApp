@@ -62,7 +62,7 @@ export const ExplorationFinishedState = ({
     <Text style={globalStyles.bigText}>
       Alle Fragen wurden beantwortet.
     </Text>
-    <Text style={globalStyles.bigText}>
+    <Text style={[globalStyles.bigText, { marginBottom: 10 }]}>
       Erreichte Punktzahl: {points}
     </Text>
     <IconButton
