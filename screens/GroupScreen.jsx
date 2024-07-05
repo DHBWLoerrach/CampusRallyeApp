@@ -1,20 +1,18 @@
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   TextInput,
-  Button,
-  Platform,
 } from 'react-native';
-import UIButton from '../ui/UIButton';
-import { useSharedStates } from '../utils/SharedStates';
-import Colors from '../utils/Colors';
-import { useState, useEffect } from 'react';
 import { supabase } from '../utils/Supabase';
+import { useSharedStates } from '../utils/SharedStates';
 import { getData, storeData } from '../utils/LocalStorage';
-
-//todo:potenzielles Problem bei der Gruppen auswahl welches durch Signal R oder Refresh gelöst werden muss
+import UIButton from '../ui/UIButton';
+import IconButton from '../ui/IconButton';
+import { globalStyles } from '../utils/Styles';
+import Colors from '../utils/Colors';
 
 export default function GroupScreen() {
   const {
@@ -22,16 +20,10 @@ export default function GroupScreen() {
     setGroups,
     group,
     setGroup,
-    questions,
-    currentQuestion,
-    points,
     rallye,
     useRallye,
     setEnabled,
   } = useSharedStates();
-  const [loading, setLoading] = useState(true);
-  const [selectionMade, setSelectionMade] = useState(false);
-
   const [newGroupName, setNewGroupName] = useState('');
 
   useEffect(() => {
@@ -45,7 +37,6 @@ export default function GroupScreen() {
         .eq('rallye_id', rallye.id)
         .order('id', { ascending: false });
       setGroups(groups);
-      setLoading(false);
     };
     fetchDataSupabase();
 
@@ -53,7 +44,6 @@ export default function GroupScreen() {
       groupId = await getData('group_key');
       if (groupId !== null) {
         setGroup(groupId);
-        setSelectionMade(true);
       }
     };
     fetchLocalStorage();
@@ -61,13 +51,16 @@ export default function GroupScreen() {
 
   if (!useRallye) {
     return (
-      <View style={styles.container}>
-        <Text style={[styles.text, styles.TextDeactivated]}>
+      <View style={globalStyles.container}>
+        <Text style={[globalStyles.bigText, { marginBottom: 10 }]}>
           Es ist aktuell keine Rallye aktiv.
         </Text>
-        <UIButton size="small" onClick={() => setEnabled(false)}>
-          Zurück zur Anmeldung
-        </UIButton>
+        <IconButton
+          icon="arrow-left"
+          label="Zurück zur Anmeldung"
+          color={Colors.dhbwRed}
+          onPress={() => setEnabled(false)}
+        />
       </View>
     );
   }
@@ -90,8 +83,17 @@ export default function GroupScreen() {
     }
   };
 
+  const chooseGroup = async (groupId) => {
+    setGroup(groupId);
+    await supabase
+      .from('rallye_group')
+      .update({ used: true })
+      .eq('id', groupId);
+    await storeData('group_key', groupId);
+  };
+
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ padding: 10 }}>
       {groups?.map((item, index) => (
         <View
           key={index}
@@ -106,7 +108,12 @@ export default function GroupScreen() {
           <Text
             style={[
               styles.sectionTitle,
-              { color: item.id === group ? Colors.dhbwRed : 'black' },
+              {
+                color:
+                  item.id === group
+                    ? Colors.dhbwRed
+                    : Colors.dhbwGray,
+              },
             ]}
           >
             Gruppe {index + 1}
@@ -116,53 +123,45 @@ export default function GroupScreen() {
             <Text style={styles.value}>{item.name}</Text>
           </View>
           {item.id === group && (
-            <View style={styles.row}>
+            <>
               <TextInput
                 style={styles.input}
                 onChangeText={setNewGroupName}
                 value={newGroupName}
                 placeholder="Neuer Gruppenname"
               />
-            </View>
+              <UIButton
+                size="small"
+                color={Colors.dhbwRed}
+                onClick={() => renameGroup(item.id)}
+                disabled={!newGroupName}
+              >
+                Namen der Gruppe ändern
+              </UIButton>
+            </>
           )}
 
-          {item.id === group && (
-            <View
-              style={
-                !newGroupName
-                  ? styles.buttonContainerDeactive
-                  : styles.buttonContainer
-              }
+          {!group && !item.used && (
+            <UIButton
+              size="small"
+              color={Colors.dhbwRed}
+              outline={true}
+              onClick={() => chooseGroup(item.id)}
             >
-              <Button
-                color={
-                  Platform.OS === 'ios'
-                    ? 'white'
-                    : Colors.contrastBlue
-                }
-                title="Umbenennen"
-                onPress={() => renameGroup(item.id)}
-                disabled={!newGroupName}
-              />
-            </View>
+              Auswählen
+            </UIButton>
           )}
-          <UIButton
-            size="small"
-            color="grey"
-            outline={true}
-            onClick={async () => {
-              setGroup(item.id);
-              setSelectionMade(true);
-              await supabase
-                .from('rallye_group')
-                .update({ used: true })
-                .eq('id', item.id);
-              await storeData('group_key', item.id);
-            }}
-            disabled={selectionMade}
-          >
-            Auswählen
-          </UIButton>
+
+          {!group && item.used && (
+            <UIButton
+              size="small"
+              outline={false}
+              disabled={true}
+              onClick={() => null}
+            >
+              Gruppe bereits vergeben
+            </UIButton>
+          )}
         </View>
       ))}
     </ScrollView>
@@ -170,17 +169,6 @@ export default function GroupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  text: {
-    fontSize: 20,
-    color: 'grey',
-    textAlign: 'center',
-  },
   section: {
     marginTop: 20,
     backgroundColor: '#fff',
@@ -188,6 +176,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 20,
     width: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    // Elevation for Android
+    elevation: 5,
   },
   sectionTitle: {
     fontSize: 20,
@@ -201,31 +198,21 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.dhbwGray,
     marginRight: 5,
   },
   value: {
     fontSize: 16,
+    color: Colors.dhbwGray,
     fontWeight: 'bold',
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: Colors.dhbwGray,
+    borderRadius: 5,
     borderWidth: 1,
     width: '100%',
     padding: 10,
-  },
-  buttonContainer: {
-    backgroundColor: Colors.contrastBlue,
-    margin: 6,
-    borderRadius: 5,
-  },
-  buttonContainerDeactive: {
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
-  },
-  TextDeactivated: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
 });
