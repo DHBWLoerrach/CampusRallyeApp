@@ -9,10 +9,9 @@ function sharedStates() {
   const [points, setPoints] = useState(0);
   const [rallye, setRallye] = useState(null);
   const [group, setGroup] = useState(null);
-  const [qrScan, setQRScan] = useState(false);
   const [useRallye, setUseRallye] = useState(false);
   const [enabled, setEnabled] = useState(false);
-  const [remainingTime,setRemainingTime] = useState(0);
+  const [remainingTime, setRemainingTime] = useState(0);
 
   return {
     questions,
@@ -21,8 +20,6 @@ function sharedStates() {
     setCurrentQuestion,
     points,
     setPoints,
-    qrScan,
-    setQRScan,
     rallye,
     setRallye,
     groups,
@@ -34,7 +31,7 @@ function sharedStates() {
     enabled,
     setEnabled,
     remainingTime,
-    setRemainingTime
+    setRemainingTime,
   };
 }
 
