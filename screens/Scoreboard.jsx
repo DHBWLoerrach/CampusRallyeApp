@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { supabase } from '../utils/Supabase';
 import { useSharedStates } from '../utils/SharedStates';
+import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 
 export default function Scoreboard() {
@@ -55,17 +56,20 @@ export default function Scoreboard() {
 
 const styles = StyleSheet.create({
   scoreboardTitle: {
+    color: Colors.dhbwGray,
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
   },
   tableHeader: {
+    color: Colors.dhbwGray,
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 5,
   },
   headerText: {
+    color: Colors.dhbwGray,
     fontSize: 20,
     fontWeight: 'bold',
     flex: 1,
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   rowText: {
+    color: Colors.dhbwGray,
     fontSize: 16,
     flex: 1,
     textAlign: 'center',
