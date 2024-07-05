@@ -1,6 +1,6 @@
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import VotingScreen from './Voting';
-import Scoreboard from '../ui/Scoreboard';
+import Scoreboard from './Scoreboard';
 import IconButton from '../ui/IconButton';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';

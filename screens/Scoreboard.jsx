@@ -3,7 +3,7 @@ import { useSharedStates } from '../utils/SharedStates';
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/Supabase';
 
-const Scoreboard = () => {
+export default function Scoreboard() {
   const { rallye } = useSharedStates();
 
   const [sortedGroups, setSortedGroups] = useState([]);
@@ -51,7 +51,7 @@ const Scoreboard = () => {
       ))}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   scoreboardContainer: {
@@ -87,5 +87,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
-export default Scoreboard;
