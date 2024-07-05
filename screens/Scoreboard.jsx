@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { useSharedStates } from '../utils/SharedStates';
 import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { supabase } from '../utils/Supabase';
+import { useSharedStates } from '../utils/SharedStates';
+import { globalStyles } from '../utils/Styles';
 
 export default function Scoreboard() {
   const { rallye } = useSharedStates();
-
   const [sortedGroups, setSortedGroups] = useState([]);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function Scoreboard() {
     const fetchData = async () => {
       try {
         let rallye_id_param = rallye.id;
-        let { data, error } = await supabase.rpc(
+        let { data } = await supabase.rpc(
           'get_total_points_per_rallye',
           {
             rallye_id_param,
@@ -35,8 +35,8 @@ export default function Scoreboard() {
   }, [rallye]);
 
   return (
-    <View style={styles.scoreboardContainer}>
-      <Text style={styles.scoreboardTitle}>Scoreboard</Text>
+    <View style={globalStyles.container}>
+      <Text style={styles.scoreboardTitle}>Rangliste</Text>
       <View style={styles.tableHeader}>
         <Text style={styles.headerText}>Platz</Text>
         <Text style={styles.headerText}>Gruppenname</Text>
@@ -54,13 +54,8 @@ export default function Scoreboard() {
 }
 
 const styles = StyleSheet.create({
-  scoreboardContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   scoreboardTitle: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
@@ -71,7 +66,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'center',
