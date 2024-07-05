@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
+  ActivityIndicator,
   View,
   Text,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -25,21 +27,13 @@ export default function GroupScreen() {
     setEnabled,
   } = useSharedStates();
   const [newGroupName, setNewGroupName] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!useRallye) {
       return;
     }
-    const fetchDataSupabase = async () => {
-      const { data: groups } = await supabase
-        .from('rallye_group')
-        .select('*')
-        .eq('rallye_id', rallye.id)
-        .order('id', { ascending: false });
-      setGroups(groups);
-    };
-    fetchDataSupabase();
-
+    onRefresh();
     const fetchLocalStorage = async () => {
       groupId = await getData('group_key');
       if (groupId !== null) {
@@ -47,7 +41,26 @@ export default function GroupScreen() {
       }
     };
     fetchLocalStorage();
-  }, [group]);
+  }, []);
+
+  const onRefresh = async () => {
+    setLoading(true);
+    const { data: groups } = await supabase
+      .from('rallye_group')
+      .select('*')
+      .eq('rallye_id', rallye.id)
+      .order('id', { ascending: false });
+    setGroups(groups);
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <View style={globalStyles.container}>
+        <ActivityIndicator size="large" color={Colors.dhbwRed} />
+      </View>
+    );
+  }
 
   if (!useRallye) {
     return (
@@ -93,7 +106,12 @@ export default function GroupScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 10 }}>
+    <ScrollView
+      contentContainerStyle={{ padding: 10 }}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+      }
+    >
       {groups?.map((item, index) => (
         <View
           key={index}
