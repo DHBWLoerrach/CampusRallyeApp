@@ -93,20 +93,18 @@ export default function VotingScreen() {
               <Text style={styles.value}>{item.name}</Text>
             </View>
             <UIButton
-              size="small"
-              color="grey"
+              color={Colors.dhbwGray}
               outline={true}
-              onClick={() => setSelectedGroup(item.id)}
+              onPress={() => setSelectedGroup(item.id)}
             >
               Punkt vergeben
             </UIButton>
           </View>
         ))}
       <UIButton
-        size="small"
         color={selectedGroup ? Colors.dhbwRed : Colors.dhbwLightGray}
         disabled={!selectedGroup || sendingResult}
-        onClick={handleNextQuestion}
+        onPress={handleNextQuestion}
       >
         Nächste Abstimmung
       </UIButton>

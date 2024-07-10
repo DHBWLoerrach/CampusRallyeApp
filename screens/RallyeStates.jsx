@@ -1,8 +1,7 @@
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import VotingScreen from './Voting';
 import Scoreboard from './Scoreboard';
-import IconButton from '../ui/IconButton';
-import Colors from '../utils/Colors';
+import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/Styles';
 
 export const PreparationState = ({ loading, onRefresh }) => (
@@ -65,12 +64,9 @@ export const ExplorationFinishedState = ({
     <Text style={[globalStyles.bigText, { marginBottom: 10 }]}>
       Erreichte Punktzahl: {points}
     </Text>
-    <IconButton
-      icon="arrow-left"
-      label="Zurück zur Anmeldung"
-      color={Colors.dhbwRed}
-      onPress={goBackToLogin}
-    />
+    <UIButton icon="arrow-left" onPress={goBackToLogin}>
+      Zurück zur Anmeldung
+    </UIButton>
   </View>
 );
 

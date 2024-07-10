@@ -3,13 +3,13 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   Alert,
   StyleSheet,
   ScrollView,
   Platform,
 } from 'react-native';
 import { useSharedStates } from '../../utils/SharedStates';
+import UIButton from '../../ui/UIButton';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
@@ -67,13 +67,14 @@ export default function SkillQuestions() {
               : styles.buttonContainer
           }
         >
-          <Button //Red Button
-            style={styles.button}
-            color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
+          <UIButton
+            color={answer ? Colors.dhbwRed : Colors.dhbwGray}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
             disabled={!answer}
-          />
+          >
+            Antwort senden
+          </UIButton>
         </View>
 
         {confirmedAnswer ? (
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: Colors.dhbwGray,
     borderWidth: 1,
+    borderRadius: 5,
     marginBottom: 20,
     paddingHorizontal: 10,
     fontSize: Constants.bigFont,

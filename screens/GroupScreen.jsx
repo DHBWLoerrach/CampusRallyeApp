@@ -12,7 +12,6 @@ import { supabase } from '../utils/Supabase';
 import { useSharedStates } from '../utils/SharedStates';
 import { getData, storeData } from '../utils/LocalStorage';
 import UIButton from '../ui/UIButton';
-import IconButton from '../ui/IconButton';
 import { globalStyles } from '../utils/Styles';
 import Colors from '../utils/Colors';
 
@@ -68,12 +67,9 @@ export default function GroupScreen() {
         <Text style={[globalStyles.bigText, { marginBottom: 10 }]}>
           Es ist aktuell keine Rallye aktiv.
         </Text>
-        <IconButton
-          icon="arrow-left"
-          label="Zurück zur Anmeldung"
-          color={Colors.dhbwRed}
-          onPress={() => setEnabled(false)}
-        />
+        <UIButton icon="arrow-left" onPress={() => setEnabled(false)}>
+          Zurück zur Anmeldung
+        </UIButton>
       </View>
     );
   }
@@ -144,9 +140,7 @@ export default function GroupScreen() {
                 placeholder="Neuer Gruppenname"
               />
               <UIButton
-                size="small"
-                color={Colors.dhbwRed}
-                onClick={() => renameGroup(item.id)}
+                onPress={() => renameGroup(item.id)}
                 disabled={!newGroupName}
               >
                 Namen der Gruppe ändern
@@ -156,10 +150,8 @@ export default function GroupScreen() {
 
           {!group && !item.used && (
             <UIButton
-              size="small"
-              color={Colors.dhbwRed}
               outline={true}
-              onClick={() => chooseGroup(item.id)}
+              onPress={() => chooseGroup(item.id)}
             >
               Auswählen
             </UIButton>
@@ -167,10 +159,9 @@ export default function GroupScreen() {
 
           {!group && item.used && (
             <UIButton
-              size="small"
               outline={false}
               disabled={true}
-              onClick={() => null}
+              onPress={() => null}
             >
               Gruppe bereits vergeben
             </UIButton>

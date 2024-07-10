@@ -1,19 +1,23 @@
 import { Text, Pressable, StyleSheet } from 'react-native';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Colors from '../utils/Colors';
 
 export default ({
-  size,
   color,
-  outline = false,
   disabled,
-  onClick,
+  icon,
+  iconRight = false,
+  outline = false,
+  onPress,
+  size = 'small',
   children,
 }) => {
   let buttonStyle = {
-    ...styles.button.sizes[size ?? 'medium'],
+    ...styles.button.sizes[size],
     backgroundColor: color ?? Colors.dhbwRed,
+    flexDirection: iconRight ? 'row-reverse' : 'row',
   };
-  let textStyle = styles.textSizes[size ?? 'medium'];
+  let textStyle = styles.textSizes[size];
   if (outline) {
     buttonStyle = {
       ...buttonStyle,
@@ -34,9 +38,17 @@ export default ({
         buttonStyle,
         disabled ? styles.button.disabled : '',
       ]}
-      onPress={onClick}
+      onPress={onPress}
       disabled={disabled}
     >
+      {icon && (
+        <FontAwesome6
+          name={icon}
+          size={20}
+          color="white"
+          style={{ marginRight: 10 }}
+        />
+      )}
       <Text style={[styles.button.text, textStyle]}>{children}</Text>
     </Pressable>
   );
@@ -45,11 +57,13 @@ export default ({
 const styles = StyleSheet.create({
   button: {
     container: {
+      justifyContent: 'center',
       alignItems: 'center',
-      width: '100%',
     },
     text: {
       color: 'white',
+      fontWeight: '600',
+      textAlign: 'center',
     },
     disabled: {
       backgroundColor: 'lightgrey',

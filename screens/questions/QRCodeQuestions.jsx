@@ -10,9 +10,8 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useSetPoints } from '../../utils/Points';
 import { useSharedStates } from '../../utils/SharedStates';
-import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
-import IconButton from '../../ui/IconButton';
+import UIButton from '../../ui/UIButton';
 
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
@@ -82,18 +81,15 @@ export default function QRCodeQuestions() {
         {questions[currentQuestion].question}
       </Text>
       <View style={styles.buttonRow}>
-        <IconButton
+        <UIButton
           icon={scanMode ? 'circle-stop' : 'qrcode'}
-          label={scanMode ? 'Kamera ausblenden' : 'QR-Code scannen'}
-          color={Colors.dhbwRed}
           onPress={() => setScanMode(!scanMode)}
-        />
-        <IconButton
-          icon="face-frown-open"
-          label="Aufgeben"
-          color={Colors.dhbwRed}
-          onPress={handleSurrender}
-        />
+        >
+          {scanMode ? 'Kamera ausblenden' : 'QR-Code scannen'}
+        </UIButton>
+        <UIButton icon="face-frown-open" onPress={handleSurrender}>
+          Aufgeben
+        </UIButton>
       </View>
       {scanMode && (
         <CameraView

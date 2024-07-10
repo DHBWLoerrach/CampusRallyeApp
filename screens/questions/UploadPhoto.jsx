@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react';
 import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import { CameraView } from 'expo-camera';
-import Colors from '../../utils/Colors';
-import IconButton from '../../ui/IconButton';
+import UIButton from '../../ui/UIButton';
 
 export default function UploadPhoto({ handleSendEmail }) {
   const [facing, setFacing] = useState('back');
@@ -18,9 +17,8 @@ export default function UploadPhoto({ handleSendEmail }) {
           facing={facing}
         />
         <View style={styles.buttonRow}>
-          <IconButton
+          <UIButton
             icon="camera"
-            label="Aufnahme"
             onPress={async () => {
               try {
                 const picture =
@@ -30,8 +28,10 @@ export default function UploadPhoto({ handleSendEmail }) {
                 console.log('error taking picture', error);
               }
             }}
-          />
-          <IconButton
+          >
+            Aufnahme
+          </UIButton>
+          <UIButton
             icon="camera-rotate"
             label="Kamera"
             onPress={() =>
@@ -39,7 +39,9 @@ export default function UploadPhoto({ handleSendEmail }) {
                 current === 'back' ? 'front' : 'back'
               )
             }
-          />
+          >
+            Kamera
+          </UIButton>
         </View>
       </>
     );
@@ -50,17 +52,15 @@ export default function UploadPhoto({ handleSendEmail }) {
       <>
         <Image source={{ uri: picture.uri }} style={styles.image} />
         <View style={styles.buttonRow}>
-          <IconButton
-            icon="recycle"
-            label="Neues Foto"
-            onPress={() => setPicture(null)}
-          />
-          <IconButton
-            color={Colors.dhbwRed}
+          <UIButton icon="recycle" onPress={() => setPicture(null)}>
+            Neues Foto
+          </UIButton>
+          <UIButton
             icon="envelope"
-            label="Foto senden"
             onPress={() => handleSendEmail(picture.uri)}
-          />
+          >
+            Foto senden
+          </UIButton>
         </View>
       </>
     );
