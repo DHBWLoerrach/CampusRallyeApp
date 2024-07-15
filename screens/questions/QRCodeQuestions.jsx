@@ -12,6 +12,7 @@ import { useSetPoints } from '../../utils/Points';
 import { useSharedStates } from '../../utils/SharedStates';
 import { globalStyles } from '../../utils/Styles';
 import UIButton from '../../ui/UIButton';
+import Hint from '../../ui/Hint';
 
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
@@ -91,6 +92,9 @@ export default function QRCodeQuestions() {
           Aufgeben
         </UIButton>
       </View>
+      {questions[currentQuestion].hint && (
+        <Hint hint={questions[currentQuestion].hint} />
+      )}
       {scanMode && (
         <CameraView
           ref={cameraRef}

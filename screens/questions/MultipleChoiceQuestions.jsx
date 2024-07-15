@@ -15,7 +15,7 @@ import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
 import { confirmAlert } from '../../utils/ConfirmAlert';
-import HintComponent from '../../ui/HintComponent';
+import Hint from '../../ui/Hint';
 
 export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState('');
@@ -98,7 +98,9 @@ export default function MultipleChoiceQuestions() {
             <Text style={styles.answer}>{confirmedAnswer}</Text>
           </View>
         ) : null}
-        <HintComponent questionId={questions[currentQuestion].id} />
+        {questions[currentQuestion].hint && (
+          <Hint hint={questions[currentQuestion].hint} />
+        )}
       </View>
     </ScrollView>
   );

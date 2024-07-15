@@ -16,7 +16,7 @@ import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
 import { useSetPoints } from '../../utils/Points';
 import { confirmAlert } from '../../utils/ConfirmAlert';
-import HintComponent from '../../ui/HintComponent';
+import Hint from '../../ui/Hint';
 
 export default function ImageQuestions() {
   const [answer, setAnswer] = useState('');
@@ -87,7 +87,9 @@ export default function ImageQuestions() {
             <Text style={styles.answer}>{confirmedAnswer}</Text>
           </View>
         ) : null}
-        <HintComponent questionId={questions[currentQuestion].id} />
+        {questions[currentQuestion].hint && (
+          <Hint hint={questions[currentQuestion].hint} />
+        )}
       </View>
     </ScrollView>
   );

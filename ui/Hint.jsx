@@ -1,35 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Text, Alert, View, StyleSheet } from 'react-native';
-import { supabase } from '../utils/Supabase';
 import { useSharedStates } from '../utils/SharedStates';
-import UIButton from '../ui/UIButton';
+import UIButton from './UIButton';
 import Colors from '../utils/Colors';
 
-export default function HintComponent({ questionId }) {
-  const [hints, setHints] = useState([]);
+export default function Hint({ hint }) {
   const [showHint, setShowHint] = useState(false);
 
   const { questions, currentQuestion } = useSharedStates();
-
-  useEffect(() => {
-    setHints([]);
-    fetchHints();
-  }, [currentQuestion]);
-
-  const fetchHints = async () => {
-    const { data: hints, error } = await supabase
-      .from('questions_hints')
-      .select('*')
-      .eq('id', questionId)
-      .limit(1);
-
-    if (error) {
-      console.error('Error fetching hints:', error);
-      return;
-    }
-
-    setHints(hints);
-  };
 
   const handleHint = () => {
     Alert.alert(
@@ -44,15 +22,12 @@ export default function HintComponent({ questionId }) {
           text: 'Ja, ich möchte einen Tipp',
           onPress: () => {
             setShowHint(true);
-            questions[currentQuestion].points =
-              questions[currentQuestion].points - hints[0].points;
+            questions[currentQuestion].points -= 1;
           },
         },
       ]
     );
   };
-
-  if (hints.length === 0) return null;
 
   return (
     <View style={styles.hintContainer}>
@@ -65,11 +40,7 @@ export default function HintComponent({ questionId }) {
       {showHint && (
         <>
           <Text style={styles.hintTitle}>Tipp:</Text>
-          {hints.map((hint, index) => (
-            <Text key={index} style={styles.hintText}>
-              {hint.hint}
-            </Text>
-          ))}
+          <Text style={styles.hintText}>{hint}</Text>
         </>
       )}
     </View>
@@ -79,7 +50,7 @@ const styles = StyleSheet.create({
   hintTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 20,
+    marginVertical: 20,
   },
   hintText: {
     fontSize: 18,
