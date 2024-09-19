@@ -80,7 +80,7 @@ export default function Welcome({
           </UIButton>
         </View>
         <UIButton onPress={onContinueWithoutRallye}>
-          Campus-Gelände erkunden{'\n'}(ohne Rallye)
+          Campus-Gelände erkunden
         </UIButton>
       </View>
     </View>
