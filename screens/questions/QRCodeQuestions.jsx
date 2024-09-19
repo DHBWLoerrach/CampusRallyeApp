@@ -47,12 +47,20 @@ export default function QRCodeQuestions() {
   const handleQRCode = ({ data }) => {
     if (questions[currentQuestion].answer !== data) {
       alert(
-        `Der Barcode ist falsch! Du bist vermutlich nicht am richtigen Ort.`
+        `Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.`
       );
       setScanMode(false);
     } else if (questions[currentQuestion].answer === data) {
-      setCurrentQuestion(currentQuestion + 1);
-      setPoints(true, questions[currentQuestion].points);
+      setScanMode(false);
+      Alert.alert('OK', `Das ist der richtige QR-Code!`, [
+        {
+          text: 'Weiter',
+          onPress: () => {
+            setCurrentQuestion(currentQuestion + 1);
+            setPoints(true, questions[currentQuestion].points);
+          },
+        },
+      ]);
     }
   };
 
@@ -120,7 +128,10 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 30,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    columnGap: 30,
+    rowGap: 10,
     marginBottom: 30,
   },
 });
