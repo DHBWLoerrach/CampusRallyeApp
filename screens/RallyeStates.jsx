@@ -10,12 +10,13 @@ export const PreparationState = ({ loading, onRefresh }) => (
       globalStyles.refreshContainer,
       globalStyles.container,
     ]}
+    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
   >
     <Text style={globalStyles.bigText}>
-      Die Rallye hat noch nicht angefangen.
+      Die Rallye hat noch nicht begonnen.
     </Text>
   </ScrollView>
 );
@@ -76,6 +77,7 @@ export const TimeExpiredState = ({ loading, onRefresh, points }) => (
       globalStyles.refreshContainer,
       globalStyles.container,
     ]}
+    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
@@ -97,6 +99,7 @@ export const AllQuestionsAnsweredState = ({
       globalStyles.refreshContainer,
       globalStyles.container,
     ]}
+    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
