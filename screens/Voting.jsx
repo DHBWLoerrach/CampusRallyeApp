@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: 5,
   },
   label: {
