@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, View, Text } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
