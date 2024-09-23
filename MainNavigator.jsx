@@ -142,7 +142,7 @@ function MainTabs() {
           headerTintColor: Color.tabHeader,
           headerTitle: () =>
             useRallye ? (
-              rallye.status === 'running' ? (
+              rallye.status === 'running' && remainingTime > 0 ? (
                 <View style={{ alignItems: 'center' }}>
                   <Text
                     style={{
