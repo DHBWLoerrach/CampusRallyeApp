@@ -47,16 +47,14 @@
             ]
           }
         ]
-      },
-      "buildNumber": "7"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "de.dhbwloe.loerrach.CampusRallyeApp",
-      "versionCode": 7
+      "package": "de.dhbwloe.loerrach.CampusRallyeApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
