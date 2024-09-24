@@ -15,17 +15,17 @@ import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/Styles';
 import Colors from '../utils/Colors';
 
-export default function GroupScreen() {
+export default function TeamScreen() {
   const {
-    groups,
-    setGroups,
-    group,
-    setGroup,
+    teams,
+    setTeams,
+    team,
+    setTeam,
     rallye,
     useRallye,
     setEnabled,
   } = useSharedStates();
-  const [newGroupName, setNewGroupName] = useState('');
+  const [newTeamName, setNewTeamName] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,9 +34,9 @@ export default function GroupScreen() {
     }
     onRefresh();
     const fetchLocalStorage = async () => {
-      groupId = await getData('group_key');
-      if (groupId !== null) {
-        setGroup(groupId);
+      const teamId = await getData('team_key');
+      if (teamId !== null) {
+        setTeam(teamId);
       }
     };
     fetchLocalStorage();
@@ -49,7 +49,7 @@ export default function GroupScreen() {
       .select('*')
       .eq('rallye_id', rallye.id)
       .order('id', { ascending: false });
-    setGroups(groups);
+    setTeams(groups);
     setLoading(false);
   };
 
@@ -74,26 +74,26 @@ export default function GroupScreen() {
     );
   }
 
-  const renameGroup = async (groupId) => {
-    if (newGroupName !== '') {
+  const renameTeam = async (teamId) => {
+    if (newTeamName !== '') {
       setLoading(true);
       await supabase
         .from('rallye_group')
-        .update({ name: newGroupName })
-        .eq('id', groupId);
-      setNewGroupName('');
+        .update({ name: newTeamName })
+        .eq('id', teamId);
+      setNewTeamName('');
       onRefresh();
       setLoading(false);
     }
   };
 
-  const chooseGroup = async (groupId) => {
-    setGroup(groupId);
+  const chooseTeam = async (teamId) => {
+    setTeam(teamId);
     await supabase
       .from('rallye_group')
       .update({ used: true })
-      .eq('id', groupId);
-    await storeData('group_key', groupId);
+      .eq('id', teamId);
+    await storeData('team_key', teamId);
   };
 
   return (
@@ -103,14 +103,14 @@ export default function GroupScreen() {
         <RefreshControl refreshing={loading} onRefresh={onRefresh} />
       }
     >
-      {groups?.map((item, index) => (
+      {teams?.map((item, index) => (
         <View
           key={index}
           style={[
             globalStyles.section,
             {
               borderColor:
-                item.id === group ? Colors.dhbwRed : 'white',
+                item.id === team ? Colors.dhbwRed : 'white',
             },
           ]}
         >
@@ -119,51 +119,49 @@ export default function GroupScreen() {
               styles.sectionTitle,
               {
                 color:
-                  item.id === group
-                    ? Colors.dhbwRed
-                    : Colors.dhbwGray,
+                  item.id === team ? Colors.dhbwRed : Colors.dhbwGray,
               },
             ]}
           >
-            Gruppe {index + 1}
+            Team {index + 1}
           </Text>
           <View style={styles.row}>
-            <Text style={styles.label}>Name der Gruppe:</Text>
+            <Text style={styles.label}>Name des Teams:</Text>
             <Text style={styles.value}>{item.name}</Text>
           </View>
-          {item.id === group && (
+          {item.id === team && (
             <>
               <TextInput
                 style={styles.input}
-                onChangeText={setNewGroupName}
-                value={newGroupName}
-                placeholder="Neuer Gruppenname"
+                onChangeText={setNewTeamName}
+                value={newTeamName}
+                placeholder="Neuer Name für das Team"
               />
               <UIButton
-                onPress={() => renameGroup(item.id)}
-                disabled={!newGroupName}
+                onPress={() => renameTeam(item.id)}
+                disabled={!newTeamName}
               >
-                Namen der Gruppe ändern
+                Namen des Teams ändern
               </UIButton>
             </>
           )}
 
-          {!group && !item.used && (
+          {!team && !item.used && (
             <UIButton
               outline={true}
-              onPress={() => chooseGroup(item.id)}
+              onPress={() => chooseTeam(item.id)}
             >
               Auswählen
             </UIButton>
           )}
 
-          {!group && item.used && (
+          {!team && item.used && (
             <UIButton
               outline={false}
               disabled={true}
               onPress={() => null}
             >
-              Gruppe bereits vergeben
+              Team bereits vergeben
             </UIButton>
           )}
         </View>

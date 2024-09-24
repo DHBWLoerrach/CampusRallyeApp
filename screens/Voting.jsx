@@ -7,8 +7,8 @@ import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 
 export default function VotingScreen() {
-  const { groups, group } = useSharedStates();
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  const { teams, team } = useSharedStates();
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [voting, setVoting] = useState([]);
   const [currentVoting, setCurrentVoting] = useState(0);
   const [sendingResult, setSendingResult] = useState(false);
@@ -18,7 +18,7 @@ export default function VotingScreen() {
       const { data: vote } = await supabase.rpc(
         'get_unvoted_questions',
         {
-          input_group_id: group,
+          input_group_id: team,
         }
       );
       if (vote !== null) {
@@ -33,16 +33,16 @@ export default function VotingScreen() {
     await supabase.from('question_voting').insert([
       {
         question_id: voting[currentVoting]?.id,
-        group_id: group,
-        voted_group_id: selectedGroup,
+        group_id: team,
+        voted_group_id: selectedTeam,
       },
     ]);
     setCurrentVoting(currentVoting + 1);
-    setSelectedGroup(null);
+    setSelectedTeam(null);
     setSendingResult(false);
   };
 
-  if (groups.length < 2 || !voting[currentVoting]) {
+  if (teams.length < 2 || !voting[currentVoting]) {
     return (
       <View style={globalStyles.container}>
         <Text style={globalStyles.bigText}>
@@ -70,11 +70,11 @@ export default function VotingScreen() {
           },
         ]}
       >
-        Gebt der Gruppe einen zusätzlichen Punkt, die eurer Meinung
-        nach die oben gestellte Aufgabe am besten gelöst hat.
+        Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
+        die oben gestellte Aufgabe am besten gelöst hat.
       </Text>
-      {groups
-        ?.filter((item) => item.id !== group)
+      {teams
+        ?.filter((item) => item.id !== team)
         .map((item, index) => (
           <View
             key={index}
@@ -82,28 +82,26 @@ export default function VotingScreen() {
               globalStyles.section,
               {
                 borderColor:
-                  selectedGroup === item.id
-                    ? Colors.dhbwRed
-                    : 'white',
+                  selectedTeam === item.id ? Colors.dhbwRed : 'white',
               },
             ]}
           >
             <View style={styles.row}>
-              <Text style={styles.label}>Name der Gruppe:</Text>
+              <Text style={styles.label}>Name des Teams:</Text>
               <Text style={styles.value}>{item.name}</Text>
             </View>
             <UIButton
               color={Colors.dhbwGray}
               outline={true}
-              onPress={() => setSelectedGroup(item.id)}
+              onPress={() => setSelectedTeam(item.id)}
             >
               Punkt vergeben
             </UIButton>
           </View>
         ))}
       <UIButton
-        color={selectedGroup ? Colors.dhbwRed : Colors.dhbwLightGray}
-        disabled={!selectedGroup || sendingResult}
+        color={selectedTeam ? Colors.dhbwRed : Colors.dhbwLightGray}
+        disabled={!selectedTeam || sendingResult}
         onPress={handleNextQuestion}
       >
         Nächste Abstimmung

@@ -27,7 +27,7 @@ export default function RallyeScreen() {
     currentQuestion,
     setCurrentQuestion,
     setEnabled,
-    group,
+    team,
     points,
     useRallye,
     rallye,
@@ -56,9 +56,9 @@ export default function RallyeScreen() {
       return;
     }
     if (rallye.status === 'running') {
-      if (group !== null) {
+      if (team !== null) {
         const fetchData = async () => {
-          let group_id = group;
+          let group_id = team;
           let { data } = await supabase.rpc('get_questions', {
             group_id,
           });
@@ -104,7 +104,7 @@ export default function RallyeScreen() {
         fetchData();
       }
     }
-  }, [rallye, group]);
+  }, [rallye, team]);
 
   useEffect(() => {
     if (!useRallye) {
@@ -113,7 +113,7 @@ export default function RallyeScreen() {
     if (rallye.status === 'running') {
       if (currentQuestion === null) {
         const fetchData = async () => {
-          let group_id_param = group;
+          let group_id_param = team;
           let { data } = await supabase.rpc('get_points', {
             group_id_param,
           });
@@ -123,7 +123,7 @@ export default function RallyeScreen() {
         fetchData();
       } else if (currentQuestion === questions.length) {
         const fetchData = async () => {
-          let group_id_param = group;
+          let group_id_param = team;
           let { data, error } = await supabase.rpc('get_points', {
             group_id_param,
           });
@@ -257,8 +257,8 @@ export default function RallyeScreen() {
       );
     }
 
-    if (group === null) {
-      return <RallyeStates.GroupNotSelectedState />;
+    if (team === null) {
+      return <RallyeStates.TeamNotSelectedState />;
     }
 
     if (

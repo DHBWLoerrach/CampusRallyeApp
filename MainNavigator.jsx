@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './utils/Supabase';
 import RallyeScreen from './screens/RallyeScreen';
 import SettingsScreen from './screens/SettingsScreen';
-import GroupScreen from './screens/GroupScreen';
+import TeamScreen from './screens/TeamScreen';
 import ImprintScreen from './screens/ImprintScreen';
 import InformationScreen from './screens/InformationScreen';
 import SkillQuestions from './screens/questions/SkillQuestions';
@@ -24,7 +24,7 @@ function MainTabs() {
     setRallye,
     useRallye,
     rallye,
-    group,
+    team,
     currentQuestion,
     questions,
     remainingTime,
@@ -74,11 +74,10 @@ function MainTabs() {
   useEffect(() => {
     if (useRallye) {
       const fetchData = async () => {
-        let groupid = group;
         let { data, error } = await supabase.rpc(
           'get_question_count',
           {
-            groupid,
+            groupid: team,
           }
         );
         let value =
@@ -86,7 +85,7 @@ function MainTabs() {
           parseFloat(data[0].totalquestions);
         setPercentage(value);
       };
-      if (group !== null) {
+      if (team !== null) {
         fetchData();
       }
     } else {
@@ -98,11 +97,11 @@ function MainTabs() {
 
       setPercentage(value);
     }
-  }, [currentQuestion, group]);
+  }, [currentQuestion, team]);
 
   return (
     <Tab.Navigator
-      initialRouteName={useRallye ? 'group' : 'rallye'}
+      initialRouteName={useRallye ? 'team' : 'rallye'}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, size }) => {
           let iconName;
@@ -110,7 +109,7 @@ function MainTabs() {
             iconName = 'map';
           } else if (route.name === 'settings') {
             iconName = 'settings';
-          } else if (route.name === 'group') {
+          } else if (route.name === 'team') {
             iconName = 'people';
           }
           return (
@@ -126,12 +125,12 @@ function MainTabs() {
       })}
     >
       <Tab.Screen
-        name="group"
-        component={GroupScreen}
+        name="team"
+        component={TeamScreen}
         options={{
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
-          title: 'Gruppe',
+          title: 'Team',
         }}
       />
       <Tab.Screen

@@ -7,7 +7,7 @@ import { globalStyles } from '../utils/Styles';
 
 export default function Scoreboard() {
   const { rallye } = useSharedStates();
-  const [sortedGroups, setSortedGroups] = useState([]);
+  const [sortedTeams, setSortedTeams] = useState([]);
 
   useEffect(() => {
     if (rallye.status !== 'ended') {
@@ -25,7 +25,7 @@ export default function Scoreboard() {
 
         if (data) {
           data.sort((a, b) => b.total_points - a.total_points);
-          setSortedGroups(data);
+          setSortedTeams(data);
         }
       } catch (error) {
         console.error('Error fetching total points data:', error);
@@ -40,14 +40,14 @@ export default function Scoreboard() {
       <Text style={styles.scoreboardTitle}>Rangliste</Text>
       <View style={styles.tableHeader}>
         <Text style={styles.headerText}>Platz</Text>
-        <Text style={styles.headerText}>Gruppenname</Text>
+        <Text style={styles.headerText}>Team</Text>
         <Text style={styles.headerText}>Punkte</Text>
       </View>
-      {sortedGroups.map((group, index) => (
+      {sortedTeams.map((team, index) => (
         <View key={index} style={styles.tableRow}>
           <Text style={styles.rowText}>{index + 1}</Text>
-          <Text style={styles.rowText}>{group.group_name}</Text>
-          <Text style={styles.rowText}>{group.total_points}</Text>
+          <Text style={styles.rowText}>{team.group_name}</Text>
+          <Text style={styles.rowText}>{team.total_points}</Text>
         </View>
       ))}
     </View>

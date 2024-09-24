@@ -23,7 +23,7 @@ export default function UploadQuestions() {
     questions,
     currentQuestion,
     setCurrentQuestion,
-    groups,
+    teams,
     rallye,
   } = useSharedStates();
   const setPoints = useSetPoints();
@@ -49,12 +49,12 @@ export default function UploadQuestions() {
   }
 
   const handleSendEmail = async (uri) => {
-    const group = groups.find((group) => group.id === groupId);
+    const theTeam = teams.find((team) => team.id === groupId);
 
     let mailOptions = {
       recipients: [rallye.mail_adress],
-      subject: 'Foto/Video -- Gruppe: ' + group.name,
-      body: `Das ist die Aufnahme unserer Gruppe!\n\nFrage: ${questions[currentQuestion].question}`,
+      subject: 'Foto/Video -- Team: ' + theTeam.name,
+      body: `Das ist die Aufnahme unseres Teams!\n\nFrage: ${questions[currentQuestion].question}`,
       attachments: [uri],
     };
     try {
@@ -94,7 +94,7 @@ export default function UploadQuestions() {
         <Text style={styles.infoText}>
           Falls das Senden des Fotos/Videos hier nicht klappt, dann
           macht das Foto/Video auf dem Handy in der Kamera-App und
-          schickt es per E-Mail mit eurem Gruppennamen an:
+          schickt es per E-Mail mit dem Namen eures Teams an:
         </Text>
         <Text
           style={{ color: 'blue' }}

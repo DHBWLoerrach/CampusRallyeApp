@@ -38,10 +38,10 @@ export const EndedState = () => (
   </View>
 );
 
-export const GroupNotSelectedState = () => (
+export const TeamNotSelectedState = () => (
   <View style={globalStyles.container}>
     <Text style={globalStyles.bigText}>
-      Bitte wähle zuerst eine Gruppe aus.
+      Bitte bilde zuerst ein Team.
     </Text>
   </View>
 );

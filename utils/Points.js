@@ -4,27 +4,30 @@ import { supabase } from './Supabase';
 export const useSetPoints = () => {
   const {
     useRallye,
-    group,
+    team,
     questions,
     currentQuestion,
     points,
-    setPoints
+    setPoints,
   } = useSharedStates();
 
-  const setPointsFunction = async (answered_correctly, earned_points) => {
-    if(useRallye){
+  const setPointsFunction = async (
+    answered_correctly,
+    earned_points
+  ) => {
+    if (useRallye) {
       await supabase.from('group_questions').insert({
-        group_id: group,
+        group_id: team,
         question_id: questions[currentQuestion].id,
         answered_correctly: answered_correctly,
-        points: earned_points
+        points: earned_points,
       });
     } else {
-      if(answered_correctly){
-        setPoints(earned_points+points);
+      if (answered_correctly) {
+        setPoints(earned_points + points);
       }
     }
-  }
+  };
 
   return setPointsFunction;
-}
+};

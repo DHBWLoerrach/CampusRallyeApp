@@ -4,11 +4,11 @@ import { useBetween } from 'use-between';
 function sharedStates() {
   // set all states, that have to be used between different components
   const [questions, setQuestions] = useState([]);
-  const [groups, setGroups] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [points, setPoints] = useState(0);
   const [rallye, setRallye] = useState(null);
-  const [group, setGroup] = useState(null);
+  const [team, setTeam] = useState(null);
   const [useRallye, setUseRallye] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [remainingTime, setRemainingTime] = useState(0);
@@ -22,10 +22,10 @@ function sharedStates() {
     setPoints,
     rallye,
     setRallye,
-    groups,
-    setGroups,
-    group,
-    setGroup,
+    teams,
+    setTeams,
+    team,
+    setTeam,
     useRallye,
     setUseRallye,
     enabled,

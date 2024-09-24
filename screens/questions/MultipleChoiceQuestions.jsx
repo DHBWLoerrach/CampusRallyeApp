@@ -21,7 +21,7 @@ export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
-  const { questions, currentQuestion, setCurrentQuestion, group } =
+  const { questions, currentQuestion, setCurrentQuestion } =
     useSharedStates();
   const setPoints = useSetPoints();
 
