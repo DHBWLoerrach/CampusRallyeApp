@@ -3,7 +3,7 @@ import { supabase } from './Supabase';
 
 export const useSetPoints = () => {
   const {
-    useRallye,
+    rallye,
     team,
     questions,
     currentQuestion,
@@ -15,7 +15,7 @@ export const useSetPoints = () => {
     answered_correctly,
     earned_points
   ) => {
-    if (useRallye) {
+    if (rallye) {
       await supabase.from('group_questions').insert({
         group_id: team,
         question_id: questions[currentQuestion].id,

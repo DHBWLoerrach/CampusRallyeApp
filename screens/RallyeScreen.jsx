@@ -29,7 +29,6 @@ export default function RallyeScreen() {
     setEnabled,
     team,
     points,
-    useRallye,
     rallye,
     setRallye,
     setPoints,
@@ -38,7 +37,7 @@ export default function RallyeScreen() {
   const [loading, setLoading] = useState(false);
 
   const onRefresh = React.useCallback(async () => {
-    if (useRallye) {
+    if (rallye) {
       setLoading(true);
       const { data: rallye } = await supabase
         .from('rallye')
@@ -52,7 +51,7 @@ export default function RallyeScreen() {
   }, []);
 
   useEffect(() => {
-    if (!useRallye) {
+    if (!rallye) {
       return;
     }
     if (rallye.status === 'running') {
@@ -107,7 +106,7 @@ export default function RallyeScreen() {
   }, [rallye, team]);
 
   useEffect(() => {
-    if (!useRallye) {
+    if (!rallye) {
       return;
     }
     if (rallye.status === 'running') {
@@ -136,7 +135,7 @@ export default function RallyeScreen() {
   }, [rallye, currentQuestion]);
 
   useEffect(() => {
-    if (useRallye) {
+    if (rallye) {
       return;
     }
     setLoading(true);
@@ -192,7 +191,7 @@ export default function RallyeScreen() {
     );
   }
 
-  if (!useRallye) {
+  if (!rallye) {
     // exploration mode (Erkundungsmodus ohne Rallye)
     if (!questions || questions.length === 0) {
       return <RallyeStates.NoQuestionsAvailableState />;

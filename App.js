@@ -8,8 +8,7 @@ import { useSharedStates } from './utils/SharedStates';
 
 export default function App() {
   const [realPassword, setRealPassword] = useState(null);
-  const { setRallye, setUseRallye, enabled, setEnabled } =
-    useSharedStates();
+  const { setRallye, enabled, setEnabled } = useSharedStates();
 
   useEffect(() => {
     async function getData() {
@@ -24,7 +23,6 @@ export default function App() {
 
   const handlePasswordSubmit = async (password) => {
     if (password === realPassword) {
-      setUseRallye(true);
       const { data: rallye } = await supabase
         .from('rallye')
         .select('*')
@@ -41,7 +39,7 @@ export default function App() {
 
   const handleNoPasswordSubmit = async () => {
     setEnabled(true);
-    setUseRallye(false);
+    setRallye(null);
   };
 
   return (

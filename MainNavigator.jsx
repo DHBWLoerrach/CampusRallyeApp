@@ -21,9 +21,8 @@ const Stack = createNativeStackNavigator();
 
 function MainTabs() {
   const {
-    setRallye,
-    useRallye,
     rallye,
+    setRallye,
     team,
     currentQuestion,
     questions,
@@ -33,22 +32,7 @@ function MainTabs() {
   const [percentage, setPercentage] = useState(0.0);
 
   useEffect(() => {
-    if (!useRallye) {
-      return;
-    }
-    const fetchData = async () => {
-      const { data: rallye } = await supabase
-        .from('rallye')
-        .select('*')
-        .eq('is_active_rallye', true);
-
-      setRallye(rallye[0]);
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (!useRallye) {
+    if (!rallye) {
       return;
     }
     const intervalId = setInterval(() => {
@@ -72,7 +56,7 @@ function MainTabs() {
   }, []);
 
   useEffect(() => {
-    if (useRallye) {
+    if (rallye) {
       const fetchData = async () => {
         let { data, error } = await supabase.rpc(
           'get_question_count',
@@ -101,7 +85,7 @@ function MainTabs() {
 
   return (
     <Tab.Navigator
-      initialRouteName={useRallye ? 'team' : 'rallye'}
+      initialRouteName={rallye ? 'team' : 'rallye'}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, size }) => {
           let iconName;
@@ -140,7 +124,7 @@ function MainTabs() {
           headerStyle: { backgroundColor: Color.dhbwRed },
           headerTintColor: Color.tabHeader,
           headerTitle: () =>
-            useRallye ? (
+            rallye ? (
               rallye.status === 'running' && remainingTime > 0 ? (
                 <View style={{ alignItems: 'center' }}>
                   <Text
