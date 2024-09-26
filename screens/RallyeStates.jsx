@@ -15,9 +15,12 @@ export const PreparationState = ({ loading, onRefresh }) => (
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
   >
-    <Text style={globalStyles.bigText}>
+    <Text style={[globalStyles.bigText, { marginBottom: 20 }]}>
       Die Rallye hat noch nicht begonnen.
     </Text>
+    <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+      Aktualisieren
+    </UIButton>
   </ScrollView>
 );
 
