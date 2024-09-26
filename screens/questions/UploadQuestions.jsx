@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useCameraPermissions } from 'expo-camera';
+import * as ImageManipulator from 'expo-image-manipulator';
 import * as MailComposer from 'expo-mail-composer';
 import { useSharedStates } from '../../utils/SharedStates';
 import { useSetPoints } from '../../utils/Points';
@@ -23,6 +24,7 @@ export default function UploadQuestions() {
     questions,
     currentQuestion,
     setCurrentQuestion,
+    team,
     teams,
     rallye,
   } = useSharedStates();
@@ -48,14 +50,24 @@ export default function UploadQuestions() {
     );
   }
 
+  const resizeImage = async (uri) => {
+    const manipResult = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 800 } }], // Resize to a width of 800 pixels (adjust as needed)
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG } // Compress to 70% quality
+    );
+    return manipResult.uri;
+  };
+
   const handleSendEmail = async (uri) => {
-    const theTeam = teams.find((team) => team.id === groupId);
+    const theTeam = teams.find((t) => t.id === team);
+    const resizedImageUri = await resizeImage(uri);
 
     let mailOptions = {
       recipients: [rallye.mail_adress],
       subject: 'Foto/Video -- Team: ' + theTeam.name,
       body: `Das ist die Aufnahme unseres Teams!\n\nFrage: ${questions[currentQuestion].question}`,
-      attachments: [uri],
+      attachments: [resizedImageUri],
     };
     try {
       await MailComposer.composeAsync(mailOptions);
