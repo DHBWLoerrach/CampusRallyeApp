@@ -19,11 +19,3 @@ export const storeData = async (storageKey, value) => {
     console.log(e);
   }
 };
-
-export const deleteData = async (storageKey) => {
-  try {
-    await AsyncStorage.removeItem(storageKey);
-  } catch (error) {
-    console.log(error);
-  }
-};

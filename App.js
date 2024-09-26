@@ -5,7 +5,6 @@ import { supabase } from './utils/Supabase';
 import MainNavigator from './MainNavigator';
 import Welcome from './screens/Welcome';
 import { useSharedStates } from './utils/SharedStates';
-import { deleteData } from './utils/LocalStorage';
 
 export default function App() {
   const [realPassword, setRealPassword] = useState(null);
@@ -41,7 +40,6 @@ export default function App() {
   };
 
   const handleNoPasswordSubmit = async () => {
-    await deleteData('team_key');
     setEnabled(true);
     setUseRallye(false);
   };
