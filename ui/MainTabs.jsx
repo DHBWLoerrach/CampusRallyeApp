@@ -16,7 +16,51 @@ import { useSharedStates } from '../utils/SharedStates';
 
 const Tab = createBottomTabNavigator();
 
-const MainTabs = observer(function MainTabs() {
+const RallyeHeader = observer(function RallyeHeader({
+  rallye,
+  percentage,
+}) {
+  const currentTime$ = currentTime.get();
+
+  return (
+    <View style={{ alignItems: 'center' }}>
+      {rallye ? (
+        rallye.status === 'running' &&
+        currentTime$ < rallye.end_time ? (
+          <>
+            <TimeHeader endTime={rallye.end_time} />
+            <Progress.Bar
+              style={{ marginTop: 10 }}
+              progress={percentage}
+              color="white"
+            />
+          </>
+        ) : (
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 18,
+              fontWeight: '500',
+            }}
+          >
+            {rallye.status === 'pre_processing' && 'Vorbereitungen'}
+            {rallye.status === 'post_processing' && 'Abstimmung'}
+            {rallye.status === 'running' && 'Zeit abgelaufen'}
+            {rallye.status === 'ended' && 'Beendet'}
+          </Text>
+        )
+      ) : (
+        <Progress.Bar
+          style={{ marginTop: 10 }}
+          progress={percentage}
+          color="white"
+        />
+      )}
+    </View>
+  );
+});
+
+const MainTabs = function MainTabs() {
   const { team, currentQuestion, questions } = useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
   const rallye = store$.rallye.get();
@@ -53,6 +97,8 @@ const MainTabs = observer(function MainTabs() {
     <Tab.Navigator
       initialRouteName={rallye ? 'team' : 'rallye'}
       screenOptions={({ route }) => ({
+        headerStyle: { backgroundColor: Color.dhbwRed },
+        headerTintColor: Color.tabHeader,
         tabBarIcon: ({ focused }) => {
           const icons = {
             rallye: 'map',
@@ -74,71 +120,24 @@ const MainTabs = observer(function MainTabs() {
       <Tab.Screen
         name="team"
         component={TeamScreen}
-        options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
-          title: 'Team',
-        }}
+        options={{ title: 'Team' }}
       />
       <Tab.Screen
         name="rallye"
         component={RallyeScreen}
         options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
           headerTitle: () => (
-            <View style={{ alignItems: 'center' }}>
-              {rallye ? (
-                rallye.status === 'running' &&
-                currentTime.get().getTime() <
-                  new Date(rallye.end_time).getTime() ? (
-                  <>
-                    <TimeHeader endTime={rallye.end_time} />
-                    <Progress.Bar
-                      style={{ marginTop: 10 }}
-                      progress={percentage}
-                      color="white"
-                    />
-                  </>
-                ) : (
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: 18,
-                      fontWeight: '500',
-                    }}
-                  >
-                    {rallye.status === 'pre_processing' &&
-                      'Vorbereitungen'}
-                    {rallye.status === 'post_processing' &&
-                      'Abstimmung'}
-                    {rallye.status === 'running' && 'Zeit abgelaufen'}
-                    {rallye.status === 'ended' && 'Beendet'}
-                  </Text>
-                )
-              ) : (
-                <Progress.Bar
-                  style={{ marginTop: 10 }}
-                  progress={percentage}
-                  color="white"
-                />
-              )}
-            </View>
+            <RallyeHeader rallye={rallye} percentage={percentage} />
           ),
-          title: 'Campus Rallye',
         }}
       />
       <Tab.Screen
         name="settings"
         component={SettingsScreen}
-        options={{
-          headerStyle: { backgroundColor: Color.dhbwRed },
-          headerTintColor: Color.tabHeader,
-          title: 'Einstellungen',
-        }}
+        options={{ title: 'Einstellungen' }}
       />
     </Tab.Navigator>
   );
-});
+};
 
 export default MainTabs;

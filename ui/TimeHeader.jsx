@@ -3,8 +3,7 @@ import { Text } from 'react-native';
 
 function calculateTimeRemaining(endTime) {
   const now = new Date();
-  const end = new Date(endTime);
-  const totalMilliseconds = end - now;
+  const totalMilliseconds = endTime - now;
 
   let totalSeconds = Math.floor(totalMilliseconds / 1000);
 
