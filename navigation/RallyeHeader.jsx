@@ -2,6 +2,7 @@ import { View, Text } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { observer } from '@legendapp/state/react';
 import { currentTime } from '@legendapp/state/helpers/time';
+import TimeHeader from './TimeHeader';
 
 const RallyeHeader = observer(function RallyeHeader({
   rallye,
