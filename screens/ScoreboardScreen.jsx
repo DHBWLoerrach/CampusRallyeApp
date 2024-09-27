@@ -5,7 +5,7 @@ import { supabase } from '../utils/Supabase';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 
-export default function Scoreboard() {
+export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
   const [sortedTeams, setSortedTeams] = useState([]);
 

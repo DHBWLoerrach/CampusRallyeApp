@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { store$ } from './utils/Store';
 import { supabase } from './utils/Supabase';
 import MainNavigator from './navigation/MainNavigator';
-import Welcome from './screens/Welcome';
+import WelcomeScreen from './screens/WelcomeScreen';
 import { useSharedStates } from './utils/SharedStates';
 
 export default function App() {
@@ -52,7 +52,7 @@ export default function App() {
       {enabled ? (
         <MainNavigator />
       ) : (
-        <Welcome
+        <WelcomeScreen
           onPasswordSubmit={handlePasswordSubmit}
           onContinueWithoutRallye={handleNoPasswordSubmit}
         />

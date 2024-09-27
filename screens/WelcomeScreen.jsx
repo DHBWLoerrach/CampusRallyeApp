@@ -14,7 +14,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Colors from '../utils/Colors';
 import UIButton from '../ui/UIButton';
 
-export default function Welcome({
+export default function WelcomeScreen({
   onPasswordSubmit,
   onContinueWithoutRallye,
 }) {
