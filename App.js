@@ -28,8 +28,12 @@ export default function App() {
         .from('rallye')
         .select('*')
         .eq('is_active_rallye', true);
-      setRallye(data[0]);
-      store$.rallye.set(data[0]);
+      const rallye = data[0];
+      if (rallye.end_time) {
+        rallye.end_time = new Date(rallye.end_time);
+      }
+      setRallye(rallye);
+      store$.rallye.set(rallye);
       setEnabled(true);
     } else {
       Alert.alert(
