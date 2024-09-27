@@ -8,8 +8,8 @@ import {
   View,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { store$ } from '../../utils/Store';
 import { useSetPoints } from '../../utils/Points';
-import { useSharedStates } from '../../utils/SharedStates';
 import { globalStyles } from '../../utils/Styles';
 import UIButton from '../../ui/UIButton';
 import Hint from '../../ui/Hint';
@@ -18,13 +18,12 @@ export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const { questions, currentQuestion, setCurrentQuestion } =
-    useSharedStates();
+  const currentQuestion = store$.currentQuestion.get();
   const setPoints = useSetPoints();
 
   submitSurrender = () => {
-    setCurrentQuestion(currentQuestion + 1);
-    setPoints(false, questions[currentQuestion].points);
+    setPoints(false, currentQuestion.points);
+    store$.gotoNextQuestion();
   };
 
   const handleSurrender = () => {
@@ -45,19 +44,19 @@ export default function QRCodeQuestions() {
   };
 
   const handleQRCode = ({ data }) => {
-    if (questions[currentQuestion].answer !== data) {
+    if (currentQuestion.answer !== data) {
       alert(
         `Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.`
       );
       setScanMode(false);
-    } else if (questions[currentQuestion].answer === data) {
+    } else if (currentQuestion.answer === data) {
       setScanMode(false);
       Alert.alert('OK', `Das ist der richtige QR-Code!`, [
         {
           text: 'Weiter',
           onPress: () => {
-            setCurrentQuestion(currentQuestion + 1);
-            setPoints(true, questions[currentQuestion].points);
+            setPoints(true, currentQuestion.points);
+            store$.gotoNextQuestion();
           },
         },
       ]);
@@ -87,7 +86,7 @@ export default function QRCodeQuestions() {
   return (
     <View style={styles.container}>
       <Text style={globalStyles.question}>
-        {questions[currentQuestion].question}
+        {currentQuestion.question}
       </Text>
       <View style={styles.buttonRow}>
         <UIButton
@@ -100,9 +99,7 @@ export default function QRCodeQuestions() {
           Aufgeben
         </UIButton>
       </View>
-      {questions[currentQuestion].hint && (
-        <Hint hint={questions[currentQuestion].hint} />
-      )}
+      {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       {scanMode && (
         <CameraView
           ref={cameraRef}

@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { useSharedStates } from '../../utils/SharedStates';
+import { store$ } from '../../utils/Store';
 import UIButton from '../../ui/UIButton';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
@@ -20,19 +20,17 @@ export default function SkillQuestions() {
   const [answer, setAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
-  const { questions, currentQuestion, setCurrentQuestion } =
-    useSharedStates();
+  const questions = store$.questions.get();
+  const currentQuestion = store$.currentQuestion.get();
+
   const setPoints = useSetPoints();
 
   const handleNext = async () => {
     correctly_answered =
       answer.trim().toLowerCase() ===
-      questions[currentQuestion].answer.toLowerCase();
-    await setPoints(
-      correctly_answered,
-      questions[currentQuestion].points
-    );
-    setCurrentQuestion(currentQuestion + 1);
+      currentQuestion.answer.toLowerCase();
+    await setPoints(correctly_answered, currentQuestion.points);
+    store$.gotoNextQuestion();
     setAnswer('');
     setAnswered(false);
   };
@@ -51,7 +49,7 @@ export default function SkillQuestions() {
     <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.container}>
         <Text style={globalStyles.question}>
-          {questions[currentQuestion].question}
+          {currentQuestion.question}
         </Text>
         <TextInput
           style={styles.input}
@@ -84,9 +82,7 @@ export default function SkillQuestions() {
             <Text style={styles.answer}>{confirmedAnswer}</Text>
           </View>
         ) : null}
-        {questions[currentQuestion].hint && (
-          <Hint hint={questions[currentQuestion].hint} />
-        )}
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     </ScrollView>
   );

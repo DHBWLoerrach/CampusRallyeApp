@@ -10,7 +10,7 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { useSharedStates } from '../../utils/SharedStates';
+import { store$ } from '../../utils/Store';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
@@ -22,18 +22,15 @@ export default function ImageQuestions() {
   const [answer, setAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
-  const { questions, currentQuestion, setCurrentQuestion } =
-    useSharedStates();
+  const questions = store$.questions.get();
+  const currentQuestion = store$.currentQuestion.get();
   const setPoints = useSetPoints();
 
   const handleNext = async () => {
     const correctly_answered =
-      answer.trim() === questions[currentQuestion].answer;
-    await setPoints(
-      correctly_answered,
-      questions[currentQuestion].points
-    );
-    setCurrentQuestion(currentQuestion + 1);
+      answer.trim() === currentQuestion.answer;
+    await setPoints(correctly_answered, currentQuestion.points);
+    store$.gotoNextQuestion();
     setAnswer('');
     setAnswered(false);
   };
@@ -51,10 +48,10 @@ export default function ImageQuestions() {
     <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.container}>
         <Text style={globalStyles.question}>
-          {questions[currentQuestion].question}
+          {currentQuestion.question}
         </Text>
         <Image
-          source={{ uri: questions[currentQuestion].uri }}
+          source={{ uri: currentQuestion.uri }}
           style={styles.picture}
         />
         <TextInput
@@ -87,9 +84,7 @@ export default function ImageQuestions() {
             <Text style={styles.answer}>{confirmedAnswer}</Text>
           </View>
         ) : null}
-        {questions[currentQuestion].hint && (
-          <Hint hint={questions[currentQuestion].hint} />
-        )}
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     </ScrollView>
   );

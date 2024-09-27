@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useSetPoints } from '../../utils/Points';
 import { TouchableOpacity } from 'react-native';
-import { useSharedStates } from '../../utils/SharedStates';
+import { store$ } from '../../utils/Store';
 import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
@@ -21,18 +21,14 @@ export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState('');
   const [confirmedAnswer, setConfirmedAnswer] = useState('');
   const [answered, setAnswered] = useState(false);
-  const { questions, currentQuestion, setCurrentQuestion } =
-    useSharedStates();
+  const questions = store$.questions.get();
+  const currentQuestion = store$.currentQuestion.get();
   const setPoints = useSetPoints();
 
   const handleNext = async () => {
-    correctly_answered =
-      answer.trim() === questions[currentQuestion].answer;
-    await setPoints(
-      correctly_answered,
-      questions[currentQuestion].points
-    );
-    setCurrentQuestion(currentQuestion + 1);
+    correctly_answered = answer.trim() === currentQuestion.answer;
+    await setPoints(correctly_answered, currentQuestion.points);
+    store$.gotoNextQuestion();
     setAnswer('');
     setAnswered(false);
   };
@@ -50,29 +46,27 @@ export default function MultipleChoiceQuestions() {
     <ScrollView contentContainerStyle={styles.contentContainer}>
       <View style={styles.container}>
         <Text style={globalStyles.question}>
-          {questions[currentQuestion].question}
+          {currentQuestion.question}
         </Text>
         <View>
-          {questions[currentQuestion].multiple_answer.map(
-            (option, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.squareButton}
-                onPress={() => setAnswer(option)}
-              >
-                <View
-                  style={[
-                    styles.innerSquare,
-                    {
-                      backgroundColor:
-                        answer === option ? Colors.dhbwRed : 'white',
-                    },
-                  ]}
-                />
-                <Text style={styles.answerText}>{option}</Text>
-              </TouchableOpacity>
-            )
-          )}
+          {currentQuestion.multiple_answer.map((option, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.squareButton}
+              onPress={() => setAnswer(option)}
+            >
+              <View
+                style={[
+                  styles.innerSquare,
+                  {
+                    backgroundColor:
+                      answer === option ? Colors.dhbwRed : 'white',
+                  },
+                ]}
+              />
+              <Text style={styles.answerText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
         <View
           style={
@@ -98,9 +92,7 @@ export default function MultipleChoiceQuestions() {
             <Text style={styles.answer}>{confirmedAnswer}</Text>
           </View>
         ) : null}
-        {questions[currentQuestion].hint && (
-          <Hint hint={questions[currentQuestion].hint} />
-        )}
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     </ScrollView>
   );

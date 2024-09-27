@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Text, Alert, View, StyleSheet } from 'react-native';
-import { useSharedStates } from '../utils/SharedStates';
+import { store$ } from '../utils/Store';
 import UIButton from './UIButton';
 import Colors from '../utils/Colors';
 
 export default function Hint({ hint }) {
   const [showHint, setShowHint] = useState(false);
-
-  const { questions, currentQuestion } = useSharedStates();
+  const currentQuestion = store$.currentQuestion.get();
 
   const handleHint = () => {
     Alert.alert(
@@ -22,7 +21,7 @@ export default function Hint({ hint }) {
           text: 'Ja, ich möchte einen Tipp',
           onPress: () => {
             setShowHint(true);
-            questions[currentQuestion].points -= 1;
+            currentQuestion.points -= 1;
           },
         },
       ]

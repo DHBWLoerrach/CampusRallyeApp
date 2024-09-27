@@ -31,7 +31,7 @@ export const PostProcessingState = ({ loading, onRefresh }) => (
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
   >
-    <VotingScreen />
+    <VotingScreen onRefresh={onRefresh} loading={loading} />
   </ScrollView>
 );
 

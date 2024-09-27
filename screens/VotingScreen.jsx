@@ -6,7 +6,7 @@ import UIButton from '../ui/UIButton';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 
-export default function VotingScreen() {
+export default function VotingScreen({ onRefresh, loading }) {
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [voting, setVoting] = useState([]);
@@ -56,10 +56,18 @@ export default function VotingScreen() {
         <Text style={globalStyles.bigText}>
           Die Abstimmung wurde beendet.
         </Text>
-        <Text style={globalStyles.bigText}>
+        <Text style={[globalStyles.bigText, { marginBottom: 20 }]}>
           Lade diese Seite neu, um das Ergebnis zu sehen, nachdem die
           Rallye beendet wurde.
         </Text>
+        <UIButton
+          color={Colors.dhbwRed}
+          icon="rotate"
+          disabled={loading}
+          onPress={onRefresh}
+        >
+          Aktualisieren
+        </UIButton>
       </View>
     );
   }

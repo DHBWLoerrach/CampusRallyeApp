@@ -12,7 +12,6 @@ import { useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as MailComposer from 'expo-mail-composer';
 import { store$ } from '../../utils/Store';
-import { useSharedStates } from '../../utils/SharedStates';
 import { useSetPoints } from '../../utils/Points';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
@@ -21,10 +20,9 @@ import UploadPhoto from './UploadPhoto';
 export default function UploadQuestions() {
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const questions = store$.questions.get();
+  const currentQuestion = store$.currentQuestion.get();
   const [permission, requestPermission] = useCameraPermissions();
-
-  const { questions, currentQuestion, setCurrentQuestion } =
-    useSharedStates();
   const setPoints = useSetPoints();
 
   if (!permission) {
@@ -62,7 +60,7 @@ export default function UploadQuestions() {
     let mailOptions = {
       recipients: [rallye.mail_adress],
       subject: 'Foto/Video -- Team: ' + team.name,
-      body: `Das ist die Aufnahme unseres Teams!\n\nFrage: ${questions[currentQuestion].question}`,
+      body: `Das ist die Aufnahme unseres Teams!\n\nFrage: ${currentQuestion.question}`,
       attachments: [resizedImageUri],
     };
     try {
@@ -84,8 +82,8 @@ export default function UploadQuestions() {
         {
           text: 'Ja, ich habe die E-Mail gesendet',
           onPress: async () => {
-            await setPoints(true, questions[currentQuestion].points);
-            setCurrentQuestion(currentQuestion + 1);
+            await setPoints(true, currentQuestion.points);
+            store$.gotoNextQuestion();
           },
         },
       ]
@@ -96,7 +94,7 @@ export default function UploadQuestions() {
     <ScrollView>
       <View style={styles.container}>
         <Text style={globalStyles.question}>
-          {questions[currentQuestion].question}
+          {currentQuestion.question}
         </Text>
         <UploadPhoto handleSendEmail={handleSendEmail} />
         <Text style={styles.infoText}>

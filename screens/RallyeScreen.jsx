@@ -24,18 +24,13 @@ const questionTypeComponents = {
 
 const RallyeScreen = observer(function RallyeScreen() {
   // import shared states
-  const {
-    questions,
-    setQuestions,
-    currentQuestion,
-    setCurrentQuestion,
-    setEnabled,
-    points,
-    setPoints,
-  } = useSharedStates();
+  const { setEnabled, points, setPoints } = useSharedStates();
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const questions = store$.questions.get();
+  const currentQuestion = store$.currentQuestion.get();
+  const allQuestionsAnswered = store$.allQuestionsAnswered.get();
   const currentTime$ = currentTime.get();
 
   const onRefresh = React.useCallback(async () => {
@@ -53,9 +48,8 @@ const RallyeScreen = observer(function RallyeScreen() {
   }, []);
 
   useEffect(() => {
-    if (!rallye) {
-      return;
-    }
+    if (!rallye) return;
+
     if (rallye.status === 'running') {
       if (team !== null) {
         const fetchData = async () => {
@@ -97,7 +91,7 @@ const RallyeScreen = observer(function RallyeScreen() {
               [data[i], data[j]] = [data[j], data[i]];
             }
           }
-          setQuestions(data);
+          store$.questions.set(data);
           setLoading(false);
         };
 
@@ -110,26 +104,15 @@ const RallyeScreen = observer(function RallyeScreen() {
     if (!rallye) {
       return;
     }
-    if (rallye.status === 'running') {
-      if (currentQuestion === null) {
-        const fetchData = async () => {
-          let { data } = await supabase.rpc('get_points', {
-            group_id_param: team.id,
-          });
+    if (rallye.status === 'running' && allQuestionsAnswered) {
+      const fetchData = async () => {
+        let { data } = await supabase.rpc('get_points', {
+          group_id_param: team.id,
+        });
 
-          setPoints(data);
-        };
-        fetchData();
-      } else if (currentQuestion === questions.length) {
-        const fetchData = async () => {
-          let { data, error } = await supabase.rpc('get_points', {
-            group_id_param: team.id,
-          });
-
-          setPoints(data);
-        };
-        fetchData();
-      }
+        setPoints(data);
+      };
+      fetchData();
     }
   }, [rallye, currentQuestion]);
 
@@ -176,7 +159,7 @@ const RallyeScreen = observer(function RallyeScreen() {
         const j = Math.floor(Math.random() * (i + 1));
         [data[i], data[j]] = [data[j], data[i]];
       }
-      setQuestions(data);
+      store$.questions.set(data);
       setLoading(false);
     };
     fetchData();
@@ -192,29 +175,23 @@ const RallyeScreen = observer(function RallyeScreen() {
 
   if (!rallye) {
     // exploration mode (Erkundungsmodus ohne Rallye)
-    if (!questions || questions.length === 0) {
+    if (questions.length === 0) {
       return <RallyeStates.NoQuestionsAvailableState />;
     }
-    if (
-      !questions ||
-      questions.length === 0 ||
-      currentQuestion >= questions.length
-    ) {
+    if (allQuestionsAnswered) {
       return (
         <RallyeStates.ExplorationFinishedState
           points={points}
           goBackToLogin={() => {
             setEnabled(false);
             setPoints(0);
-            setCurrentQuestion(0);
+            store$.questionIndex.set(0);
           }}
         />
       );
     }
     const QuestionComponent =
-      questionTypeComponents[
-        questions[currentQuestion].question_type
-      ];
+      questionTypeComponents[currentQuestion.question_type];
     return (
       <View style={globalStyles.container}>
         <QuestionComponent />
@@ -259,11 +236,7 @@ const RallyeScreen = observer(function RallyeScreen() {
       return <RallyeStates.TeamNotSelectedState />;
     }
 
-    if (
-      !questions ||
-      questions.length === 0 ||
-      currentQuestion >= questions.length
-    ) {
+    if (questions.length === 0 || allQuestionsAnswered) {
       return (
         <RallyeStates.AllQuestionsAnsweredState
           loading={loading}
@@ -274,9 +247,7 @@ const RallyeScreen = observer(function RallyeScreen() {
     }
 
     const QuestionComponent =
-      questionTypeComponents[
-        questions[currentQuestion].question_type
-      ];
+      questionTypeComponents[currentQuestion.question_type];
     return (
       <View style={globalStyles.container}>
         <QuestionComponent />

@@ -9,15 +9,17 @@ import RallyeScreen from '../screens/RallyeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import TeamScreen from '../screens/TeamScreen';
 import Color from '../utils/Colors';
-import { useSharedStates } from '../utils/SharedStates';
 
 const Tab = createBottomTabNavigator();
 
 const MainTabs = observer(function MainTabs() {
-  const { currentQuestion, questions } = useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const questions = store$.questions.get();
+  const currentQuestion = store$.currentQuestion.get();
+  const allQuestionsAnswered = store$.allQuestionsAnswered.get();
+  const index = store$.questionIndex.get();
 
   useEffect(() => {
     if (rallye && team) {
@@ -36,16 +38,13 @@ const MainTabs = observer(function MainTabs() {
       if (team !== null) {
         fetchData();
       }
-    } else {
-      let value = 0.0;
-      if (currentQuestion && questions != null) {
-        value =
-          parseFloat(currentQuestion) / parseFloat(questions.length);
-      }
-
+    } else if (questions.length > 0) {
+      let value = allQuestionsAnswered
+        ? 1.0
+        : parseFloat(index) / parseFloat(questions.length);
       setPercentage(value);
     }
-  }, [currentQuestion, team]);
+  }, [currentQuestion, team, allQuestionsAnswered]);
 
   return (
     <Tab.Navigator
