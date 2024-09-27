@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { store$ } from './utils/Store';
 import { supabase } from './utils/Supabase';
 import MainNavigator from './MainNavigator';
 import Welcome from './screens/Welcome';
@@ -23,11 +24,12 @@ export default function App() {
 
   const handlePasswordSubmit = async (password) => {
     if (password === realPassword) {
-      const { data: rallye } = await supabase
+      const { data } = await supabase
         .from('rallye')
         .select('*')
         .eq('is_active_rallye', true);
-      setRallye(rallye[0]);
+      setRallye(data[0]);
+      store$.rallye.set(data[0]);
       setEnabled(true);
     } else {
       Alert.alert(
