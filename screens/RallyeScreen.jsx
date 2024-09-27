@@ -30,12 +30,12 @@ const RallyeScreen = observer(function RallyeScreen() {
     currentQuestion,
     setCurrentQuestion,
     setEnabled,
-    team,
     points,
     setPoints,
   } = useSharedStates();
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
+  const team = store$.team.get();
   const currentTime$ = currentTime.get();
 
   const onRefresh = React.useCallback(async () => {
@@ -59,9 +59,8 @@ const RallyeScreen = observer(function RallyeScreen() {
     if (rallye.status === 'running') {
       if (team !== null) {
         const fetchData = async () => {
-          let group_id = team;
           let { data } = await supabase.rpc('get_questions', {
-            group_id,
+            group_id: team.id,
           });
           if (data) {
             temp = data.filter(
@@ -114,9 +113,8 @@ const RallyeScreen = observer(function RallyeScreen() {
     if (rallye.status === 'running') {
       if (currentQuestion === null) {
         const fetchData = async () => {
-          let group_id_param = team;
           let { data } = await supabase.rpc('get_points', {
-            group_id_param,
+            group_id_param: team.id,
           });
 
           setPoints(data);
@@ -124,9 +122,8 @@ const RallyeScreen = observer(function RallyeScreen() {
         fetchData();
       } else if (currentQuestion === questions.length) {
         const fetchData = async () => {
-          let group_id_param = team;
           let { data, error } = await supabase.rpc('get_points', {
-            group_id_param,
+            group_id_param: team.id,
           });
 
           setPoints(data);

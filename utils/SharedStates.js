@@ -6,7 +6,6 @@ function sharedStates() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [points, setPoints] = useState(0);
-  const [team, setTeam] = useState(null);
   const [enabled, setEnabled] = useState(false);
 
   return {
@@ -16,8 +15,6 @@ function sharedStates() {
     setCurrentQuestion,
     points,
     setPoints,
-    team,
-    setTeam,
     enabled,
     setEnabled,
   };

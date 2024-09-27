@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
+import { observer } from '@legendapp/state/react';
 import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
 import { useSharedStates } from '../utils/SharedStates';
@@ -9,11 +10,11 @@ import { globalStyles } from '../utils/Styles';
 import Colors from '../utils/Colors';
 import generateTeamName from '../utils/RandomTeamNames';
 
-export default function TeamScreen({ navigation }) {
+const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
-  const [teamName, setTeamName] = useState(null);
-  const { team, setTeam, setEnabled } = useSharedStates();
+  const { setEnabled } = useSharedStates();
   const rallye = store$.rallye.get();
+  const team = store$.team.get();
 
   useEffect(() => {
     if (!rallye) {
@@ -24,16 +25,15 @@ export default function TeamScreen({ navigation }) {
       if (teamId !== null) {
         const { data } = await supabase
           .from('rallye_group')
-          .select('name')
+          .select('*')
           .eq('id', teamId);
         if (data.length > 0) {
-          setTeamName(data[0].name);
-          setTeam(teamId);
+          store$.team.set(data[0]);
         }
       }
     };
     fetchLocalStorage();
-  }, []);
+  }, [rallye]);
 
   if (!rallye) {
     return (
@@ -58,7 +58,7 @@ export default function TeamScreen({ navigation }) {
             { color: Colors.dhbwRed, marginBottom: 20 },
           ]}
         >
-          {teamName}
+          {team.name}
         </Text>
         <UIButton onPress={gotoRallye}>Gehe zur Rallye</UIButton>
       </>
@@ -78,8 +78,7 @@ export default function TeamScreen({ navigation }) {
             rallye_id: rallye.id,
           })
           .select();
-        setTeam(data[0].id);
-        setTeamName(teamName);
+        store$.team.set(data[0]);
         storeData(rallye.id + '', data[0].id);
       } catch (err) {
         console.log('error creating team: ', err);
@@ -117,4 +116,6 @@ export default function TeamScreen({ navigation }) {
       )}
     </View>
   );
-}
+});
+
+export default TeamScreen;

@@ -2,19 +2,18 @@ import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
-import { useSharedStates } from '../utils/SharedStates';
 import UIButton from '../ui/UIButton';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 
 export default function VotingScreen() {
-  const { team } = useSharedStates();
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [voting, setVoting] = useState([]);
   const [currentVoting, setCurrentVoting] = useState(0);
   const [sendingResult, setSendingResult] = useState(false);
   const rallye = store$.rallye.get();
+  const team = store$.team.get();
 
   useEffect(() => {
     const fetchDataSupabase = async () => {
@@ -27,7 +26,7 @@ export default function VotingScreen() {
       const { data: vote } = await supabase.rpc(
         'get_unvoted_questions',
         {
-          input_group_id: team,
+          input_group_id: team.id,
         }
       );
       if (vote !== null) {
@@ -42,7 +41,7 @@ export default function VotingScreen() {
     await supabase.from('question_voting').insert([
       {
         question_id: voting[currentVoting]?.id,
-        group_id: team,
+        group_id: team.id,
         voted_group_id: selectedTeam,
       },
     ]);
@@ -83,7 +82,7 @@ export default function VotingScreen() {
         die oben gestellte Aufgabe am besten gelöst hat.
       </Text>
       {teams
-        ?.filter((item) => item.id !== team)
+        ?.filter((item) => item.id !== team.id)
         .map((item, index) => (
           <View
             key={index}

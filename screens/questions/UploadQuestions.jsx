@@ -20,15 +20,11 @@ import UploadPhoto from './UploadPhoto';
 
 export default function UploadQuestions() {
   const rallye = store$.rallye.get();
+  const team = store$.team.get();
   const [permission, requestPermission] = useCameraPermissions();
 
-  const {
-    questions,
-    currentQuestion,
-    setCurrentQuestion,
-    team,
-    teams,
-  } = useSharedStates();
+  const { questions, currentQuestion, setCurrentQuestion } =
+    useSharedStates();
   const setPoints = useSetPoints();
 
   if (!permission) {
@@ -61,12 +57,11 @@ export default function UploadQuestions() {
   };
 
   const handleSendEmail = async (uri) => {
-    const theTeam = teams.find((t) => t.id === team);
     const resizedImageUri = await resizeImage(uri);
 
     let mailOptions = {
       recipients: [rallye.mail_adress],
-      subject: 'Foto/Video -- Team: ' + theTeam.name,
+      subject: 'Foto/Video -- Team: ' + team.name,
       body: `Das ist die Aufnahme unseres Teams!\n\nFrage: ${questions[currentQuestion].question}`,
       attachments: [resizedImageUri],
     };

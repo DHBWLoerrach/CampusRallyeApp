@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { observer } from '@legendapp/state/react';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
 import { supabase } from '../utils/Supabase';
 import { store$ } from '../utils/Store';
@@ -12,18 +13,19 @@ import { useSharedStates } from '../utils/SharedStates';
 
 const Tab = createBottomTabNavigator();
 
-const MainTabs = function MainTabs() {
-  const { team, currentQuestion, questions } = useSharedStates();
+const MainTabs = observer(function MainTabs() {
+  const { currentQuestion, questions } = useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
   const rallye = store$.rallye.get();
+  const team = store$.team.get();
 
   useEffect(() => {
-    if (rallye) {
+    if (rallye && team) {
       const fetchData = async () => {
         let { data, error } = await supabase.rpc(
           'get_question_count',
           {
-            groupid: team,
+            groupid: team.id,
           }
         );
         let value =
@@ -90,6 +92,6 @@ const MainTabs = function MainTabs() {
       />
     </Tab.Navigator>
   );
-};
+});
 
 export default MainTabs;
