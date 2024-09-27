@@ -117,9 +117,7 @@ const RallyeScreen = observer(function RallyeScreen() {
   }, [rallye, currentQuestion]);
 
   useEffect(() => {
-    if (rallye) {
-      return;
-    }
+    if (rallye) return;
     setLoading(true);
     const fetchData = async () => {
       let { data } = await supabase
