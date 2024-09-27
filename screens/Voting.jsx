@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
 import { useSharedStates } from '../utils/SharedStates';
 import UIButton from '../ui/UIButton';
@@ -7,14 +8,22 @@ import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 
 export default function VotingScreen() {
-  const { teams, team } = useSharedStates();
+  const { team } = useSharedStates();
+  const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [voting, setVoting] = useState([]);
   const [currentVoting, setCurrentVoting] = useState(0);
   const [sendingResult, setSendingResult] = useState(false);
+  const rallye = store$.rallye.get();
 
   useEffect(() => {
     const fetchDataSupabase = async () => {
+      const { data: teams } = await supabase
+        .from('rallye_group')
+        .select('*')
+        .eq('rallye_id', rallye.id)
+        .order('id', { ascending: false });
+      setTeams(teams);
       const { data: vote } = await supabase.rpc(
         'get_unvoted_questions',
         {
