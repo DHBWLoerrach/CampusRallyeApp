@@ -24,7 +24,7 @@ const questionTypeComponents = {
 
 const RallyeScreen = observer(function RallyeScreen() {
   // import shared states
-  const { setEnabled, points, setPoints } = useSharedStates();
+  const { points, setPoints } = useSharedStates();
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
@@ -181,9 +181,10 @@ const RallyeScreen = observer(function RallyeScreen() {
         <RallyeStates.ExplorationFinishedState
           points={points}
           goBackToLogin={() => {
-            setEnabled(false);
             setPoints(0);
+            store$.enabled.set(false);
             store$.questionIndex.set(0);
+            store$.allQuestionsAnswered.set(false);
           }}
         />
       );

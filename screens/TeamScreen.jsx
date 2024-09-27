@@ -3,7 +3,6 @@ import { Text, View } from 'react-native';
 import { observer } from '@legendapp/state/react';
 import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
-import { useSharedStates } from '../utils/SharedStates';
 import { getData, storeData } from '../utils/LocalStorage';
 import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/Styles';
@@ -12,7 +11,6 @@ import generateTeamName from '../utils/RandomTeamNames';
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
-  const { setEnabled } = useSharedStates();
   const rallye = store$.rallye.get();
   const team = store$.team.get();
 
@@ -41,7 +39,10 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
         <Text style={[globalStyles.bigText, { marginBottom: 10 }]}>
           Du nimmst gerade nicht an einer Rallye teil.
         </Text>
-        <UIButton icon="arrow-left" onPress={() => setEnabled(false)}>
+        <UIButton
+          icon="arrow-left"
+          onPress={() => store$.enabled.set(false)}
+        >
           Zurück zur Anmeldung
         </UIButton>
       </View>

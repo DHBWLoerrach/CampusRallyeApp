@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { observer } from '@legendapp/state/react';
 import { store$ } from './utils/Store';
 import { supabase } from './utils/Supabase';
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
-import { useSharedStates } from './utils/SharedStates';
 
-export default function App() {
+const App = observer(function App() {
   const [realPassword, setRealPassword] = useState(null);
-  const { enabled, setEnabled } = useSharedStates();
+  const enabled = store$.enabled.get();
 
   useEffect(() => {
     async function getData() {
@@ -33,7 +33,7 @@ export default function App() {
         rallye.end_time = new Date(rallye.end_time);
       }
       store$.rallye.set(rallye);
-      setEnabled(true);
+      store$.enabled.set(true);
     } else {
       Alert.alert(
         'Falsches Passwort',
@@ -42,9 +42,9 @@ export default function App() {
     }
   };
 
-  const handleNoPasswordSubmit = async () => {
-    setEnabled(true);
+  const handleNoPasswordSubmit = () => {
     store$.rallye.set(null);
+    store$.enabled.set(true);
   };
 
   return (
@@ -59,4 +59,6 @@ export default function App() {
       )}
     </NavigationContainer>
   );
-}
+});
+
+export default App;

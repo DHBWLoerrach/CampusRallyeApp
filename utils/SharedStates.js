@@ -4,13 +4,10 @@ import { useBetween } from 'use-between';
 function sharedStates() {
   // set all states, that have to be used between different components
   const [points, setPoints] = useState(0);
-  const [enabled, setEnabled] = useState(false);
 
   return {
     points,
     setPoints,
-    enabled,
-    setEnabled,
   };
 }
 

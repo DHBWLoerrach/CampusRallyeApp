@@ -3,6 +3,7 @@ import { observable } from '@legendapp/state';
 export const store$ = observable({
   rallye: null,
   team: null,
+  enabled: false,
   questions: [],
   questionIndex: 0,
   allQuestionsAnswered: false,
