@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { currentTime } from '@legendapp/state/helpers/time';
 import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
@@ -32,7 +33,6 @@ export default function RallyeScreen() {
     rallye,
     setRallye,
     setPoints,
-    remainingTime,
   } = useSharedStates();
   const [loading, setLoading] = useState(false);
 
@@ -246,7 +246,10 @@ export default function RallyeScreen() {
   }
 
   if (rallye.status === 'running') {
-    if (remainingTime < 0) {
+    if (
+      currentTime.get().getTime() >=
+      new Date(rallye.end_time).getTime()
+    ) {
       return (
         <RallyeStates.TimeExpiredState
           loading={loading}

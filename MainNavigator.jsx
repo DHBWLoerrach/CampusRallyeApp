@@ -1,10 +1,14 @@
+import { useEffect, useState } from 'react';
+import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
 import * as Progress from 'react-native-progress';
-import { View, Text } from 'react-native';
-import { useEffect, useState } from 'react';
+import { observer } from '@legendapp/state/react';
+import { currentTime } from '@legendapp/state/helpers/time';
 import { supabase } from './utils/Supabase';
+import { store$ } from './utils/Store';
+import TimeHeader from './ui/TimeHeader';
 import RallyeScreen from './screens/RallyeScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import TeamScreen from './screens/TeamScreen';
@@ -19,41 +23,10 @@ import { useSharedStates } from './utils/SharedStates';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function MainTabs() {
-  const {
-    rallye,
-    setRallye,
-    team,
-    currentQuestion,
-    questions,
-    remainingTime,
-    setRemainingTime,
-  } = useSharedStates();
+const MainTabs = observer(function MainTabs() {
+  const { team, currentQuestion, questions } = useSharedStates();
   const [percentage, setPercentage] = useState(0.0);
-
-  useEffect(() => {
-    if (!rallye) {
-      return;
-    }
-    const intervalId = setInterval(() => {
-      const endTime = new Date(rallye.end_time);
-      const currentTime = new Date();
-      const diffInMilliseconds = endTime - currentTime;
-      const diffInMinutes = Math.round(
-        diffInMilliseconds / 1000 / 60
-      );
-      setRemainingTime(diffInMinutes);
-    }, 60000);
-
-    //execute it one time to set the time directly
-    const endTime = new Date(rallye.end_time);
-    const currentTime = new Date();
-    const diffInMilliseconds = endTime - currentTime;
-    const diffInMinutes = Math.round(diffInMilliseconds / 1000 / 60);
-    setRemainingTime(diffInMinutes);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  const rallye = store$.rallye.get();
 
   useEffect(() => {
     if (rallye) {
@@ -125,17 +98,11 @@ function MainTabs() {
           headerTintColor: Color.tabHeader,
           headerTitle: () =>
             rallye ? (
-              rallye.status === 'running' && remainingTime > 0 ? (
+              rallye.status === 'running' &&
+              currentTime.get().getTime() <
+                new Date(rallye.end_time).getTime() ? (
                 <View style={{ alignItems: 'center' }}>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: 14,
-                      fontWeight: '500',
-                    }}
-                  >
-                    Verbleibende Zeit: {remainingTime} Minuten
-                  </Text>
+                  <TimeHeader endTime={rallye.end_time} />
                   <Progress.Bar
                     style={{ marginTop: 10 }}
                     progress={percentage}
@@ -202,7 +169,7 @@ function MainTabs() {
       />
     </Tab.Navigator>
   );
-}
+});
 
 export default function MainNavigator() {
   return (

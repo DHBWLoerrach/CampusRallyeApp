@@ -9,7 +9,6 @@ function sharedStates() {
   const [rallye, setRallye] = useState(null);
   const [team, setTeam] = useState(null);
   const [enabled, setEnabled] = useState(false);
-  const [remainingTime, setRemainingTime] = useState(0);
 
   return {
     questions,
@@ -24,8 +23,6 @@ function sharedStates() {
     setTeam,
     enabled,
     setEnabled,
-    remainingTime,
-    setRemainingTime,
   };
 }
 
