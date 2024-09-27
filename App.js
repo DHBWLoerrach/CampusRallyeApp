@@ -9,7 +9,7 @@ import { useSharedStates } from './utils/SharedStates';
 
 export default function App() {
   const [realPassword, setRealPassword] = useState(null);
-  const { setRallye, enabled, setEnabled } = useSharedStates();
+  const { enabled, setEnabled } = useSharedStates();
 
   useEffect(() => {
     async function getData() {
@@ -32,7 +32,6 @@ export default function App() {
       if (rallye.end_time) {
         rallye.end_time = new Date(rallye.end_time);
       }
-      setRallye(rallye);
       store$.rallye.set(rallye);
       setEnabled(true);
     } else {
@@ -45,7 +44,7 @@ export default function App() {
 
   const handleNoPasswordSubmit = async () => {
     setEnabled(true);
-    setRallye(null);
+    store$.rallye.set(null);
   };
 
   return (

@@ -1,15 +1,11 @@
+import { store$ } from './Store';
 import { useSharedStates } from './SharedStates';
 import { supabase } from './Supabase';
 
 export const useSetPoints = () => {
-  const {
-    rallye,
-    team,
-    questions,
-    currentQuestion,
-    points,
-    setPoints,
-  } = useSharedStates();
+  const { team, questions, currentQuestion, points, setPoints } =
+    useSharedStates();
+  const rallye = store$.rallye.get();
 
   const setPointsFunction = async (
     answered_correctly,

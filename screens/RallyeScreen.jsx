@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { observer } from '@legendapp/state/react';
 import { currentTime } from '@legendapp/state/helpers/time';
+import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
@@ -31,22 +32,21 @@ const RallyeScreen = observer(function RallyeScreen() {
     setEnabled,
     team,
     points,
-    rallye,
-    setRallye,
     setPoints,
   } = useSharedStates();
   const [loading, setLoading] = useState(false);
+  const rallye = store$.rallye.get();
   const currentTime$ = currentTime.get();
 
   const onRefresh = React.useCallback(async () => {
     if (rallye) {
       setLoading(true);
-      const { data: rallye } = await supabase
+      const { data } = await supabase
         .from('rallye')
         .select('*')
         .eq('is_active_rallye', true);
-      if (rallye[0].status !== rallye.status) {
-        setRallye(rallye[0]);
+      if (data[0].status !== rallye.status) {
+        store$.rallye.set(data[0]);
       }
       setLoading(false);
     }

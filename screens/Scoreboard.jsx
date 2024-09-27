@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
-import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 
 export default function Scoreboard() {
-  const { rallye } = useSharedStates();
+  const rallye = store$.rallye.get();
   const [sortedTeams, setSortedTeams] = useState([]);
 
   useEffect(() => {

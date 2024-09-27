@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
+import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
 import { useSharedStates } from '../utils/SharedStates';
 import { getData, storeData } from '../utils/LocalStorage';
@@ -11,7 +12,8 @@ import generateTeamName from '../utils/RandomTeamNames';
 export default function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [teamName, setTeamName] = useState(null);
-  const { team, setTeam, rallye, setEnabled } = useSharedStates();
+  const { team, setTeam, setEnabled } = useSharedStates();
+  const rallye = store$.rallye.get();
 
   useEffect(() => {
     if (!rallye) {
@@ -20,7 +22,7 @@ export default function TeamScreen({ navigation }) {
     const fetchLocalStorage = async () => {
       const teamId = await getData(rallye.id + '');
       if (teamId !== null) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('rallye_group')
           .select('name')
           .eq('id', teamId);

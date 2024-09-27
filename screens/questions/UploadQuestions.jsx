@@ -11,6 +11,7 @@ import {
 import { useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as MailComposer from 'expo-mail-composer';
+import { store$ } from '../../utils/Store';
 import { useSharedStates } from '../../utils/SharedStates';
 import { useSetPoints } from '../../utils/Points';
 import Colors from '../../utils/Colors';
@@ -18,6 +19,7 @@ import { globalStyles } from '../../utils/Styles';
 import UploadPhoto from './UploadPhoto';
 
 export default function UploadQuestions() {
+  const rallye = store$.rallye.get();
   const [permission, requestPermission] = useCameraPermissions();
 
   const {
@@ -26,7 +28,6 @@ export default function UploadQuestions() {
     setCurrentQuestion,
     team,
     teams,
-    rallye,
   } = useSharedStates();
   const setPoints = useSetPoints();
 
