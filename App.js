@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { store$ } from './utils/Store';
 import { supabase } from './utils/Supabase';
-import MainNavigator from './MainNavigator';
+import MainNavigator from './navigation/MainNavigator';
 import Welcome from './screens/Welcome';
 import { useSharedStates } from './utils/SharedStates';
 

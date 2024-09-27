@@ -1,11 +1,11 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import MainTabs from './ui/MainTabs';
-import ImprintScreen from './screens/ImprintScreen';
-import InformationScreen from './screens/InformationScreen';
-import SkillQuestions from './screens/questions/SkillQuestions';
-import UploadQuestions from './screens/questions/UploadQuestions';
-import QRCodeQuestions from './screens/questions/QRCodeQuestions';
-import Color from './utils/Colors';
+import MainTabs from './MainTabs';
+import ImprintScreen from '../screens/ImprintScreen';
+import InformationScreen from '../screens/InformationScreen';
+import SkillQuestions from '../screens/questions/SkillQuestions';
+import UploadQuestions from '../screens/questions/UploadQuestions';
+import QRCodeQuestions from '../screens/questions/QRCodeQuestions';
+import Color from '../utils/Colors';
 
 const Stack = createNativeStackNavigator();
 
