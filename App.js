@@ -13,11 +13,11 @@ const App = observer(function App() {
 
   useEffect(() => {
     async function getData() {
-      const { data: login } = await supabase
+      const { data } = await supabase
         .from('login')
         .select('password, rallye!inner(id)')
         .eq('rallye.is_active_rallye', true);
-      setRealPassword(login[0].password);
+      if (data) setRealPassword(data[0].password);
     }
     getData();
   }, []);
