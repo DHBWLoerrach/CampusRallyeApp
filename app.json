@@ -56,7 +56,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan barcodes and to take pictures.."
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan barcodes and to take pictures..",
+          "recordAudioAndroid": false
         }
       ]
     ],
