@@ -35,11 +35,7 @@ export const PostProcessingState = ({ loading, onRefresh }) => (
   </ScrollView>
 );
 
-export const EndedState = () => (
-  <View style={globalStyles.container}>
-    <Scoreboard />
-  </View>
-);
+export const EndedState = () => <Scoreboard />;
 
 export const TeamNotSelectedState = () => (
   <View style={globalStyles.container}>

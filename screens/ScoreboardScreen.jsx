@@ -1,26 +1,20 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
 import Colors from '../utils/Colors';
-import { globalStyles } from '../utils/Styles';
 
 export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
   const [sortedTeams, setSortedTeams] = useState([]);
 
   useEffect(() => {
-    if (rallye.status !== 'ended') {
-      return;
-    }
+    if (rallye.status !== 'ended') return;
     const fetchData = async () => {
       try {
-        let rallye_id_param = rallye.id;
         let { data } = await supabase.rpc(
           'get_total_points_per_rallye',
-          {
-            rallye_id_param,
-          }
+          { rallye_id_param: rallye.id }
         );
 
         if (data) {
@@ -36,7 +30,7 @@ export default function ScoreboardScreen() {
   }, [rallye]);
 
   return (
-    <View style={globalStyles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.scoreboardTitle}>Rangliste</Text>
       <View style={styles.tableHeader}>
         <Text style={styles.headerText}>Platz</Text>
@@ -50,11 +44,14 @@ export default function ScoreboardScreen() {
           <Text style={styles.rowText}>{team.total_points}</Text>
         </View>
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'white',
+  },
   scoreboardTitle: {
     color: Colors.dhbwGray,
     fontSize: 30,
