@@ -8,7 +8,6 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import { useSetPoints } from '../../utils/Points';
 import { TouchableOpacity } from 'react-native';
 import { store$ } from '../../utils/Store';
 import Constants from '../../utils/Constants';
@@ -19,22 +18,19 @@ import Hint from '../../ui/Hint';
 
 export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState('');
-  const [confirmedAnswer, setConfirmedAnswer] = useState('');
-  const [answered, setAnswered] = useState(false);
-  const questions = store$.questions.get();
   const currentQuestion = store$.currentQuestion.get();
-  const setPoints = useSetPoints();
 
   const handleNext = async () => {
     correctly_answered = answer.trim() === currentQuestion.answer;
-    await setPoints(correctly_answered, currentQuestion.points);
+    await store$.savePoints(
+      correctly_answered,
+      currentQuestion.points
+    );
     store$.gotoNextQuestion();
     setAnswer('');
-    setAnswered(false);
   };
 
   const handleAnswerSubmit = () => {
-    setAnswered(true);
     if (answer.trim() === '') {
       Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
       return;
@@ -83,15 +79,6 @@ export default function MultipleChoiceQuestions() {
             disabled={!answer}
           />
         </View>
-
-        {confirmedAnswer ? (
-          <View style={styles.answerContainer}>
-            <Text style={styles.answerLabel}>
-              Bestätigte Antwort:
-            </Text>
-            <Text style={styles.answer}>{confirmedAnswer}</Text>
-          </View>
-        ) : null}
         {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     </ScrollView>

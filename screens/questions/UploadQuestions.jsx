@@ -12,7 +12,6 @@ import { useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as MailComposer from 'expo-mail-composer';
 import { store$ } from '../../utils/Store';
-import { useSetPoints } from '../../utils/Points';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/Styles';
 import UploadPhoto from './UploadPhoto';
@@ -20,10 +19,8 @@ import UploadPhoto from './UploadPhoto';
 export default function UploadQuestions() {
   const rallye = store$.rallye.get();
   const team = store$.team.get();
-  const questions = store$.questions.get();
   const currentQuestion = store$.currentQuestion.get();
   const [permission, requestPermission] = useCameraPermissions();
-  const setPoints = useSetPoints();
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -82,7 +79,10 @@ export default function UploadQuestions() {
         {
           text: 'Ja, ich habe die E-Mail gesendet',
           onPress: async () => {
-            await setPoints(true, currentQuestion.points);
+            await store$.savePoints(
+              correctly_answered,
+              currentQuestion.points
+            );
             store$.gotoNextQuestion();
           },
         },

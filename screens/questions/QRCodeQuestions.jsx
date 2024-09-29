@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { store$ } from '../../utils/Store';
-import { useSetPoints } from '../../utils/Points';
 import { globalStyles } from '../../utils/Styles';
 import UIButton from '../../ui/UIButton';
 import Hint from '../../ui/Hint';
@@ -19,10 +18,9 @@ export default function QRCodeQuestions() {
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const currentQuestion = store$.currentQuestion.get();
-  const setPoints = useSetPoints();
 
-  submitSurrender = () => {
-    setPoints(false, currentQuestion.points);
+  submitSurrender = async () => {
+    await store$.savePoints(false, currentQuestion.points);
     store$.gotoNextQuestion();
   };
 
@@ -54,8 +52,8 @@ export default function QRCodeQuestions() {
       Alert.alert('OK', `Das ist der richtige QR-Code!`, [
         {
           text: 'Weiter',
-          onPress: () => {
-            setPoints(true, currentQuestion.points);
+          onPress: async () => {
+            await store$.savePoints(true, currentQuestion.points);
             store$.gotoNextQuestion();
           },
         },

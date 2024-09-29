@@ -7,7 +7,6 @@ import { supabase } from '../utils/Supabase';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
-import { useSharedStates } from '../utils/SharedStates';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/Styles';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
@@ -23,13 +22,12 @@ const questionTypeComponents = {
 };
 
 const RallyeScreen = observer(function RallyeScreen() {
-  // import shared states
-  const { points, setPoints } = useSharedStates();
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
   const questions = store$.questions.get();
   const currentQuestion = store$.currentQuestion.get();
+  const points = store$.points.get();
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
   const currentTime$ = currentTime.get();
 
@@ -109,8 +107,7 @@ const RallyeScreen = observer(function RallyeScreen() {
         let { data } = await supabase.rpc('get_points', {
           group_id_param: team.id,
         });
-
-        setPoints(data);
+        store$.points.set(data);
       };
       fetchData();
     }
@@ -181,7 +178,7 @@ const RallyeScreen = observer(function RallyeScreen() {
         <RallyeStates.ExplorationFinishedState
           points={points}
           goBackToLogin={() => {
-            setPoints(0);
+            store$.points.set(0);
             store$.enabled.set(false);
             store$.questionIndex.set(0);
             store$.allQuestionsAnswered.set(false);
