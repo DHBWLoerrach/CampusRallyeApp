@@ -38,8 +38,12 @@ const RallyeScreen = observer(function RallyeScreen() {
         .from('rallye')
         .select('*')
         .eq('is_active_rallye', true);
-      if (data[0].status !== rallye.status) {
-        store$.rallye.set(data[0]);
+      const rallyeFromDB = data[0];
+      if (rallyeFromDB && rallyeFromDB.status !== rallye.status) {
+        if (rallyeFromDB.end_time) {
+          rallyeFromDB.end_time = new Date(rallyeFromDB.end_time);
+        }
+        store$.rallye.set(rallyeFromDB);
       }
       setLoading(false);
     }
