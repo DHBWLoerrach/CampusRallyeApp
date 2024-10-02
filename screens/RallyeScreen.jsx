@@ -120,7 +120,7 @@ const RallyeScreen = observer(function RallyeScreen() {
   }, [rallye, team]);
 
   useEffect(() => {
-    if (!rallye) {
+    if (!rallye || !team) {
       return;
     }
     const fetchData = async () => {
@@ -254,7 +254,7 @@ const RallyeScreen = observer(function RallyeScreen() {
           loading={loading}
           onRefresh={onRefresh}
           points={points}
-          teamName={team.name}
+          teamName={team?.name}
         />
       );
     }

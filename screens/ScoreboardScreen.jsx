@@ -30,12 +30,15 @@ export default function ScoreboardScreen() {
 
     fetchData();
   }, [rallye]);
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.scoreboardTitle}>Rangliste</Text>
-      <Text style={[styles.headerText, { marginBottom: 10 }]}>
-        {ourTeam.name}: {points} Punkte
-      </Text>
+      {ourTeam && (
+        <Text style={[styles.headerText, { marginBottom: 10 }]}>
+          {ourTeam.name}: {points} Punkte
+        </Text>
+      )}
       <View style={styles.tableHeader}>
         <Text style={styles.headerText}>Platz</Text>
         <Text style={styles.headerText}>Team</Text>
@@ -46,7 +49,7 @@ export default function ScoreboardScreen() {
           key={index}
           style={[
             styles.tableRow,
-            team.group_name === ourTeam.name && styles.ourTeam,
+            team.group_name === ourTeam?.name && styles.ourTeam,
           ]}
         >
           <Text style={styles.rowText}>{index + 1}</Text>
