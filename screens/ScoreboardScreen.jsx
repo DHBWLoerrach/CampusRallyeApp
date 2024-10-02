@@ -21,7 +21,18 @@ export default function ScoreboardScreen() {
 
         if (data) {
           data.sort((a, b) => b.total_points - a.total_points);
-          setSortedTeams(data);
+
+          // compute ranking and respect ties
+          let rank = 1;
+          let previousPoints = data[0].total_points;
+
+          const rankedData = data.map((team) => {
+            if (previousPoints !== team.total_points) rank += 1;
+            previousPoints = team.total_points;
+            return { ...team, rank: rank };
+          });
+
+          setSortedTeams(rankedData);
         }
       } catch (error) {
         console.error('Error fetching total points data:', error);
@@ -52,7 +63,7 @@ export default function ScoreboardScreen() {
             team.group_name === ourTeam?.name && styles.ourTeam,
           ]}
         >
-          <Text style={styles.rowText}>{index + 1}</Text>
+          <Text style={styles.rowText}>{team.rank}</Text>
           <Text style={styles.rowText}>{team.group_name}</Text>
           <Text style={styles.rowText}>{team.total_points}</Text>
         </View>
