@@ -143,6 +143,12 @@ const RallyeScreen = observer(function RallyeScreen() {
         .select('*')
         .eq('enabled', true)
         .neq('question_type', 'upload');
+
+      if (!data) {
+        setLoading(false);
+        return;
+      }
+
       temp = data.filter(
         (item) => item.question_type !== 'multiple_choice'
       );
@@ -192,7 +198,12 @@ const RallyeScreen = observer(function RallyeScreen() {
   if (!rallye) {
     // exploration mode (Erkundungsmodus ohne Rallye)
     if (questions.length === 0) {
-      return <RallyeStates.NoQuestionsAvailableState />;
+      return (
+        <RallyeStates.NoQuestionsAvailableState
+          loading={loading}
+          onRefresh={onRefresh}
+        />
+      );
     }
     if (allQuestionsAnswered) {
       return (

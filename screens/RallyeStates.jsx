@@ -45,12 +45,24 @@ export const TeamNotSelectedState = () => (
   </View>
 );
 
-export const NoQuestionsAvailableState = () => (
-  <View style={globalStyles.container}>
-    <Text style={globalStyles.bigText}>
+export const NoQuestionsAvailableState = ({ loading, onRefresh }) => (
+  <ScrollView
+    contentContainerStyle={[
+      globalStyles.refreshContainer,
+      globalStyles.container,
+    ]}
+    style={{ backgroundColor: 'white' }}
+    refreshControl={
+      <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+    }
+  >
+    <Text style={[globalStyles.bigText, { marginBottom: 20 }]}>
       Es sind keine Fragen verfügbar.
     </Text>
-  </View>
+    <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+      Aktualisieren
+    </UIButton>
+  </ScrollView>
 );
 
 export const ExplorationFinishedState = ({
