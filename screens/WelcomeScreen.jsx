@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   Modal,
@@ -17,6 +18,9 @@ import UIButton from '../ui/UIButton';
 export default function WelcomeScreen({
   onPasswordSubmit,
   onContinueWithoutRallye,
+  networkAvailable,
+  loading,
+  onRefresh,
 }) {
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -57,6 +61,31 @@ export default function WelcomeScreen({
     );
   };
 
+  const OnlineContent = () => (
+    <>
+      <View style={styles.button}>
+        <PasswordModal onStart={onPasswordSubmit} />
+        <UIButton onPress={() => setModalVisible(true)}>
+          An Campus Rallye teilnehmen{'\n'}(Passwort erforderlich)
+        </UIButton>
+      </View>
+      <UIButton onPress={onContinueWithoutRallye}>
+        Campus-Gelände erkunden
+      </UIButton>
+    </>
+  );
+
+  const OfflineContent = ({ loading, onRefresh }) => (
+    <View style={styles.offline}>
+      <Text style={[styles.text, { marginBottom: 20 }]}>
+        Du bist offline…
+      </Text>
+      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+        Aktualisieren
+      </UIButton>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <Image
@@ -73,15 +102,15 @@ export default function WelcomeScreen({
         />
       </View>
       <View style={styles.content}>
-        <View style={styles.button}>
-          <PasswordModal onStart={onPasswordSubmit} />
-          <UIButton onPress={() => setModalVisible(true)}>
-            An Campus Rallye teilnehmen{'\n'}(Passwort erforderlich)
-          </UIButton>
-        </View>
-        <UIButton onPress={onContinueWithoutRallye}>
-          Campus-Gelände erkunden
-        </UIButton>
+        {loading && (
+          <View>
+            <ActivityIndicator size="large" color={Colors.dhbwRed} />
+          </View>
+        )}
+        {networkAvailable && !loading && <OnlineContent />}
+        {!networkAvailable && !loading && (
+          <OfflineContent onRefresh={onRefresh} loading={loading} />
+        )}
       </View>
     </View>
   );
@@ -145,5 +174,10 @@ const styles = StyleSheet.create({
     height: 50,
     flex: 1,
     paddingHorizontal: 10,
+  },
+  offline: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '50%',
   },
 });

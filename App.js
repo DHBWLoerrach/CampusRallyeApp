@@ -9,18 +9,28 @@ import WelcomeScreen from './screens/WelcomeScreen';
 
 const App = observer(function App() {
   const [realPassword, setRealPassword] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [online, setOnline] = useState(true);
   const enabled = store$.enabled.get();
 
   useEffect(() => {
-    async function getData() {
-      const { data } = await supabase
-        .from('login')
-        .select('password, rallye!inner(id)')
-        .eq('rallye.is_active_rallye', true);
-      if (data) setRealPassword(data[0].password);
-    }
-    getData();
+    onRefresh();
   }, []);
+
+  const onRefresh = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('login')
+      .select('password, rallye!inner(id)')
+      .eq('rallye.is_active_rallye', true);
+    if (data) {
+      setRealPassword(data[0].password);
+      setOnline(true);
+    } else {
+      setOnline(false);
+    }
+    setLoading(false);
+  };
 
   const handlePasswordSubmit = async (password) => {
     if (password === realPassword) {
@@ -55,6 +65,9 @@ const App = observer(function App() {
         <WelcomeScreen
           onPasswordSubmit={handlePasswordSubmit}
           onContinueWithoutRallye={handleNoPasswordSubmit}
+          networkAvailable={online}
+          loading={loading}
+          onRefresh={onRefresh}
         />
       )}
     </NavigationContainer>
