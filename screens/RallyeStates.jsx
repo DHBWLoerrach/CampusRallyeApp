@@ -82,7 +82,12 @@ export const ExplorationFinishedState = ({
   </View>
 );
 
-export const TimeExpiredState = ({ loading, onRefresh, points }) => (
+export const TimeExpiredState = ({
+  loading,
+  onRefresh,
+  teamName,
+  points,
+}) => (
   <ScrollView
     contentContainerStyle={[
       globalStyles.refreshContainer,
@@ -96,7 +101,7 @@ export const TimeExpiredState = ({ loading, onRefresh, points }) => (
     <Text style={[globalStyles.bigText, { marginBottom: 8 }]}>
       Die Zeit für die Rallye ist abgelaufen.
     </Text>
-    <ResultText points={points} />
+    <ResultText points={points} teamName={teamName} />
   </ScrollView>
 );
 
@@ -104,6 +109,7 @@ export const AllQuestionsAnsweredState = ({
   loading,
   onRefresh,
   points,
+  teamName,
 }) => (
   <ScrollView
     contentContainerStyle={[
@@ -119,19 +125,19 @@ export const AllQuestionsAnsweredState = ({
       <Text style={[globalStyles.bigText, { marginBottom: 8 }]}>
         Ihr habt alle Fragen beantwortet, Glückwunsch!
       </Text>
-      <ResultText points={points} />
+      <ResultText points={points} teamName={teamName} />
     </View>
   </ScrollView>
 );
 
-function ResultText({ points }) {
+function ResultText({ teamName, points }) {
   return (
     <>
       <Text style={[globalStyles.bigText, { marginBottom: 8 }]}>
         Wartet bis die Rallye beendet wird, um das Ergebnis zu sehen.
       </Text>
       <Text style={[globalStyles.bigText, { marginBottom: 8 }]}>
-        Eure erreichte Punktzahl: {points}
+        Euer Team {teamName} hat {points} Punkte erreicht.
       </Text>
       <Text style={globalStyles.bigText}>
         Geht zu eurem vereinbarten Treffpunkt.

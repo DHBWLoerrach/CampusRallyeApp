@@ -254,6 +254,7 @@ const RallyeScreen = observer(function RallyeScreen() {
           loading={loading}
           onRefresh={onRefresh}
           points={points}
+          teamName={team.name}
         />
       );
     }
@@ -268,6 +269,7 @@ const RallyeScreen = observer(function RallyeScreen() {
           loading={loading}
           onRefresh={onRefresh}
           points={points}
+          teamName={team.name}
         />
       );
     }
