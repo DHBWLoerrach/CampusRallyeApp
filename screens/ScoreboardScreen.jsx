@@ -6,6 +6,8 @@ import Colors from '../utils/Colors';
 
 export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
+  const ourTeam = store$.team.get();
+  const points = store$.points.get();
   const [sortedTeams, setSortedTeams] = useState([]);
 
   useEffect(() => {
@@ -28,17 +30,25 @@ export default function ScoreboardScreen() {
 
     fetchData();
   }, [rallye]);
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.scoreboardTitle}>Rangliste</Text>
+      <Text style={[styles.headerText, { marginBottom: 10 }]}>
+        {ourTeam.name}: {points} Punkte
+      </Text>
       <View style={styles.tableHeader}>
         <Text style={styles.headerText}>Platz</Text>
         <Text style={styles.headerText}>Team</Text>
         <Text style={styles.headerText}>Punkte</Text>
       </View>
       {sortedTeams.map((team, index) => (
-        <View key={index} style={styles.tableRow}>
+        <View
+          key={index}
+          style={[
+            styles.tableRow,
+            team.group_name === ourTeam.name && styles.ourTeam,
+          ]}
+        >
           <Text style={styles.rowText}>{index + 1}</Text>
           <Text style={styles.rowText}>{team.group_name}</Text>
           <Text style={styles.rowText}>{team.total_points}</Text>
@@ -76,11 +86,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
+    marginHorizontal: 5,
+    alignItems: 'center',
   },
   rowText: {
     color: Colors.dhbwGray,
     fontSize: 16,
     flex: 1,
     textAlign: 'center',
+  },
+  ourTeam: {
+    backgroundColor: Colors.veryLightGray,
+    borderRadius: 8,
   },
 });

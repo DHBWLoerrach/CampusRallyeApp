@@ -123,15 +123,13 @@ const RallyeScreen = observer(function RallyeScreen() {
     if (!rallye) {
       return;
     }
-    if (rallye.status === 'running' && allQuestionsAnswered) {
-      const fetchData = async () => {
-        let { data } = await supabase.rpc('get_points', {
-          group_id_param: team.id,
-        });
-        store$.points.set(data);
-      };
-      fetchData();
-    }
+    const fetchData = async () => {
+      let { data } = await supabase.rpc('get_points', {
+        group_id_param: team.id,
+      });
+      store$.points.set(data);
+    };
+    fetchData();
   }, [rallye, currentQuestion]);
 
   useEffect(() => {
