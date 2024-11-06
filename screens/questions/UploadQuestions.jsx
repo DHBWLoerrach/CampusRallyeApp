@@ -79,10 +79,7 @@ export default function UploadQuestions() {
         {
           text: 'Ja, ich habe die E-Mail gesendet',
           onPress: async () => {
-            await store$.savePoints(
-              correctly_answered,
-              currentQuestion.points
-            );
+            await store$.savePoints(true, currentQuestion.points);
             store$.gotoNextQuestion();
           },
         },
