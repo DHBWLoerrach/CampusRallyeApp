@@ -4,11 +4,11 @@ import { CameraView } from 'expo-camera';
 import UIButton from '../../ui/UIButton';
 
 export default function UploadPhoto({ handleSendEmail }) {
-  const [facing, setFacing] = useState('back');
   const [picture, setPicture] = useState(null);
   const cameraRef = useRef(null);
 
   function PhotoCamera() {
+    const [facing, setFacing] = useState('back');
     return (
       <>
         <CameraView
