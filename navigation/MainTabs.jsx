@@ -79,6 +79,7 @@ const MainTabs = observer(function MainTabs() {
         name="rallye"
         component={RallyeScreen}
         options={{
+          title: 'Rallye',
           headerTitle: () => (
             <RallyeHeader rallye={rallye} percentage={percentage} />
           ),
