@@ -77,3 +77,6 @@ supabase status
 ```
 
 Nun kann die App getestet und weiterentwickelt werden. Für das aktive Testen muss nun mit `npx expo -g` der Server gestartet werden. Die App kann in Expo Go App getestet werden (Scan des QR-Codes). Informationen hierzu werden direkt auf der Konsole angezeigt.
+
+Die Anmeldedaten für die Teilnahme an einer Rallye in der App können aus den
+entsprechenden Tabellen in der Supabase-Instanz in Erfahrung gebracht werden.
