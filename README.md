@@ -49,11 +49,28 @@ Voraussetzungen für die Weiterentwicklung dieses Projekts sind folgende:
 1. Zum Schluss muss noch die Konfiguration zu Supabase angepasst werden. Dazu ist zunächst die Datei `.env` im Projektverzeichnis zu erstellen. In `.env` müssen zwei Einträge vorgenommen werden:
 
 ```
-EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+EXPO_PUBLIC_SUPABASE_URL=http://SERVER:54321
 EXPO_PUBLIC_SUPABASE_ANON_KEY=SUPABASE_ANON_KEY
 ```
 
-Dort muss nun der Anon Key eingefügt werden. Dieser kann im Terminal abgefragt werden (dazu ins Verzeichnis der lokalen Supabase-Instanz wechseln):
+Der Eintrag für `EXPO_PUBLIC_SUPABASE_URL` muss die IP-Adresse
+des Servers enthalten. Wird die App auf einem iPhone-Simulator oder
+Android-Emulator auf dem Rechner ausgeführt, der die Supabase-Instanz
+bereitstellt, dann kann für `SERVER` die IP-Adresse von „localhost“
+eingesetzt werden:
+
+```
+EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+```
+
+Wird die App auf einem Smartphone ausgeführt, dann ist für
+`SERVER` die IP-Adresse des Rechners einzutragen, auf dem
+die Supabase-Instanz läuft.
+
+Für `EXPO_PUBLIC_SUPABASE_ANON_KEY` muss der Anon Key der
+Supbase-Instanz eingefügt werden. Dieser kann im Terminal
+abgefragt werden (dazu ins Verzeichnis der lokalen
+Supabase-Instanz wechseln):
 
 ```sh
 supabase status
