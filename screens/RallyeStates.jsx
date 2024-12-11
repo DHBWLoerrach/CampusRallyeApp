@@ -3,6 +3,7 @@ import VotingScreen from './VotingScreen';
 import Scoreboard from './ScoreboardScreen';
 import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/Styles';
+import { store$ } from '../utils/Store';
 
 export const PreparationState = ({ loading, onRefresh }) => (
   <ScrollView
@@ -140,8 +141,11 @@ function ResultText({ teamName, points }) {
         Euer Team {teamName} hat {points} Punkte erreicht.
       </Text>
       <Text style={globalStyles.bigText}>
-        Geht zu eurem vereinbarten Treffpunkt.
+        Geht zu eurem vereinbarten Treffpunkt. {"\n\n"}
       </Text>
+      <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
+        Zurück zum Start
+      </UIButton>
     </>
   );
 }
