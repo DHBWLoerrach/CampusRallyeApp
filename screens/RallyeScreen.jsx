@@ -21,6 +21,17 @@ const questionTypeComponents = {
   picture: ImageQuestions,
 };
 
+// Hilfsfunktion zum Mischen eines Arrays
+function shuffleArray(arr) {
+  let a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+
 const RallyeScreen = observer(function RallyeScreen() {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
@@ -171,14 +182,12 @@ const RallyeScreen = observer(function RallyeScreen() {
           (item) => item.parent_id === element.id
         );
         const childAnswers = childs.map((child) => child.answer);
-        element.multiple_answer = childAnswers;
+        // Antwortoptionen mischen
+        element.multiple_answer = shuffleArray([...childAnswers]);
       }
 
       data = temp.concat(multiple_choice_parent);
-      for (let i = data.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [data[i], data[j]] = [data[j], data[i]];
-      }
+      data = shuffleArray([...data]);
       store$.questions.set(data);
       setLoading(false);
     };
