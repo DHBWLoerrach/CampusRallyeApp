@@ -5,6 +5,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { store$ } from '../utils/Store';
+import UIButton from '../ui/UIButton';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
@@ -23,6 +25,12 @@ export default function SettingsScreen() {
       >
         <Text style={styles.tileText}>Informationen</Text>
       </TouchableOpacity>
+      <UIButton
+        style={styles.button}
+        icon="arrow-left" onPress={() => store$.enabled.set(false)}
+      >
+        <Text>Zurück zum Start</Text>
+      </UIButton>
     </View>
   );
 }
@@ -50,5 +58,10 @@ const styles = StyleSheet.create({
   tileText: {
     fontSize: 20,
     color: 'grey',
+  },
+
+  button: {
+    paddingTop: 20,
+    marginVertical: 10,
   },
 });
