@@ -1,5 +1,10 @@
 import { observable } from '@legendapp/state';
 import { supabase } from './Supabase';
+import NetInfo from '@react-native-community/netinfo';
+import { queueOfflineAction, processOfflineQueue, initNetworkListener } from './OfflineSync';
+
+// Initialisiere Network Listener
+initNetworkListener(() => processOfflineQueue(supabase));
 
 export const store$ = observable({
   rallye: null,
@@ -25,13 +30,25 @@ export const store$ = observable({
     if (answered_correctly) {
       store$.points.set(store$.points.get() + earned_points);
     }
+    
     if (store$.team.get() !== null) {
-      await supabase.from('group_questions').insert({
+      const data = {
         group_id: store$.team.get().id,
         question_id: store$.currentQuestion.get().id,
         answered_correctly: answered_correctly,
         points: earned_points,
-      });
+      };
+
+      const isConnected = (await NetInfo.fetch()).isConnected;
+      
+      if (isConnected) {
+        await supabase.from('group_questions').insert(data);
+      } else {
+        await queueOfflineAction({
+          table: 'group_questions',
+          data: data
+        });
+      }
     }
   },
 });
