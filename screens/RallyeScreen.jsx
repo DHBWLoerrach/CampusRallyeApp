@@ -12,6 +12,7 @@ import { globalStyles } from '../utils/Styles';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
 import ImageQuestions from './questions/ImageQuestions';
 import * as RallyeStates from './RallyeStates';
+import NetInfo from '@react-native-community/netinfo';
 
 const questionTypeComponents = {
   knowledge: SkillQuestions,
@@ -44,19 +45,30 @@ const RallyeScreen = observer(function RallyeScreen() {
 
   const onRefresh = React.useCallback(async () => {
     if (rallye) {
-      setLoading(true);
-      const { data } = await supabase
-        .from('rallye')
-        .select('*')
-        .eq('is_active_rallye', true);
-      const rallyeFromDB = data[0];
-      if (rallyeFromDB && rallyeFromDB.status !== rallye.status) {
-        if (rallyeFromDB.end_time) {
-          rallyeFromDB.end_time = new Date(rallyeFromDB.end_time);
-        }
-        store$.rallye.set(rallyeFromDB);
+      const networkState = await NetInfo.fetch();
+      if (!networkState.isConnected) {
+        alert("Keine Internetverbindung verfügbar");
+        return;
       }
-      setLoading(false);
+
+      setLoading(true);
+      try {
+        const { data } = await supabase
+          .from("rallye")
+          .select("*")
+          .eq("is_active_rallye", true);
+        const rallyeFromDB = data[0];
+        if (rallyeFromDB && rallyeFromDB.status !== rallye.status) {
+          if (rallyeFromDB.end_time) {
+            rallyeFromDB.end_time = new Date(rallyeFromDB.end_time);
+          }
+          store$.rallye.set(rallyeFromDB);
+        }
+      } catch (error) {
+        console.error("Fehler beim Laden der Daten:", error);
+      } finally {
+        setLoading(false);
+      }
     }
   }, []);
 

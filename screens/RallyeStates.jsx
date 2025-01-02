@@ -143,9 +143,6 @@ function ResultText({ teamName, points }) {
       <Text style={globalStyles.bigText}>
         Geht zu eurem vereinbarten Treffpunkt. {"\n\n"}
       </Text>
-      <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
-        Zurück zum Start
-      </UIButton>
     </>
   );
 }
