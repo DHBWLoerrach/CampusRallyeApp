@@ -29,7 +29,7 @@ export default function SettingsScreen() {
         style={globalStyles.settingsStyles.button}
         icon="arrow-left" onPress={() => store$.enabled.set(false)}
       >
-        <Text>Zurück zum Start</Text>
+        <Text>Zurück zur Anmeldung</Text>
       </UIButton>
     </View>
   );
