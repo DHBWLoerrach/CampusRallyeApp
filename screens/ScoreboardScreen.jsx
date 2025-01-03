@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
-import Colors from '../utils/Colors';
+import { globalStyles } from '../utils/GlobalStyles';
+import UIButton from '../ui/UIButton';
 
 export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
@@ -12,7 +13,7 @@ export default function ScoreboardScreen() {
 
   useEffect(() => {
     if (rallye.status !== 'ended') return;
-    const fetchData = async () => {
+    const fetchData = async () => { 
       try {
         let { data } = await supabase.rpc(
           'get_total_points_per_rallye',
@@ -43,74 +44,38 @@ export default function ScoreboardScreen() {
   }, [rallye]);
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.scoreboardTitle}>Rangliste</Text>
+    <>
+    <ScrollView style={globalStyles.scoreboardStyles.container}>
+      <Text style={globalStyles.scoreboardStyles.title}>
+        Punktestand
+      </Text>
       {ourTeam && (
-        <Text style={[styles.headerText, { marginBottom: 10 }]}>
+        <Text style={globalStyles.scoreboardStyles.teamInfo}>
           {ourTeam.name}: {points} Punkte
         </Text>
       )}
-      <View style={styles.tableHeader}>
-        <Text style={styles.headerText}>Platz</Text>
-        <Text style={styles.headerText}>Team</Text>
-        <Text style={styles.headerText}>Punkte</Text>
+      <View style={globalStyles.scoreboardStyles.tableHeader}>
+        <Text style={globalStyles.scoreboardStyles.headerText}>Platz</Text>
+        <Text style={globalStyles.scoreboardStyles.headerText}>Team</Text>
+        <Text style={globalStyles.scoreboardStyles.headerText}>Punkte</Text>
       </View>
       {sortedTeams.map((team, index) => (
         <View
           key={index}
           style={[
-            styles.tableRow,
-            team.group_name === ourTeam?.name && styles.ourTeam,
+            globalStyles.scoreboardStyles.tableRow,
+            team.group_name === ourTeam?.name && globalStyles.scoreboardStyles.ourTeam,
           ]}
         >
-          <Text style={styles.rowText}>{team.rank}</Text>
-          <Text style={styles.rowText}>{team.group_name}</Text>
-          <Text style={styles.rowText}>{team.total_points}</Text>
+          <Text style={globalStyles.scoreboardStyles.rowText}>{team.rank}</Text>
+          <Text style={globalStyles.scoreboardStyles.rowText}>{team.group_name}</Text>
+          <Text style={globalStyles.scoreboardStyles.rowText}>{team.total_points}</Text>
         </View>
       ))}
     </ScrollView>
+    <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
+        Zurück zur Anmeldung
+    </UIButton>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-  },
-  scoreboardTitle: {
-    color: Colors.dhbwGray,
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  tableHeader: {
-    color: Colors.dhbwGray,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  headerText: {
-    color: Colors.dhbwGray,
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-    marginHorizontal: 5,
-    alignItems: 'center',
-  },
-  rowText: {
-    color: Colors.dhbwGray,
-    fontSize: 16,
-    flex: 1,
-    textAlign: 'center',
-  },
-  ourTeam: {
-    backgroundColor: Colors.veryLightGray,
-    borderRadius: 8,
-  },
-});

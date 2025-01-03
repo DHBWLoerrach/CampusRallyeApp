@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { store$ } from '../utils/Store';
 import { supabase } from '../utils/Supabase';
 import UIButton from '../ui/UIButton';
 import Colors from '../utils/Colors';
-import { globalStyles } from '../utils/Styles';
+import { globalStyles } from '../utils/GlobalStyles';
 
 export default function VotingScreen({ onRefresh, loading }) {
   const [teams, setTeams] = useState([]);
@@ -73,13 +73,13 @@ export default function VotingScreen({ onRefresh, loading }) {
   }
 
   return (
-    <View style={styles.main}>
-      <Text style={[styles.text, { fontStyle: 'italic' }]}>
+    <View style={globalStyles.votingStyles.main}>
+      <Text style={globalStyles.votingStyles.text}>
         {voting[currentVoting]?.question}
       </Text>
       <Text
         style={[
-          styles.text,
+          globalStyles.votingStyles.text,
           {
             margin: 20,
             color: Colors.dhbwRed,
@@ -102,9 +102,9 @@ export default function VotingScreen({ onRefresh, loading }) {
               },
             ]}
           >
-            <View style={styles.row}>
-              <Text style={styles.label}>Name des Teams:</Text>
-              <Text style={styles.value}>{item.name}</Text>
+            <View style={globalStyles.votingStyles.row}>
+              <Text style={globalStyles.votingStyles.label}>Name des Teams:</Text>
+              <Text style={globalStyles.votingStyles.value}>{item.name}</Text>
             </View>
             <UIButton
               color={Colors.dhbwGray}
@@ -125,28 +125,3 @@ export default function VotingScreen({ onRefresh, loading }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  main: {
-    padding: 20,
-  },
-  text: {
-    fontSize: 20,
-    color: Colors.dhbwGray,
-    textAlign: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 5,
-  },
-  label: {
-    fontSize: 16,
-    color: Colors.dhbwGray,
-    marginRight: 5,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

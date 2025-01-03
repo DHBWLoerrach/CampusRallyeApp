@@ -1,5 +1,6 @@
 // copied from https://github.com/DHBWLoerrach/CampusApp
 // TO DO: Which colors do we need?
+
 module.exports = {
   cellBorder: "#EEEEEE",
   veryLightGray: "rgb(233,233,233)",

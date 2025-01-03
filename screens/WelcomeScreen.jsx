@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
   Modal,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -14,6 +12,7 @@ import {
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Colors from '../utils/Colors';
 import UIButton from '../ui/UIButton';
+import { globalStyles } from '../utils/GlobalStyles';
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -33,17 +32,17 @@ export default function WelcomeScreen({
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableOpacity
-          style={styles.modalOverlay}
+          style={globalStyles.welcomeStyles.modalOverlay}
           onPress={() => {
             setModalVisible(false);
             setPassword('');
           }}
         >
-          <View style={styles.popoverContent}>
+          <View style={globalStyles.welcomeStyles.popoverContent}>
             <TextInput
               placeholder="Passwort eingeben"
               secureTextEntry={true}
-              style={styles.passwordInput}
+              style={globalStyles.welcomeStyles.passwordInput}
               onChangeText={setPassword}
               value={password}
             />
@@ -63,7 +62,7 @@ export default function WelcomeScreen({
 
   const OnlineContent = () => (
     <>
-      <View style={styles.button}>
+      <View style={globalStyles.welcomeStyles.button}>
         <PasswordModal onStart={onPasswordSubmit} />
         <UIButton onPress={() => setModalVisible(true)}>
           An Campus Rallye teilnehmen{'\n'}(Passwort erforderlich)
@@ -76,8 +75,8 @@ export default function WelcomeScreen({
   );
 
   const OfflineContent = ({ loading, onRefresh }) => (
-    <View style={styles.offline}>
-      <Text style={[styles.text, { marginBottom: 20 }]}>
+    <View style={globalStyles.welcomeStyles.offline}>
+      <Text style={[globalStyles.welcomeStyles.text, { marginBottom: 20 }]}>
         Du bist offline…
       </Text>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
@@ -87,21 +86,21 @@ export default function WelcomeScreen({
   );
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.welcomeStyles.container}>
       <Image
-        style={styles.headerImage}
+        style={globalStyles.welcomeStyles.headerImage}
         source={require('../assets/dhbw-campus-header.png')}
       />
-      <View style={styles.header}>
-        <Text style={[styles.text, styles.title]}>
+      <View style={globalStyles.welcomeStyles.header}>
+        <Text style={[globalStyles.welcomeStyles.text, globalStyles.welcomeStyles.title]}>
           DHBW Lörrach Campus Rallye
         </Text>
         <Image
-          style={styles.logo}
+          style={globalStyles.welcomeStyles.logo}
           source={require('../assets/dhbw-logo.png')}
         />
       </View>
-      <View style={styles.content}>
+      <View style={globalStyles.welcomeStyles.content}>
         {loading && (
           <View>
             <ActivityIndicator size="large" color={Colors.dhbwRed} />
@@ -115,69 +114,3 @@ export default function WelcomeScreen({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 10,
-  },
-  headerImage: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height / 3,
-  },
-  header: {
-    marginTop: 10,
-    flexDirection: 'row',
-  },
-  logo: {
-    marginLeft: 20,
-    width: 60,
-    height: 60,
-  },
-  text: {
-    color: Colors.dhbwGray,
-    fontSize: 20,
-  },
-  title: {
-    flex: 1,
-    color: Colors.dhbwRed,
-    fontWeight: 500,
-    alignSelf: 'center',
-  },
-  content: {
-    flex: 1,
-    width: '100%',
-  },
-  button: {
-    width: '100%',
-    marginVertical: 60,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.75)',
-  },
-  popoverContent: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: Colors.dhbwRed,
-  },
-  passwordInput: {
-    height: 50,
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  offline: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '50%',
-  },
-});

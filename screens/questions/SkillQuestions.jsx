@@ -4,14 +4,12 @@ import {
   Text,
   TextInput,
   Alert,
-  StyleSheet,
   ScrollView,
 } from 'react-native';
 import { store$ } from '../../utils/Store';
 import UIButton from '../../ui/UIButton';
-import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
-import { globalStyles } from '../../utils/Styles';
+import { globalStyles } from '../../utils/GlobalStyles';
 import { confirmAlert } from '../../utils/ConfirmAlert';
 import Hint from '../../ui/Hint';
 
@@ -41,13 +39,13 @@ export default function SkillQuestions() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.contentContainer}>
-      <View style={styles.container}>
-        <Text style={globalStyles.question}>
+    <ScrollView contentContainerStyle={globalStyles.skillStyles.contentContainer}>
+      <View style={globalStyles.skillStyles.container}>
+        <Text style={globalStyles.default.question}>
           {currentQuestion.question}
         </Text>
         <TextInput
-          style={styles.input}
+          style={globalStyles.skillStyles.input}
           value={answer}
           onChangeText={setAnswer}
           placeholder="Gib hier deine Antwort ein"
@@ -55,8 +53,8 @@ export default function SkillQuestions() {
         <View
           style={
             !answer
-              ? styles.buttonContainerDeactive
-              : styles.buttonContainer
+              ? globalStyles.skillStyles.buttonContainerDeactive
+              : globalStyles.skillStyles.buttonContainer
           }
         >
           <UIButton
@@ -74,53 +72,3 @@ export default function SkillQuestions() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 200, // quickfix for keyboard covering input on small screens
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    width: '100%',
-    height: 40,
-    borderColor: Colors.dhbwGray,
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    fontSize: Constants.bigFont,
-  },
-  answerContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  answerLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  answer: {
-    fontSize: 16,
-  },
-  buttonContainer: {
-    backgroundColor: Colors.dhbwRed,
-    margin: 6,
-    borderRadius: 5,
-  },
-  buttonContainerDeactive: {
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
-  },
-});

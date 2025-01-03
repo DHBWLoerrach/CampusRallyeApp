@@ -8,7 +8,7 @@ import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
 import QRCodeQuestions from './questions/QRCodeQuestions';
 import Colors from '../utils/Colors';
-import { globalStyles } from '../utils/Styles';
+import { globalStyles } from '../utils/GlobalStyles';
 import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
 import ImageQuestions from './questions/ImageQuestions';
 import * as RallyeStates from './RallyeStates';
@@ -208,7 +208,7 @@ const RallyeScreen = observer(function RallyeScreen() {
 
   if (loading) {
     return (
-      <View style={globalStyles.container}>
+      <View style={globalStyles.default.container}>
         <ActivityIndicator size="large" color={Colors.dhbwRed} />
       </View>
     );
@@ -240,7 +240,7 @@ const RallyeScreen = observer(function RallyeScreen() {
     const QuestionComponent =
       questionTypeComponents[currentQuestion.question_type];
     return (
-      <View style={globalStyles.container}>
+      <View style={globalStyles.default.container}>
         <QuestionComponent />
       </View>
     );
@@ -298,7 +298,7 @@ const RallyeScreen = observer(function RallyeScreen() {
     const QuestionComponent =
       questionTypeComponents[currentQuestion.question_type];
     return (
-      <View style={globalStyles.container}>
+      <View style={globalStyles.default.container}>
         <QuestionComponent />
       </View>
     );

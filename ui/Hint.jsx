@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Text, Alert, View, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { Text, Alert, View } from 'react-native';
 import { store$ } from '../utils/Store';
 import UIButton from './UIButton';
 import Colors from '../utils/Colors';
+import { globalStyles } from '../utils/GlobalStyles';
 
 export default function Hint({ hint }) {
   const [showHint, setShowHint] = useState(false);
@@ -29,7 +30,7 @@ export default function Hint({ hint }) {
   };
 
   return (
-    <View style={styles.hintContainer}>
+    <View style={globalStyles.hintStyles.hintContainer}>
       {!showHint && (
         <UIButton onPress={handleHint} color={Colors.contrastBlue}>
           Tipp anfordern
@@ -38,24 +39,10 @@ export default function Hint({ hint }) {
 
       {showHint && (
         <>
-          <Text style={styles.hintTitle}>Tipp:</Text>
-          <Text style={styles.hintText}>{hint}</Text>
+          <Text style={globalStyles.hintStyles.hintTitle}>Tipp:</Text>
+          <Text style={globalStyles.hintStyles.hintText}>{hint}</Text>
         </>
       )}
     </View>
   );
 }
-const styles = StyleSheet.create({
-  hintTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginVertical: 20,
-  },
-  hintText: {
-    fontSize: 18,
-    marginTop: 10,
-  },
-  hintContainer: {
-    marginTop: 20,
-  },
-});

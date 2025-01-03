@@ -3,15 +3,15 @@ import {
   ScrollView,
   View,
   Text,
-  StyleSheet,
 } from 'react-native';
-import Colors from '../utils//Colors';
+import Colors from '../utils/Colors';
+import { globalStyles } from '../utils/GlobalStyles';
 
 export default function ImprintScreen() {
   return (
     <ScrollView>
-      <View style={styles.texts.container}>
-        <View style={styles.texts.block}>
+      <View style={globalStyles.imprintStyles.texts.container}>
+        <View style={globalStyles.imprintStyles.texts.block}>
           <Text>
             Duale Hochschule Baden-Württemberg Lörrach
             {'\n'}
@@ -29,8 +29,8 @@ export default function ImprintScreen() {
             Umsatzsteuergesetz: DE287664832
           </Text>
         </View>
-        <View style={styles.texts.block}>
-          <Text style={styles.texts.headline}>
+        <View style={globalStyles.imprintStyles.texts.block}>
+          <Text style={globalStyles.imprintStyles.texts.headline}>
             Rechtsform und zuständige Aufsichtsbehörde
           </Text>
           <Text>
@@ -67,8 +67,8 @@ export default function ImprintScreen() {
             http://www.mwk.bwl.de
           </Text>
         </View>
-        <View style={styles.texts.block}>
-          <Text style={styles.texts.headline}>Externe Links</Text>
+        <View style={globalStyles.imprintStyles.texts.block}>
+          <Text style={globalStyles.imprintStyles.texts.headline}>Externe Links</Text>
           <Text>
             Die Campus App enthält Links zu externen Webseiten
             Dritter, auf deren Inhalte wir keinen Einfluss haben und
@@ -86,8 +86,8 @@ export default function ImprintScreen() {
             dies bitte mit.
           </Text>
         </View>
-        <View style={styles.texts.block}>
-          <Text style={styles.texts.headline}>Urheberrecht</Text>
+        <View style={globalStyles.imprintStyles.texts.block}>
+          <Text style={globalStyles.imprintStyles.texts.headline}>Urheberrecht</Text>
           <Text>
             Soweit die Inhalte auf dieser Seite nicht vom Betreiber
             erstellt wurden, werden die Urheberrechte Dritter
@@ -100,8 +100,8 @@ export default function ImprintScreen() {
             kenntlich gemacht.
           </Text>
         </View>
-        <View style={styles.texts.block}>
-          <Text style={styles.texts.headline}>Quellcode</Text>
+        <View style={globalStyles.imprintStyles.texts.block}>
+          <Text style={globalStyles.imprintStyles.texts.headline}>Quellcode</Text>
           <Text>
             Der Quellcode dieser App wurde als Open Source Projekt
             angelegt
@@ -121,62 +121,3 @@ export default function ImprintScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  textSizes: {
-    small: {
-      fontSize: 15,
-    },
-    medium: {
-      fontSize: 25,
-    },
-    dialog: {
-      fontSize: 18,
-    },
-  },
-  button: {
-    container: {
-      backgroundColor: Colors.dhbwRed,
-      alignItems: 'center',
-    },
-    text: {
-      color: 'white',
-    },
-    disabled: {
-      backgroundColor: 'grey',
-    },
-    sizes: {
-      small: {
-        padding: 10,
-        borderRadius: 5,
-      },
-      medium: {
-        padding: 10,
-        borderRadius: 5,
-      },
-      dialog: {
-        padding: 10,
-        borderRadius: 3,
-        marginLeft: 7,
-      },
-    },
-  },
-  texts: {
-    container: {
-      padding: 15,
-    },
-    block: {
-      marginBottom: 20,
-    },
-    quote: {
-      fontStyle: 'italic',
-      marginHorizontal: 15,
-    },
-    headline: {
-      fontSize: 20,
-    },
-    link: {
-      color: Colors.link,
-    },
-  },
-});

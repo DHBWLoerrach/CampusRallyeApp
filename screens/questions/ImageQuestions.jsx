@@ -7,13 +7,11 @@ import {
   Button,
   Platform,
   Alert,
-  StyleSheet,
   ScrollView,
 } from 'react-native';
 import { store$ } from '../../utils/Store';
-import Constants from '../../utils/Constants';
 import Colors from '../../utils/Colors';
-import { globalStyles } from '../../utils/Styles';
+import { globalStyles } from '../../utils/GlobalStyles';
 import { confirmAlert } from '../../utils/ConfirmAlert';
 import Hint from '../../ui/Hint';
 
@@ -41,17 +39,17 @@ export default function ImageQuestions() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.contentContainer}>
-      <View style={styles.container}>
-        <Text style={globalStyles.question}>
+    <ScrollView contentContainerStyle={globalStyles.imageStyles.contentContainer}>
+      <View style={globalStyles.imageStyles.container}>
+        <Text style={globalStyles.default.question}>
           {currentQuestion.question}
         </Text>
         <Image
           source={{ uri: currentQuestion.uri }}
-          style={styles.picture}
+          style={globalStyles.imageStyles.picture}
         />
         <TextInput
-          style={styles.input}
+          style={globalStyles.imageStyles.input}
           value={answer}
           onChangeText={setAnswer}
           placeholder="Gib hier deine Antwort ein"
@@ -59,12 +57,12 @@ export default function ImageQuestions() {
         <View
           style={
             !answer
-              ? styles.buttonContainerDeactive
-              : styles.buttonContainer
+              ? globalStyles.imageStyles.buttonContainerDeactive
+              : globalStyles.imageStyles.buttonContainer
           }
         >
           <Button //Red Button
-            style={styles.button}
+            style={globalStyles.imageStyles.button}
             color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
             title="Antwort senden"
             onPress={handleAnswerSubmit}
@@ -77,57 +75,3 @@ export default function ImageQuestions() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 200, // quickfix for keyboard covering input on small screens
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    width: '100%',
-    height: 40,
-    borderColor: Colors.dhbwGray,
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    fontSize: Constants.bigFont,
-  },
-  answerContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  answerLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  answer: {
-    fontSize: 16,
-  },
-  buttonContainer: {
-    backgroundColor: Colors.dhbwRed,
-    margin: 6,
-    borderRadius: 5,
-  },
-  buttonContainerDeactive: {
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
-  },
-  picture: {
-    width: 300,
-    height: 300,
-    marginBottom: 20,
-  },
-});

@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Image, View } from 'react-native';
 import { CameraView } from 'expo-camera';
 import UIButton from '../../ui/UIButton';
+import globalStyles from '../../utils/GlobalStyles';
 
 export default function UploadPhoto({ handleSendEmail }) {
   const [picture, setPicture] = useState(null);
@@ -13,10 +14,10 @@ export default function UploadPhoto({ handleSendEmail }) {
       <>
         <CameraView
           ref={cameraRef}
-          style={styles.camera}
+          style={globalStyles.uploadStyles.camera}
           facing={facing}
         />
-        <View style={styles.buttonRow}>
+        <View style={globalStyles.uploadStyles.buttonRow}>
           <UIButton
             icon="camera"
             onPress={async () => {
@@ -50,8 +51,8 @@ export default function UploadPhoto({ handleSendEmail }) {
   function ImagePreview() {
     return (
       <>
-        <Image source={{ uri: picture.uri }} style={styles.image} />
-        <View style={styles.buttonRow}>
+        <Image source={{ uri: picture.uri }} style={globalStyles.uploadStyles.image} />
+        <View style={globalStyles.uploadStyles.buttonRow}>
           <UIButton icon="recycle" onPress={() => setPicture(null)}>
             Neues Foto
           </UIButton>
@@ -67,29 +68,8 @@ export default function UploadPhoto({ handleSendEmail }) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={globalStyles.uploadStyles.container}>
       {picture ? <ImagePreview /> : <PhotoCamera />}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  camera: {
-    width: Dimensions.get('window').width * 0.8,
-    height: Dimensions.get('window').width * 0.8,
-  },
-  image: {
-    width: Dimensions.get('window').width * 0.8,
-    height: Dimensions.get('window').width * 0.8,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 30,
-    marginVertical: 10,
-  },
-});

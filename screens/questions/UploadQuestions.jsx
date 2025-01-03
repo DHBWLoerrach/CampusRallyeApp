@@ -5,7 +5,6 @@ import {
   Platform,
   Text,
   ScrollView,
-  StyleSheet,
   View,
 } from 'react-native';
 import { useCameraPermissions } from 'expo-camera';
@@ -13,7 +12,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as MailComposer from 'expo-mail-composer';
 import { store$ } from '../../utils/Store';
 import Colors from '../../utils/Colors';
-import { globalStyles } from '../../utils/Styles';
+import { globalStyles } from '../../utils/GlobalStyles';
 import UploadPhoto from './UploadPhoto';
 
 export default function UploadQuestions() {
@@ -30,7 +29,7 @@ export default function UploadQuestions() {
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
-      <View style={styles.container}>
+      <View style={globalStyles.uploadQuestionStyles.container}>
         <Text style={{ textAlign: 'center', marginBottom: 10 }}>
           Wir brauchen Zugriff auf die Kamera
         </Text>
@@ -89,12 +88,12 @@ export default function UploadQuestions() {
 
   return (
     <ScrollView>
-      <View style={styles.container}>
-        <Text style={globalStyles.question}>
+      <View style={globalStyles.uploadQuestionStyles.container}>
+        <Text style={globalStyles.default.question}>
           {currentQuestion.question}
         </Text>
         <UploadPhoto handleSendEmail={handleSendEmail} />
-        <Text style={styles.infoText}>
+        <Text style={globalStyles.uploadQuestionStyles.infoText}>
           Falls das Senden des Fotos/Videos hier nicht klappt, dann
           macht das Foto/Video auf dem Handy in der Kamera-App und
           schickt es per E-Mail mit dem Namen eures Teams an:
@@ -108,40 +107,15 @@ export default function UploadQuestions() {
           {rallye.mail_adress}
         </Text>
 
-        <View style={styles.redButtonContainer}>
+        <View style={globalStyles.uploadQuestionStyles.redButtonContainer}>
           <Button //Red Button
             color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
             title="Weiter"
             onPress={handleAnswerSubmit}
-            style={styles.buttons}
+            style={globalStyles.uploadQuestionStyles.buttons}
           />
         </View>
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 10,
-  },
-  buttonContainer: {
-    margin: 10,
-    borderRadius: 5,
-  },
-  buttons: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 10,
-    marginBottom: 10,
-    padding: 10,
-  },
-  redButtonContainer: {
-    backgroundColor: Colors.dhbwRed,
-    margin: 6,
-    borderRadius: 5,
-  },
-});

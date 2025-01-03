@@ -2,14 +2,12 @@ import { useRef, useState } from 'react';
 import {
   Alert,
   Button,
-  Dimensions,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { store$ } from '../../utils/Store';
-import { globalStyles } from '../../utils/Styles';
+import { globalStyles } from '../../utils/GlobalStyles';
 import UIButton from '../../ui/UIButton';
 import Hint from '../../ui/Hint';
 
@@ -69,7 +67,7 @@ export default function QRCodeQuestions() {
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
-      <View style={globalStyles.container}>
+      <View style={globalStyles.default.container}>
         <Text style={{ textAlign: 'center', marginBottom: 10 }}>
           Wir brauchen Zugriff auf die Kamera
         </Text>
@@ -82,11 +80,11 @@ export default function QRCodeQuestions() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={globalStyles.question}>
+    <View style={globalStyles.qrCodeStyles.container}>
+      <Text style={globalStyles.default.question}>
         {currentQuestion.question}
       </Text>
-      <View style={styles.buttonRow}>
+      <View style={globalStyles.qrCodeStyles.buttonRow}>
         <UIButton
           icon={scanMode ? 'circle-stop' : 'qrcode'}
           onPress={() => setScanMode(!scanMode)}
@@ -101,32 +99,10 @@ export default function QRCodeQuestions() {
       {scanMode && (
         <CameraView
           ref={cameraRef}
-          style={styles.camera}
+          style={globalStyles.qrCodeStyles.camera}
           onBarcodeScanned={handleQRCode}
         />
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginTop: 20,
-  },
-  camera: {
-    width: Dimensions.get('window').width * 0.8,
-    height: Dimensions.get('window').width * 0.8,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    columnGap: 30,
-    rowGap: 10,
-    marginBottom: 30,
-  },
-});
