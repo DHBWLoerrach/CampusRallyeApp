@@ -31,7 +31,6 @@ function shuffleArray(arr) {
   return a;
 }
 
-
 const RallyeScreen = observer(function RallyeScreen() {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
@@ -96,28 +95,23 @@ const RallyeScreen = observer(function RallyeScreen() {
               const childAnswers = childs.map(
                 (child) => child.answer
               );
-              element.multiple_answer = childAnswers;
+              element.multiple_answer = shuffleArray([
+                ...childAnswers,
+              ]);
             }
             data = temp.concat(multiple_choice_parent);
 
             // upload questions shall always be at the end
             // Partition the array into non-upload and upload questions
-            const nonUploadQuestions = data.filter(
+            let nonUploadQuestions = data.filter(
               (question) => question.question_type !== 'upload'
             );
             const uploadQuestions = data.filter(
               (question) => question.question_type === 'upload'
             );
-            // Shuffle the non-upload questions using Fisher-Yates algorithm
-            for (let i = nonUploadQuestions.length - 1; i > 0; i--) {
-              // Generate a random index from 0 to i
-              const j = Math.floor(Math.random() * (i + 1));
-              // Swap elements at indices i and j
-              [nonUploadQuestions[i], nonUploadQuestions[j]] = [
-                nonUploadQuestions[j],
-                nonUploadQuestions[i],
-              ];
-            }
+            nonUploadQuestions = shuffleArray([
+              ...nonUploadQuestions,
+            ]);
             // append upload questions at the end
             data = nonUploadQuestions.concat(uploadQuestions);
           }
