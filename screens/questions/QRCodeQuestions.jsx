@@ -49,15 +49,8 @@ export default function QRCodeQuestions() {
       setScanMode(false);
     } else if (currentQuestion.answer === data) {
       setScanMode(false);
-      Alert.alert('OK', `Das ist der richtige QR-Code!`, [
-        {
-          text: 'Weiter',
-          onPress: async () => {
-            await store$.savePoints(true, currentQuestion.points);
-            store$.gotoNextQuestion();
-          },
-        },
-      ]);
+      store$.savePoints(true, currentQuestion.points);
+      store$.gotoNextQuestion();
     }
   };
 

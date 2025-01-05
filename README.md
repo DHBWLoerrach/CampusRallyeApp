@@ -89,11 +89,13 @@ entsprechenden Tabellen in der Supabase-Instanz in Erfahrung gebracht werden.
 
 Dies setzt die Installation und Konfiguration des Android-SDKs und XCode (nur auf macOS) voraus.
 
-`npx expo prebuild` erstellt einen Prebuild, wodurch im Projekt die Dateiordner der nativen Apps erstellt werden (`android` und `ios`).
+`npx expo prebuild` erstellt einen Prebuild, wodurch im Projekt die Dateiordner der nativen Apps erstellt werden (`android` und `ios`). Der Zusatz `--clean` entfernt die beiden Dateiordner `android` und `ios` und erstellt sie neu (daher sind diese nicht im git-Repository).
 
 `npx expo run:ios --device` und `npx expo run:android --device` erstellt lokale Dev-Builds der nativen App und fragt nach dem gewünschten Smartphone/Simulator/Emulator für die Installation der App.
 
-`npm expo start -d` startet den Metro-Bundler für einen Dev-Build.
+`npx expo start -d` startet den Metro-Bundler für einen Dev-Build.
+
+Wenn ein Android-Testgerät über USB-Kabel verbunden wird, dann kann der Metro-Bundler mit `--localhost` gestartet werden, um die Verbindung zur App „kabelgebunden“ herzustellen: `npx expo start -d --localhost`
 
 ## Veröffentlichung im App/Play Store
 
