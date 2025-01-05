@@ -80,3 +80,25 @@ Nun kann die App getestet und weiterentwickelt werden. Für das aktive Testen mu
 
 Die Anmeldedaten für die Teilnahme an einer Rallye in der App können aus den
 entsprechenden Tabellen in der Supabase-Instanz in Erfahrung gebracht werden.
+
+### App mit Expo testen
+
+`npx expo start -g` started den Metro-Bundler, um die App auf einem Smartphone oder Emulator/Simulator in der Expo Go App zu testen.
+
+### Development Builds der App erstellen
+
+Dies setzt die Installation und Konfiguration des Android-SDKs und XCode (nur auf macOS) voraus.
+
+`npx expo prebuild` erstellt einen Prebuild, wodurch im Projekt die Dateiordner der nativen Apps erstellt werden (`android` und `ios`).
+
+`npx expo run:ios --device` und `npx expo run:android --device` erstellt lokale Dev-Builds der nativen App und fragt nach dem gewünschten Smartphone/Simulator/Emulator für die Installation der App.
+
+`npm expo start -d` startet den Metro-Bundler für einen Dev-Build.
+
+## Veröffentlichung im App/Play Store
+
+`eas build` erstellt die nativen Apps in der Cloud mit [Expo EAS](https://expo.dev/eas).
+
+`eas submit` liefert die nativen Apps zunächst als Betaversion in den App/Play Store aus. Die Android-Version wird automatisch als Beta (offener Test) veröffentlicht. Für das iPhone muss der neue erstellte Build der App im App Store für die Beta Tester in Testflight zur Veröffentlichung beantragt werden.
+
+Nach einer Veröffentlichung einer neuen Produktionsversion sollte der Eintrag für `version` in `app.json` erhöht werden (als eigener Commit „_Bump version to x.y.z_”)
