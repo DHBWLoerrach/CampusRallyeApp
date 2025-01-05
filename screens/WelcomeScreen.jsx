@@ -25,51 +25,14 @@ export default function WelcomeScreen({
 }) {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const PasswordModal = ({ onStart }) => {
-    const [password, setPassword] = useState("");
-    return (
-      <Modal
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={globalStyles.welcomeStyles.modalOverlay}
-          onPress={() => {
-            setModalVisible(false);
-            setPassword("");
-          }}
-        >
-          <View style={globalStyles.welcomeStyles.popoverContent}>
-            <TextInput
-              placeholder="Passwort eingeben"
-              secureTextEntry={true}
-              style={globalStyles.welcomeStyles.passwordInput}
-              onChangeText={setPassword}
-              value={password}
-            />
-            <Pressable onPress={() => onStart(password)}>
-              <FontAwesome
-                name="arrow-right"
-                size={32}
-                color={Colors.dhbwRed}
-                marginRight={5}
-              />
-            </Pressable>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-    );
-  };
-
   const OnlineContent = () => (
     <View style={globalStyles.welcomeStyles.container}>
-      <PasswordModal onStart={onPasswordSubmit} />
       <Card
         title="An Campus Rallye teilnehmen"
         description="Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
         icon="map-marker"
         onPress={() => setModalVisible(true)}
+        onPasswordSubmit={onPasswordSubmit}
       />
       <Card
         title="Campus-Gelände erkunden"
