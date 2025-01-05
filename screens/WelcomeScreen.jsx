@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -8,11 +8,13 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Colors from '../utils/Colors';
-import UIButton from '../ui/UIButton';
-import { globalStyles } from '../utils/GlobalStyles';
+  StyleSheet,
+} from "react-native";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Colors from "../utils/Colors";
+import UIButton from "../ui/UIButton";
+import { globalStyles } from "../utils/GlobalStyles";
+import Card from "../ui/Card";
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -24,7 +26,7 @@ export default function WelcomeScreen({
   const [modalVisible, setModalVisible] = useState(false);
 
   const PasswordModal = ({ onStart }) => {
-    const [password, setPassword] = useState('');
+    const [password, setPassword] = useState("");
     return (
       <Modal
         transparent
@@ -35,7 +37,7 @@ export default function WelcomeScreen({
           style={globalStyles.welcomeStyles.modalOverlay}
           onPress={() => {
             setModalVisible(false);
-            setPassword('');
+            setPassword("");
           }}
         >
           <View style={globalStyles.welcomeStyles.popoverContent}>
@@ -61,17 +63,21 @@ export default function WelcomeScreen({
   };
 
   const OnlineContent = () => (
-    <>
-      <View style={globalStyles.welcomeStyles.button}>
-        <PasswordModal onStart={onPasswordSubmit} />
-        <UIButton onPress={() => setModalVisible(true)}>
-          An Campus Rallye teilnehmen{'\n'}(Passwort erforderlich)
-        </UIButton>
-      </View>
-      <UIButton onPress={onContinueWithoutRallye}>
-        Campus-Gelände erkunden
-      </UIButton>
-    </>
+    <View style={globalStyles.welcomeStyles.container}>
+      <PasswordModal onStart={onPasswordSubmit} />
+      <Card
+        title="An Campus Rallye teilnehmen"
+        description="Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
+        icon="map-marker"
+        onPress={() => setModalVisible(true)}
+      />
+      <Card
+        title="Campus-Gelände erkunden"
+        description="Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck"
+        icon="compass"
+        onPress={onContinueWithoutRallye}
+      />
+    </View>
   );
 
   const OfflineContent = ({ loading, onRefresh }) => (
@@ -89,15 +95,20 @@ export default function WelcomeScreen({
     <View style={globalStyles.welcomeStyles.container}>
       <Image
         style={globalStyles.welcomeStyles.headerImage}
-        source={require('../assets/dhbw-campus-header.png')}
+        source={require("../assets/dhbw-campus-header.png")}
       />
       <View style={globalStyles.welcomeStyles.header}>
-        <Text style={[globalStyles.welcomeStyles.text, globalStyles.welcomeStyles.title]}>
+        <Text
+          style={[
+            globalStyles.welcomeStyles.text,
+            globalStyles.welcomeStyles.title,
+          ]}
+        >
           DHBW Lörrach Campus Rallye
         </Text>
         <Image
           style={globalStyles.welcomeStyles.logo}
-          source={require('../assets/dhbw-logo.png')}
+          source={require("../assets/dhbw-logo.png")}
         />
       </View>
       <View style={globalStyles.welcomeStyles.content}>

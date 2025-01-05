@@ -4,12 +4,6 @@ import Colors from "./Colors";
 import Constants from "./Constants";
 
 export const globalStyles = StyleSheet.create({
-  // Gemeinsame Basis-Styles
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-  },
   default: {
     container: {
       flex: 1,
@@ -50,7 +44,38 @@ export const globalStyles = StyleSheet.create({
     },
   },
 
-  // Scoreboard Screen
+  cardStyles: {
+    card: {
+      width: "90%",
+      backgroundColor: "white",
+      borderRadius: 15,
+      padding: 20,
+      marginVertical: 20,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: Colors.dhbwGray,
+      marginTop: 10,
+      textAlign: "center",
+    },
+    cardDescription: {
+      fontSize: 14,
+      color: Colors.dhbwGray,
+      textAlign: "center",
+      marginTop: 5,
+    },
+  },
+
   scoreboardStyles: {
     container: {
       backgroundColor: "white",
@@ -98,7 +123,6 @@ export const globalStyles = StyleSheet.create({
     },
   },
 
-  // Voting Screen
   votingStyles: {
     main: {
       padding: 20,
@@ -115,7 +139,6 @@ export const globalStyles = StyleSheet.create({
     },
   },
 
-  // Settings Screen
   settingsStyles: {
     container: {
       flex: 1,
@@ -288,6 +311,7 @@ export const globalStyles = StyleSheet.create({
       marginBottom: 30,
     },
   },
+
   skillStyles: {
     contentContainer: {
       flexGrow: 1,
@@ -337,6 +361,7 @@ export const globalStyles = StyleSheet.create({
       borderRadius: 5,
     },
   },
+
   uploadStyles: {
     container: {
       flex: 1,
@@ -598,17 +623,5 @@ export const globalStyles = StyleSheet.create({
         fontSize: 18,
       },
     },
-  },
-
-  // Common Components
-  text: {
-    fontSize: 16,
-    color: Colors.dhbwGray,
-  },
-  heading: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: Colors.dhbwGray,
-    marginBottom: 15,
   },
 });
