@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { observer } from '@legendapp/state/react';
 import { store$ } from './utils/Store';
@@ -70,6 +71,7 @@ const App = observer(function App() {
           onRefresh={onRefresh}
         />
       )}
+      <StatusBar style="auto" />
     </NavigationContainer>
   );
 });
