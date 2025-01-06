@@ -25,7 +25,7 @@ export const store$ = observable({
     if (answered_correctly) {
       store$.points.set(store$.points.get() + earned_points);
     }
-    if (store$.team.get() !== null) {
+    if (store$.rallye.get() !== null && store$.team.get() !== null) {
       await supabase.from('group_questions').insert({
         group_id: store$.team.get().id,
         question_id: store$.currentQuestion.get().id,
