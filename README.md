@@ -103,4 +103,4 @@ Wenn ein Android-Testgerät über USB-Kabel verbunden wird, dann kann der Metro-
 
 `eas submit` liefert die nativen Apps zunächst als Betaversion in den App/Play Store aus. Die Android-Version wird automatisch als Beta (offener Test) veröffentlicht. Für das iPhone muss der neue erstellte Build der App im App Store für die Beta Tester in Testflight zur Veröffentlichung beantragt werden.
 
-Nach einer Veröffentlichung einer neuen Produktionsversion sollte der Eintrag für `version` in `app.json` erhöht werden (als eigener Commit „_Bump version to x.y.z_”)
+Nach erfolgter Veröffentlichung einer neuen Produktionsversion sollte der Eintrag für `version` in `app.json` erhöht werden (als eigener Commit „_Bump version to x.y.z_“)
