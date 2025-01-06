@@ -23,6 +23,7 @@ export default function QRCodeQuestions() {
   submitResult = async (isCorrect) => {
     await store$.savePoints(isCorrect, currentQuestion.points);
     store$.gotoNextQuestion();
+    setScanCorrect(false);
   };
 
   const handleSurrender = () => {
