@@ -16,11 +16,12 @@ import Hint from '../../ui/Hint';
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
   const [scanMode, setScanMode] = useState(false);
+  const [isScanCorrect, setScanCorrect] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const currentQuestion = store$.currentQuestion.get();
 
-  submitSurrender = async () => {
-    await store$.savePoints(false, currentQuestion.points);
+  submitResult = async (isCorrect) => {
+    await store$.savePoints(isCorrect, currentQuestion.points);
     store$.gotoNextQuestion();
   };
 
@@ -35,7 +36,7 @@ export default function QRCodeQuestions() {
         },
         {
           text: 'Ja, ich möchte aufgeben',
-          onPress: () => submitSurrender(),
+          onPress: () => submitResult(false),
         },
       ]
     );
@@ -49,8 +50,7 @@ export default function QRCodeQuestions() {
       setScanMode(false);
     } else if (currentQuestion.answer === data) {
       setScanMode(false);
-      store$.savePoints(true, currentQuestion.points);
-      store$.gotoNextQuestion();
+      setScanCorrect(true);
     }
   };
 
@@ -70,6 +70,17 @@ export default function QRCodeQuestions() {
           onPress={requestPermission}
           title="Zugriff auf Kamera erlauben"
         />
+      </View>
+    );
+  }
+
+  if (isScanCorrect) {
+    return (
+      <View style={globalStyles.container}>
+        <Text style={globalStyles.question}>
+          QR Code erfolgreich gescannt!
+        </Text>
+        <UIButton onPress={() => submitResult(true)}>Weiter</UIButton>
       </View>
     );
   }
