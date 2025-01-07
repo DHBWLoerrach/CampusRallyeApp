@@ -19,14 +19,14 @@ const RallyeHeader = observer(function RallyeHeader({
   );
 
   return (
-    <View style={{ alignItems: 'center' }}>
+    <View style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
       {rallye ? (
         rallye.status === 'running' &&
         currentTime$ < rallye.end_time ? (
-          <>
+          <View style={{ alignItems: 'center' }}>
             <TimeHeader endTime={rallye.end_time} />
             <ProgressBar />
-          </>
+          </View>
         ) : (
           <Text
             style={{

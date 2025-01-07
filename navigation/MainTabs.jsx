@@ -46,17 +46,26 @@ const MainTabs = observer(function MainTabs() {
     }
   }, [currentQuestion, team, allQuestionsAnswered]);
 
+  const HomeScreen = () => {
+    useEffect(() => {
+      store$.enabled.set(false);
+    }, []);
+
+    return null;
+  };
+
   return (
     <Tab.Navigator
-      initialRouteName={rallye ? 'team' : 'rallye'}
+      initialRouteName={rallye ? "team" : "rallye"}
       screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: Color.dhbwRed },
         headerTintColor: Color.tabHeader,
         tabBarIcon: ({ focused }) => {
           const icons = {
-            rallye: 'map',
-            settings: 'settings',
-            team: 'people',
+            home: "home",
+            rallye: "map",
+            settings: "settings",
+            team: "people",
           };
           return (
             <MaterialIcon
@@ -71,15 +80,20 @@ const MainTabs = observer(function MainTabs() {
       })}
     >
       <Tab.Screen
+        name="home"
+        component={HomeScreen}
+        options={{ title: "Anmeldung" }}
+      />
+      <Tab.Screen
         name="team"
         component={TeamScreen}
-        options={{ title: 'Team' }}
+        options={{ title: "Team" }}
       />
       <Tab.Screen
         name="rallye"
         component={RallyeScreen}
         options={{
-          title: 'Rallye',
+          title: "Rallye",
           headerTitle: () => (
             <RallyeHeader rallye={rallye} percentage={percentage} />
           ),
@@ -88,7 +102,7 @@ const MainTabs = observer(function MainTabs() {
       <Tab.Screen
         name="settings"
         component={SettingsScreen}
-        options={{ title: 'Einstellungen' }}
+        options={{ title: "Einstellungen" }}
       />
     </Tab.Navigator>
   );

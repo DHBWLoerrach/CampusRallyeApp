@@ -67,7 +67,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
     async function createTeam() {
       setLoading(true);
       const teamName = generateTeamName();
-      // TODO input name and validate team: unique, not empty, not too long
+
       try {
         const { data, error } = await supabase
           .from("rallye_group")
@@ -76,10 +76,21 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
             rallye_id: rallye.id,
           })
           .select();
-        store$.team.set(data[0]);
-        storeData(rallye.id + "", data[0].id);
+
+        if (error) throw error;
+
+        if (data && data[0]) {
+          store$.team.set(data[0]);
+          await storeData(rallye.id + "", data[0].id);
+        } else {
+          throw new Error("No data returned from database");
+        }
       } catch (err) {
-        console.log("error creating team: ", err);
+        console.error("Error creating team:", err);
+        Alert.alert(
+          "Fehler",
+          "Team konnte nicht erstellt werden. Bitte erneut versuchen."
+        );
       } finally {
         setLoading(false);
       }

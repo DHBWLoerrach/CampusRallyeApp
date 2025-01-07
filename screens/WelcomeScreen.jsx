@@ -2,15 +2,9 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Modal,
-  Pressable,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
-  StyleSheet,
 } from "react-native";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Colors from "../utils/Colors";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
@@ -55,36 +49,38 @@ export default function WelcomeScreen({
   );
 
   return (
+    <>
     <View style={globalStyles.welcomeStyles.container}>
       <Image
         style={globalStyles.welcomeStyles.headerImage}
         source={require("../assets/dhbw-campus-header.png")}
       />
-      <View style={globalStyles.welcomeStyles.header}>
-        <Text
-          style={[
-            globalStyles.welcomeStyles.text,
-            globalStyles.welcomeStyles.title,
-          ]}
-        >
-          DHBW Lörrach Campus Rallye
-        </Text>
-        <Image
-          style={globalStyles.welcomeStyles.logo}
-          source={require("../assets/dhbw-logo.png")}
-        />
+        <View style={globalStyles.welcomeStyles.header}>
+          <Text
+            style={[
+              globalStyles.welcomeStyles.text,
+              globalStyles.welcomeStyles.title,
+            ]}
+          >
+            DHBW Lörrach Campus Rallye
+          </Text>
+          <Image
+            style={globalStyles.welcomeStyles.logo}
+            source={require("../assets/dhbw-logo.png")}
+          />
+        </View>
+        <View style={globalStyles.welcomeStyles.content}>
+          {loading && (
+            <View>
+              <ActivityIndicator size="large" color={Colors.dhbwRed} />
+            </View>
+          )}
+          {networkAvailable && !loading && <OnlineContent />}
+          {!networkAvailable && !loading && (
+            <OfflineContent onRefresh={onRefresh} loading={loading} />
+          )}
+        </View>
       </View>
-      <View style={globalStyles.welcomeStyles.content}>
-        {loading && (
-          <View>
-            <ActivityIndicator size="large" color={Colors.dhbwRed} />
-          </View>
-        )}
-        {networkAvailable && !loading && <OnlineContent />}
-        {!networkAvailable && !loading && (
-          <OfflineContent onRefresh={onRefresh} loading={loading} />
-        )}
-      </View>
-    </View>
+    </>
   );
 }

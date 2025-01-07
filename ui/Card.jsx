@@ -5,11 +5,11 @@ import {
   Animated,
   TextInput,
   View,
-  Pressable,
-} from "react-native";
+  } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Colors from "../utils/Colors";
 import { globalStyles } from "../utils/GlobalStyles";
+import UIButton from "./UIButton";
 
 const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -39,14 +39,12 @@ const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
   const frontAnimatedStyle = {
     transform: [{ rotateY: frontInterpolate }],
     zIndex: isFlipped ? 0 : 1,
-    // Deaktiviert Touch-Events wenn Karte gedreht
     pointerEvents: isFlipped ? "none" : "auto",
   };
 
   const backAnimatedStyle = {
     transform: [{ rotateY: backInterpolate }],
     zIndex: isFlipped ? 1 : 0,
-    // Aktiviert Touch-Events nur wenn Karte gedreht
     pointerEvents: isFlipped ? "auto" : "none",
   };
 
@@ -87,15 +85,24 @@ const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
           placeholder="Passwort"
         />
         <View style={globalStyles.cardStyles.buttonRow}>
-          <Pressable
-            style={globalStyles.cardStyles.button}
-            onPress={handlePasswordSubmit}
+          <UIButton
+            style={[globalStyles.cardStyles.button]}
+            textStyle={globalStyles.cardStyles.buttonText}
+            onPress={flipCard}
+            variant="custom"
+            color={Colors.dhbwRedLight}
           >
-            <Text style={globalStyles.cardStyles.buttonText}>Bestätigen</Text>
-          </Pressable>
-          <Pressable style={globalStyles.cardStyles.button} onPress={flipCard}>
-            <Text style={globalStyles.cardStyles.buttonText}>Zurück</Text>
-          </Pressable>
+            Zurück
+          </UIButton>
+          <UIButton
+            style={[globalStyles.cardStyles.button]}
+            textStyle={globalStyles.cardStyles.buttonText}
+            onPress={handlePasswordSubmit}
+            variant="custom"
+            color={Colors.dhbwRed}
+          >
+            Bestätigen
+          </UIButton>
         </View>
       </Animated.View>
     </TouchableOpacity>

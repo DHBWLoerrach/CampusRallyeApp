@@ -8,6 +8,7 @@ module.exports = {
   mediumGray: "#777777",
   dhbwGray: "#5C6971",
   dhbwRed: "#E2001A",
+  dhbwRedLight: "#E2001A80",
   lightBlue: "#9fdbf5",
   contrastBlue: "#334D7A",
   dhbwRedWebView: "rgb(226,0,26)", // FIXME: needed by WebView
@@ -19,6 +20,7 @@ module.exports = {
     cellBorder: "#EEEEEE",
     dhbwGray: "#5C6971",
     dhbwRed: "#E2001A",
+    dhbwRedLight: "#E2001A80",
     lightGray: "#DADADA",
     dhbwRedWebView: "rgb(226,0,26)", // FIXME: needed by WebView
     icon: "#484848",
@@ -41,6 +43,7 @@ module.exports = {
     scheduleInfo: "#9fdbf5",
     dhbwGray: "#5C6971",
     dhbwRed: "#E2001A",
+    dhbwRedLight: "#E2001A80",
     lightGray: "#DADADA",
     dhbwRedWebView: "rgb(226,0,26)", // FIXME: needed by WebView
     cellBorder: "#1f1f1f",

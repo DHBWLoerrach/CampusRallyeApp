@@ -22,6 +22,11 @@ const questionTypeComponents = {
   picture: ImageQuestions,
 };
 
+// Konstanten für Rallye-Status
+const RALLYE_STATUS = {
+  RUNNING: 'running'
+};
+
 // Hilfsfunktion zum Mischen eines Arrays
 function shuffleArray(arr) {
   let a = arr.slice();
@@ -268,7 +273,9 @@ const RallyeScreen = observer(function RallyeScreen() {
     return <RallyeStates.EndedState />;
   }
 
-  if (rallye.status === 'running') {
+  // Rendert den entsprechenden Zustand der Rallye basierend auf verschiedenen Bedingungen
+  if (rallye.status === RALLYE_STATUS.RUNNING) {
+    // Prüfe ob die Zeit abgelaufen ist
     if (currentTime$ >= rallye.end_time) {
       return (
         <RallyeStates.TimeExpiredState
@@ -280,11 +287,13 @@ const RallyeScreen = observer(function RallyeScreen() {
       );
     }
 
-    if (team === null) {
+    // Prüfe ob ein Team ausgewählt wurde
+    if (!team) {
       return <RallyeStates.TeamNotSelectedState />;
     }
 
-    if (questions.length === 0 || allQuestionsAnswered) {
+    // Prüfe ob alle Fragen beantwortet wurden oder keine Fragen vorhanden sind
+    if (!questions.length || allQuestionsAnswered) {
       return (
         <RallyeStates.AllQuestionsAnsweredState
           loading={loading}
@@ -295,8 +304,8 @@ const RallyeScreen = observer(function RallyeScreen() {
       );
     }
 
-    const QuestionComponent =
-      questionTypeComponents[currentQuestion.question_type];
+    // Rendere die aktuelle Frage mit dem entsprechenden Komponententyp
+    const QuestionComponent = questionTypeComponents[currentQuestion.question_type];
     return (
       <View style={globalStyles.default.container}>
         <QuestionComponent />
@@ -304,6 +313,7 @@ const RallyeScreen = observer(function RallyeScreen() {
     );
   }
 
+  // Kein gültiger Rallye-Status
   return null;
 });
 

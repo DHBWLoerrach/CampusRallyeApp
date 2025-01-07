@@ -573,27 +573,6 @@ export const globalStyles = StyleSheet.create({
       width: "100%",
       marginVertical: 60,
     },
-    modalOverlay: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0,0,0,0.75)",
-    },
-    popoverContent: {
-      flexDirection: "row",
-      justifyContent: "center",
-      alignItems: "center",
-      width: "90%",
-      backgroundColor: "#fff",
-      borderRadius: 5,
-      borderWidth: 1,
-      borderColor: Colors.dhbwRed,
-    },
-    passwordInput: {
-      height: 50,
-      flex: 1,
-      paddingHorizontal: 10,
-    },
     offline: {
       alignItems: "center",
       justifyContent: "center",
