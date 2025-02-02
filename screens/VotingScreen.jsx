@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
-import { store$ } from '../utils/Store';
-import { supabase } from '../utils/Supabase';
-import UIButton from '../ui/UIButton';
-import Colors from '../utils/Colors';
-import { globalStyles } from '../utils/GlobalStyles';
+import { useState, useEffect } from "react";
+import { View, Text, ScrollView } from "react-native";
+import { store$ } from "../utils/Store";
+import { supabase } from "../utils/Supabase";
+import UIButton from "../ui/UIButton";
+import Colors from "../utils/Colors";
+import { globalStyles } from "../utils/GlobalStyles";
 
 export default function VotingScreen({ onRefresh, loading }) {
   const [teams, setTeams] = useState([]);
@@ -18,17 +18,14 @@ export default function VotingScreen({ onRefresh, loading }) {
   useEffect(() => {
     const fetchDataSupabase = async () => {
       const { data: teams } = await supabase
-        .from('rallye_group')
-        .select('*')
-        .eq('rallye_id', rallye.id)
-        .order('id', { ascending: false });
+        .from("rallye_group")
+        .select("*")
+        .eq("rallye_id", rallye.id)
+        .order("id", { ascending: false });
       setTeams(teams);
-      const { data: vote } = await supabase.rpc(
-        'get_unvoted_questions',
-        {
-          input_group_id: team.id,
-        }
-      );
+      const { data: vote } = await supabase.rpc("get_unvoted_questions", {
+        input_group_id: team.id,
+      });
       if (vote !== null) {
         setVoting(vote);
       }
@@ -38,7 +35,7 @@ export default function VotingScreen({ onRefresh, loading }) {
 
   const handleNextQuestion = async () => {
     setSendingResult(true);
-    await supabase.from('question_voting').insert([
+    await supabase.from("question_voting").insert([
       {
         question_id: voting[currentVoting]?.id,
         group_id: team.id,
@@ -52,76 +49,89 @@ export default function VotingScreen({ onRefresh, loading }) {
 
   if (teams.length < 2 || !voting[currentVoting]) {
     return (
-      <View style={globalStyles.container}>
-        <Text style={globalStyles.bigText}>
-          Die Abstimmung wurde beendet.
-        </Text>
-        <Text style={[globalStyles.bigText, { marginBottom: 20 }]}>
-          Lade diese Seite neu, um das Ergebnis zu sehen, nachdem die
-          Rallye beendet wurde.
-        </Text>
-        <UIButton
-          color={Colors.dhbwRed}
-          icon="rotate"
-          disabled={loading}
-          onPress={onRefresh}
-        >
+      <ScrollView
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
+          globalStyles.rallyeStatesStyles.container,
+        ]}
+        style={{ backgroundColor: "white" }}
+      >
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+            Die Abstimmung wurde beendet
+          </Text>
+          <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+            Lade diese Seite neu, um das Ergebnis zu sehen, nachdem die Rallye
+            beendet wurde.
+          </Text>
+        </View>
+
+        <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
           Aktualisieren
         </UIButton>
-      </View>
+      </ScrollView>
     );
   }
 
   return (
-    <View style={globalStyles.votingStyles.main}>
-      <Text style={globalStyles.votingStyles.text}>
-        {voting[currentVoting]?.question}
-      </Text>
-      <Text
-        style={[
-          globalStyles.votingStyles.text,
-          {
-            margin: 20,
-            color: Colors.dhbwRed,
-          },
-        ]}
-      >
-        Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
-        die oben gestellte Aufgabe am besten gelöst hat.
-      </Text>
-      {teams
-        ?.filter((item) => item.id !== team.id)
-        .map((item, index) => (
-          <View
-            key={index}
+    <ScrollView
+      contentContainerStyle={globalStyles.default.refreshContainer}
+      style={{ backgroundColor: "white" }}
+    >
+      <View style={globalStyles.default.container}>
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+            {voting[currentVoting]?.question}
+          </Text>
+          <Text
             style={[
-              globalStyles.section,
-              {
-                borderColor:
-                  selectedTeam === item.id ? Colors.dhbwRed : 'white',
-              },
+              globalStyles.rallyeStatesStyles.infoSubtitle,
+              { color: Colors.dhbwRed, marginTop: 20 },
             ]}
           >
-            <View style={globalStyles.votingStyles.row}>
-              <Text style={globalStyles.votingStyles.label}>Name des Teams:</Text>
-              <Text style={globalStyles.votingStyles.value}>{item.name}</Text>
-            </View>
-            <UIButton
-              color={Colors.dhbwGray}
-              outline={true}
-              onPress={() => setSelectedTeam(item.id)}
+            Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die
+            oben gestellte Aufgabe am besten gelöst hat.
+          </Text>
+        </View>
+
+        {teams
+          ?.filter((item) => item.id !== team.id)
+          .map((item, index) => (
+            <View
+              key={index}
+              style={[
+                globalStyles.rallyeStatesStyles.infoBox,
+                {
+                  borderColor:
+                    selectedTeam === item.id ? Colors.dhbwRed : "transparent",
+                  borderWidth: selectedTeam === item.id ? 2 : 0,
+                },
+              ]}
             >
-              Punkt vergeben
-            </UIButton>
-          </View>
-        ))}
-      <UIButton
-        color={selectedTeam ? Colors.dhbwRed : Colors.dhbwLightGray}
-        disabled={!selectedTeam || sendingResult}
-        onPress={handleNextQuestion}
-      >
-        Nächste Abstimmung
-      </UIButton>
-    </View>
+              <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+                {item.name}
+              </Text>
+              <UIButton
+                color={
+                  selectedTeam === item.id ? Colors.dhbwRed : Colors.dhbwGray
+                }
+                outline={true}
+                onPress={() => setSelectedTeam(item.id)}
+              >
+                Punkt vergeben
+              </UIButton>
+            </View>
+          ))}
+
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <UIButton
+            disabled={!selectedTeam || sendingResult}
+            onPress={handleNextQuestion}
+          >
+            Nächste Abstimmung
+          </UIButton>
+        </View>
+      </View>
+    </ScrollView>
   );
 }

@@ -1,12 +1,4 @@
-import {
-  Alert,
-  Button,
-  Linking,
-  Platform,
-  Text,
-  ScrollView,
-  View,
-} from 'react-native';
+import { Alert, Text, ScrollView, View, Linking } from 'react-native';
 import { useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as MailComposer from 'expo-mail-composer';
@@ -14,6 +6,8 @@ import { store$ } from '../../utils/Store';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/GlobalStyles';
 import UploadPhoto from './UploadPhoto';
+import UIButton from '../../ui/UIButton';
+import Hint from '../../ui/Hint';
 
 export default function UploadQuestions() {
   const rallye = store$.rallye.get();
@@ -21,22 +15,15 @@ export default function UploadQuestions() {
   const currentQuestion = store$.currentQuestion.get();
   const [permission, requestPermission] = useCameraPermissions();
 
-  if (!permission) {
-    // Camera permissions are still loading.
-    return <View />;
-  }
-
-  if (!permission.granted) {
-    // Camera permissions are not granted yet.
+  if (!permission?.granted) {
     return (
-      <View style={globalStyles.uploadQuestionStyles.container}>
+      <View style={globalStyles.default.container}>
         <Text style={{ textAlign: 'center', marginBottom: 10 }}>
           Wir brauchen Zugriff auf die Kamera
         </Text>
-        <Button
-          onPress={requestPermission}
-          title="Zugriff auf Kamera erlauben"
-        />
+        <UIButton onPress={requestPermission}>
+          Zugriff auf Kamera erlauben
+        </UIButton>
       </View>
     );
   }
@@ -69,12 +56,9 @@ export default function UploadQuestions() {
   const handleAnswerSubmit = () => {
     Alert.alert(
       'Sicherheitsfrage',
-      ` Hast du die E-Mail mit dem Foto/Video gesendet ?`,
+      'Hast du die E-Mail mit dem Foto/Video gesendet?',
       [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
-        },
+        { text: 'Abbrechen', style: 'cancel' },
         {
           text: 'Ja, ich habe die E-Mail gesendet',
           onPress: async () => {
@@ -87,34 +71,42 @@ export default function UploadQuestions() {
   };
 
   return (
-    <ScrollView>
-      <View style={globalStyles.uploadQuestionStyles.container}>
-        <Text style={globalStyles.default.question}>
-          {currentQuestion.question}
-        </Text>
-        <UploadPhoto handleSendEmail={handleSendEmail} />
-        <Text style={globalStyles.uploadQuestionStyles.infoText}>
-          Falls das Senden des Fotos/Videos hier nicht klappt, dann
-          macht das Foto/Video auf dem Handy in der Kamera-App und
-          schickt es per E-Mail mit dem Namen eures Teams an:
-        </Text>
-        <Text
-          style={{ color: 'blue' }}
-          onPress={() =>
-            Linking.openURL(`mailto:${rallye.mail_adress}`)
-          }
-        >
-          {rallye.mail_adress}
-        </Text>
-
-        <View style={globalStyles.uploadQuestionStyles.redButtonContainer}>
-          <Button //Red Button
-            color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
-            title="Weiter"
-            onPress={handleAnswerSubmit}
-            style={globalStyles.uploadQuestionStyles.buttons}
-          />
+    <ScrollView 
+      contentContainerStyle={globalStyles.default.refreshContainer}
+      style={{ backgroundColor: 'white' }}
+    >
+      <View style={globalStyles.default.container}>
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+            {currentQuestion.question}
+          </Text>
         </View>
+
+        <UploadPhoto handleSendEmail={handleSendEmail} />
+
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+            Falls das Senden des Fotos/Videos hier nicht klappt, dann macht das 
+            Foto/Video auf dem Handy in der Kamera-App und schickt es per E-Mail 
+            mit dem Namen eures Teams an:
+          </Text>
+          <Text
+            style={{ color: Colors.dhbwRed, textAlign: 'center', padding: 10 }}
+            onPress={() => Linking.openURL(`mailto:${rallye.mail_adress}`)}
+          >
+            {rallye.mail_adress}
+          </Text>
+
+          <UIButton onPress={handleAnswerSubmit}>
+            Weiter
+          </UIButton>
+        </View>
+
+        {currentQuestion.hint && (
+          <View style={globalStyles.rallyeStatesStyles.infoBox}>
+            <Hint hint={currentQuestion.hint} />
+          </View>
+        )}
       </View>
     </ScrollView>
   );

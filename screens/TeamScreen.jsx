@@ -48,18 +48,17 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
   function ShowTeam({ gotoRallye }) {
     return (
-      <>
-        <Text style={[globalStyles.default.bigText]}>Name deines Teams:</Text>
-        <Text
-          style={[
-            globalStyles.default.bigText,
-            { color: Colors.dhbwRed, marginBottom: 20 },
-          ]}
-        >
+      <View style={globalStyles.teamStyles.infoBox}>
+        <Text style={globalStyles.teamStyles.message}>
+          Name deines Teams:
+        </Text>
+        <Text style={globalStyles.teamStyles.teamName}>
           {team.name}
         </Text>
-        <UIButton onPress={gotoRallye}>Gehe zur Rallye</UIButton>
-      </>
+        <UIButton onPress={gotoRallye}>
+          Gehe zur Rallye
+        </UIButton>
+      </View>
     );
   }
 
@@ -97,32 +96,27 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
     }
 
     return (
-      <>
-        <Text style={[globalStyles.default.bigText, { marginBottom: 10 }]}>
+      <View style={globalStyles.teamStyles.infoBox}>
+        <Text style={globalStyles.teamStyles.message}>
           Bilde ein Team, um an der Rallye teilzunehmen.
         </Text>
         <UIButton disabled={loading} onPress={createTeam}>
           Team bilden
         </UIButton>
-      </>
+      </View>
     );
   }
 
   return (
     <View style={globalStyles.default.container}>
-      <Text
-        style={[
-          globalStyles.default.bigText,
-          { marginBottom: 10, fontWeight: "600" },
-        ]}
-      >
-        {rallye.name}
-      </Text>
-      {team ? (
-        <ShowTeam gotoRallye={() => navigation.navigate("rallye")} />
-      ) : (
-        <BuildTeam />
-      )}
+      <Text style={globalStyles.teamStyles.title}>{rallye.name}</Text>
+      <View style={globalStyles.teamStyles.container}>
+        {team ? (
+          <ShowTeam gotoRallye={() => navigation.navigate("rallye")} />
+        ) : (
+          <BuildTeam />
+        )}
+      </View>
     </View>
   );
 });

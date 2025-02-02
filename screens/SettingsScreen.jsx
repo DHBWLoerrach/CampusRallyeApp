@@ -25,12 +25,13 @@ export default function SettingsScreen() {
       >
         <Text style={globalStyles.settingsStyles.tileText}>Informationen</Text>
       </TouchableOpacity>
-      <UIButton
+      
+      {/* <UIButton
         style={globalStyles.settingsStyles.button}
         icon="arrow-left" onPress={() => store$.enabled.set(false)}
       >
         <Text>Zurück zur Anmeldung</Text>
-      </UIButton>
+      </UIButton> */}
     </View>
   );
 }

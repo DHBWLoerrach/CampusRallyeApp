@@ -56,7 +56,7 @@ const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
 
   return (
     <TouchableOpacity
-      style={[globalStyles.cardStyles.card, { height: 200 }]}
+      style={globalStyles.cardStyles.card }
       onPress={icon === "map-marker" ? flipCard : onPress}
     >
       <Animated.View

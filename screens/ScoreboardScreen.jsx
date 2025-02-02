@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { store$ } from '../utils/Store';
-import { supabase } from '../utils/Supabase';
-import { globalStyles } from '../utils/GlobalStyles';
-import UIButton from '../ui/UIButton';
+import { useState, useEffect } from "react";
+import { ScrollView, Text, View } from "react-native";
+import { store$ } from "../utils/Store";
+import { supabase } from "../utils/Supabase";
+import { globalStyles } from "../utils/GlobalStyles";
+import UIButton from "../ui/UIButton";
+import Colors from "../utils/Colors";
 
 export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
@@ -12,18 +13,16 @@ export default function ScoreboardScreen() {
   const [sortedTeams, setSortedTeams] = useState([]);
 
   useEffect(() => {
-    if (rallye.status !== 'ended') return;
-    const fetchData = async () => { 
+    if (rallye.status !== "ended") return;
+    const fetchData = async () => {
       try {
-        let { data } = await supabase.rpc(
-          'get_total_points_per_rallye',
-          { rallye_id_param: rallye.id }
-        );
+        let { data } = await supabase.rpc("get_total_points_per_rallye", {
+          rallye_id_param: rallye.id,
+        });
 
         if (data) {
           data.sort((a, b) => b.total_points - a.total_points);
 
-          // compute ranking and respect ties
           let rank = 1;
           let previousPoints = data[0].total_points;
 
@@ -36,46 +35,87 @@ export default function ScoreboardScreen() {
           setSortedTeams(rankedData);
         }
       } catch (error) {
-        console.error('Error fetching total points data:', error);
+        console.error("Error fetching total points data:", error);
       }
     };
-
     fetchData();
   }, [rallye]);
 
   return (
-    <>
-    <ScrollView style={globalStyles.scoreboardStyles.container}>
-      <Text style={globalStyles.scoreboardStyles.title}>
-        Punktestand
-      </Text>
-      {ourTeam && (
-        <Text style={globalStyles.scoreboardStyles.teamInfo}>
-          {ourTeam.name}: {points} Punkte
+    <ScrollView
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        globalStyles.rallyeStatesStyles.container,
+      ]}
+      style={{ backgroundColor: "white" }}
+    >
+      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+          Punktestand
         </Text>
-      )}
-      <View style={globalStyles.scoreboardStyles.tableHeader}>
-        <Text style={globalStyles.scoreboardStyles.headerText}>Platz</Text>
-        <Text style={globalStyles.scoreboardStyles.headerText}>Team</Text>
-        <Text style={globalStyles.scoreboardStyles.headerText}>Punkte</Text>
+        {ourTeam && (
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoSubtitle,
+              { marginTop: 10 },
+            ]}
+          >
+            Dein Team: {ourTeam.name}
+          </Text>
+        )}
       </View>
-      {sortedTeams.map((team, index) => (
+
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, { padding: 0 }]}>
         <View
-          key={index}
-          style={[
-            globalStyles.scoreboardStyles.tableRow,
-            team.group_name === ourTeam?.name && globalStyles.scoreboardStyles.ourTeam,
-          ]}
+          style={{
+            flexDirection: "row",
+            padding: 15,
+            borderBottomWidth: 1,
+            borderBottomColor: Colors.lightGray,
+            backgroundColor: Colors.veryLightGray,
+          }}
         >
-          <Text style={globalStyles.scoreboardStyles.rowText}>{team.rank}</Text>
-          <Text style={globalStyles.scoreboardStyles.rowText}>{team.group_name}</Text>
-          <Text style={globalStyles.scoreboardStyles.rowText}>{team.total_points}</Text>
+          <Text style={globalStyles.scoreboardStyles.headerCell}>Platz</Text>
+          <Text style={globalStyles.scoreboardStyles.headerCellWide}>Team</Text>
+          <Text style={globalStyles.scoreboardStyles.headerCell}>Punkte</Text>
         </View>
-      ))}
+
+        {/* ScrollView für die Teamliste */}
+        <ScrollView style={{ maxHeight: 300 }}>
+          {sortedTeams.map((team, index) => (
+            <View
+              key={index}
+              style={[
+                globalStyles.scoreboardStyles.row,
+                team.group_name === ourTeam?.name &&
+                  globalStyles.scoreboardStyles.rowHighlighted,
+              ]}
+            >
+              <Text style={globalStyles.scoreboardStyles.cell}>
+                {team.rank}
+              </Text>
+              <Text
+                style={[
+                  globalStyles.scoreboardStyles.cellWide,
+                  team.group_name === ourTeam?.name &&
+                    globalStyles.scoreboardStyles.cellHighlighted,
+                ]}
+              >
+                {team.group_name}
+              </Text>
+              <Text style={globalStyles.scoreboardStyles.cell}>
+                {team.total_points}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+
+      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
+          Zurück zur Anmeldung
+        </UIButton>
+      </View>
     </ScrollView>
-    <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
-        Zurück zur Anmeldung
-    </UIButton>
-    </>
   );
 }
