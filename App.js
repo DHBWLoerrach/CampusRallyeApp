@@ -19,12 +19,16 @@ const App = observer(function App() {
 
   const onRefresh = async () => {
     setLoading(true);
+    //ggf änderungen bei der Supabase///////////////////
     const { data } = await supabase
-      .from('login')
+      .from('rallye')
+      .select('id')
+      /* .from('login')
       .select('password, rallye!inner(id)')
-      .eq('rallye.is_active_rallye', true);
+      .eq('rallye.is_active_rallye', true); */
     if (data) {
-      setRealPassword(data[0].password);
+      //Temp dummy zum testen
+      setRealPassword("123");//data[0].password);
       setOnline(true);
     } else {
       setOnline(false);
@@ -34,10 +38,11 @@ const App = observer(function App() {
 
   const handlePasswordSubmit = async (password) => {
     if (password === realPassword) {
+      //ggf änderungen bei der Supabase///////////////////
       const { data } = await supabase
         .from('rallye')
-        .select('*')
-        .eq('is_active_rallye', true);
+        .select('*');
+        //.eq('is_active_rallye', true);
       const rallye = data[0];
       if (rallye.end_time) {
         rallye.end_time = new Date(rallye.end_time);

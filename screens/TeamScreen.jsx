@@ -22,7 +22,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
       const teamId = await getData(rallye.id + "");
       if (teamId !== null) {
         const { data } = await supabase
-          .from("rallye_group")
+          .from("rallyeTeam")
           .select("*")
           .eq("id", teamId);
         if (data.length > 0) {
@@ -69,7 +69,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
       try {
         const { data, error } = await supabase
-          .from("rallye_group")
+          .from("rallyeTeam")
           .insert({
             name: teamName,
             rallye_id: rallye.id,
