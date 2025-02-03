@@ -6,15 +6,32 @@ import Colors from "../../utils/Colors";
 import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";
 import Hint from "../../ui/Hint";
+import { saveAnswer } from "../../services/storage/answerStorage";
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
 
   const handleNext = async () => {
-    correctly_answered =
+    const correctly_answered =
       answer.trim().toLowerCase() === currentQuestion.answer.toLowerCase();
-    await store$.savePoints(correctly_answered, currentQuestion.points);
+
+    // Aktualisiere Punkte direkt im Store
+    if (correctly_answered) {
+      store$.points.set(store$.points.get() + currentQuestion.points);
+    }
+
+    // Speichere die Antwort über den saveAnswer Service
+    const team = store$.team.get();
+    if (team && currentQuestion) {
+      await saveAnswer(
+        team.id,
+        currentQuestion.id,
+        correctly_answered,
+        correctly_answered ? currentQuestion.points : 0
+      );
+    }
+
     store$.gotoNextQuestion();
     setAnswer("");
   };

@@ -1,14 +1,13 @@
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Image, Text, View } from "react-native";
 import Colors from "../utils/Colors";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
 import Card from "../ui/Card";
+import { useState, useEffect } from "react";
+import { Alert } from "react-native";
+import { supabase } from "../utils/Supabase";
+import RallyeSelectionModal from "../ui/RallyeSelectionModal";
+import { getActiveRallyes, setCurrentRallye } from '../services/storage'; 
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -17,7 +16,25 @@ export default function WelcomeScreen({
   loading,
   onRefresh,
 }) {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [showRallyeModal, setShowRallyeModal] = useState(false);
+  const [activeRallyes, setActiveRallyes] = useState([]);
+  const [selectedRallye, setSelectedRallye] = useState(null);
+
+  // Funktion zum Laden der aktiven Rallyes
+  const loadActiveRallyes = async () => {
+    const rallyes = await getActiveRallyes();
+    setActiveRallyes(rallyes);
+  };
+  // Sicherstellen dass Rallyes beim ersten Render geladen werden
+  useEffect(() => {
+    loadActiveRallyes();
+  }, []);
+
+  const handleRallyeSelect = async (rallye) => {
+    await setCurrentRallye(rallye);
+    setSelectedRallye(rallye); 
+    setShowRallyeModal(false);
+  };
 
   const OnlineContent = () => (
     <View style={globalStyles.welcomeStyles.container}>
@@ -25,8 +42,18 @@ export default function WelcomeScreen({
         title="An Campus Rallye teilnehmen"
         description="Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
         icon="map-marker"
-        onPress={() => setModalVisible(true)}
-        onPasswordSubmit={onPasswordSubmit}
+        onShowModal={() => {
+          loadActiveRallyes();
+          setShowRallyeModal(true);
+        }}
+        selectedRallye={selectedRallye}
+        onPasswordSubmit={(password) => {
+          if (!selectedRallye) {
+            Alert.alert("Fehler", "Bitte wähle zuerst eine Rallye aus.");
+            return;
+          }
+          onPasswordSubmit(password, selectedRallye);
+        }}
       />
       <Card
         title="Campus-Gelände erkunden"
@@ -50,11 +77,11 @@ export default function WelcomeScreen({
 
   return (
     <>
-    <View style={globalStyles.welcomeStyles.container}>
-      <Image
-        style={globalStyles.welcomeStyles.headerImage}
-        source={require("../assets/dhbw-campus-header.png")}
-      />
+      <View style={globalStyles.welcomeStyles.container}>
+        <Image
+          style={globalStyles.welcomeStyles.headerImage}
+          source={require("../assets/dhbw-campus-header.png")}
+        />
         <View style={globalStyles.welcomeStyles.header}>
           <Text
             style={[
@@ -81,6 +108,12 @@ export default function WelcomeScreen({
           )}
         </View>
       </View>
+      <RallyeSelectionModal
+        visible={showRallyeModal}
+        onClose={() => setShowRallyeModal(false)}
+        activeRallyes={activeRallyes}
+        onSelect={handleRallyeSelect}
+      />
     </>
   );
 }

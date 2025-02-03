@@ -1,17 +1,26 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Text,
   TouchableOpacity,
   Animated,
   TextInput,
   View,
-  } from "react-native";
+  Alert,
+} from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Colors from "../utils/Colors";
 import { globalStyles } from "../utils/GlobalStyles";
 import UIButton from "./UIButton";
 
-const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
+const Card = ({
+  title,
+  description,
+  icon,
+  onPress,
+  onShowModal, // Neuer prop
+  onPasswordSubmit,
+  selectedRallye,
+}) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [password, setPassword] = useState("");
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -25,6 +34,12 @@ const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
     }).start();
     setIsFlipped(!isFlipped);
   };
+
+  useEffect(() => {
+    if (selectedRallye) {
+      flipCard();
+    }
+  }, [selectedRallye]);
 
   const frontInterpolate = flipAnim.interpolate({
     inputRange: [0, 180],
@@ -49,6 +64,10 @@ const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
   };
 
   const handlePasswordSubmit = () => {
+    if (!selectedRallye && icon === "map-marker") {
+      Alert.alert("Fehler", "Bitte wähle zuerst eine Rallye aus.");
+      return;
+    }
     onPasswordSubmit(password);
     setPassword("");
     flipCard();
@@ -56,8 +75,9 @@ const Card = ({ title, description, icon, onPress, onPasswordSubmit }) => {
 
   return (
     <TouchableOpacity
-      style={globalStyles.cardStyles.card }
-      onPress={icon === "map-marker" ? flipCard : onPress}
+      style={globalStyles.cardStyles.card}
+      // Hier die Logik anpassen:
+      onPress={icon === "map-marker" ? onShowModal : onPress}
     >
       <Animated.View
         style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}

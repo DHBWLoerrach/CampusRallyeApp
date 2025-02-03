@@ -13,7 +13,9 @@ export default function MultipleChoiceQuestions() {
   const currentQuestion = store$.currentQuestion.get();
 
   const handleNext = async () => {
-    correctly_answered = answer.trim() === currentQuestion.answer;
+    // Vergleiche die getroffene Antwort (kleinbuchstabig) mit der korrekten Antwort aus der DB
+    const correctly_answered =
+      answer.trim().toLowerCase() === currentQuestion.answer.toLowerCase();
     await store$.savePoints(correctly_answered, currentQuestion.points);
     store$.gotoNextQuestion();
     setAnswer("");
@@ -21,64 +23,66 @@ export default function MultipleChoiceQuestions() {
 
   const handleAnswerSubmit = () => {
     if (answer.trim() === "") {
-      Alert.alert("Fehler", "Bitte gebe eine Antwort ein.");
+      Alert.alert("Fehler", "Bitte wähle eine Antwort aus.");
       return;
     }
+    // Zeige einen Bestätigungsdialog vor dem Absenden
     confirmAlert(answer, handleNext);
   };
 
   return (
-    // <ScrollView
-    //   contentContainerStyle={globalStyles.default.refreshContainer}
-    //   style={{ backgroundColor: 'white' }}
-    // >
-    <View style={globalStyles.default.container}>
-      <View style={globalStyles.rallyeStatesStyles.infoBox}>
-        <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-          {currentQuestion.question}
-        </Text>
-      </View>
+    <ScrollView
+      contentContainerStyle={globalStyles.default.refreshContainer}
+      style={{ backgroundColor: "white" }}
+    >
+      <View style={globalStyles.default.container}>
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+            {currentQuestion.question}
+          </Text>
+        </View>
 
-      <View style={globalStyles.rallyeStatesStyles.infoBox}>
-        {currentQuestion.multiple_answer.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              globalStyles.multipleChoiceStyles.squareButton,
-              {
-                borderColor:
-                  answer === option ? Colors.dhbwRed : Colors.dhbwGray,
-              },
-            ]}
-            onPress={() => setAnswer(option)}
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          {currentQuestion.answers &&
+            currentQuestion.answers.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  globalStyles.multipleChoiceStyles.squareButton,
+                  {
+                    borderColor:
+                      answer === option.text ? Colors.dhbwRed : Colors.dhbwGray,
+                  },
+                ]}
+                onPress={() => setAnswer(option.text)}
+              >
+                <View
+                  style={[
+                    globalStyles.multipleChoiceStyles.innerSquare,
+                    {
+                      backgroundColor:
+                        answer === option.text ? Colors.dhbwRed : "white",
+                    },
+                  ]}
+                />
+                <Text style={globalStyles.multipleChoiceStyles.answerText}>
+                  {option.text}
+                </Text>
+              </TouchableOpacity>
+            ))}
+        </View>
+
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <UIButton
+            color={answer ? Colors.dhbwRed : Colors.dhbwGray}
+            disabled={!answer}
+            onPress={handleAnswerSubmit}
           >
-            <View
-              style={[
-                globalStyles.multipleChoiceStyles.innerSquare,
-                {
-                  backgroundColor: answer === option ? Colors.dhbwRed : "white",
-                },
-              ]}
-            />
-            <Text style={globalStyles.multipleChoiceStyles.answerText}>
-              {option}
-            </Text>
-          </TouchableOpacity>
-        ))}
+            Antwort senden
+          </UIButton>
+          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
+        </View>
       </View>
-      
-      <View style={globalStyles.rallyeStatesStyles.infoBox}>
-        <UIButton
-          color={answer ? Colors.dhbwRed : Colors.dhbwGray}
-          disabled={!answer}
-          onPress={handleAnswerSubmit}
-        >
-          Antwort senden
-        </UIButton>
-
-        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
-      </View>
-    </View>
-    // </ScrollView>
+    </ScrollView>
   );
 }

@@ -6,6 +6,7 @@ import { globalStyles } from "../../utils/GlobalStyles";
 import UIButton from "../../ui/UIButton";
 import Hint from "../../ui/Hint";
 import Colors from "../../utils/Colors";
+import { saveAnswer } from "../../services/storage/answerStorage";
 
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
@@ -15,8 +16,17 @@ export default function QRCodeQuestions() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const submitSurrender = async () => {
-    await store$.savePoints(false, currentQuestion.points);
-    store$.gotoNextQuestion();
+    setScanMode(false);
+    try {
+      const team = store$.team.get();
+      if (team && currentQuestion) {
+        await saveAnswer(team.id, currentQuestion.id, false, 0);
+      }
+      store$.gotoNextQuestion();
+    } catch (error) {
+      console.error("Fehler beim Aufgeben:", error);
+      Alert.alert("Fehler", "Beim Aufgeben ist ein Fehler aufgetreten.");
+    }
   };
 
   const handleSurrender = () => {
@@ -30,7 +40,7 @@ export default function QRCodeQuestions() {
         },
         {
           text: "Ja, ich möchte aufgeben",
-          onPress: () => submitSurrender(),
+          onPress: submitSurrender,
         },
       ]
     );
@@ -126,13 +136,11 @@ export default function QRCodeQuestions() {
               Aufgeben
             </UIButton>
           </View>
-        </View>
 
         {currentQuestion.hint && (
-          <View style={globalStyles.rallyeStatesStyles.infoBox}>
-            <Hint hint={currentQuestion.hint} />
-          </View>
+          <Hint hint={currentQuestion.hint} />
         )}
+        </View>
       </View>
     </View>
   );

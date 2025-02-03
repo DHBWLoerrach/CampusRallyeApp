@@ -56,6 +56,71 @@ export const globalStyles = StyleSheet.create({
     },
   },
 
+  rallyeModal: {
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalContent: {
+      backgroundColor: "white",
+      padding: 20,
+      borderRadius: 10,
+      width: "85%",
+      maxHeight: "80%",
+    },
+    modalTitle: {
+      fontSize: 22,
+      fontWeight: "bold",
+      marginBottom: 15,
+      textAlign: "center",
+    },
+    rallyeCard: {
+      backgroundColor: "#f2f2f2",
+      borderRadius: 8,
+      padding: 15,
+      marginVertical: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    rallyeInfo: {
+      flex: 1,
+      paddingRight: 10,
+    },
+    rallyeName: {
+      fontSize: 18,
+      fontWeight: "600",
+      marginBottom: 5,
+    },
+    rallyeStudiengang: {
+      fontSize: 16,
+      color: "#555",
+      marginBottom: 3,
+    },
+    rallyeStatus: {
+      fontSize: 14,
+      color: "#888",
+    },
+    selectButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+    },
+    cancelButton: {
+      marginTop: 20,
+      alignSelf: "center",
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+    },
+    noDataText: {
+      textAlign: "center",
+      fontSize: 16,
+      color: "#777",
+      marginVertical: 10,
+    },
+  },
+
   rallyeStatesStyles: {
     container: {
       flex: 1,

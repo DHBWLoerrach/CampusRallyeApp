@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from 'react';
 import { Text, View } from "react-native";
-import { observer } from "@legendapp/state/react";
-import { store$ } from "../utils/Store";
+import { observer } from '@legendapp/state/react';
+import { store$ } from '../utils/Store';
 import { supabase } from "../utils/Supabase";
 import { getData, storeData } from "../utils/LocalStorage";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
-import Colors from "../utils/Colors";
 import generateTeamName from "../utils/RandomTeamNames";
+import { createTeam, getCurrentTeam } from '../services/storage';
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
@@ -15,22 +15,16 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
   const team = store$.team.get();
 
   useEffect(() => {
-    if (!rallye) {
-      return;
-    }
-    const fetchLocalStorage = async () => {
-      const teamId = await getData(rallye.id + "");
-      if (teamId !== null) {
-        const { data } = await supabase
-          .from("rallyeTeam")
-          .select("*")
-          .eq("id", teamId);
-        if (data.length > 0) {
-          store$.team.set(data[0]);
-        }
+    if (!rallye) return;
+    
+    const loadTeam = async () => {
+      const team = await getCurrentTeam();
+      if (team) {
+        store$.team.set(team);
       }
     };
-    fetchLocalStorage();
+    
+    loadTeam();
   }, [rallye]);
 
   if (!rallye) {

@@ -36,24 +36,21 @@ const App = observer(function App() {
     setLoading(false);
   };
 
-  const handlePasswordSubmit = async (password) => {
-    if (password === realPassword) {
-      //ggf änderungen bei der Supabase///////////////////
-      const { data } = await supabase
-        .from('rallye')
-        .select('*');
-        //.eq('is_active_rallye', true);
-      const rallye = data[0];
-      if (rallye.end_time) {
-        rallye.end_time = new Date(rallye.end_time);
+  const handlePasswordSubmit = async (password, selectedRallye) => {
+    try {
+      // Passwort direkt aus dem Rallye-Objekt lesen
+      if (password === selectedRallye.password) {
+        store$.rallye.set(selectedRallye);
+        store$.enabled.set(true);
+      } else {
+        Alert.alert(
+          'Falsches Passwort',
+          'Bitte geben Sie das richtige Passwort ein.'
+        );
       }
-      store$.rallye.set(rallye);
-      store$.enabled.set(true);
-    } else {
-      Alert.alert(
-        'Falsches Passwort',
-        'Bitte geben Sie das richtige Passwort ein.'
-      );
+    } catch (error) {
+      console.error('Fehler beim Überprüfen des Passworts:', error);
+      Alert.alert('Fehler', 'Es ist ein Fehler aufgetreten.');
     }
   };
 

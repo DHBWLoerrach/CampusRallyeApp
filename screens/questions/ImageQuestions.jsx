@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { View, Text, TextInput, Image, ScrollView } from "react-native";
+import { View, Text, TextInput, Image, ScrollView, Alert } from "react-native";
 import { store$ } from "../../utils/Store";
+import { saveAnswer } from "../../services/storage/answerStorage";
 import Colors from "../../utils/Colors";
 import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";
@@ -8,16 +9,28 @@ import UIButton from "../../ui/UIButton";
 import Hint from "../../ui/Hint";
 
 export default function ImageQuestions() {
-  const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
+  const team = store$.team.get();
+  const [answer, setAnswer] = useState("");
 
+  // Vergleicht die Antwort, speichert das Ergebnis und leitet zur nächsten Frage weiter
   const handleNext = async () => {
-    const correctly_answered = answer.trim() === currentQuestion.answer;
-    await store$.savePoints(correctly_answered, currentQuestion.points);
+    const correctlyAnswered = answer.trim() === currentQuestion.answer;
+    // Optional: Punkte aktualisieren
+    if (correctlyAnswered) {
+      store$.points.set(store$.points.get() + currentQuestion.points);
+    }
+    await saveAnswer(
+      team.id,
+      currentQuestion.id,
+      correctlyAnswered,
+      correctlyAnswered ? currentQuestion.points : 0
+    );
     store$.gotoNextQuestion();
     setAnswer("");
   };
 
+  // Validiert die Eingabe, zeigt ggf. einen Bestätigungsdialog und ruft handleNext auf
   const handleAnswerSubmit = () => {
     if (answer.trim() === "") {
       Alert.alert("Fehler", "Bitte gebe eine Antwort ein.");
@@ -42,7 +55,6 @@ export default function ImageQuestions() {
           <Image
             source={{ uri: currentQuestion.uri }}
             style={{
-              // width: "90%",
               height: "100%",
               borderRadius: 10,
               paddingVertical: 10,
@@ -62,8 +74,8 @@ export default function ImageQuestions() {
 
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
           <UIButton
-            color={answer.trim() !== "" ? Colors.dhbwRed : Colors.dhbwGray} // Prüfe auf nicht-leeren String
-            disabled={answer.trim() === ""} // Prüfe auf leeren String
+            color={answer.trim() !== "" ? Colors.dhbwRed : Colors.dhbwGray}
+            disabled={answer.trim() === ""}
             onPress={handleAnswerSubmit}
           >
             Antwort senden

@@ -1,4 +1,5 @@
 import { observable } from '@legendapp/state';
+import { getCurrentRallye, getCurrentTeam } from '../services/storage';
 import { supabase } from './Supabase';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -74,7 +75,10 @@ export const store$ = observable({
   questionIndex: 0,
   points: 0,
   allQuestionsAnswered: false,
+
+  // Hilfsfunktionen
   currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
+  
   gotoNextQuestion: () => {
     if (store$.questions.get().length === 0) return;
     let nextIndex = store$.questionIndex.get() + 1;
@@ -84,45 +88,20 @@ export const store$ = observable({
     } else {
       store$.questionIndex.set(nextIndex);
     }
+    // Persistiere den aktuellen Index
+    AsyncStorage.setItem("currentQuestionIndex", String(store$.questionIndex.get()));
   },
-  savePoints: async (answered_correctly, earned_points) => {
-    try {
-      // Update lokalen Punktestand
-      if (answered_correctly) {
-        store$.points.set(store$.points.get() + earned_points);
-      }
 
-      // Speichere Antworten nur wenn ein Team existiert
-      if (store$.team.get()) {
-        const data = {
-          group_id: store$.team.get().id,
-          question_id: store$.currentQuestion.get().id,
-          answered_correctly: answered_correctly,
-          points: answered_correctly ? earned_points : 0,
-        };
-
-        const networkState = await NetInfo.fetch();
-
-        if (networkState.isConnected) {
-          // Online: Direkt in Datenbank speichern
-          const { error } = await supabase.from("group_questions").insert(data);
-
-          if (error) {
-            console.error("Error saving answer:", error);
-            // Fallback: Offline speichern bei Fehler
-            const queue = await getOfflineQueue();
-            queue.push({ table: "group_questions", data });
-            await saveOfflineQueue(queue);
-          }
-        } else {
-          // Offline: Für spätere Synchronisation speichern
-          const queue = await getOfflineQueue();
-          queue.push({ table: "group_questions", data });
-          await saveOfflineQueue(queue);
-        }
-      }
-    } catch (error) {
-      console.error("Error in savePoints:", error);
+  // Initialisierungsfunktion
+  initialize: async () => {
+    const rallye = await getCurrentRallye();
+    const team = await getCurrentTeam();
+    
+    store$.rallye.set(rallye);
+    store$.team.set(team);
+    const savedIndex = await AsyncStorage.getItem("currentQuestionIndex");
+    if (savedIndex !== null) {
+      store$.questionIndex.set(parseInt(savedIndex, 10));
     }
-  },
+  }
 });
