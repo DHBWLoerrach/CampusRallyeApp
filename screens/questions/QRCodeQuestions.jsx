@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Alert, Button, Text, View, ScrollView } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { store$ } from "../../utils/Store";
+import { store$ } from "../../services/storage/Store";
 import { globalStyles } from "../../utils/GlobalStyles";
 import UIButton from "../../ui/UIButton";
 import Hint from "../../ui/Hint";

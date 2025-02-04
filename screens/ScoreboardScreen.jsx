@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { store$ } from "../utils/Store";
+import { store$ } from "../services/storage/Store";
 import { supabase } from "../utils/Supabase";
 import { globalStyles } from "../utils/GlobalStyles";
 import UIButton from "../ui/UIButton";

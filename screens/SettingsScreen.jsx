@@ -4,7 +4,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { store$ } from '../utils/Store';
+import { store$ } from '../services/storage/Store';
 import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/GlobalStyles';
 

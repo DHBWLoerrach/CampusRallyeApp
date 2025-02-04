@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Text, View } from "react-native";
 import { observer } from '@legendapp/state/react';
-import { store$ } from '../utils/Store';
+import { store$ } from '../services/storage/Store';
 import { supabase } from "../utils/Supabase";
-import { getData, storeData } from "../utils/LocalStorage";
+import { getData, storeData } from "../services/storage/LocalStorage";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
 import generateTeamName from "../utils/RandomTeamNames";

@@ -1,6 +1,6 @@
 import { observable } from '@legendapp/state';
-import { getCurrentRallye, getCurrentTeam } from '../services/storage';
-import { supabase } from './Supabase';
+import { getCurrentRallye, getCurrentTeam } from '.';
+import { supabase } from '../../utils/Supabase';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

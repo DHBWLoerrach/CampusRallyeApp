@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, Alert, ScrollView } from "react-native";
 import { TouchableOpacity } from "react-native";
-import { store$ } from "../../utils/Store";
+import { store$ } from "../../services/storage/Store";
 import Colors from "../../utils/Colors";
 import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";

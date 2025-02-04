@@ -1,5 +1,5 @@
 import { store$ } from './Store';
-import { supabase } from './Supabase';
+import { supabase } from '../../utils/Supabase';
 
 export async function getQuestions() {
   let { data: questions, error: questionError } = await supabase

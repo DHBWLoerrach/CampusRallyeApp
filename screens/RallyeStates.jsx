@@ -3,7 +3,7 @@ import VotingScreen from './VotingScreen';
 import Scoreboard from './ScoreboardScreen';
 import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/GlobalStyles';
-import { store$ } from '../utils/Store';
+import { store$ } from '../services/storage/Store';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Colors from '../utils/Colors';
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { observer } from '@legendapp/state/react';
-import { store$ } from './utils/Store';
+import { store$ } from './services/storage/Store';
 import { supabase } from './utils/Supabase';
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';

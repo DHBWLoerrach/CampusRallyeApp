@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, ScrollView, RefreshControl, Alert, Text } from 'react-native';
 import { observer } from '@legendapp/state/react';
-import { store$ } from '../utils/Store';
+import { store$ } from '../services/storage/Store';
 import { saveAnswer } from '../services/storage/answerStorage';
 import NetInfo from '@react-native-community/netinfo';
 import SkillQuestions from './questions/SkillQuestions';

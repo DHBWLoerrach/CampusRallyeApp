@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { observer } from '@legendapp/state/react';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
 import { supabase } from '../utils/Supabase';
-import { store$ } from '../utils/Store';
+import { store$ } from '../services/storage/Store';
 import RallyeHeader from './RallyeHeader';
 import RallyeScreen from '../screens/RallyeScreen';
 import SettingsScreen from '../screens/SettingsScreen';

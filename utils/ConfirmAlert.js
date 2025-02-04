@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { getData, storeData } from '../utils/LocalStorage';
+import { getData, storeData } from '../services/storage/LocalStorage';
 
 export async function confirmAlert(answer, handleNext) {
   const confirmAlertValue = await getData("confirmAlert");

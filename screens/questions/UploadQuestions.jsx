@@ -2,7 +2,7 @@ import { Alert, Text, ScrollView, View, Linking } from 'react-native';
 import { useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as MailComposer from 'expo-mail-composer';
-import { store$ } from '../../utils/Store';
+import { store$ } from '../../services/storage/Store';
 import Colors from '../../utils/Colors';
 import { globalStyles } from '../../utils/GlobalStyles';
 import UploadPhoto from './UploadPhoto';

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Text, Alert, View } from 'react-native';
-import { store$ } from '../utils/Store';
+import { store$ } from '../services/storage/Store';
 import UIButton from './UIButton';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/GlobalStyles';
