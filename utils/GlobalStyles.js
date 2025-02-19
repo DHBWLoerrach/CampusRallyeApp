@@ -945,4 +945,21 @@ export const globalStyles = StyleSheet.create({
       marginBottom: SCREEN_HEIGHT * 0.02,
     },
   },
+
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    backgroundColor: Colors.dhbwRed,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
 });

@@ -80,9 +80,9 @@ export default function MultipleChoiceQuestions() {
           >
             Antwort senden
           </UIButton>
-          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
         </View>
       </View>
+          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
     </ScrollView>
   );
 }

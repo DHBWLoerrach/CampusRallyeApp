@@ -137,10 +137,10 @@ export default function QRCodeQuestions() {
             </UIButton>
           </View>
 
+        </View>
         {currentQuestion.hint && (
           <Hint hint={currentQuestion.hint} />
         )}
-        </View>
       </View>
     </View>
   );

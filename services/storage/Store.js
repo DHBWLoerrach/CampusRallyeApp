@@ -1,10 +1,8 @@
-import { observable } from '@legendapp/state';
-import { getCurrentRallye, getCurrentTeam } from '.';
-import { supabase } from '../../utils/Supabase';
-import NetInfo from '@react-native-community/netinfo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { observable } from "@legendapp/state";
+import { rallyeStorage } from "./RallyeStorageManager";
+import { NetInfo } from "@react-native-community/netinfo";
 
-const OFFLINE_QUEUE_KEY = 'offlineQueue';
+const OFFLINE_QUEUE_KEY = "offlineQueue";
 let syncInProgress = false;
 
 // Hilfsfunktion zum Abrufen der offline Queue
@@ -13,7 +11,7 @@ const getOfflineQueue = async () => {
     const queue = await AsyncStorage.getItem(OFFLINE_QUEUE_KEY);
     return queue ? JSON.parse(queue) : [];
   } catch (error) {
-    console.error('Error reading offline queue:', error);
+    console.error("Error reading offline queue:", error);
     return [];
   }
 };
@@ -23,18 +21,18 @@ const saveOfflineQueue = async (queue) => {
   try {
     await AsyncStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
   } catch (error) {
-    console.error('Error saving offline queue:', error);
+    console.error("Error saving offline queue:", error);
   }
 };
 
 // Verarbeitung der offline Queue
 const processOfflineQueue = async () => {
   if (syncInProgress) return;
-  
+
   try {
     syncInProgress = true;
     const queue = await getOfflineQueue();
-    
+
     if (queue.length === 0) return;
 
     for (const action of queue) {
@@ -43,10 +41,10 @@ const processOfflineQueue = async () => {
           .from(action.table)
           .insert(action.data)
           .select();
-        
+
         if (error) throw error;
       } catch (error) {
-        console.error('Error processing offline action:', error);
+        console.error("Error processing offline action:", error);
         return; // Bei Fehler Synchronisation abbrechen
       }
     }
@@ -54,54 +52,97 @@ const processOfflineQueue = async () => {
     // Queue leeren nach erfolgreicher Synchronisation
     await AsyncStorage.removeItem(OFFLINE_QUEUE_KEY);
   } catch (error) {
-    console.error('Error in processOfflineQueue:', error);
+    console.error("Error in processOfflineQueue:", error);
   } finally {
     syncInProgress = false;
   }
 };
 
 // Network Listener initialisieren
-NetInfo.addEventListener(state => {
-  if (state.isConnected) {
-    processOfflineQueue();
-  }
-});
+// NetInfo.addEventListener((state) => {
+//   if (state.isConnected) {
+//     processOfflineQueue();
+//   }
+// });
 
 export const store$ = observable({
-  rallye: null,
-  team: null,
   enabled: false,
-  questions: [],
-  questionIndex: 0,
-  points: 0,
-  allQuestionsAnswered: false,
+  rallye: null,
 
-  // Hilfsfunktionen
-  currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
-  
-  gotoNextQuestion: () => {
-    if (store$.questions.get().length === 0) return;
-    let nextIndex = store$.questionIndex.get() + 1;
-    if (nextIndex === store$.questions.get().length) {
-      store$.allQuestionsAnswered.set(true);
-      store$.questionIndex.set(0);
+  initialize: async () => {
+    await rallyeStorage.initialize();
+    const activeData = rallyeStorage.getActiveRallyeData();
+    if (activeData) {
+      // Stelle sicher, dass alle notwendigen Eigenschaften existieren
+      store$.rallye.set({
+        ...activeData,
+        questions: activeData.questions || [],
+        currentQuestionIndex: 0, // Setze explizit auf 0
+        totalPoints: activeData.totalPoints || 0,
+        team: activeData.team || null,
+      });
+      store$.enabled.set(true);
     } else {
-      store$.questionIndex.set(nextIndex);
+      store$.rallye.set(null);
+      store$.enabled.set(false);
     }
-    // Persistiere den aktuellen Index
-    AsyncStorage.setItem("currentQuestionIndex", String(store$.questionIndex.get()));
   },
 
-  // Initialisierungsfunktion
-  initialize: async () => {
-    const rallye = await getCurrentRallye();
-    const team = await getCurrentTeam();
-    
-    store$.rallye.set(rallye);
-    store$.team.set(team);
-    const savedIndex = await AsyncStorage.getItem("currentQuestionIndex");
-    if (savedIndex !== null) {
-      store$.questionIndex.set(parseInt(savedIndex, 10));
+  // Load a specific rallye
+  loadRallye: async (rallyeId) => {
+    try {
+      const data = await rallyeStorage.fetchRallyeData(rallyeId);
+      await rallyeStorage.setActiveRallye(rallyeId);
+      store$.rallye.set(data);
+      return true;
+    } catch (error) {
+      console.error("Error loading rallye:", error);
+      return false;
     }
-  }
+  },
+
+  // Save answer for current rallye
+  saveAnswer: async (questionId, answer, points) => {
+    const rallye = store$.rallye.get();
+    if (!rallye) return;
+
+    await rallyeStorage.saveAnswer(rallye.id, questionId, answer, points);
+    // Update observable state
+    store$.rallye.set(rallyeStorage.getRallyeData(rallye.id));
+  },
+
+  createTeam: async (teamName) => {
+    const rallye = store$.rallye.get();
+    if (!rallye) return false;
+
+    try {
+      const { data: team, error } = await supabase
+        .from("rallyeTeam")
+        .insert({
+          name: teamName,
+          rallye_id: rallye.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (team) {
+        const updatedRallye = { ...rallye, team };
+        await rallyeStorage.saveRallyeData(rallye.id, updatedRallye);
+        store$.rallye.set(updatedRallye);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error creating team:", error);
+      return false;
+    }
+  },
+
+  // The current rallye data
+  rallye: null,
 });
+
+// Initialize on import
+store$.initialize();
