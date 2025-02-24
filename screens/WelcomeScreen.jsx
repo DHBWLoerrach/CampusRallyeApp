@@ -7,11 +7,12 @@ import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 import { supabase } from "../utils/Supabase";
 import RallyeSelectionModal from "../ui/RallyeSelectionModal";
-import { getActiveRallyes, setCurrentRallye } from '../services/storage'; 
+import { getActiveRallyes, getCurrentRallye, setCurrentRallye } from '../services/storage'; 
 import {
   loadActiveRallyes,
   getRallyeAndQuestionsAndAnswers,
 } from "../services/storage/RallyeStorageManager";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -26,17 +27,21 @@ export default function WelcomeScreen({
 
   // Sicherstellen dass Rallyes beim ersten Render geladen werden
   useEffect(() => {
-    async () => {
+    (async () => {
       const rallyes = await getActiveRallyes();
       setActiveRallyes(rallyes);
-    };
+    })();
   }, []);
 
   const handleRallyeSelect = async (rallye) => {
-    await setCurrentRallye(rallye);
-    setSelectedRallye(rallye); 
+    setSelectedRallye(rallye);
+    const currentRallye = await getCurrentRallye();
+    if (selectedRallye.id === currentRallye.id) {
+      onPasswordSubmit(selectedRallye.password, selectedRallye);
+    } else {
+      await setCurrentRallye(rallye);
+    }
     setShowRallyeModal(false);
-    await getRallyeAndQuestionsAndAnswers(1);
   };
 
   const OnlineContent = () => (

@@ -1,6 +1,8 @@
 import { observable } from "@legendapp/state";
-import { rallyeStorage } from "./RallyeStorageManager";
-import { NetInfo } from "@react-native-community/netinfo";
+import { getCurrentRallye, getCurrentTeam } from ".";
+import { supabase } from "../../utils/Supabase";
+import NetInfo from "@react-native-community/netinfo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OFFLINE_QUEUE_KEY = "offlineQueue";
 let syncInProgress = false;
@@ -59,90 +61,50 @@ const processOfflineQueue = async () => {
 };
 
 // Network Listener initialisieren
-// NetInfo.addEventListener((state) => {
-//   if (state.isConnected) {
-//     processOfflineQueue();
-//   }
-// });
-
-export const store$ = observable({
-  enabled: false,
-  rallye: null,
-
-  initialize: async () => {
-    await rallyeStorage.initialize();
-    const activeData = rallyeStorage.getActiveRallyeData();
-    if (activeData) {
-      // Stelle sicher, dass alle notwendigen Eigenschaften existieren
-      store$.rallye.set({
-        ...activeData,
-        questions: activeData.questions || [],
-        currentQuestionIndex: 0, // Setze explizit auf 0
-        totalPoints: activeData.totalPoints || 0,
-        team: activeData.team || null,
-      });
-      store$.enabled.set(true);
-    } else {
-      store$.rallye.set(null);
-      store$.enabled.set(false);
-    }
-  },
-
-  // Load a specific rallye
-  loadRallye: async (rallyeId) => {
-    try {
-      const data = await rallyeStorage.fetchRallyeData(rallyeId);
-      await rallyeStorage.setActiveRallye(rallyeId);
-      store$.rallye.set(data);
-      return true;
-    } catch (error) {
-      console.error("Error loading rallye:", error);
-      return false;
-    }
-  },
-
-  // Save answer for current rallye
-  saveAnswer: async (questionId, answer, points) => {
-    const rallye = store$.rallye.get();
-    if (!rallye) return;
-
-    await rallyeStorage.saveAnswer(rallye.id, questionId, answer, points);
-    // Update observable state
-    store$.rallye.set(rallyeStorage.getRallyeData(rallye.id));
-  },
-
-  createTeam: async (teamName) => {
-    const rallye = store$.rallye.get();
-    if (!rallye) return false;
-
-    try {
-      const { data: team, error } = await supabase
-        .from("rallyeTeam")
-        .insert({
-          name: teamName,
-          rallye_id: rallye.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      if (team) {
-        const updatedRallye = { ...rallye, team };
-        await rallyeStorage.saveRallyeData(rallye.id, updatedRallye);
-        store$.rallye.set(updatedRallye);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error creating team:", error);
-      return false;
-    }
-  },
-
-  // The current rallye data
-  rallye: null,
+NetInfo.addEventListener((state) => {
+  if (state.isConnected) {
+    processOfflineQueue();
+  }
 });
 
-// Initialize on import
-store$.initialize();
+export const store$ = observable({
+  rallye: null,
+  rallyeTeam: null,
+  teamQuestions: [],
+  enabled: false,
+  questions: [],
+  questionIndex: 0,
+  points: 0,
+  allQuestionsAnswered: false,
+
+  // Hilfsfunktionen
+  currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
+
+  gotoNextQuestion: () => {
+    if (store$.questions.get().length === 0) return;
+    let nextIndex = store$.questionIndex.get() + 1;
+    if (nextIndex === store$.questions.get().length) {
+      store$.allQuestionsAnswered.set(true);
+      store$.questionIndex.set(0);
+    } else {
+      store$.questionIndex.set(nextIndex);
+    }
+    // Persistiere den aktuellen Index
+    AsyncStorage.setItem(
+      "currentQuestionIndex",
+      String(store$.questionIndex.get())
+    );
+  },
+
+  // Initialisierungsfunktion
+  initialize: async () => {
+    const rallye = await getCurrentRallye();
+    store$.rallye.set(rallye);
+    const loadTeam = await getCurrentTeam(rallye.id);
+    loadTeam ? store$.rallyeTeam.set(loadTeam) : store$.rallyeTeam.set(null);
+    const savedIndex = await AsyncStorage.getItem("currentQuestionIndex");
+    if (savedIndex !== null) {
+      store$.questionIndex.set(parseInt(savedIndex, 10));
+    }
+  },
+});

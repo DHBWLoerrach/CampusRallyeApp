@@ -2,7 +2,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
 import ImprintScreen from '../screens/ImprintScreen';
 import InformationScreen from '../screens/InformationScreen';
-import SkillQuestions from '../screens/questions/SkillQuestions';
 import Color from '../utils/Colors';
 
 const Stack = createNativeStackNavigator();
@@ -25,7 +24,6 @@ export default function MainNavigator() {
         name="Informationen"
         component={InformationScreen}
       />
-      <Stack.Screen name="Wissensfragen" component={SkillQuestions} />
     </Stack.Navigator>
   );
 }

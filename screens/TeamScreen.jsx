@@ -7,7 +7,7 @@ import { getData, storeData } from "../services/storage/LocalStorage";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
 import generateTeamName from "../utils/RandomTeamNames";
-import { createTeam, getCurrentTeam } from '../services/storage';
+import { createTeam, getCurrentTeam, setCurrentTeam } from '../services/storage';
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
@@ -74,7 +74,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
         if (data && data[0]) {
           store$.team.set(data[0]);
-          await storeData(rallye.id + "", data[0].id);
+          await setCurrentTeam(rallye.id, data[0]);
         } else {
           throw new Error("No data returned from database");
         }
