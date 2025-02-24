@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, TextInput, Image, ScrollView, Alert } from "react-native";
 import { store$ } from "../../services/storage/Store";
 import { saveAnswer } from "../../services/storage/answerStorage";
@@ -7,16 +7,35 @@ import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";
 import UIButton from "../../ui/UIButton";
 import Hint from "../../ui/Hint";
+import { supabase } from "../../utils/Supabase";
 
 export default function ImageQuestions() {
   const currentQuestion = store$.currentQuestion.get();
+  const currentAnswer = store$.currentAnswer.get();
   const team = store$.team.get();
   const [answer, setAnswer] = useState("");
+  const [pictureUri, setPictureUri] = useState("https://dhbw-loerrach.de/fileadmin/standards_homepage/images_header/header_bereiche-und-einrichtungen/Wir_ueber_uns.jpg");
+
+  useEffect(() => {
+    getPictureUri();
+  }, []);
+
+  const getPictureUri = async () => {
+    const bucket = "test";
+    const { data, error } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(currentQuestion.bucket_path);
+    if (error) {
+      console.error("Error fetching image URL:", error);
+      return;
+    }
+    setPictureUri(data.publicUrl);
+  }
 
   // Vergleicht die Antwort, speichert das Ergebnis und leitet zur nächsten Frage weiter
   const handleNext = async () => {
-    const correctlyAnswered = answer.trim() === currentQuestion.answer;
-    // Optional: Punkte aktualisieren
+    const correctlyAnswered =
+      answer.trim() === currentAnswer.text.toLowerCase();
     if (correctlyAnswered) {
       store$.points.set(store$.points.get() + currentQuestion.points);
     }
@@ -53,7 +72,9 @@ export default function ImageQuestions() {
 
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
           <Image
-            source={{ uri: currentQuestion.uri }}
+            source={{
+              uri: "https://dhbw-loerrach.de/fileadmin/standards_homepage/images_header/header_bereiche-und-einrichtungen/Wir_ueber_uns.jpg",
+            }}
             style={{
               height: "100%",
               borderRadius: 10,

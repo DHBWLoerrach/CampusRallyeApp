@@ -13,12 +13,13 @@ export default function QRCodeQuestions() {
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const currentQuestion = store$.currentQuestion.get();
+  const currentAnswer = store$.currentAnswer.get();
+  const team = store$.team.get();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const submitSurrender = async () => {
     setScanMode(false);
     try {
-      const team = store$.team.get();
       if (team && currentQuestion) {
         await saveAnswer(team.id, currentQuestion.id, false, 0);
       }
@@ -55,18 +56,19 @@ export default function QRCodeQuestions() {
       console.log(currentQuestion.answer);
       console.log(data);
 
-      if (currentQuestion.answer !== data) {
-        alert(
+      if (currentAnswer.text.toLowerCase() !== data.toLowerCase()) {
+        Alert.alert(
           `Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.`
         );
         setScanMode(false);
-      } else if (currentQuestion.answer === data) {
+      } else if (currentAnswer.text.toLowerCase() === data.toLowerCase()) {
         setScanMode(false);
         Alert.alert("OK", `Das ist der richtige QR-Code!`, [
           {
             text: "Weiter",
             onPress: async () => {
               await store$.savePoints(true, currentQuestion.points);
+              await saveAnswer(team.id, currentQuestion.id, true, currentQuestion.points);
               store$.gotoNextQuestion();
             },
           },

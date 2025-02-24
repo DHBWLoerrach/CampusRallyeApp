@@ -7,18 +7,27 @@ import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";
 import Hint from "../../ui/Hint";
 import UIButton from "../../ui/UIButton";
+import { saveAnswer } from "../../services/storage/answerStorage";
 
 export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
+  const currentAnswer = store$.currentAnswer.get();
 
   const handleNext = async () => {
-    // Vergleiche die getroffene Antwort (kleinbuchstabig) mit der korrekten Antwort aus der DB
-    const correctly_answered =
-      answer.trim().toLowerCase() === currentQuestion.answer.toLowerCase();
-    await store$.savePoints(correctly_answered, currentQuestion.points);
-    store$.gotoNextQuestion();
-    setAnswer("");
+    const correctlyAnswered =
+          answer.trim() === currentAnswer.text.toLowerCase();
+        if (correctlyAnswered) {
+          store$.points.set(store$.points.get() + currentQuestion.points);
+        }
+        await saveAnswer(
+          team.id,
+          currentQuestion.id,
+          correctlyAnswered,
+          correctlyAnswered ? currentQuestion.points : 0
+        );
+        store$.gotoNextQuestion();
+        setAnswer("");
   };
 
   const handleAnswerSubmit = () => {

@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator, ScrollView, RefreshControl, Alert, Text } from 'react-native';
-import { observer } from '@legendapp/state/react';
-import { store$ } from '../services/storage/Store';
-import { saveAnswer } from '../services/storage/answerStorage';
-import NetInfo from '@react-native-community/netinfo';
-import SkillQuestions from './questions/SkillQuestions';
-import UploadQuestions from './questions/UploadQuestions';
-import QRCodeQuestions from './questions/QRCodeQuestions';
-import MultipleChoiceQuestions from './questions/MultipleChoiceQuestions';
-import ImageQuestions from './questions/ImageQuestions';
-import * as RallyeStates from './RallyeStates';
-import { globalStyles } from '../utils/GlobalStyles';
-import { supabase } from '../utils/Supabase';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  ActivityIndicator,
+  ScrollView,
+  RefreshControl,
+  Alert,
+  Text,
+} from "react-native";
+import { observer } from "@legendapp/state/react";
+import { store$ } from "../services/storage/Store";
+import { saveAnswer } from "../services/storage/answerStorage";
+import NetInfo from "@react-native-community/netinfo";
+import SkillQuestions from "./questions/SkillQuestions";
+import UploadQuestions from "./questions/UploadQuestions";
+import QRCodeQuestions from "./questions/QRCodeQuestions";
+import MultipleChoiceQuestions from "./questions/MultipleChoiceQuestions";
+import ImageQuestions from "./questions/ImageQuestions";
+import * as RallyeStates from "./RallyeStates";
+import { globalStyles } from "../utils/GlobalStyles";
+import { supabase } from "../utils/Supabase";
 
 const questionTypeComponents = {
   knowledge: SkillQuestions,
@@ -38,35 +45,37 @@ const RallyeScreen = observer(function RallyeScreen() {
         .from("join_rallye_questions")
         .select("question_id")
         .eq("rallye_id", rallye.id);
-      
+
       if (joinError) throw joinError;
-      
+
       const questionIds = joinData.map((row) => row.question_id);
-      
+
       if (questionIds.length === 0) {
         store$.questions.set([]);
         store$.currentQuestion.set(null);
         return;
       }
-      
+
       // 2. Hole bereits beantwortete Fragen des aktuellen Teams
       const { data: answeredData, error: answeredError } = await supabase
         .from("teamQuestions")
         .select("question_id")
         .eq("team_id", team.id);
       if (answeredError) throw answeredError;
-      const answeredIds = answeredData.map(row => row.question_id);
-      
+      const answeredIds = answeredData.map((row) => row.question_id);
+
       // Filtere die Frage-IDs, die schon beantwortet wurden
-      const filteredQuestionIds = questionIds.filter(id => !answeredIds.includes(id));
-      
+      const filteredQuestionIds = questionIds.filter(
+        (id) => !answeredIds.includes(id)
+      );
+
       // 3. Lese die entsprechenden (unbeantworteten) Fragen aus der questions Tabelle aus
       const { data: questionsData, error: questionsError } = await supabase
         .from("questions")
         .select("*")
         .in("id", filteredQuestionIds);
       if (questionsError) throw questionsError;
-      
+
       // Mapping der Felder für die UI
       const mappedQuestions = questionsData.map((q) => ({
         ...q,
@@ -75,7 +84,7 @@ const RallyeScreen = observer(function RallyeScreen() {
         answer:
           typeof q.answer === "string" ? q.answer : String(q.answer || ""),
       }));
-      
+
       // Zufällige Reihenfolge per Fisher-Yates-Shuffle
       const shuffleArray = (array) => {
         for (let i = array.length - 1; i > 0; i--) {
@@ -84,14 +93,15 @@ const RallyeScreen = observer(function RallyeScreen() {
         }
         return array;
       };
-      
+
       const randomizedQuestions = shuffleArray(mappedQuestions);
-      console.log("Randomized questions:", randomizedQuestions);
-      
+
       store$.questions.set(randomizedQuestions);
       // Lade den persistierten Fragenindex (z.B. aus AsyncStorage) und setze currentQuestion.
       // Falls kein gespeicherter Index vorhanden: setze auf 0.
-      store$.currentQuestion.set(randomizedQuestions[store$.questionIndex.get() || 0]);
+      store$.currentQuestion.set(
+        randomizedQuestions[store$.questionIndex.get() || 0]
+      );
     } catch (error) {
       console.error("Fehler beim Laden der Fragen:", error);
       Alert.alert("Fehler", "Die Fragen konnten nicht geladen werden.");
@@ -100,10 +110,49 @@ const RallyeScreen = observer(function RallyeScreen() {
     }
   };
 
+  const loadAnswers = async () => {
+    try {
+      const { data: joinData, error: joinError } = await supabase
+        .from("join_rallye_questions")
+        .select("question_id")
+        .eq("rallye_id", rallye.id);
+
+      if (joinError) throw joinError;
+
+      const questionIds = joinData.map((row) => row.question_id);
+
+      if (joinError) {
+        console.error("Error fetching rallye questions", joinError);
+        return [];
+      }
+      
+      const { data: answers, error: answerError } = await supabase
+        .from("answers")
+        .select("*")
+        .in("question_id", questionIds)
+        .eq("correct", true);
+
+      if (answerError) {
+        console.error(
+          "Error fetching answers for rallye",
+          rallye.id,
+          answerError
+        );
+        return [];
+      }
+
+      store$.answers.set(answers);
+    } catch (error) {
+      console.error("Error fetching rallye answers:", error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     if (rallye && team) {
       loadQuestions();
     }
+    if (questions) loadAnswers();
   }, [rallye, team]);
 
   // Speichert die Antwort und leitet zur nächsten Frage weiter
@@ -148,7 +197,10 @@ const RallyeScreen = observer(function RallyeScreen() {
               store$.gotoNextQuestion();
             } catch (error) {
               console.error("Fehler beim Aufgeben:", error);
-              Alert.alert("Fehler", "Beim Aufgeben ist ein Fehler aufgetreten.");
+              Alert.alert(
+                "Fehler",
+                "Beim Aufgeben ist ein Fehler aufgetreten."
+              );
             }
           },
         },
@@ -175,7 +227,10 @@ const RallyeScreen = observer(function RallyeScreen() {
 
   if (!rallye) {
     return (
-      <RallyeStates.NoQuestionsAvailableState loading={loading} onRefresh={onRefresh} />
+      <RallyeStates.NoQuestionsAvailableState
+        loading={loading}
+        onRefresh={onRefresh}
+      />
     );
   }
 
@@ -200,7 +255,10 @@ const RallyeScreen = observer(function RallyeScreen() {
         }
       >
         <View style={globalStyles.default.container}>
-          <QuestionComponent onAnswer={handleAnswer} question={currentQuestion} />
+          <QuestionComponent
+            onAnswer={handleAnswer}
+            question={currentQuestion}
+          />
         </View>
       </ScrollView>
     );

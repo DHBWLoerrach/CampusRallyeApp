@@ -76,9 +76,17 @@ export const store$ = observable({
   questionIndex: 0,
   points: 0,
   allQuestionsAnswered: false,
+  answers: [],
 
   // Hilfsfunktionen
   currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
+
+  currentAnswer: () => {
+    const current = store$.currentQuestion();
+    if (!current) return null;
+    const answers = store$.answers.get();
+    return answers.find((a) => a.question_id === current.id) || null;
+  },
 
   gotoNextQuestion: () => {
     if (store$.questions.get().length === 0) return;
@@ -108,3 +116,6 @@ export const store$ = observable({
     }
   },
 });
+
+// Initialisierung
+store$.initialize();

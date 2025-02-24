@@ -11,10 +11,11 @@ import { saveAnswer } from "../../services/storage/answerStorage";
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
+  const currentAnswer = store$.currentAnswer.get();
 
   const handleNext = async () => {
     const correctly_answered =
-      answer.trim().toLowerCase() === currentQuestion.answer.toLowerCase();
+      answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
 
     // Aktualisiere Punkte direkt im Store
     if (correctly_answered) {
