@@ -46,7 +46,7 @@ export default function QRCodeQuestions() {
     );
   };
 
-  const handleQRCode = ({ data }) => {
+  const handleQRCode = async ({ data }) => {
     if (isProcessing) return;
 
     try {
@@ -66,7 +66,10 @@ export default function QRCodeQuestions() {
           {
             text: "Weiter",
             onPress: async () => {
-              await store$.savePoints(true, currentQuestion.points);
+              const team = store$.team.get();
+              if (team && currentQuestion) {
+                await saveAnswer(team.id, currentQuestion.id, true, currentQuestion.points);
+              }
               store$.gotoNextQuestion();
             },
           },
