@@ -7,7 +7,6 @@ import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";
 import Hint from "../../ui/Hint";
 import { saveAnswer } from "../../services/storage/answerStorage";
-import { addPoints, setCurrentQuestionIndex } from "../../services/storage/RallyeStorageManager";
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState("");
@@ -19,7 +18,7 @@ export default function SkillQuestions() {
 
     // Aktualisiere Punkte direkt im Store
     if (correctly_answered) {
-      await addPoints(currentQuestion.points, store$.rallye.get().id);
+      store$.points.set(store$.points.get() + currentQuestion.points);
     }
 
     // Speichere die Antwort über den saveAnswer Service
@@ -33,7 +32,6 @@ export default function SkillQuestions() {
       );
     }
 
-    await setCurrentQuestionIndex(store$.questionIndex.get() + 1, store$.rallye.get().id);
     store$.gotoNextQuestion();
     setAnswer("");
   };

@@ -8,7 +8,6 @@ import { globalStyles } from '../../utils/GlobalStyles';
 import UploadPhoto from './UploadPhoto';
 import UIButton from '../../ui/UIButton';
 import Hint from '../../ui/Hint';
-import { saveAnswer } from '../../services/storage/answerStorage';
 
 export default function UploadQuestions() {
   const rallye = store$.rallye.get();
@@ -63,8 +62,7 @@ export default function UploadQuestions() {
         {
           text: 'Ja, ich habe die E-Mail gesendet',
           onPress: async () => {
-            const correctlyAnswered = true;
-            await saveAnswer(team.id, currentQuestion.id, correctlyAnswered, currentQuestion.points);
+            await store$.savePoints(true, currentQuestion.points);
             store$.gotoNextQuestion();
           },
         },

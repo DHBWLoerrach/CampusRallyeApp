@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, ScrollView, RefreshControl, Alert, Text } from 'react-native';
 import { observer } from '@legendapp/state/react';
 import { store$ } from '../services/storage/Store';
+import { saveAnswer } from '../services/storage/answerStorage';
 import NetInfo from '@react-native-community/netinfo';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadQuestions from './questions/UploadQuestions';
@@ -11,7 +12,6 @@ import ImageQuestions from './questions/ImageQuestions';
 import * as RallyeStates from './RallyeStates';
 import { globalStyles } from '../utils/GlobalStyles';
 import { supabase } from '../utils/Supabase';
-import { saveTeamAnswer, getRallyeAndQuestionsAndAnswers } from '../services/storage/RallyeStorageManager';
 
 const questionTypeComponents = {
   knowledge: SkillQuestions,
@@ -33,13 +33,49 @@ const RallyeScreen = observer(function RallyeScreen() {
   const loadQuestions = async () => {
     setLoading(true);
     try {
-      const questionsData = await getRallyeAndQuestionsAndAnswers(rallye.id);
-      if (questionsData.length === 0) {
+      // 1. Hole aus der Join-Tabelle alle question_ids der aktuell ausgewählten Rallye
+      const { data: joinData, error: joinError } = await supabase
+        .from("join_rallye_questions")
+        .select("question_id")
+        .eq("rallye_id", rallye.id);
+      
+      if (joinError) throw joinError;
+      
+      const questionIds = joinData.map((row) => row.question_id);
+      
+      if (questionIds.length === 0) {
         store$.questions.set([]);
         store$.currentQuestion.set(null);
         return;
       }
-
+      
+      // 2. Hole bereits beantwortete Fragen des aktuellen Teams
+      const { data: answeredData, error: answeredError } = await supabase
+        .from("teamQuestions")
+        .select("question_id")
+        .eq("team_id", team.id);
+      if (answeredError) throw answeredError;
+      const answeredIds = answeredData.map(row => row.question_id);
+      
+      // Filtere die Frage-IDs, die schon beantwortet wurden
+      const filteredQuestionIds = questionIds.filter(id => !answeredIds.includes(id));
+      
+      // 3. Lese die entsprechenden (unbeantworteten) Fragen aus der questions Tabelle aus
+      const { data: questionsData, error: questionsError } = await supabase
+        .from("questions")
+        .select("*")
+        .in("id", filteredQuestionIds);
+      if (questionsError) throw questionsError;
+      
+      // Mapping der Felder für die UI
+      const mappedQuestions = questionsData.map((q) => ({
+        ...q,
+        question: q.content,
+        question_type: q.type,
+        answer:
+          typeof q.answer === "string" ? q.answer : String(q.answer || ""),
+      }));
+      
       // Zufällige Reihenfolge per Fisher-Yates-Shuffle
       const shuffleArray = (array) => {
         for (let i = array.length - 1; i > 0; i--) {
@@ -48,11 +84,13 @@ const RallyeScreen = observer(function RallyeScreen() {
         }
         return array;
       };
-
-      const randomizedQuestions = shuffleArray(questionsData);
+      
+      const randomizedQuestions = shuffleArray(mappedQuestions);
       console.log("Randomized questions:", randomizedQuestions);
-
+      
       store$.questions.set(randomizedQuestions);
+      // Lade den persistierten Fragenindex (z.B. aus AsyncStorage) und setze currentQuestion.
+      // Falls kein gespeicherter Index vorhanden: setze auf 0.
       store$.currentQuestion.set(randomizedQuestions[store$.questionIndex.get() || 0]);
     } catch (error) {
       console.error("Fehler beim Laden der Fragen:", error);
@@ -75,7 +113,12 @@ const RallyeScreen = observer(function RallyeScreen() {
         store$.points.set(points + answerPoints);
       }
       if (team && currentQuestion) {
-        await saveTeamAnswer(rallye.id, currentQuestion.id, answered_correctly ? currentQuestion.answer : "", store$.questionIndex.get());
+        await saveAnswer(
+          team.id,
+          currentQuestion.id,
+          answered_correctly,
+          answered_correctly ? answerPoints : 0
+        );
       }
       store$.gotoNextQuestion();
     } catch (error) {
@@ -98,8 +141,9 @@ const RallyeScreen = observer(function RallyeScreen() {
           text: "Ja, aufgeben",
           onPress: async () => {
             try {
+              // Beim Aufgeben wird die Frage als falsch bewertet und es gibt keine Punktzahl
               if (team && currentQuestion) {
-                await saveTeamAnswer(rallye.id, currentQuestion.id, "", store$.questionIndex.get());
+                await saveAnswer(team.id, currentQuestion.id, false, 0);
               }
               store$.gotoNextQuestion();
             } catch (error) {

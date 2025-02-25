@@ -7,16 +7,16 @@ import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";
 import Hint from "../../ui/Hint";
 import UIButton from "../../ui/UIButton";
-import { saveAnswer } from "../../services/storage/answerStorage";
 
 export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
-  const team = store$.team.get();
 
   const handleNext = async () => {
-    const correctlyAnswered = answer.trim().toLowerCase() === currentQuestion.answer.toLowerCase();
-    await saveAnswer(team.id, currentQuestion.id, correctlyAnswered, correctlyAnswered ? currentQuestion.points : 0);
+    // Vergleiche die getroffene Antwort (kleinbuchstabig) mit der korrekten Antwort aus der DB
+    const correctly_answered =
+      answer.trim().toLowerCase() === currentQuestion.answer.toLowerCase();
+    await store$.savePoints(correctly_answered, currentQuestion.points);
     store$.gotoNextQuestion();
     setAnswer("");
   };
@@ -26,6 +26,7 @@ export default function MultipleChoiceQuestions() {
       Alert.alert("Fehler", "Bitte wähle eine Antwort aus.");
       return;
     }
+    // Zeige einen Bestätigungsdialog vor dem Absenden
     confirmAlert(answer, handleNext);
   };
 
@@ -81,7 +82,7 @@ export default function MultipleChoiceQuestions() {
           </UIButton>
         </View>
       </View>
-      {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
+          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
     </ScrollView>
   );
 }
