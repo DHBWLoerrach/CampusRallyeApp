@@ -61,6 +61,7 @@ const RallyeScreen = observer(function RallyeScreen() {
         .from("teamQuestions")
         .select("question_id")
         .eq("team_id", team.id);
+
       if (answeredError) throw answeredError;
       const answeredIds = answeredData.map((row) => row.question_id);
 
@@ -81,11 +82,9 @@ const RallyeScreen = observer(function RallyeScreen() {
         ...q,
         question: q.content,
         question_type: q.type,
-        answer:
-          typeof q.answer === "string" ? q.answer : String(q.answer || ""),
       }));
 
-      // Zufällige Reihenfolge per Fisher-Yates-Shuffle
+      // Zufällige Reihenfolge
       const shuffleArray = (array) => {
         for (let i = array.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -125,12 +124,11 @@ const RallyeScreen = observer(function RallyeScreen() {
         console.error("Error fetching rallye questions", joinError);
         return [];
       }
-      
+
       const { data: answers, error: answerError } = await supabase
         .from("answers")
         .select("*")
         .in("question_id", questionIds)
-        .eq("correct", true);
 
       if (answerError) {
         console.error(
@@ -142,9 +140,47 @@ const RallyeScreen = observer(function RallyeScreen() {
       }
 
       store$.answers.set(answers);
+      await loadMultipleChoiceAnswers();
     } catch (error) {
       console.error("Error fetching rallye answers:", error);
       return [];
+    }
+  };
+
+  const loadMultipleChoiceAnswers = async () => {
+    try {
+      // Alle Multiple-Choice-Frage-IDs sammeln
+      const multipleChoiceQuestions = store$.questions.filter(
+        (q) => q.question_type === "multiple_choice"
+      );
+
+      if (multipleChoiceQuestions.length === 0) {
+        store$.multipleChoiceAnswers.set([3]);
+        return;
+      }
+
+      // IDs extrahieren
+      const multipleChoiceQuestionIds = multipleChoiceQuestions.map(
+        (q) => q.id
+      );
+
+      // Alle Antworten für diese Fragen auf einmal laden
+      const { data: answers, error } = await supabase
+        .from("answers")
+        .select("*")
+        .in("question_id", multipleChoiceQuestionIds.id);
+
+      if (error) {
+        console.error("Error fetching multiple choice answers:", error);
+        store$.multipleChoiceAnswers.set([1]);
+        return;
+      }
+
+      // Die Antworten im Store speichern
+      store$.multipleChoiceAnswers.set(answers || [2]);
+    } catch (error) {
+      console.error("Error fetching rallye answers:", error);
+      store$.multipleChoiceAnswers.set([]);
     }
   };
 
@@ -215,6 +251,7 @@ const RallyeScreen = observer(function RallyeScreen() {
       return;
     }
     await loadQuestions();
+    await loadAnswers();
   };
 
   if (loading) {
@@ -236,6 +273,7 @@ const RallyeScreen = observer(function RallyeScreen() {
 
   if (questions.length > 0 && !allQuestionsAnswered) {
     const questionType = currentQuestion?.question_type;
+    console.log("questionType", questionType);
     const QuestionComponent = questionTypeComponents[questionType];
     if (!QuestionComponent) {
       return (

@@ -2,10 +2,12 @@ import { supabase } from "../../utils/Supabase";
 import { StorageKeys, getStorageItem, setStorageItem } from "./asyncStorage";
 
 export async function getCurrentTeam(rallyeId) {
+  if (!rallyeId) return null;
   return getStorageItem(StorageKeys.TEAM + "_" + rallyeId);
 }
 
-export async function setCurrentTeam(team, rallyeId) {
+export async function setCurrentTeam(rallyeId, team) {
+  if (!rallyeId) return null;
   return setStorageItem(StorageKeys.TEAM + "_" + rallyeId, team);
 }
 
@@ -23,7 +25,7 @@ export async function createTeam(teamName, rallyeId) {
     if (error) throw error;
 
     if (data) {
-      await setCurrentTeam(data);
+      await setCurrentTeam(rallyeId, data);
       return data;
     }
   } catch (error) {

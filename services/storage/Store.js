@@ -77,6 +77,8 @@ export const store$ = observable({
   points: 0,
   allQuestionsAnswered: false,
   answers: [],
+  multipleChoiceAnswers: [],
+  team: null,
 
   // Hilfsfunktionen
   currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
@@ -85,7 +87,15 @@ export const store$ = observable({
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get();
-    return answers.find((a) => a.question_id === current.id) || null;
+    return answers.filter((a) => a.question_id === current.id && a.correct === true)[0];
+  },
+
+  currentMultipleChoiceAnswers: () => {
+    const current = store$.currentQuestion();
+    if (!current) return null;
+    const answers = store$.answers.get();
+    return answers.filter(
+      (a) => a.question_id === current.id);
   },
 
   gotoNextQuestion: () => {
@@ -104,12 +114,28 @@ export const store$ = observable({
     );
   },
 
+  reset: () => {
+    store$.questionIndex.set(0);
+    store$.points.set(0);
+    store$.allQuestionsAnswered.set(false);
+    store$.rallyeTeam.set(null);
+    store$.teamQuestions.set([]);
+    store$.questions.set([]);
+    store$.questionIndex.set(0);
+    store$.points.set(0);
+    store$.answers.set([]);
+    store$.multipleChoiceAnswers.set([]);
+    store$.team.set(null);
+  },
+
   // Initialisierungsfunktion
   initialize: async () => {
     const rallye = await getCurrentRallye();
     store$.rallye.set(rallye);
-    const loadTeam = await getCurrentTeam(rallye.id);
-    loadTeam ? store$.rallyeTeam.set(loadTeam) : store$.rallyeTeam.set(null);
+    if (rallye) {
+      const loadTeam = await getCurrentTeam(rallye.id);
+      loadTeam ? store$.team.set(loadTeam) : store$.team.set(null);
+    }
     const savedIndex = await AsyncStorage.getItem("currentQuestionIndex");
     if (savedIndex !== null) {
       store$.questionIndex.set(parseInt(savedIndex, 10));

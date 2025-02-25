@@ -5,14 +5,8 @@ import { globalStyles } from "../utils/GlobalStyles";
 import Card from "../ui/Card";
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
-import { supabase } from "../utils/Supabase";
 import RallyeSelectionModal from "../ui/RallyeSelectionModal";
 import { getActiveRallyes, getCurrentRallye, setCurrentRallye } from '../services/storage'; 
-import {
-  loadActiveRallyes,
-  getRallyeAndQuestionsAndAnswers,
-} from "../services/storage/RallyeStorageManager";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -51,7 +45,7 @@ export default function WelcomeScreen({
         description="Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
         icon="map-marker"
         onShowModal={() => {
-          loadActiveRallyes();
+          getActiveRallyes();
           setShowRallyeModal(true);
         }}
         selectedRallye={selectedRallye}

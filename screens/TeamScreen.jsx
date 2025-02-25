@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Text, View } from "react-native";
-import { observer } from '@legendapp/state/react';
-import { store$ } from '../services/storage/Store';
+import { observer } from "@legendapp/state/react";
+import { store$ } from "../services/storage/Store";
 import { supabase } from "../utils/Supabase";
-import { getData, storeData } from "../services/storage/LocalStorage";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
 import generateTeamName from "../utils/RandomTeamNames";
-import { createTeam, getCurrentTeam, setCurrentTeam } from '../services/storage';
+import {
+  getCurrentTeam,
+  setCurrentTeam
+} from "../services/storage";
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
@@ -16,14 +18,23 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
   useEffect(() => {
     if (!rallye) return;
-    
+
     const loadTeam = async () => {
-      const team = await getCurrentTeam();
-      if (team) {
-        store$.team.set(team);
+      const localTeam = await getCurrentTeam(rallye.id);
+      const {data: onlineTeam, error: teamError} = await supabase
+        .from("rallyeTeam")
+        .select("*")
+        .eq("rallye_id", rallye.id)
+        .eq("id", localTeam?.id)
+        .single();
+
+      if (localTeam && !teamError) {
+        store$.team.set(localTeam);
+      } else {
+        store$.team.set(null);
       }
     };
-    
+
     loadTeam();
   }, [rallye]);
 
@@ -43,15 +54,9 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
   function ShowTeam({ gotoRallye }) {
     return (
       <View style={globalStyles.teamStyles.infoBox}>
-        <Text style={globalStyles.teamStyles.message}>
-          Name deines Teams:
-        </Text>
-        <Text style={globalStyles.teamStyles.teamName}>
-          {team.name}
-        </Text>
-        <UIButton onPress={gotoRallye}>
-          Gehe zur Rallye
-        </UIButton>
+        <Text style={globalStyles.teamStyles.message}>Name deines Teams:</Text>
+        <Text style={globalStyles.teamStyles.teamName}>{team.name}</Text>
+        <UIButton onPress={gotoRallye}>Gehe zur Rallye</UIButton>
       </View>
     );
   }
@@ -73,6 +78,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
         if (error) throw error;
 
         if (data && data[0]) {
+          store$.reset();
           store$.team.set(data[0]);
           await setCurrentTeam(rallye.id, data[0]);
         } else {

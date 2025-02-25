@@ -13,11 +13,10 @@ export default function SkillQuestions() {
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
 
-  const handleNext = async () => {
+  const handleNext = async () => {   
     const correctly_answered =
       answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
 
-    // Aktualisiere Punkte direkt im Store
     if (correctly_answered) {
       store$.points.set(store$.points.get() + currentQuestion.points);
     }
@@ -29,7 +28,8 @@ export default function SkillQuestions() {
         team.id,
         currentQuestion.id,
         correctly_answered,
-        correctly_answered ? currentQuestion.points : 0
+        correctly_answered ? currentQuestion.points : 0,
+        answer
       );
     }
 
@@ -76,9 +76,9 @@ export default function SkillQuestions() {
             Antwort senden
           </UIButton>
 
-          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
         </View>
       </View>
+          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
     </ScrollView>
   );
 }

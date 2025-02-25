@@ -13,21 +13,25 @@ export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
+  const currentMultipleChoiceAnswers = store$.currentMultipleChoiceAnswers.get();
+  const team = store$.team.get();
+  console.log(currentMultipleChoiceAnswers);
 
   const handleNext = async () => {
     const correctlyAnswered =
-          answer.trim() === currentAnswer.text.toLowerCase();
-        if (correctlyAnswered) {
-          store$.points.set(store$.points.get() + currentQuestion.points);
-        }
-        await saveAnswer(
-          team.id,
-          currentQuestion.id,
-          correctlyAnswered,
-          correctlyAnswered ? currentQuestion.points : 0
-        );
-        store$.gotoNextQuestion();
-        setAnswer("");
+      answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
+    if (correctlyAnswered) {
+      store$.points.set(store$.points.get() + currentQuestion.points);
+    }
+    await saveAnswer(
+      team.id,
+      currentQuestion.id,
+      correctlyAnswered,
+      correctlyAnswered ? currentQuestion.points : 0,
+      answer
+    );
+    store$.gotoNextQuestion();
+    setAnswer("");
   };
 
   const handleAnswerSubmit = () => {
@@ -52,15 +56,17 @@ export default function MultipleChoiceQuestions() {
         </View>
 
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          {currentQuestion.answers &&
-            currentQuestion.answers.map((option, index) => (
+          {currentMultipleChoiceAnswers &&
+            currentMultipleChoiceAnswers.map((option) => (
               <TouchableOpacity
-                key={index}
+                key={Math.random()}
                 style={[
                   globalStyles.multipleChoiceStyles.squareButton,
                   {
                     borderColor:
-                      answer === option.text ? Colors.dhbwRed : Colors.dhbwGray,
+                      answer === option.text
+                        ? Colors.dhbwRed
+                        : Colors.dhbwGray,
                   },
                 ]}
                 onPress={() => setAnswer(option.text)}
@@ -91,7 +97,7 @@ export default function MultipleChoiceQuestions() {
           </UIButton>
         </View>
       </View>
-          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
+      {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
     </ScrollView>
   );
 }

@@ -8,7 +8,6 @@ import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
 
 const App = observer(function App() {
-  const [realPassword, setRealPassword] = useState(null);
   const [loading, setLoading] = useState(false);
   const [online, setOnline] = useState(true);
   const enabled = store$.enabled.get();
@@ -19,16 +18,11 @@ const App = observer(function App() {
 
   const onRefresh = async () => {
     setLoading(true);
-    //ggf änderungen bei der Supabase///////////////////
     const { data } = await supabase
       .from('rallye')
-      .select('id')
-      /* .from('login')
-      .select('password, rallye!inner(id)')
-      .eq('rallye.is_active_rallye', true); */
+      .select('*')
+      .eq('is_active', true);
     if (data) {
-      //Temp dummy zum testen
-      setRealPassword("123");//data[0].password);
       setOnline(true);
     } else {
       setOnline(false);
@@ -38,7 +32,6 @@ const App = observer(function App() {
 
   const handlePasswordSubmit = async (password, selectedRallye) => {
     try {
-      // Passwort direkt aus dem Rallye-Objekt lesen
       if (password === selectedRallye.password) {
         store$.rallye.set(selectedRallye);
         store$.enabled.set(true);

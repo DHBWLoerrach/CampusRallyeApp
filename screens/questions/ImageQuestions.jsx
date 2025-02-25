@@ -35,15 +35,19 @@ export default function ImageQuestions() {
   // Vergleicht die Antwort, speichert das Ergebnis und leitet zur nächsten Frage weiter
   const handleNext = async () => {
     const correctlyAnswered =
-      answer.trim() === currentAnswer.text.toLowerCase();
+      answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
+    console.log(correctlyAnswered);
+
     if (correctlyAnswered) {
       store$.points.set(store$.points.get() + currentQuestion.points);
     }
+
     await saveAnswer(
       team.id,
       currentQuestion.id,
       correctlyAnswered,
-      correctlyAnswered ? currentQuestion.points : 0
+      correctlyAnswered ? currentQuestion.points : 0,
+      answer
     );
     store$.gotoNextQuestion();
     setAnswer("");
