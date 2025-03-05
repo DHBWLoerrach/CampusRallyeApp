@@ -6,7 +6,11 @@ import Card from "../ui/Card";
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 import RallyeSelectionModal from "../ui/RallyeSelectionModal";
-import { getActiveRallyes, getCurrentRallye, setCurrentRallye } from '../services/storage'; 
+import {
+  getActiveRallyes,
+  getCurrentRallye,
+  setCurrentRallye,
+} from "../services/storage";
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -25,13 +29,13 @@ export default function WelcomeScreen({
       const rallyes = await getActiveRallyes();
       setActiveRallyes(rallyes);
     })();
-  }, []);
+  }, [showRallyeModal]);
 
   const handleRallyeSelect = async (rallye) => {
     setSelectedRallye(rallye);
     const currentRallye = await getCurrentRallye();
-    if (selectedRallye.id === currentRallye.id) {
-      onPasswordSubmit(selectedRallye.password, selectedRallye);
+    if (rallye.id === currentRallye?.id) {
+      onPasswordSubmit(rallye.password, rallye);
     } else {
       await setCurrentRallye(rallye);
     }
@@ -45,7 +49,6 @@ export default function WelcomeScreen({
         description="Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
         icon="map-marker"
         onShowModal={() => {
-          getActiveRallyes();
           setShowRallyeModal(true);
         }}
         selectedRallye={selectedRallye}
