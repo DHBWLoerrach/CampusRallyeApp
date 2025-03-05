@@ -17,7 +17,7 @@ const RallyeSelectionModal = ({
           {item.studiengang}
         </Text>
         <Text style={globalStyles.rallyeModal.rallyeStatus}>
-          {item.status}
+          {item.status.split("_").join(" ")}
         </Text>
       </View>
       <UIButton
@@ -52,7 +52,10 @@ const RallyeSelectionModal = ({
               Keine aktiven Rallyes verfügbar
             </Text>
           )}
-          <UIButton onPress={onClose} style={globalStyles.rallyeModal.cancelButton}>
+          <UIButton
+            onPress={onClose}
+            style={globalStyles.rallyeModal.cancelButton}
+          >
             Abbrechen
           </UIButton>
         </View>
