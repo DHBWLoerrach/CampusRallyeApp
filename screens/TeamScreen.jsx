@@ -124,7 +124,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
     }
 
     return (
-      <View style={globalStyles.teamStyles.infoBox}>
+      <View style={[globalStyles.teamStyles.infoBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.background }]}>
         <Text
           style={[
             globalStyles.teamStyles.message,
