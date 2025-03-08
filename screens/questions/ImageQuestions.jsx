@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { View, Text, TextInput, Image, ScrollView, Alert } from "react-native";
 import { store$ } from "../../services/storage/Store";
 import { saveAnswer } from "../../services/storage/answerStorage";
@@ -8,6 +8,7 @@ import { confirmAlert } from "../../utils/ConfirmAlert";
 import UIButton from "../../ui/UIButton";
 import Hint from "../../ui/Hint";
 import { supabase } from "../../utils/Supabase";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 export default function ImageQuestions() {
   const currentQuestion = store$.currentQuestion.get();
@@ -15,6 +16,7 @@ export default function ImageQuestions() {
   const team = store$.team.get();
   const [answer, setAnswer] = useState("");
   const [pictureUri, setPictureUri] = useState("https://dhbw-loerrach.de/fileadmin/standards_homepage/images_header/header_bereiche-und-einrichtungen/Wir_ueber_uns.jpg");
+  const { isDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     getPictureUri();
@@ -63,21 +65,30 @@ export default function ImageQuestions() {
   };
 
   return (
-    <View
+    <ScrollView
       contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: "white" }}
+      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
       <View style={globalStyles.default.container}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             {currentQuestion.question}
           </Text>
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <Image
             source={{
-              uri: "https://dhbw-loerrach.de/fileadmin/standards_homepage/images_header/header_bereiche-und-einrichtungen/Wir_ueber_uns.jpg",
+              uri: pictureUri,
             }}
             style={{
               height: "100%",
@@ -88,16 +99,26 @@ export default function ImageQuestions() {
           />
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <TextInput
-            style={[globalStyles.skillStyles.input]}
+            style={[
+              globalStyles.skillStyles.input,
+              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text, borderColor: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+            ]}
             value={answer}
             onChangeText={(text) => setAnswer(text)}
             placeholder="Deine Antwort..."
+            placeholderTextColor={isDarkMode ? Colors.darkMode.text : Colors.lightMode.text}
           />
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <UIButton
             color={answer.trim() !== "" ? Colors.dhbwRed : Colors.dhbwGray}
             disabled={answer.trim() === ""}
@@ -108,11 +129,14 @@ export default function ImageQuestions() {
         </View>
 
         {currentQuestion.hint && (
-          <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <View style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+          ]}>
             <Hint hint={currentQuestion.hint} />
           </View>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 }

@@ -8,6 +8,11 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Colors from "../utils/Colors";
 import { setTimePlayed } from "../services/storage";
 import React, { useEffect } from "react";
+import { useContext } from 'react';
+import { ThemeContext } from '../utils/ThemeContext';
+
+export const PreparationState = ({ loading, onRefresh }) => {
+  const { isDarkMode } = useContext(ThemeContext);
 
 export const PreparationState = ({ loading, onRefresh }) => (
   <ScrollView
@@ -15,7 +20,7 @@ export const PreparationState = ({ loading, onRefresh }) => (
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
     ]}
-    style={{ backgroundColor: "white" }}
+    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
@@ -26,11 +31,6 @@ export const PreparationState = ({ loading, onRefresh }) => (
       color={Colors.dhbwRed}
       style={globalStyles.rallyeStatesStyles.successIcon}
     />
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.title}>
-        {store$.rallye.get().name}
-      </Text>
-    </View>
 
     <View style={globalStyles.rallyeStatesStyles.infoBox}>
       <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
@@ -40,24 +40,25 @@ export const PreparationState = ({ loading, onRefresh }) => (
         Bitte warte auf den Start der Rallye
       </Text>
     </View>
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        Aktualisieren
-      </UIButton>
-    </View>
+
+    <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+      Aktualisieren
+    </UIButton>
   </ScrollView>
 );
 
-export const PostProcessingState = ({ loading, onRefresh }) => (
-  <ScrollView
-    contentContainerStyle={globalStyles.default.refreshContainer}
-    refreshControl={
-      <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-    }
-  >
-    <VotingScreen onRefresh={onRefresh} loading={loading} />
-  </ScrollView>
-);
+  return (
+    <ScrollView
+      contentContainerStyle={globalStyles.default.refreshContainer}
+      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+      }
+    >
+      <VotingScreen onRefresh={onRefresh} loading={loading} />
+    </ScrollView>
+  );
+};
 
 export const EndedState = () => <Scoreboard />;
 
@@ -67,7 +68,7 @@ export const TeamNotSelectedState = () => (
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
     ]}
-    style={{ backgroundColor: "white" }}
+    style={{ backgroundColor: 'white' }}
   >
     <FontAwesome
       name="users"
@@ -76,16 +77,29 @@ export const TeamNotSelectedState = () => (
       style={globalStyles.rallyeStatesStyles.successIcon}
     />
 
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-        Kein Team ausgewählt
-      </Text>
-      <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
-        Bitte bilde zuerst ein Team
-      </Text>
-    </View>
-  </ScrollView>
-);
+      <View style={[
+        globalStyles.rallyeStatesStyles.infoBox,
+        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+      ]}>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.infoTitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          Kein Team ausgewählt
+        </Text>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.infoSubtitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          Bitte bilde zuerst ein Team
+        </Text>
+      </View>
+    </ScrollView>
+  );
+};
+
+export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
+  const { isDarkMode } = useContext(ThemeContext);
 
 export const NoQuestionsAvailableState = ({ loading, onRefresh }) => (
   <ScrollView
@@ -93,7 +107,7 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => (
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
     ]}
-    style={{ backgroundColor: "white" }}
+    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
@@ -105,22 +119,35 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => (
       style={globalStyles.rallyeStatesStyles.successIcon}
     />
 
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-        Keine Fragen verfügbar
-      </Text>
-      <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
-        Momentan sind keine Fragen zum Beantworten verfügbar
-      </Text>
-    </View>
+      <View style={[
+        globalStyles.rallyeStatesStyles.infoBox,
+        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+      ]}>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.infoTitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          Keine Fragen verfügbar
+        </Text>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.infoSubtitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          Momentan sind keine Fragen zum Beantworten verfügbar
+        </Text>
+      </View>
 
-    <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-      Aktualisieren
-    </UIButton>
-  </ScrollView>
-);
+      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+        Aktualisieren
+      </UIButton>
+    </ScrollView>
+  );
+};
 
-export const ExplorationFinishedState = ({ goBackToLogin, points }) => (
+export const ExplorationFinishedState = ({
+  goBackToLogin,
+  points,
+}) => (
   <View style={globalStyles.default.container}>
     <Text style={globalStyles.default.bigText}>
       Alle Fragen wurden beantwortet.
@@ -134,13 +161,13 @@ export const ExplorationFinishedState = ({ goBackToLogin, points }) => (
   </View>
 );
 
-export const TimeExpiredState = ({ loading, onRefresh, teamName, points }) => (
+export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => (
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
     ]}
-    style={{ backgroundColor: "white" }}
+    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
@@ -152,26 +179,44 @@ export const TimeExpiredState = ({ loading, onRefresh, teamName, points }) => (
       style={globalStyles.rallyeStatesStyles.successIcon}
     />
 
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-        Zeit abgelaufen
-      </Text>
-      <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
-        Die Zeit für die Rallye ist abgelaufen
-      </Text>
-    </View>
+      <View style={[
+        globalStyles.rallyeStatesStyles.infoBox,
+        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+      ]}>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.infoTitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          Zeit abgelaufen
+        </Text>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.infoSubtitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          Die Zeit für die Rallye ist abgelaufen
+        </Text>
+      </View>
 
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.pointsTitle}>
-        Team: {teamName}
-      </Text>
-      <Text style={globalStyles.rallyeStatesStyles.pointsValue}>
-        {points} Punkte
-      </Text>
-    </View>
+      <View style={[
+        globalStyles.rallyeStatesStyles.infoBox,
+        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+      ]}>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.pointsTitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          Team: {teamName}
+        </Text>
+        <Text style={[
+          globalStyles.rallyeStatesStyles.pointsValue,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}>
+          {points} Punkte
+        </Text>
+      </View>
 
     <Text style={globalStyles.rallyeStatesStyles.footer}>
-      Wartet bis die Rallye beendet wird, um das Ergebnis zu sehen.{"\n"}
+      Wartet bis die Rallye beendet wird, um das Ergebnis zu sehen.{'\n'}
       Geht zum vereinbarten Treffpunkt.
     </Text>
   </ScrollView>
@@ -182,55 +227,60 @@ export const AllQuestionsAnsweredState = ({
   onRefresh,
   points,
   teamName,
-  teamId,
-  rallyeId,
-}) => {
-  useEffect(() => {
-    setTimePlayed(rallyeId, teamId);
-  }, [rallyeId, teamId]);
+}) => (
+  <ScrollView
+    contentContainerStyle={[
+      globalStyles.default.refreshContainer,
+      globalStyles.rallyeStatesStyles.container,
+    ]}
+    refreshControl={
+      <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+    }
+  >
+    <FontAwesome
+      name="trophy"
+      size={80}
+      color={Colors.dhbwRed}
+      style={globalStyles.rallyeStatesStyles.successIcon}
+    />
 
-  return (
-    <ScrollView
-      contentContainerStyle={[
-        globalStyles.default.refreshContainer,
-        globalStyles.rallyeStatesStyles.container,
-      ]}
-      refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-      }
-    >
-      <FontAwesome
-        name="trophy"
-        size={80}
-        color={Colors.dhbwRed}
-        style={globalStyles.rallyeStatesStyles.successIcon}
-      />
+    <Text style={globalStyles.rallyeStatesStyles.title}>Glückwunsch!</Text>
 
-      <Text style={globalStyles.rallyeStatesStyles.title}>Glückwunsch!</Text>
-
-      <View style={globalStyles.rallyeStatesStyles.infoBox}>
-        <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-          Alle Fragen beantwortet
-        </Text>
-        <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
-          Team: {teamName}
-        </Text>
-      </View>
-
-      <View style={globalStyles.rallyeStatesStyles.infoBox}>
-        <Text style={globalStyles.rallyeStatesStyles.pointsTitle}>
-          Erreichte Punkte
-        </Text>
-        <Text style={globalStyles.rallyeStatesStyles.pointsValue}>
-          {points}
-        </Text>
-      </View>
-
-      <Text style={globalStyles.rallyeStatesStyles.footer}>
-        Wartet auf die Beendigung der Rallye{"\n"}
-        und geht zum vereinbarten Treffpunkt.
+    <View style={globalStyles.rallyeStatesStyles.infoBox}>
+      <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        Alle Fragen beantwortet
       </Text>
-    </ScrollView>
-  );
-};
+      <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+        Team: {teamName}
+      </Text>
+    </View>
 
+    <View style={globalStyles.rallyeStatesStyles.infoBox}>
+      <Text style={globalStyles.rallyeStatesStyles.pointsTitle}>
+        Erreichte Punkte
+      </Text>
+      <Text style={globalStyles.rallyeStatesStyles.pointsValue}>{points}</Text>
+    </View>
+
+    <Text style={globalStyles.rallyeStatesStyles.footer}>
+      Wartet auf die Beendigung der Rallye{"\n"}
+      und geht zum vereinbarten Treffpunkt.
+    </Text>
+  </ScrollView>
+);
+
+function ResultText({ teamName, points }) {
+  return (
+    <>
+      <Text style={[globalStyles.default.bigText, { marginBottom: 8 }]}>
+        Wartet bis die Rallye beendet wird, um das Ergebnis zu sehen.
+      </Text>
+      <Text style={[globalStyles.default.bigText, { marginBottom: 8 }]}>
+        Euer Team {teamName} hat {points} Punkte erreicht.
+      </Text>
+      <Text style={globalStyles.default.bigText}>
+        Geht zu eurem vereinbarten Treffpunkt. {"\n\n"}
+      </Text>
+    </>
+  );
+}

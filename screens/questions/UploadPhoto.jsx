@@ -1,18 +1,23 @@
-import { useRef, useState } from 'react';
-import { Image, View } from 'react-native';
+import { useRef, useState, useContext } from 'react';
+import { Image, View, Text } from 'react-native';
 import { CameraView } from 'expo-camera';
 import UIButton from '../../ui/UIButton';
 import { globalStyles } from '../../utils/GlobalStyles';
 import Colors from '../../utils/Colors';
+import { ThemeContext } from '../../utils/ThemeContext';
 
 export default function UploadPhoto({ handleSendEmail }) {
   const [picture, setPicture] = useState(null);
   const cameraRef = useRef(null);
+  const { isDarkMode } = useContext(ThemeContext);
 
   function PhotoCamera() {
     const [facing, setFacing] = useState('back');
     return (
-      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+      <View style={[
+        globalStyles.rallyeStatesStyles.infoBox,
+        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+      ]}>
         <CameraView
           ref={cameraRef}
           style={globalStyles.uploadStyles.camera}
@@ -46,7 +51,10 @@ export default function UploadPhoto({ handleSendEmail }) {
 
   function ImagePreview() {
     return (
-      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+      <View style={[
+        globalStyles.rallyeStatesStyles.infoBox,
+        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+      ]}>
         <Image 
           source={{ uri: picture.uri }} 
           style={globalStyles.uploadStyles.image} 

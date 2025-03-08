@@ -7,6 +7,7 @@ import { supabase } from './utils/Supabase';
 import { getTourModeRallye } from './services/storage/rallyeStorage';
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
+import { ThemeContext, themeStore$ } from './utils/ThemeContext';
 
 const App = observer(function App() {
   const [loading, setLoading] = useState(false);
@@ -57,20 +58,26 @@ const App = observer(function App() {
     store$.enabled.set(true);
   };
 
+  const toggleDarkMode = () => {
+    themeStore$.isDarkMode.set(!themeStore$.isDarkMode.get());
+  };
+
   return (
-    <NavigationContainer>
-      {enabled ? (
-        <MainNavigator />
-      ) : (
-        <WelcomeScreen
-          onPasswordSubmit={handlePasswordSubmit}
-          onContinueWithoutRallye={handleNoPasswordSubmit}
-          networkAvailable={online}
-          loading={loading}
-          onRefresh={onRefresh}
-        />
-      )}
-    </NavigationContainer>
+    <ThemeContext.Provider value={{ isDarkMode: themeStore$.isDarkMode.get(), toggleDarkMode }}>
+      <NavigationContainer>
+        {enabled ? (
+          <MainNavigator />
+        ) : (
+          <WelcomeScreen
+            onPasswordSubmit={handlePasswordSubmit}
+            onContinueWithoutRallye={handleNoPasswordSubmit}
+            networkAvailable={online}
+            loading={loading}
+            onRefresh={onRefresh}
+          />
+        )}
+      </NavigationContainer>
+    </ThemeContext.Provider>
   );
 });
 

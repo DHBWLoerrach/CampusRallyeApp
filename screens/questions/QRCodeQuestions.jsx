@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useContext } from "react";
 import { Alert, Button, Text, View, ScrollView } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { store$ } from "../../services/storage/Store";
@@ -7,6 +7,7 @@ import UIButton from "../../ui/UIButton";
 import Hint from "../../ui/Hint";
 import Colors from "../../utils/Colors";
 import { saveAnswer } from "../../services/storage/answerStorage";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
@@ -16,6 +17,7 @@ export default function QRCodeQuestions() {
   const currentAnswer = store$.currentAnswer.get();
   const team = store$.team.get();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { isDarkMode } = useContext(ThemeContext);
 
   const submitSurrender = async () => {
     setScanMode(false);
@@ -88,14 +90,16 @@ export default function QRCodeQuestions() {
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
-      <View style={globalStyles.default.container}>
-        <Text style={{ textAlign: "center", marginBottom: 10 }}>
+      <View style={[
+        globalStyles.default.container,
+        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+      ]}>
+        <Text style={{ textAlign: "center", marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
           Wir brauchen Zugriff auf die Kamera
         </Text>
-        <Button
-          onPress={requestPermission}
-          title="Zugriff auf Kamera erlauben"
-        />
+        <UIButton onPress={requestPermission}>
+          Zugriff auf Kamera erlauben
+        </UIButton>
       </View>
     );
   }
@@ -103,11 +107,17 @@ export default function QRCodeQuestions() {
   return (
     <View
       contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: "white" }}
+      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
       <View style={globalStyles.default.container}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             {currentQuestion.question}
           </Text>
         </View>
@@ -122,7 +132,10 @@ export default function QRCodeQuestions() {
           </View>
         )}
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
             <UIButton
               icon={scanMode ? "circle-stop" : "qrcode"}
@@ -138,10 +151,15 @@ export default function QRCodeQuestions() {
               Aufgeben
             </UIButton>
           </View>
-
         </View>
+
         {currentQuestion.hint && (
-          <Hint hint={currentQuestion.hint} />
+          <View style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+          ]}>
+            <Hint hint={currentQuestion.hint} />
+          </View>
         )}
       </View>
     </View>
