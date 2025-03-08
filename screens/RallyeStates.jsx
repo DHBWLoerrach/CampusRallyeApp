@@ -18,8 +18,8 @@ export const PreparationState = ({ loading, onRefresh }) => {
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
+      { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
     ]}
-    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
@@ -64,8 +64,8 @@ export const TeamNotSelectedState = () => {(
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
+      { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
     ]}
-    style={{ backgroundColor: 'white' }}
   >
     <FontAwesome
       name="users"
@@ -102,8 +102,8 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
+      { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
     ]}
-    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
@@ -161,8 +161,8 @@ export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => (
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
+      { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background},
     ]}
-    style={{ backgroundColor: 'white' }}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
     }
@@ -227,6 +227,7 @@ export const AllQuestionsAnsweredState = ({
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
+      { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
     ]}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
