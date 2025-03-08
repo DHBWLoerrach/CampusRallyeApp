@@ -6,13 +6,20 @@ import {
 } from 'react-native';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/GlobalStyles';
+import { useContext } from 'react';
+import { ThemeContext } from '../utils/ThemeContext';
 
 export default function ImprintScreen() {
+  const { isDarkMode } = useContext(ThemeContext);
+
   return (
-    <ScrollView>
-      <View style={globalStyles.imprintStyles.texts.container}>
+    <ScrollView style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}>
+      <View style={[
+        globalStyles.imprintStyles.texts.container,
+        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+      ]}>
         <View style={globalStyles.imprintStyles.texts.block}>
-          <Text>
+          <Text style={{ color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
             Duale Hochschule Baden-Württemberg Lörrach
             {'\n'}
             Hangstraße 46-50
@@ -30,10 +37,13 @@ export default function ImprintScreen() {
           </Text>
         </View>
         <View style={globalStyles.imprintStyles.texts.block}>
-          <Text style={globalStyles.imprintStyles.texts.headline}>
+          <Text style={[
+            globalStyles.imprintStyles.texts.headline,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             Rechtsform und zuständige Aufsichtsbehörde
           </Text>
-          <Text>
+          <Text style={{ color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
             Die Duale Hochschule Baden-Württemberg ist nach § 1 Abs. 1
             DH-ErrichtG vom 12.12.2008 eine rechtsfähige Körperschaft
             des öffentlichen Rechts und zugleich staatliche
@@ -68,8 +78,13 @@ export default function ImprintScreen() {
           </Text>
         </View>
         <View style={globalStyles.imprintStyles.texts.block}>
-          <Text style={globalStyles.imprintStyles.texts.headline}>Externe Links</Text>
-          <Text>
+          <Text style={[
+            globalStyles.imprintStyles.texts.headline,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
+            Externe Links
+          </Text>
+          <Text style={{ color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
             Die Campus App enthält Links zu externen Webseiten
             Dritter, auf deren Inhalte wir keinen Einfluss haben und
             für welche die DHBW Lörrach keine Gewähr übernehmen kann.
@@ -87,8 +102,13 @@ export default function ImprintScreen() {
           </Text>
         </View>
         <View style={globalStyles.imprintStyles.texts.block}>
-          <Text style={globalStyles.imprintStyles.texts.headline}>Urheberrecht</Text>
-          <Text>
+          <Text style={[
+            globalStyles.imprintStyles.texts.headline,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
+            Urheberrecht
+          </Text>
+          <Text style={{ color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
             Soweit die Inhalte auf dieser Seite nicht vom Betreiber
             erstellt wurden, werden die Urheberrechte Dritter
             beachtet. Insbesondere werden Inhalte Dritter als solche
@@ -101,8 +121,13 @@ export default function ImprintScreen() {
           </Text>
         </View>
         <View style={globalStyles.imprintStyles.texts.block}>
-          <Text style={globalStyles.imprintStyles.texts.headline}>Quellcode</Text>
-          <Text>
+          <Text style={[
+            globalStyles.imprintStyles.texts.headline,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
+            Quellcode
+          </Text>
+          <Text style={{ color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
             Der Quellcode dieser App wurde als Open Source Projekt
             angelegt
           </Text>

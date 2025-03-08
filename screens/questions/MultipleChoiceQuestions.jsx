@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { View, Text, Alert, ScrollView } from "react-native";
-import { TouchableOpacity } from "react-native";
+import { useState, useContext } from "react";
+import { View, Text, Alert, ScrollView, TouchableOpacity } from "react-native";
 import { store$ } from "../../services/storage/Store";
 import Colors from "../../utils/Colors";
 import { globalStyles } from "../../utils/GlobalStyles";
@@ -8,6 +7,7 @@ import { confirmAlert } from "../../utils/ConfirmAlert";
 import Hint from "../../ui/Hint";
 import UIButton from "../../ui/UIButton";
 import { saveAnswer } from "../../services/storage/answerStorage";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState("");
@@ -15,7 +15,7 @@ export default function MultipleChoiceQuestions() {
   const currentAnswer = store$.currentAnswer.get();
   const currentMultipleChoiceAnswers = store$.currentMultipleChoiceAnswers.get();
   const team = store$.team.get();
-  console.log(currentMultipleChoiceAnswers);
+  const { isDarkMode } = useContext(ThemeContext);
 
   const handleNext = async () => {
     const correctlyAnswered =
@@ -46,16 +46,25 @@ export default function MultipleChoiceQuestions() {
   return (
     <ScrollView
       contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: "white" }}
+      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
       <View style={globalStyles.default.container}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             {currentQuestion.question}
           </Text>
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           {currentMultipleChoiceAnswers &&
             currentMultipleChoiceAnswers.map((option) => (
               <TouchableOpacity
@@ -66,7 +75,7 @@ export default function MultipleChoiceQuestions() {
                     borderColor:
                       answer === option.text
                         ? Colors.dhbwRed
-                        : Colors.dhbwGray,
+                        : isDarkMode ? Colors.darkMode.text : Colors.dhbwGray,
                   },
                 ]}
                 onPress={() => setAnswer(option.text)}
@@ -76,18 +85,24 @@ export default function MultipleChoiceQuestions() {
                     globalStyles.multipleChoiceStyles.innerSquare,
                     {
                       backgroundColor:
-                        answer === option.text ? Colors.dhbwRed : "white",
+                        answer === option.text ? Colors.dhbwRed : isDarkMode ? Colors.darkMode.card : "white",
                     },
                   ]}
                 />
-                <Text style={globalStyles.multipleChoiceStyles.answerText}>
+                <Text style={[
+                  globalStyles.multipleChoiceStyles.answerText,
+                  { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+                ]}>
                   {option.text}
                 </Text>
               </TouchableOpacity>
             ))}
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <UIButton
             color={answer ? Colors.dhbwRed : Colors.dhbwGray}
             disabled={!answer}
@@ -97,7 +112,14 @@ export default function MultipleChoiceQuestions() {
           </UIButton>
         </View>
       </View>
-      {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
+      {currentQuestion.hint && (
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Hint hint={currentQuestion.hint} />
+        </View>
+      )}
     </ScrollView>
   );
 }

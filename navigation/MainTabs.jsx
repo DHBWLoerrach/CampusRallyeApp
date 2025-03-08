@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { observer } from '@legendapp/state/react';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
@@ -8,7 +8,8 @@ import RallyeHeader from './RallyeHeader';
 import RallyeScreen from '../screens/RallyeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import TeamScreen from '../screens/TeamScreen';
-import Color from '../utils/Colors';
+import Colors from '../utils/Colors';
+import { ThemeContext } from '../utils/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -20,6 +21,7 @@ const MainTabs = observer(function MainTabs() {
   const currentQuestion = store$.currentQuestion.get();
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
   const index = store$.questionIndex.get();
+  const { isDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     if (rallye && team) {
@@ -58,8 +60,8 @@ const MainTabs = observer(function MainTabs() {
     <Tab.Navigator
       initialRouteName={rallye ? "team" : "rallye"}
       screenOptions={({ route }) => ({
-        headerStyle: { backgroundColor: Color.dhbwRed },
-        headerTintColor: Color.tabHeader,
+        headerStyle: { backgroundColor: Colors.dhbwRed },
+        headerTintColor: Colors.tabHeader,
         tabBarIcon: ({ focused }) => {
           const icons = {
             home: "home",
@@ -71,12 +73,13 @@ const MainTabs = observer(function MainTabs() {
             <MaterialIcon
               name={icons[route.name]}
               size={30}
-              color={focused ? Color.dhbwRed : Color.dhbwGray}
+              color={focused ? Colors.dhbwRed : isDarkMode ? Colors.darkMode.tabBarIcon : Colors.dhbwGray}
             />
           );
         },
-        tabBarActiveTintColor: Color.dhbwRed,
-        tabBarInactiveTintColor: Color.dhbwGray,
+        tabBarActiveTintColor: Colors.dhbwRed,
+        tabBarInactiveTintColor: Colors.dhbwGray,
+        tabBarStyle: { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
       })}
     >
       <Tab.Screen

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -11,6 +11,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Colors from "../utils/Colors";
 import { globalStyles } from "../utils/GlobalStyles";
 import UIButton from "./UIButton";
+import { ThemeContext } from "../utils/ThemeContext";
 
 const Card = ({
   title,
@@ -24,6 +25,7 @@ const Card = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [password, setPassword] = useState("");
   const flipAnim = useRef(new Animated.Value(0)).current;
+  const { isDarkMode } = useContext(ThemeContext);
 
   const flipCard = () => {
     Animated.spring(flipAnim, {
@@ -75,7 +77,10 @@ const Card = ({
 
   return (
     <TouchableOpacity
-      style={globalStyles.cardStyles.card}
+      style={[
+        globalStyles.cardStyles.card,
+        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+      ]}
       // Hier die Logik anpassen:
       onPress={icon === "map-marker" ? onShowModal : onPress}
     >
@@ -83,8 +88,16 @@ const Card = ({
         style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}
       >
         <FontAwesome name={icon} size={40} color={Colors.dhbwRed} />
-        <Text style={globalStyles.cardStyles.cardTitle}>{title}</Text>
-        <Text style={globalStyles.cardStyles.cardDescription}>
+        <Text style={[
+          globalStyles.cardStyles.cardTitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
+        ]}>
+          {title}
+        </Text>
+        <Text style={[
+          globalStyles.cardStyles.cardDescription,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
+        ]}>
           {description}
         </Text>
       </Animated.View>
@@ -96,13 +109,22 @@ const Card = ({
           backAnimatedStyle,
         ]}
       >
-        <Text style={globalStyles.cardStyles.cardTitle}>Passwort eingeben</Text>
+        <Text style={[
+          globalStyles.cardStyles.cardTitle,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
+        ]}>
+          Passwort eingeben
+        </Text>
         <TextInput
-          style={globalStyles.cardStyles.passwordInput}
+          style={[
+            globalStyles.cardStyles.passwordInput,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray, borderColor: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
+          ]}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
           placeholder="Passwort"
+          placeholderTextColor={isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray}
         />
         <View style={globalStyles.cardStyles.buttonRow}>
           <UIButton

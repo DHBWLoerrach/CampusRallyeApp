@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Text, View } from "react-native";
 import { observer } from "@legendapp/state/react";
 import { store$ } from "../services/storage/Store";
@@ -6,22 +6,22 @@ import { supabase } from "../utils/Supabase";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
 import generateTeamName from "../utils/RandomTeamNames";
-import {
-  getCurrentTeam,
-  setCurrentTeam
-} from "../services/storage";
+import { getCurrentTeam, setCurrentTeam } from "../services/storage";
+import { ThemeContext } from "../utils/ThemeContext";
+import Colors from "../utils/Colors";
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const { isDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     if (!rallye) return;
 
     const loadTeam = async () => {
       const localTeam = await getCurrentTeam(rallye.id);
-      const {data: onlineTeam, error: teamError} = await supabase
+      const { data: onlineTeam, error: teamError } = await supabase
         .from("rallyeTeam")
         .select("*")
         .eq("rallye_id", rallye.id)
@@ -40,8 +40,18 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
   if (!rallye) {
     return (
-      <View style={globalStyles.default.container}>
-        <Text style={[globalStyles.default.bigText, { marginBottom: 10 }]}>
+      <View
+        style={[
+          globalStyles.default.container,
+          { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+        ]}
+      >
+        <Text
+          style={[
+            globalStyles.default.bigText,
+            { marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}
+        >
           Du nimmst gerade nicht an einer Rallye teil.
         </Text>
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
@@ -53,9 +63,27 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
   function ShowTeam({ gotoRallye }) {
     return (
-      <View style={globalStyles.teamStyles.infoBox}>
-        <Text style={globalStyles.teamStyles.message}>Name deines Teams:</Text>
-        <Text style={globalStyles.teamStyles.teamName}>{team.name}</Text>
+      <View style={[
+              globalStyles.teamStyles.infoBox, 
+              { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.background },
+              //{ shadowColor: isDarkMode ? "#fff" : "#000" },
+              ]}>
+        <Text
+          style={[
+            globalStyles.teamStyles.message,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}
+        >
+          Name deines Teams:
+        </Text>
+        <Text
+          style={[
+            globalStyles.teamStyles.teamName,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}
+        >
+          {team.name}
+        </Text>
         <UIButton onPress={gotoRallye}>Gehe zur Rallye</UIButton>
       </View>
     );
@@ -97,7 +125,12 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
     return (
       <View style={globalStyles.teamStyles.infoBox}>
-        <Text style={globalStyles.teamStyles.message}>
+        <Text
+          style={[
+            globalStyles.teamStyles.message,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}
+        >
           Bilde ein Team, um an der Rallye teilzunehmen.
         </Text>
         <UIButton disabled={loading} onPress={createTeam}>
@@ -108,9 +141,24 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
   }
 
   return (
-    <View style={globalStyles.default.container}>
-      <Text style={globalStyles.teamStyles.title}>{rallye.name}</Text>
-      <View style={globalStyles.teamStyles.container}>
+    <View
+      style={[
+        globalStyles.default.container,
+        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+      ]}
+    >
+      <Text
+        style={[
+          globalStyles.teamStyles.title,
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}
+      >
+        {rallye.name}
+      </Text>
+      <View style={[
+              globalStyles.teamStyles.container,
+              { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+            ]}>
         {team ? (
           <ShowTeam gotoRallye={() => navigation.navigate("rallye")} />
         ) : (

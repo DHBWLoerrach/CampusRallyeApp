@@ -1,16 +1,14 @@
-import { ActivityIndicator, Image, Text, View } from "react-native";
+import { ActivityIndicator, Image, Text, View, TouchableOpacity } from "react-native";
 import Colors from "../utils/Colors";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
 import Card from "../ui/Card";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Alert } from "react-native";
 import RallyeSelectionModal from "../ui/RallyeSelectionModal";
-import {
-  getActiveRallyes,
-  getCurrentRallye,
-  setCurrentRallye,
-} from "../services/storage";
+import { getActiveRallyes, getCurrentRallye, setCurrentRallye } from "../services/storage";
+import { ThemeContext } from "../utils/ThemeContext";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -22,6 +20,7 @@ export default function WelcomeScreen({
   const [showRallyeModal, setShowRallyeModal] = useState(false);
   const [activeRallyes, setActiveRallyes] = useState([]);
   const [selectedRallye, setSelectedRallye] = useState(null);
+  const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
 
   // Sicherstellen dass Rallyes beim ersten Render geladen werden
   useEffect(() => {
@@ -43,7 +42,10 @@ export default function WelcomeScreen({
   };
 
   const OnlineContent = () => (
-    <View style={globalStyles.welcomeStyles.container}>
+    <View style={[
+            globalStyles.welcomeStyles.container,
+            { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+            ]}>
       <Card
         title="An Campus Rallye teilnehmen"
         description="Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
@@ -70,8 +72,13 @@ export default function WelcomeScreen({
   );
 
   const OfflineContent = ({ loading, onRefresh }) => (
-    <View style={globalStyles.welcomeStyles.offline}>
-      <Text style={[globalStyles.welcomeStyles.text, { marginBottom: 20 }]}>
+    <View style={[
+            globalStyles.welcomeStyles.offline,
+            { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+            ]}>
+      <Text style={[globalStyles.welcomeStyles.text, { marginBottom: 20 },
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+            ]}>
         Du bist offline…
       </Text>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
@@ -82,16 +89,32 @@ export default function WelcomeScreen({
 
   return (
     <>
-      <View style={globalStyles.welcomeStyles.container}>
-        <Image
-          style={globalStyles.welcomeStyles.headerImage}
-          source={require("../assets/dhbw-campus-header.png")}
-        />
+      <View style={[
+        globalStyles.welcomeStyles.container,
+        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }
+      ]}>
+        <View style={{ position: "relative" }}>
+          <Image
+            style={globalStyles.welcomeStyles.headerImage}
+            source={require("../assets/dhbw-campus-header.png")}
+          />
+          <TouchableOpacity
+            style={{ position: "absolute", top: 20, left: 13 }}
+            onPress={toggleDarkMode}
+          >
+            <MaterialIcons
+              name={isDarkMode ? "brightness-3" : "brightness-7"}
+              size={24}
+              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+            />
+          </TouchableOpacity>
+        </View>
         <View style={globalStyles.welcomeStyles.header}>
           <Text
             style={[
               globalStyles.welcomeStyles.text,
               globalStyles.welcomeStyles.title,
+              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }
             ]}
           >
             DHBW Lörrach Campus Rallye
@@ -101,7 +124,10 @@ export default function WelcomeScreen({
             source={require("../assets/dhbw-logo.png")}
           />
         </View>
-        <View style={globalStyles.welcomeStyles.content}>
+        <View style={[
+                globalStyles.welcomeStyles.content,
+                { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background},
+                ]}>
           {loading && (
             <View>
               <ActivityIndicator size="large" color={Colors.dhbwRed} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   ActivityIndicator,
@@ -19,6 +19,8 @@ import ImageQuestions from "./questions/ImageQuestions";
 import * as RallyeStates from "./RallyeStates";
 import { globalStyles } from "../utils/GlobalStyles";
 import { supabase } from "../utils/Supabase";
+import Colors from "../utils/Colors";
+import { ThemeContext } from "../utils/ThemeContext";
 
 const questionTypeComponents = {
   knowledge: SkillQuestions,
@@ -36,6 +38,7 @@ const RallyeScreen = observer(function RallyeScreen() {
   const currentQuestion = store$.currentQuestion.get();
   const points = store$.points.get();
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
+  const { isDarkMode } = useContext(ThemeContext);
 
   const loadQuestions = async () => {
     setLoading(true);
@@ -128,7 +131,7 @@ const RallyeScreen = observer(function RallyeScreen() {
       const { data: answers, error: answerError } = await supabase
         .from("answers")
         .select("*")
-        .in("question_id", questionIds)
+        .in("question_id", questionIds);
 
       if (answerError) {
         console.error(
@@ -256,8 +259,11 @@ const RallyeScreen = observer(function RallyeScreen() {
 
   if (loading) {
     return (
-      <View style={globalStyles.default.container}>
-        <ActivityIndicator size="large" color="#000" />
+      <View style={[
+        globalStyles.default.container,
+        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+      ]}>
+        <ActivityIndicator size="large" color={Colors.dhbwRed} />
       </View>
     );
   }
@@ -277,7 +283,10 @@ const RallyeScreen = observer(function RallyeScreen() {
     const QuestionComponent = questionTypeComponents[questionType];
     if (!QuestionComponent) {
       return (
-        <View style={globalStyles.default.container}>
+        <View style={[
+          globalStyles.default.container,
+          { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+        ]}>
           <Text style={{ color: "red", textAlign: "center" }}>
             Unbekannter Fragentyp: {questionType}
           </Text>
@@ -287,7 +296,7 @@ const RallyeScreen = observer(function RallyeScreen() {
     return (
       <ScrollView
         contentContainerStyle={globalStyles.default.refreshContainer}
-        style={{ backgroundColor: "white" }}
+        style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={onRefresh} />
         }

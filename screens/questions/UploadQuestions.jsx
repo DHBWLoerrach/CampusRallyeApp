@@ -8,17 +8,22 @@ import { globalStyles } from '../../utils/GlobalStyles';
 import UploadPhoto from './UploadPhoto';
 import UIButton from '../../ui/UIButton';
 import Hint from '../../ui/Hint';
+import { ThemeContext } from '../../utils/ThemeContext';
 
 export default function UploadQuestions() {
   const rallye = store$.rallye.get();
   const team = store$.team.get();
   const currentQuestion = store$.currentQuestion.get();
   const [permission, requestPermission] = useCameraPermissions();
+  const { isDarkMode } = useContext(ThemeContext);
 
   if (!permission?.granted) {
     return (
-      <View style={globalStyles.default.container}>
-        <Text style={{ textAlign: 'center', marginBottom: 10 }}>
+      <View style={[
+        globalStyles.default.container,
+        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+      ]}>
+        <Text style={{ textAlign: 'center', marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
           Wir brauchen Zugriff auf die Kamera
         </Text>
         <UIButton onPress={requestPermission}>
@@ -73,19 +78,31 @@ export default function UploadQuestions() {
   return (
     <ScrollView 
       contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: 'white' }}
+      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
       <View style={globalStyles.default.container}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             {currentQuestion.question}
           </Text>
         </View>
 
         <UploadPhoto handleSendEmail={handleSendEmail} />
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoSubtitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             Falls das Senden des Fotos/Videos hier nicht klappt, dann macht das 
             Foto/Video auf dem Handy in der Kamera-App und schickt es per E-Mail 
             mit dem Namen eures Teams an:
@@ -103,7 +120,10 @@ export default function UploadQuestions() {
         </View>
 
         {currentQuestion.hint && (
-          <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <View style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+          ]}>
             <Hint hint={currentQuestion.hint} />
           </View>
         )}

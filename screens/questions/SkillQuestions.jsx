@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { View, Text, TextInput, Alert, ScrollView } from "react-native";
 import { store$ } from "../../services/storage/Store";
 import UIButton from "../../ui/UIButton";
@@ -7,13 +7,15 @@ import { globalStyles } from "../../utils/GlobalStyles";
 import { confirmAlert } from "../../utils/ConfirmAlert";
 import Hint from "../../ui/Hint";
 import { saveAnswer } from "../../services/storage/answerStorage";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
+  const { isDarkMode } = useContext(ThemeContext);
 
-  const handleNext = async () => {   
+  const handleNext = async () => {
     const correctly_answered =
       answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
 
@@ -49,36 +51,58 @@ export default function SkillQuestions() {
   return (
     <ScrollView
       contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: "white" }}
+      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
       <View style={globalStyles.default.container}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             {currentQuestion.question}
           </Text>
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <TextInput
-            style={globalStyles.skillStyles.input}
+            style={[
+              globalStyles.skillStyles.input,
+              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text, borderColor: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+            ]}
             value={answer}
             onChangeText={(text) => setAnswer(text.trim())}
             placeholder="Deine Antwort..."
+            placeholderTextColor={isDarkMode ? Colors.darkMode.text : Colors.lightMode.text}
           />
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <UIButton
-            color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray} 
-            disabled={!answer.trim()} 
+            color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
+            disabled={!answer.trim()}
             onPress={handleAnswerSubmit}
           >
             Antwort senden
           </UIButton>
-
         </View>
       </View>
-          {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
+      {currentQuestion.hint && (
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Hint hint={currentQuestion.hint} />
+        </View>
+      )}
     </ScrollView>
   );
 }

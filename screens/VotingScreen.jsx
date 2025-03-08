@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { store$ } from "../services/storage/Store";
 import { supabase } from "../utils/Supabase";
 import UIButton from "../ui/UIButton";
 import Colors from "../utils/Colors";
 import { globalStyles } from "../utils/GlobalStyles";
+import { ThemeContext } from "../utils/ThemeContext";
 
 export default function VotingScreen({ onRefresh, loading }) {
   const [teams, setTeams] = useState([]);
@@ -14,6 +15,7 @@ export default function VotingScreen({ onRefresh, loading }) {
   const [sendingResult, setSendingResult] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const { isDarkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     const fetchDataSupabase = async () => {
@@ -54,13 +56,22 @@ export default function VotingScreen({ onRefresh, loading }) {
           globalStyles.default.refreshContainer,
           globalStyles.rallyeStatesStyles.container,
         ]}
-        style={{ backgroundColor: "white" }}
+        style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
       >
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             Die Abstimmung wurde beendet
           </Text>
-          <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoSubtitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             Lade diese Seite neu, um das Ergebnis zu sehen, nachdem die Rallye
             beendet wurde.
           </Text>
@@ -76,11 +87,17 @@ export default function VotingScreen({ onRefresh, loading }) {
   return (
     <ScrollView
       contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: "white" }}
+      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
       <View style={globalStyles.default.container}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
+          <Text style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}>
             {voting[currentVoting]?.question}
           </Text>
           <Text
@@ -105,10 +122,14 @@ export default function VotingScreen({ onRefresh, loading }) {
                   borderColor:
                     selectedTeam === item.id ? Colors.dhbwRed : "transparent",
                   borderWidth: selectedTeam === item.id ? 2 : 0,
+                  backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card,
                 },
               ]}
             >
-              <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+              <Text style={[
+                globalStyles.rallyeStatesStyles.infoTitle,
+                { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+              ]}>
                 {item.name}
               </Text>
               <UIButton
@@ -123,7 +144,10 @@ export default function VotingScreen({ onRefresh, loading }) {
             </View>
           ))}
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+        ]}>
           <UIButton
             disabled={!selectedTeam || sendingResult}
             onPress={handleNextQuestion}
