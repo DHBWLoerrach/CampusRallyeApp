@@ -47,8 +47,7 @@ export const PreparationState = ({ loading, onRefresh }) => {
 
   return (
     <ScrollView
-      contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
+      contentContainerStyle={[globalStyles.default.refreshContainer,{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={onRefresh} />
       }

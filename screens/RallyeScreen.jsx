@@ -309,16 +309,16 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     }
     return (
       <ScrollView
-        contentContainerStyle={globalStyles.default.refreshContainer}
-        style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
+        contentContainerStyle={[globalStyles.default.refreshContainer, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={onRefresh} />
         }
       >
-        <View style={globalStyles.default.container}>
+        <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
           <QuestionComponent
             onAnswer={handleAnswer}
             question={currentQuestion}
+            style={{ backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }}
           />
         </View>
       </ScrollView>

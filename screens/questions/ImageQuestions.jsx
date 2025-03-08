@@ -66,8 +66,7 @@ export default function ImageQuestions() {
 
   return (
     <ScrollView
-      contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
+      contentContainerStyle={[globalStyles.default.refreshContainer, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
     >
       <View style={globalStyles.default.container}>
         <View style={[

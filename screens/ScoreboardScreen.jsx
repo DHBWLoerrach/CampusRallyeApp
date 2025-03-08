@@ -99,8 +99,8 @@ export default function ScoreboardScreen() {
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,
+        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
       ]}
-      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
       <View style={[
         globalStyles.rallyeStatesStyles.infoBox,
@@ -143,7 +143,7 @@ export default function ScoreboardScreen() {
         </View>
 
         {/* ScrollView für die Teamliste */}
-        <ScrollView style={{ maxHeight: 300 }}>
+        <ScrollView style={[{ maxHeight: 300 }, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.veryLightGray }]}>
           {sortedTeams.map((team, index) => (
             <View
               key={index}

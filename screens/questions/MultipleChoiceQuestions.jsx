@@ -48,7 +48,7 @@ export default function MultipleChoiceQuestions() {
       contentContainerStyle={globalStyles.default.refreshContainer}
       style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
-      <View style={globalStyles.default.container}>
+      <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
         <View style={[
           globalStyles.rallyeStatesStyles.infoBox,
           { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
