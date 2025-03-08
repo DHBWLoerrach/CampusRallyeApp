@@ -5,6 +5,7 @@ import UIButton from '../../ui/UIButton';
 import { globalStyles } from '../../utils/GlobalStyles';
 import Colors from '../../utils/Colors';
 import { ThemeContext } from '../../utils/ThemeContext';
+import { uploadPhotoAnswer } from '../../services/storage/answerStorage';
 
 export default function UploadPhoto({ handleSendEmail }) {
   const [picture, setPicture] = useState(null);
@@ -51,26 +52,23 @@ export default function UploadPhoto({ handleSendEmail }) {
 
   function ImagePreview() {
     return (
-      <View style={[
-        globalStyles.rallyeStatesStyles.infoBox,
-        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-      ]}>
-        <Image 
-          source={{ uri: picture.uri }} 
-          style={globalStyles.uploadStyles.image} 
+      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <Image
+          source={{ uri: picture.uri }}
+          style={globalStyles.uploadStyles.image}
           resizeMode="contain"
         />
         <View style={globalStyles.qrCodeStyles.buttonRow}>
-          <UIButton 
+          <UIButton
             icon="recycle"
-            color={Colors.dhbwGray} 
+            color={Colors.dhbwGray}
             onPress={() => setPicture(null)}
           >
             Neues Foto
           </UIButton>
           <UIButton
             icon="envelope"
-            onPress={() => handleSendEmail(picture.uri)}
+            onPress={() => uploadPhotoAnswer(picture.uri)}
           >
             Foto senden
           </UIButton>

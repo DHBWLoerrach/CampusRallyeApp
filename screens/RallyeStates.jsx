@@ -12,9 +12,8 @@ import { useContext } from 'react';
 import { ThemeContext } from '../utils/ThemeContext';
 
 export const PreparationState = ({ loading, onRefresh }) => {
+  
   const { isDarkMode } = useContext(ThemeContext);
-
-export const PreparationState = ({ loading, onRefresh }) => (
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -45,7 +44,6 @@ export const PreparationState = ({ loading, onRefresh }) => (
       Aktualisieren
     </UIButton>
   </ScrollView>
-);
 
   return (
     <ScrollView
@@ -62,7 +60,7 @@ export const PreparationState = ({ loading, onRefresh }) => (
 
 export const EndedState = () => <Scoreboard />;
 
-export const TeamNotSelectedState = () => (
+export const TeamNotSelectedState = () => {(
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -101,7 +99,6 @@ export const TeamNotSelectedState = () => (
 export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
   const { isDarkMode } = useContext(ThemeContext);
 
-export const NoQuestionsAvailableState = ({ loading, onRefresh }) => (
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -141,7 +138,6 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => (
         Aktualisieren
       </UIButton>
     </ScrollView>
-  );
 };
 
 export const ExplorationFinishedState = ({
@@ -268,19 +264,3 @@ export const AllQuestionsAnsweredState = ({
     </Text>
   </ScrollView>
 );
-
-function ResultText({ teamName, points }) {
-  return (
-    <>
-      <Text style={[globalStyles.default.bigText, { marginBottom: 8 }]}>
-        Wartet bis die Rallye beendet wird, um das Ergebnis zu sehen.
-      </Text>
-      <Text style={[globalStyles.default.bigText, { marginBottom: 8 }]}>
-        Euer Team {teamName} hat {points} Punkte erreicht.
-      </Text>
-      <Text style={globalStyles.default.bigText}>
-        Geht zu eurem vereinbarten Treffpunkt. {"\n\n"}
-      </Text>
-    </>
-  );
-}

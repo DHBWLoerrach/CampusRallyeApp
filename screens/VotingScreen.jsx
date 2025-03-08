@@ -82,7 +82,7 @@ export default function VotingScreen({ onRefresh, loading }) {
 
   if (!votingAllowed || teamCount < 2) {
     return (
-      <ScrollView
+      <View
         contentContainerStyle={[
           globalStyles.default.refreshContainer,
           globalStyles.rallyeStatesStyles.container,
@@ -117,7 +117,7 @@ export default function VotingScreen({ onRefresh, loading }) {
   }
 
   return (
-    <ScrollView
+    <View
       contentContainerStyle={globalStyles.default.refreshContainer}
       style={{ backgroundColor: "white" }}
     >

@@ -99,7 +99,7 @@ export default function WelcomeScreen({
             source={require("../assets/dhbw-campus-header.png")}
           />
           <TouchableOpacity
-            style={{ position: "absolute", top: 20, left: 13 }}
+            style={{ position: "absolute", top: 40, left: 13 }}
             onPress={toggleDarkMode}
           >
             <MaterialIcons
