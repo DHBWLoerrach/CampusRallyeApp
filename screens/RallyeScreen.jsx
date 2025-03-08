@@ -12,7 +12,7 @@ import { store$ } from "../services/storage/Store";
 import { saveAnswer } from "../services/storage/answerStorage";
 import NetInfo from "@react-native-community/netinfo";
 import SkillQuestions from "./questions/SkillQuestions";
-import UploadQuestions from "./questions/UploadQuestions";
+import UploadPhoto from "./questions/UploadPhoto";
 import QRCodeQuestions from "./questions/QRCodeQuestions";
 import MultipleChoiceQuestions from "./questions/MultipleChoiceQuestions";
 import ImageQuestions from "./questions/ImageQuestions";
@@ -22,13 +22,13 @@ import { supabase } from "../utils/Supabase";
 
 const questionTypeComponents = {
   knowledge: SkillQuestions,
-  upload: UploadQuestions,
+  upload: UploadPhoto,
   qr_code: QRCodeQuestions,
   multiple_choice: MultipleChoiceQuestions,
   picture: ImageQuestions,
 };
 
-const RallyeScreen = observer(function RallyeScreen() {
+const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
@@ -58,7 +58,7 @@ const RallyeScreen = observer(function RallyeScreen() {
 
       // 2. Hole bereits beantwortete Fragen des aktuellen Teams
       const { data: answeredData, error: answeredError } = await supabase
-        .from("teamQuestions")
+        .from("team_questions")
         .select("question_id")
         .eq("team_id", team.id);
 
@@ -128,7 +128,7 @@ const RallyeScreen = observer(function RallyeScreen() {
       const { data: answers, error: answerError } = await supabase
         .from("answers")
         .select("*")
-        .in("question_id", questionIds)
+        .in("question_id", questionIds);
 
       if (answerError) {
         console.error(
@@ -140,47 +140,26 @@ const RallyeScreen = observer(function RallyeScreen() {
       }
 
       store$.answers.set(answers);
-      await loadMultipleChoiceAnswers();
     } catch (error) {
       console.error("Error fetching rallye answers:", error);
       return [];
     }
   };
 
-  const loadMultipleChoiceAnswers = async () => {
+  const getRallyeStatus = async () => {
     try {
-      // Alle Multiple-Choice-Frage-IDs sammeln
-      const multipleChoiceQuestions = store$.questions.filter(
-        (q) => q.question_type === "multiple_choice"
-      );
+      const { data, error } = await supabase
+        .from("rallye")
+        .select("status")
+        .eq("id", rallye.id);
 
-      if (multipleChoiceQuestions.length === 0) {
-        store$.multipleChoiceAnswers.set([3]);
-        return;
+      if (error) throw error;
+
+      if (data) {
+        store$.rallye.status.set(data[0].status);
       }
-
-      // IDs extrahieren
-      const multipleChoiceQuestionIds = multipleChoiceQuestions.map(
-        (q) => q.id
-      );
-
-      // Alle Antworten für diese Fragen auf einmal laden
-      const { data: answers, error } = await supabase
-        .from("answers")
-        .select("*")
-        .in("question_id", multipleChoiceQuestionIds.id);
-
-      if (error) {
-        console.error("Error fetching multiple choice answers:", error);
-        store$.multipleChoiceAnswers.set([1]);
-        return;
-      }
-
-      // Die Antworten im Store speichern
-      store$.multipleChoiceAnswers.set(answers || [2]);
     } catch (error) {
-      console.error("Error fetching rallye answers:", error);
-      store$.multipleChoiceAnswers.set([]);
+      console.error("Error fetching rallye status:", error);
     }
   };
 
@@ -250,8 +229,17 @@ const RallyeScreen = observer(function RallyeScreen() {
       Alert.alert("Fehler", "Keine Internetverbindung verfügbar");
       return;
     }
-    await loadQuestions();
-    await loadAnswers();
+    if (rallye.status === "running") {
+      await loadQuestions();
+      await loadAnswers();
+      await getRallyeStatus();
+      if (!team) {
+        console.log("No team found, navigating to team screen");
+        navigation.navigate("team");
+      }
+    } else {
+      await getRallyeStatus();
+    }
   };
 
   if (loading) {
@@ -267,6 +255,32 @@ const RallyeScreen = observer(function RallyeScreen() {
       <RallyeStates.NoQuestionsAvailableState
         loading={loading}
         onRefresh={onRefresh}
+      />
+    );
+  }
+
+  if (rallye.status === "preparing") {
+    return (
+      <RallyeStates.PreparationState loading={loading} onRefresh={onRefresh} />
+    );
+  }
+
+  if (rallye.status === "post_processing") {
+    return (
+      <RallyeStates.PostProcessingState
+        loading={loading}
+        onRefresh={onRefresh}
+      />
+    );
+  }
+
+  if (rallye.status === "ended") {
+    return (
+      <RallyeStates.EndedState
+        loading={loading}
+        onRefresh={onRefresh}
+        points={points}
+        teamName={team?.name}
       />
     );
   }
@@ -309,6 +323,8 @@ const RallyeScreen = observer(function RallyeScreen() {
         onRefresh={onRefresh}
         points={points}
         teamName={team.name}
+        teamId={team.id}
+        rallyeId={rallye.id}
       />
     );
   }

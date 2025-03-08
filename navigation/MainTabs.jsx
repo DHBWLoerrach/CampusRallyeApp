@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { observer } from '@legendapp/state/react';
-import MaterialIcon from '@expo/vector-icons/MaterialIcons';
-import { supabase } from '../utils/Supabase';
-import { store$ } from '../services/storage/Store';
-import RallyeHeader from './RallyeHeader';
-import RallyeScreen from '../screens/RallyeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import TeamScreen from '../screens/TeamScreen';
-import Color from '../utils/Colors';
+import { useEffect, useState } from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { observer } from "@legendapp/state/react";
+import MaterialIcon from "@expo/vector-icons/MaterialIcons";
+import { supabase } from "../utils/Supabase";
+import { store$ } from "../services/storage/Store";
+import RallyeHeader from "./RallyeHeader";
+import RallyeScreen from "../screens/RallyeScreen";
+import SettingsScreen from "../screens/SettingsScreen";
+import TeamScreen from "../screens/TeamScreen";
+import Color from "../utils/Colors";
 
 const Tab = createBottomTabNavigator();
 
@@ -24,12 +24,9 @@ const MainTabs = observer(function MainTabs() {
   useEffect(() => {
     if (rallye && team) {
       const fetchData = async () => {
-        let { data, error } = await supabase.rpc(
-          'get_question_count',
-          {
-            groupid: team.id,
-          }
-        );
+        let { data, error } = await supabase.rpc("get_question_count", {
+          groupid: team.id,
+        });
         let value =
           parseFloat(data[0].answeredquestions) /
           parseFloat(data[0].totalquestions);
@@ -56,7 +53,7 @@ const MainTabs = observer(function MainTabs() {
 
   return (
     <Tab.Navigator
-      initialRouteName={rallye ? "team" : "rallye"}
+      initialRouteName={rallye && rallye.status === "running" ? "team" : "rallye"}
       screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: Color.dhbwRed },
         headerTintColor: Color.tabHeader,

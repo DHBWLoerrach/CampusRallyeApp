@@ -6,10 +6,7 @@ import { supabase } from "../utils/Supabase";
 import UIButton from "../ui/UIButton";
 import { globalStyles } from "../utils/GlobalStyles";
 import generateTeamName from "../utils/RandomTeamNames";
-import {
-  getCurrentTeam,
-  setCurrentTeam
-} from "../services/storage";
+import { getCurrentTeam, setCurrentTeam } from "../services/storage";
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
@@ -21,8 +18,8 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
     const loadTeam = async () => {
       const localTeam = await getCurrentTeam(rallye.id);
-      const {data: onlineTeam, error: teamError} = await supabase
-        .from("rallyeTeam")
+      const { data: onlineTeam, error: teamError } = await supabase
+        .from("rallye_team")
         .select("*")
         .eq("rallye_id", rallye.id)
         .eq("id", localTeam?.id)
@@ -68,7 +65,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
       try {
         const { data, error } = await supabase
-          .from("rallyeTeam")
+          .from("rallye_team")
           .insert({
             name: teamName,
             rallye_id: rallye.id,
@@ -111,10 +108,14 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
     <View style={globalStyles.default.container}>
       <Text style={globalStyles.teamStyles.title}>{rallye.name}</Text>
       <View style={globalStyles.teamStyles.container}>
-        {team ? (
-          <ShowTeam gotoRallye={() => navigation.navigate("rallye")} />
+        {rallye.status === "running" ? (
+          team ? (
+            <ShowTeam gotoRallye={() => navigation.navigate("rallye")} />
+          ) : (
+            <BuildTeam />
+          )
         ) : (
-          <BuildTeam />
+          navigation.navigate("rallye")
         )}
       </View>
     </View>

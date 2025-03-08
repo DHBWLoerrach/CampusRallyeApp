@@ -79,6 +79,7 @@ export const store$ = observable({
   answers: [],
   multipleChoiceAnswers: [],
   team: null,
+  votingAllowed: true,
 
   // Hilfsfunktionen
   currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
@@ -126,6 +127,7 @@ export const store$ = observable({
     store$.answers.set([]);
     store$.multipleChoiceAnswers.set([]);
     store$.team.set(null);
+    store$.votingAllowed.set(true);
   },
 
   // Initialisierungsfunktion

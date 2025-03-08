@@ -4,12 +4,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { observer } from '@legendapp/state/react';
 import { store$ } from './services/storage/Store';
 import { supabase } from './utils/Supabase';
+import { getTourModeRallye } from './services/storage/rallyeStorage';
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
 
 const App = observer(function App() {
   const [loading, setLoading] = useState(false);
   const [online, setOnline] = useState(true);
+  const [tour, setTour] = useState(null);
   const enabled = store$.enabled.get();
 
   useEffect(() => {
@@ -48,7 +50,10 @@ const App = observer(function App() {
   };
 
   const handleNoPasswordSubmit = () => {
-    store$.rallye.set(null);
+    const tour = getTourModeRallye();
+    console.log(tour);
+    setTour(tour);
+    store$.rallye.set(tour);
     store$.enabled.set(true);
   };
 

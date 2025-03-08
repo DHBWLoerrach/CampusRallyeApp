@@ -14,13 +14,39 @@ export async function getActiveRallyes() {
     const { data, error } = await supabase
       .from("rallye")
       .select("*")
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .eq("tour_mode", false);
 
     if (error) throw error;
+
+    data.forEach((rallye) => {
+      if (Date.now() > new Date(rallye?.end_time).getTime()) {
+        console.log("Rallye ended:", rallye.id);
+        rallye.status = "ended";
+      }
+    });
+
     return data || [];
   } catch (error) {
     console.error("Error fetching active rallyes:", error);
     return [];
+  }
+}
+
+export async function getTourModeRallye() {
+  try {
+    const { data, error } = await supabase
+      .from("rallye")
+      .select("*")
+      .eq("is_active", true)
+      .eq("tour_mode", true)
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching tour mode rallye:", error);
+    return null;
   }
 }
 
