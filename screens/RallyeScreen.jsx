@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext, useCallback, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   ActivityIndicator,
@@ -34,6 +35,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const tour_mode = store$.tour_mode.get();
   const questions = store$.questions.get();
   const currentQuestion = store$.currentQuestion.get();
   const points = store$.points.get();
@@ -42,6 +44,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
 
   const loadQuestions = async () => {
     setLoading(true);
+    consolog.log("Loading questions");
     try {
       // 1. Hole aus der Join-Tabelle alle question_ids der aktuell ausgewählten Rallye
       const { data: joinData, error: joinError } = await supabase
@@ -236,7 +239,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       await loadQuestions();
       await loadAnswers();
       await getRallyeStatus();
-      if (!team) {
+      if (!team && !rallye.tour_mode) {
         console.log("No team found, navigating to team screen");
         navigation.navigate("team");
       }
@@ -247,10 +250,16 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={[
-        globalStyles.default.container,
-        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
-      ]}>
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
         <ActivityIndicator size="large" color={Colors.dhbwRed} />
       </View>
     );
@@ -292,15 +301,21 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   }
 
   if (questions.length > 0 && !allQuestionsAnswered) {
+    console.log("Hier");
     const questionType = currentQuestion?.question_type;
-    console.log("questionType", questionType);
     const QuestionComponent = questionTypeComponents[questionType];
     if (!QuestionComponent) {
       return (
-        <View style={[
-          globalStyles.default.container,
-          { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
-        ]}>
+        <View
+          style={[
+            globalStyles.default.container,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.background
+                : Colors.lightMode.background,
+            },
+          ]}
+        >
           <Text style={{ color: "red", textAlign: "center" }}>
             Unbekannter Fragentyp: {questionType}
           </Text>
@@ -309,31 +324,64 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     }
     return (
       <ScrollView
-        contentContainerStyle={[globalStyles.default.refreshContainer, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={onRefresh} />
         }
       >
-        <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
+        <View
+          style={[
+            globalStyles.default.container,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.background
+                : Colors.lightMode.background,
+            },
+          ]}
+        >
           <QuestionComponent
             onAnswer={handleAnswer}
             question={currentQuestion}
-            style={{ backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }}
+            style={{
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            }}
           />
         </View>
       </ScrollView>
     );
   }
 
-  if (allQuestionsAnswered) {
+  if (allQuestionsAnswered && !rallye.tour_mode) {
     return (
       <RallyeStates.AllQuestionsAnsweredState
         loading={loading}
         onRefresh={onRefresh}
         points={points}
-        teamName={team.name}
-        teamId={team.id}
+        teamName={team?.name}
+        teamId={team?.id}
         rallyeId={rallye.id}
+      />
+    );
+  }
+
+  if (allQuestionsAnswered && rallye.tour_mode) {
+    return (
+      <RallyeStates.ExplorationFinishedState
+        goBackToLogin={() => {
+          store$.reset();
+          store$.rallye.set(null);
+          store$.enabled.set(false);
+        }}
+        points={points}
       />
     );
   }

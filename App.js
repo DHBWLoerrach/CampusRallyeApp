@@ -50,12 +50,16 @@ const App = observer(function App() {
     }
   };
 
-  const handleNoPasswordSubmit = () => {
-    const tour = getTourModeRallye();
-    console.log(tour);
-    setTour(tour);
-    store$.rallye.set(tour);
-    store$.enabled.set(true);
+  const handleNoPasswordSubmit = async () => {
+    const tourRallye = await getTourModeRallye();
+    if (tourRallye) {
+      console.log(tourRallye);
+      store$.team.set(null);
+      store$.rallye.set(tourRallye);
+      store$.enabled.set(true);
+    } else {
+      Alert.alert("Fehler", "Kein Tour Mode Rallye verfügbar.");
+    }
   };
 
   const toggleDarkMode = () => {

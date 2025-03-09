@@ -8,17 +8,20 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Colors from "../utils/Colors";
 import { setTimePlayed } from "../services/storage";
 import React, { useEffect } from "react";
-import { useContext } from 'react';
-import { ThemeContext } from '../utils/ThemeContext';
+import { useContext } from "react";
+import { ThemeContext } from "../utils/ThemeContext";
 
 export const PreparationState = ({ loading, onRefresh }) => {
-  
   const { isDarkMode } = useContext(ThemeContext);
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
       globalStyles.rallyeStatesStyles.container,
-      { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+      {
+        backgroundColor: isDarkMode
+          ? Colors.darkMode.background
+          : Colors.lightMode.background,
+      },
     ]}
     refreshControl={
       <RefreshControl refreshing={loading} onRefresh={onRefresh} />
@@ -43,11 +46,18 @@ export const PreparationState = ({ loading, onRefresh }) => {
     <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
       Aktualisieren
     </UIButton>
-  </ScrollView>
+  </ScrollView>;
 
   return (
     <ScrollView
-      contentContainerStyle={[globalStyles.default.refreshContainer,{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={onRefresh} />
       }
@@ -59,9 +69,7 @@ export const PreparationState = ({ loading, onRefresh }) => {
 
 export const EndedState = () => <Scoreboard />;
 
-export const TeamNotSelectedState = () => {
-  const { isDarkMode } = useContext(ThemeContext);
-  (
+export const TeamNotSelectedState = () => {(
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -141,29 +149,61 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
     </ScrollView>
 };
 
-export const ExplorationFinishedState = ({
-  goBackToLogin,
-  points,
-}) => {
+export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
   const { isDarkMode } = useContext(ThemeContext);
-  (
-  <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
-    <Text style={[globalStyles.default.bigText, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
-      Alle Fragen wurden beantwortet.
-    </Text>
-    <Text style={[globalStyles.default.bigText, { marginBottom: 10 }, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
-      Erreichte Punktzahl: {points}
-    </Text>
-    <UIButton icon="arrow-left" onPress={goBackToLogin}>
-      Zurück zur Anmeldung
-    </UIButton>
-  </View>
-);
+  return (
+    <ScrollView
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        globalStyles.rallyeStatesStyles.container,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
+      <FontAwesome
+        name="trophy"
+        size={80}
+        color={Colors.dhbwRed}
+        style={globalStyles.rallyeStatesStyles.successIcon}
+      />
+
+      <Text style={globalStyles.rallyeStatesStyles.title}>Glückwunsch!</Text>
+
+      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+          Alle Fragen wurden beantwortet.
+        </Text>
+      </View>
+
+      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <Text style={globalStyles.rallyeStatesStyles.pointsTitle}>
+          Erreichte Punktzahl
+        </Text>
+        <Text style={globalStyles.rallyeStatesStyles.pointsValue}>
+          {points}
+        </Text>
+      </View>
+      <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <UIButton
+          icon="arrow-left"
+          onPress={() => {
+            goBackToLogin();
+          }}
+        >
+          Erkundungsmodus beenden
+        </UIButton>
+      </View>
+    </ScrollView>
+  );
 };
+
 
 export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => {
   const { isDarkMode } = useContext(ThemeContext);
-  (
+  return (
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -249,7 +289,7 @@ export const AllQuestionsAnsweredState = ({
       style={globalStyles.rallyeStatesStyles.successIcon}
     />
 
-    <Text style={globalStyles.rallyeStatesStyles.title}>Glückwunsch!</Text>
+      <Text style={globalStyles.rallyeStatesStyles.title}>Glückwunsch!</Text>
 
     <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}>
       <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>

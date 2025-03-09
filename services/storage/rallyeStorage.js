@@ -39,11 +39,10 @@ export async function getTourModeRallye() {
       .from("rallye")
       .select("*")
       .eq("is_active", true)
-      .eq("tour_mode", true)
-      .single();
+      .eq("tour_mode", true);
 
     if (error) throw error;
-    return data;
+    return data[0] || null;
   } catch (error) {
     console.error("Error fetching tour mode rallye:", error);
     return null;

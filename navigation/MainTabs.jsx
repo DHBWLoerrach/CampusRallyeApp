@@ -1,15 +1,15 @@
-import { useEffect, useState, useContext } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { observer } from '@legendapp/state/react';
-import MaterialIcon from '@expo/vector-icons/MaterialIcons';
-import { supabase } from '../utils/Supabase';
-import { store$ } from '../services/storage/Store';
-import RallyeHeader from './RallyeHeader';
-import RallyeScreen from '../screens/RallyeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import TeamScreen from '../screens/TeamScreen';
-import Colors from '../utils/Colors';
-import { ThemeContext } from '../utils/ThemeContext';
+import { useEffect, useState, useContext } from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { observer } from "@legendapp/state/react";
+import MaterialIcon from "@expo/vector-icons/MaterialIcons";
+import { supabase } from "../utils/Supabase";
+import { store$ } from "../services/storage/Store";
+import RallyeHeader from "./RallyeHeader";
+import RallyeScreen from "../screens/RallyeScreen";
+import SettingsScreen from "../screens/SettingsScreen";
+import TeamScreen from "../screens/TeamScreen";
+import Colors from "../utils/Colors";
+import { ThemeContext } from "../utils/ThemeContext";
 
 const Tab = createBottomTabNavigator();
 
@@ -55,7 +55,11 @@ const MainTabs = observer(function MainTabs() {
 
   return (
     <Tab.Navigator
-      initialRouteName={rallye && rallye.status === "running" ? "team" : "rallye"}
+      initialRouteName={
+        rallye && rallye.status === "running" && !rallye.tour_mode
+          ? "team"
+          : "rallye"
+      }
       screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: Colors.dhbwRed },
         headerTintColor: Colors.tabHeader,
@@ -70,13 +74,23 @@ const MainTabs = observer(function MainTabs() {
             <MaterialIcon
               name={icons[route.name]}
               size={30}
-              color={focused ? Colors.dhbwRed : isDarkMode ? Colors.darkMode.tabBarIcon : Colors.dhbwGray}
+              color={
+                focused
+                  ? Colors.dhbwRed
+                  : isDarkMode
+                  ? Colors.darkMode.tabBarIcon
+                  : Colors.dhbwGray
+              }
             />
           );
         },
         tabBarActiveTintColor: Colors.dhbwRed,
         tabBarInactiveTintColor: Colors.dhbwGray,
-        tabBarStyle: { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+        tabBarStyle: {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
       })}
     >
       <Tab.Screen
@@ -84,11 +98,13 @@ const MainTabs = observer(function MainTabs() {
         component={HomeScreen}
         options={{ title: "Anmeldung" }}
       />
-      <Tab.Screen
-        name="team"
-        component={TeamScreen}
-        options={{ title: "Team" }}
-      />
+      {!rallye.tour_mode ? (
+        <Tab.Screen
+          name="team"
+          component={TeamScreen}
+          options={{ title: "Team" }}
+        />
+      ) : null}
       <Tab.Screen
         name="rallye"
         component={RallyeScreen}
