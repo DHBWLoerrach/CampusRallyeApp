@@ -23,7 +23,7 @@ export async function saveAnswer(
   questionId,
   answeredCorrectly,
   points,
-  answer
+  answer = ""
 ) {
   try {
     // Ergebnis in der Tabelle team_questions speichern
