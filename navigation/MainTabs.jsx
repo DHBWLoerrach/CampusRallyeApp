@@ -10,6 +10,7 @@ import SettingsScreen from "../screens/SettingsScreen";
 import TeamScreen from "../screens/TeamScreen";
 import Colors from "../utils/Colors";
 import { ThemeContext } from "../utils/ThemeContext";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 const Tab = createBottomTabNavigator();
 
@@ -22,6 +23,7 @@ const MainTabs = observer(function MainTabs() {
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
   const index = store$.questionIndex.get();
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
     if (rallye && team) {
@@ -96,20 +98,20 @@ const MainTabs = observer(function MainTabs() {
       <Tab.Screen
         name="home"
         component={HomeScreen}
-        options={{ title: "Anmeldung" }}
+        options={{ title: language === 'de' ? "Anmeldung" : "Registration" }}
       />
       {!rallye.tour_mode ? (
         <Tab.Screen
           name="team"
           component={TeamScreen}
-          options={{ title: "Team" }}
+          options={{ title: language === 'de' ? "Team" : "Team" }}
         />
       ) : null}
       <Tab.Screen
         name="rallye"
         component={RallyeScreen}
         options={{
-          title: "Rallye",
+          title: language === 'de' ? "Rallye" : "Rallye",
           headerTitle: () => (
             <RallyeHeader rallye={rallye} percentage={percentage} />
           ),
@@ -118,7 +120,7 @@ const MainTabs = observer(function MainTabs() {
       <Tab.Screen
         name="settings"
         component={SettingsScreen}
-        options={{ title: "Einstellungen" }}
+        options={{ title: language === 'de' ? "Einstellungen" : "Settings" }}
       />
     </Tab.Navigator>
   );
