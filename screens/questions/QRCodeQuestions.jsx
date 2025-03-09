@@ -29,22 +29,35 @@ export default function QRCodeQuestions() {
       }
       store$.gotoNextQuestion();
     } catch (error) {
-      console.error(language === 'de' ? "Fehler beim Aufgeben:" : "Error surrendering:", error);
-      Alert.alert(language === 'de' ? "Fehler" : "Error", language === 'de' ? "Beim Aufgeben ist ein Fehler aufgetreten." : "An error occurred while surrendering.");
+      console.error(
+        language === "de" ? "Fehler beim Aufgeben:" : "Error surrendering:",
+        error
+      );
+      Alert.alert(
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Beim Aufgeben ist ein Fehler aufgetreten."
+          : "An error occurred while surrendering."
+      );
     }
   };
 
   const handleSurrender = () => {
     Alert.alert(
-      language === 'de' ? "Sicherheitsfrage" : "Security question",
-      language === 'de' ? "Willst du diese Aufgabe wirklich aufgeben?" : "Do you really want to give up this task?",
+      language === "de" ? "Sicherheitsfrage" : "Security question",
+      language === "de"
+        ? "Willst du diese Aufgabe wirklich aufgeben?"
+        : "Do you really want to give up this task?",
       [
         {
-          text: language === 'de' ? "Abbrechen" : "Cancel",
+          text: language === "de" ? "Abbrechen" : "Cancel",
           style: "cancel",
         },
         {
-          text: language === 'de' ? "Ja, ich möchte aufgeben" : "Yes, I want to give up",
+          text:
+            language === "de"
+              ? "Ja, ich möchte aufgeben"
+              : "Yes, I want to give up",
           onPress: submitSurrender,
         },
       ]
@@ -57,26 +70,36 @@ export default function QRCodeQuestions() {
     try {
       setIsProcessing(true);
 
-      console.log(currentQuestion.answer);
-      console.log(data);
-
       if (currentAnswer.text.toLowerCase() !== data.toLowerCase()) {
         Alert.alert(
-          language === 'de' ? "Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort." : "The QR code is incorrect! You are probably not at the right place."
+          language === "de"
+            ? "Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort."
+            : "The QR code is incorrect! You are probably not at the right place."
         );
         setScanMode(false);
       } else if (currentAnswer.text.toLowerCase() === data.toLowerCase()) {
         setScanMode(false);
-        Alert.alert("OK", language === 'de' ? "Das ist der richtige QR-Code!" : "This is the correct QR code!", [
-          {
-            text: language === 'de' ? "Weiter" : "Next",
-            onPress: async () => {
-              await store$.savePoints(true, currentQuestion.points);
-              await saveAnswer(team.id, currentQuestion.id, true, currentQuestion.points);
-              store$.gotoNextQuestion();
+        Alert.alert(
+          "OK",
+          language === "de"
+            ? "Das ist der richtige QR-Code!"
+            : "This is the correct QR code!",
+          [
+            {
+              text: language === "de" ? "Weiter" : "Next",
+              onPress: async () => {
+                await store$.savePoints(true, currentQuestion.points);
+                await saveAnswer(
+                  team.id,
+                  currentQuestion.id,
+                  true,
+                  currentQuestion.points
+                );
+                store$.gotoNextQuestion();
+              },
             },
-          },
-        ]);
+          ]
+        );
       }
     } finally {
       // Nach Verarbeitung Flag zurücksetzen
@@ -92,15 +115,31 @@ export default function QRCodeQuestions() {
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
-      <View style={[
-        globalStyles.default.container,
-        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
-      ]}>
-        <Text style={{ textAlign: "center", marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
-          {language === 'de' ? "Wir brauchen Zugriff auf die Kamera" : "We need access to the camera"}
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
+        <Text
+          style={{
+            textAlign: "center",
+            marginBottom: 10,
+            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+          }}
+        >
+          {language === "de"
+            ? "Wir brauchen Zugriff auf die Kamera"
+            : "We need access to the camera"}
         </Text>
         <UIButton onPress={requestPermission}>
-          {language === 'de' ? "Zugriff auf Kamera erlauben" : "Allow access to camera"}
+          {language === "de"
+            ? "Zugriff auf Kamera erlauben"
+            : "Allow access to camera"}
         </UIButton>
       </View>
     );
@@ -109,60 +148,106 @@ export default function QRCodeQuestions() {
   return (
     <View
       contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
+      style={{
+        backgroundColor: isDarkMode
+          ? Colors.darkMode.background
+          : Colors.lightMode.background,
+      }}
     >
-      <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
-          <Text style={[
-            globalStyles.rallyeStatesStyles.infoTitle,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-          ]}>
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoTitle,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+          >
             {currentQuestion.question}
           </Text>
         </View>
 
         {scanMode && (
-          <View style={[globalStyles.qrCodeStyles.cameraBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}>
+          <View
+            style={[
+              globalStyles.qrCodeStyles.cameraBox,
+              {
+                backgroundColor: isDarkMode
+                  ? Colors.darkMode.card
+                  : Colors.lightMode.card,
+              },
+            ]}
+          >
             <CameraView
               ref={cameraRef}
-              style={[globalStyles.qrCodeStyles.camera, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}
+              style={[
+                globalStyles.qrCodeStyles.camera,
+                {
+                  backgroundColor: isDarkMode
+                    ? Colors.darkMode.card
+                    : Colors.lightMode.card,
+                },
+              ]}
               onBarcodeScanned={handleQRCode}
             />
           </View>
         )}
 
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
           <View style={globalStyles.qrCodeStyles.buttonRow}>
             <UIButton
               icon={scanMode ? "circle-stop" : "qrcode"}
               onPress={() => setScanMode(!scanMode)}
             >
-              {scanMode ? language === 'de' ? "Kamera ausblenden" : "Hide Camera" : language === 'de' ? "QR-Code scannen" : "Scan QR Code"}
+              {scanMode
+                ? language === "de"
+                  ? "Kamera ausblenden"
+                  : "Hide Camera"
+                : language === "de"
+                ? "QR-Code scannen"
+                : "Scan QR Code"}
             </UIButton>
             <UIButton
               icon="face-frown-open"
               color={Colors.dhbwGray}
               onPress={handleSurrender}
             >
-              {language === 'de' ? "Aufgeben" : "Surrender"}
+              {language === "de" ? "Aufgeben" : "Surrender"}
             </UIButton>
           </View>
         </View>
 
-        {currentQuestion.hint && (
-          <View style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-          ]}>
-            <Hint hint={currentQuestion.hint} />
-          </View>
-        )}
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     </View>
   );

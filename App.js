@@ -13,7 +13,6 @@ import { LanguageProvider } from './utils/LanguageContext'; // Import LanguagePr
 const App = observer(function App() {
   const [loading, setLoading] = useState(false);
   const [online, setOnline] = useState(true);
-  const [tour, setTour] = useState(null);
   const enabled = store$.enabled.get();
 
   useEffect(() => {
@@ -54,7 +53,6 @@ const App = observer(function App() {
   const handleNoPasswordSubmit = async () => {
     const tourRallye = await getTourModeRallye();
     if (tourRallye) {
-      console.log(tourRallye);
       store$.team.set(null);
       store$.reset();
       store$.rallye.set(tourRallye);

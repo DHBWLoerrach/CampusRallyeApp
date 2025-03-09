@@ -21,7 +21,6 @@ export async function getActiveRallyes() {
 
     data.forEach((rallye) => {
       if (Date.now() > new Date(rallye?.end_time).getTime()) {
-        console.log("Rallye ended:", rallye.id);
         rallye.status = "ended";
       }
     });

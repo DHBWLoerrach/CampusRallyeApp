@@ -1,5 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   ActivityIndicator,
@@ -40,6 +39,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   const currentQuestion = store$.currentQuestion.get();
   const points = store$.points.get();
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
+  const timeExpired = store$.timeExpired.get();
   const { isDarkMode } = useContext(ThemeContext);
   const { language } = useLanguage(); // Use LanguageContext
 
@@ -65,12 +65,12 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       // 2. Hole bereits beantwortete Fragen des aktuellen Teams
       let answeredIds = [];
       if (!rallye.tour_mode) {
-      const { data: answeredData, error: answeredError } = await supabase
-        .from("team_questions")
-        .select("question_id")
-        .eq("team_id", team.id);
+        const { data: answeredData, error: answeredError } = await supabase
+          .from("team_questions")
+          .select("question_id")
+          .eq("team_id", team.id);
 
-      if (answeredError) throw answeredError;
+        if (answeredError) throw answeredError;
         answeredIds = answeredData.map((row) => row.question_id);
       }
 
@@ -119,8 +119,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     } catch (error) {
       console.error("Fehler beim Laden der Fragen:", error);
       Alert.alert(
-        language === 'de' ? "Fehler" : "Error",
-        language === 'de' ? "Die Fragen konnten nicht geladen werden." : "The questions could not be loaded."
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Die Fragen konnten nicht geladen werden."
+          : "The questions could not be loaded."
       );
     } finally {
       setLoading(false);
@@ -206,8 +208,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     } catch (error) {
       console.error("Fehler beim Speichern der Antwort:", error);
       Alert.alert(
-        language === 'de' ? "Fehler" : "Error",
-        language === 'de' ? "Antwort konnte nicht gespeichert werden." : "Answer could not be saved."
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Antwort konnte nicht gespeichert werden."
+          : "Answer could not be saved."
       );
     }
   };
@@ -215,15 +219,17 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   // Wird aufgerufen, wenn der Nutzer die Aufgabe aufgeben möchte
   const handleSurrender = () => {
     Alert.alert(
-      language === 'de' ? "Aufgabe aufgeben" : "Surrender task",
-      language === 'de' ? "Willst du diese Aufgabe wirklich aufgeben?" : "Do you really want to give up this task?",
+      language === "de" ? "Aufgabe aufgeben" : "Surrender task",
+      language === "de"
+        ? "Willst du diese Aufgabe wirklich aufgeben?"
+        : "Do you really want to give up this task?",
       [
         {
-          text: language === 'de' ? "Abbrechen" : "Cancel",
+          text: language === "de" ? "Abbrechen" : "Cancel",
           style: "cancel",
         },
         {
-          text: language === 'de' ? "Ja, aufgeben" : "Yes, give up",
+          text: language === "de" ? "Ja, aufgeben" : "Yes, give up",
           onPress: async () => {
             try {
               // Beim Aufgeben wird die Frage als falsch bewertet und es gibt keine Punktzahl
@@ -234,8 +240,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
             } catch (error) {
               console.error("Fehler beim Aufgeben:", error);
               Alert.alert(
-                language === 'de' ? "Fehler" : "Error",
-                language === 'de' ? "Beim Aufgeben ist ein Fehler aufgetreten." : "An error occurred while giving up."
+                language === "de" ? "Fehler" : "Error",
+                language === "de"
+                  ? "Beim Aufgeben ist ein Fehler aufgetreten."
+                  : "An error occurred while giving up."
               );
             }
           },
@@ -248,8 +256,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     const networkState = await NetInfo.fetch();
     if (!networkState.isConnected) {
       Alert.alert(
-        language === 'de' ? "Fehler" : "Error",
-        language === 'de' ? "Keine Internetverbindung verfügbar" : "No internet connection available"
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Keine Internetverbindung verfügbar"
+          : "No internet connection available"
       );
       return;
     }
@@ -318,9 +328,6 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     );
   }
 
-  console.log("Questions:", questions);
-  console.log("allQuestionsAnswered:", allQuestionsAnswered);
-
   if (questions.length > 0 && !allQuestionsAnswered) {
     const questionType = currentQuestion?.question_type;
     const QuestionComponent = questionTypeComponents[questionType];
@@ -337,7 +344,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
           ]}
         >
           <Text style={{ color: "red", textAlign: "center" }}>
-            {language === 'de' ? "Unbekannter Fragentyp" : "Unknown question type"}: {questionType}
+            {language === "de"
+              ? "Unbekannter Fragentyp"
+              : "Unknown question type"}
+            : {questionType}
           </Text>
         </View>
       );
@@ -381,16 +391,27 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   }
 
   if (allQuestionsAnswered && !rallye.tour_mode) {
-    return (
-      <RallyeStates.AllQuestionsAnsweredState
-        loading={loading}
-        onRefresh={onRefresh}
-        points={points}
-        teamName={team?.name}
-        teamId={team?.id}
-        rallyeId={rallye.id}
-      />
-    );
+    if (timeExpired) {
+      return (
+        <RallyeStates.TimeExpiredState
+          loading={loading}
+          onRefresh={onRefresh}
+          teamName={team?.name}
+          points={points}
+        />
+      );
+    } else {
+      return (
+        <RallyeStates.AllQuestionsAnsweredState
+          loading={loading}
+          onRefresh={onRefresh}
+          points={points}
+          teamName={team?.name}
+          teamId={team?.id}
+          rallyeId={rallye.id}
+        />
+      );
+    }
   }
 
   if (allQuestionsAnswered && rallye.tour_mode) {

@@ -79,6 +79,7 @@ export const store$ = observable({
   multipleChoiceAnswers: [],
   team: null,
   votingAllowed: true,
+  timeExpired: false,
 
   // Hilfsfunktionen
   currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
@@ -96,7 +97,15 @@ export const store$ = observable({
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get();
-    return answers.filter((a) => a.question_id === current.id);
+    const filtered = answers.filter((a) => a.question_id === current.id);
+    const shuffleArray = (array) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    };
+    return shuffleArray(filtered);
   },
 
   gotoNextQuestion: () => {
@@ -124,6 +133,7 @@ export const store$ = observable({
     store$.questionIndex.set(0);
     store$.points.set(0);
     store$.answers.set([]);
+    store$.timeExpired.set(false);
     store$.multipleChoiceAnswers.set([]);
     store$.votingAllowed.set(true);
   },

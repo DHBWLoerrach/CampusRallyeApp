@@ -1,12 +1,10 @@
-import { useState, useEffect, useContext } from "react";
-import { View, Text, FlatList } from "react-native";
+import { useState, useEffect } from "react";
+import { View, Text, FlatList, Image } from "react-native";
 import { store$ } from "../services/storage/Store";
 import { supabase } from "../utils/Supabase";
 import UIButton from "../ui/UIButton";
 import Colors from "../utils/Colors";
 import { globalStyles } from "../utils/GlobalStyles";
-import { ThemeContext } from "../utils/ThemeContext";
-import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 import { TouchableOpacity } from "react-native";
 
 export default function VotingScreen({ onRefresh, loading }) {
@@ -21,25 +19,54 @@ export default function VotingScreen({ onRefresh, loading }) {
   const [sendingResult, setSendingResult] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
-  const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const votingAllowed = store$.votingAllowed.get();
+
+  const getVotingData = async () => {
+    try {
+      const { data, error } = await supabase.rpc("get_voting_content", {
+        rallye_id_param: rallye.id,
+        own_team_id_param: team.id,
+      });
+      if (error) {
+        throw error;
+      }
+      setVoting(data || []);
+    } catch (error) {
+      console.error("Error fetching voting questions:", error);
+    }
+  };
+
+  const getCount = async () => {
+    try {
+      const { data: count, error: countError } = await supabase
+        .from("voting")
+        .select("question_id")
+        .eq("rallye_id", rallye.id);
+      if (countError) {
+        console.error("Error fetching voting questions:", countError);
+        return;
+      }
+      setCounter(count.length);
+
+      const { data, error } = await supabase
+        .from("rallye_team")
+        .select("id")
+        .eq("rallye_id", rallye.id);
+      if (error) {
+        console.error("Error fetching team count:", error);
+        return;
+      }
+      setTeamCount(data.length);
+    } catch (error) {
+      console.error("Error fetching team count:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchDataSupabase = async () => {
-      const { data: teams } = await supabase
-        .from("rallye_group")
-        .select("*")
-        .eq("rallye_id", rallye.id)
-        .order("id", { ascending: false });
-      setTeams(teams);
-      const { data: vote } = await supabase.rpc("get_unvoted_questions", {
-        input_group_id: team.id,
-      });
-      if (vote !== null) {
-        setVoting(vote);
-      }
-    };
-    fetchDataSupabase();
+    (async () => {
+      await getVotingData();
+      await getCount();
+    })();
   }, []);
 
   useEffect(() => {
@@ -68,7 +95,8 @@ export default function VotingScreen({ onRefresh, loading }) {
   const handleNextQuestion = async () => {
     // Update der Punkte
     const { data, error } = await supabase.rpc(
-      "increment_team_question_points", {
+      "increment_team_question_points",
+      {
         target_answer_id: selectedUpdateId,
       }
     );
@@ -82,36 +110,28 @@ export default function VotingScreen({ onRefresh, loading }) {
     setSelectedTeam(null);
     setSendingResult(false);
   };
-
+  
   if (!votingAllowed || teamCount < 2) {
     return (
       <View
-        contentContainerStyle={[
-          globalStyles.default.refreshContainer,
-          globalStyles.rallyeStatesStyles.container,
-        ]}
-        style={{ backgroundColor: "white" }}
+        style={[globalStyles.default.container, { backgroundColor: "white" }]}
       >
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
-          <Text style={[
-            globalStyles.rallyeStatesStyles.infoTitle,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-          ]}>
-            {language === 'de' ? 'Die Abstimmung wurde beendet' : 'The voting has ended'}
+        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+            Die Abstimmung wurde beendet wurde.
           </Text>
-          <Text style={[
-            globalStyles.rallyeStatesStyles.infoSubtitle,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-          ]}>
-            {language === 'de' ? 'Lade diese Seite neu, um das Ergebnis zu sehen, nachdem die Rallye beendet wurde.' : 'Reload this page to see the result after the rally has ended.'}
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoSubtitle,
+              { marginTop: 10 },
+            ]}
+          >
+            Wartet auf die Beendigung der Rallye.
           </Text>
         </View>
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
           <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-            {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+            Aktualisieren
           </UIButton>
         </View>
       </View>
@@ -120,49 +140,100 @@ export default function VotingScreen({ onRefresh, loading }) {
 
   return (
     <View
-      contentContainerStyle={globalStyles.default.refreshContainer}
-      style={{ backgroundColor: "white" }}
+      style={[
+        globalStyles.default.container,
+        { backgroundColor: "white", flex: 1 },
+      ]}
     >
-      <View style={globalStyles.default.container}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-            {voting[currentVoting]?.question}
-          </Text>
-          <Text
-            style={[
-              globalStyles.rallyeStatesStyles.infoSubtitle,
-              { color: Colors.dhbwRed, marginTop: 20 },
-            ]}
+      <FlatList
+        data={currentQuestion}
+        keyExtractor={() => {
+          Math.random().toString().split(".")[1];
+        }}
+        onRefresh={getVotingData}
+        refreshing={loading}
+        ListHeaderComponent={() =>
+          currentQuestion && currentQuestion.length > 0 ? (
+            <View style={{ paddingTop: 10, paddingBottom: 30 }}>
+              <View style={globalStyles.rallyeStatesStyles.infoBox}>
+                <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+                  {currentQuestion[0]?.question_content}
+                </Text>
+                <Text
+                  style={[
+                    globalStyles.rallyeStatesStyles.infoSubtitle,
+                    { marginTop: 10 },
+                  ]}
+                >
+                  Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
+                  die oben gestellte Aufgabe am besten gelöst hat.
+                </Text>
+              </View>
+            </View>
+          ) : null
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => {
+              setSelectedTeam(item.rt_id);
+              setSelectedUpdateId(item.tq_id);
+            }}
+            activeOpacity={1.0}
+            style={{ alignItems: "flex-start", paddingTop: 10 }}
           >
-            {language === 'de' ? 'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.' : 'Give an extra point to the team that you think solved the task above the best.'}
-          </Text>
-        </View>
-
-        {teams
-          ?.filter((item) => item.id !== team.id)
-          .map((item, index) => (
             <View
               style={[
                 globalStyles.rallyeStatesStyles.infoBox,
                 {
                   borderColor:
-                    selectedTeam === item.id ? Colors.dhbwRed : "transparent",
-                  borderWidth: selectedTeam === item.id ? 2 : 0,
+                    selectedTeam === item.rt_id
+                      ? Colors.dhbwRed
+                      : "transparent",
+                  borderWidth: selectedTeam === item.rt_id ? 2 : 0,
                 },
               ]}
             >
-              <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-                {item.name}
+              {item.question_type === "knowledge" ? (
+                <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+                  {item.tq_team_answer}
+                </Text>
+              ) : (
+                (() => {
+                  const imageUri = `${
+                    process.env.EXPO_PUBLIC_SUPABASE_URL
+                  }/storage/v1/object/public/upload_photo_answers/${item?.tq_team_answer.trim()}`;
+                  return (
+                    <Image
+                      source={{ uri: imageUri }}
+                      style={{
+                        width: "100%",
+                        height: 200,
+                        resizeMode: "contain",
+                        marginBottom: 10,
+                      }}
+                    />
+                  );
+                })()
+              )}
+              <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+                {item.rt_team_name}
               </Text>
             </View>
-          ))}
-
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={[{ padding: 10 }]}
+      />
+      <View
+        style={{
+          padding: 10,
+        }}
+      >
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
           <UIButton
             disabled={!selectedTeam || sendingResult}
             onPress={handleNextQuestion}
           >
-            {language === 'de' ? 'Nächste Abstimmung' : 'Next Vote'}
+            Nächste Abstimmung
           </UIButton>
         </View>
       </View>

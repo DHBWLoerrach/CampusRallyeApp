@@ -25,7 +25,6 @@ export default function ScoreboardScreen() {
           .select("id, name, created_at, time_played")
           .eq("rallye_id", rallye.id);
 
-        console.log("Data:", data);
 
         const { data: teamPoints, error } = await supabase
           .from("team_questions")
@@ -35,7 +34,6 @@ export default function ScoreboardScreen() {
             data.map((team) => team.id)
           );
 
-        console.log("Total Points:", teamPoints);
 
         if (error) throw error;
 
@@ -194,7 +192,7 @@ export default function ScoreboardScreen() {
         { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
       ]}>
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
-          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
+          {language === 'de' ? 'Rallye beenden' : 'Quit Rallye'}
         </UIButton>
       </View>
     </ScrollView>

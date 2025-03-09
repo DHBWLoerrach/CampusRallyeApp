@@ -17,11 +17,9 @@ import {
   getCurrentRallye,
   setCurrentRallye,
 } from "../services/storage";
-import { getTourModeRallye } from "../services/storage/rallyeStorage"; // neu hinzugefügt
-import { store$ } from "../services/storage/Store"; // neu hinzugefügt
 import { ThemeContext } from "../utils/ThemeContext";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
+import { useLanguage } from "../utils/LanguageContext";
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -36,7 +34,6 @@ export default function WelcomeScreen({
   const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
   const { language, toggleLanguage } = useLanguage(); // Use LanguageContext
 
-  // Sicherstellen dass Rallyes beim ersten Render geladen werden
   useEffect(() => {
     (async () => {
       const rallyes = await getActiveRallyes();
@@ -46,12 +43,7 @@ export default function WelcomeScreen({
 
   const handleRallyeSelect = async (rallye) => {
     setSelectedRallye(rallye);
-    const currentRallye = await getCurrentRallye();
-    if (rallye.id === currentRallye?.id) {
-      onPasswordSubmit(rallye.password, rallye);
-    } else {
-      await setCurrentRallye(rallye);
-    }
+    await setCurrentRallye(rallye);
     setShowRallyeModal(false);
   };
 
@@ -67,8 +59,16 @@ export default function WelcomeScreen({
       ]}
     >
       <Card
-        title={language === 'de' ? "An Campus Rallye teilnehmen" : "Join Campus Rallye"}
-        description={language === 'de' ? "Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team" : "Join a guided rally and explore the campus with your team"}
+        title={
+          language === "de"
+            ? "An Campus Rallye teilnehmen"
+            : "Join Campus Rallye"
+        }
+        description={
+          language === "de"
+            ? "Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
+            : "Join a guided rally and explore the campus with your team"
+        }
         icon="map-marker"
         onShowModal={() => {
           setShowRallyeModal(true);
@@ -76,15 +76,24 @@ export default function WelcomeScreen({
         selectedRallye={selectedRallye}
         onPasswordSubmit={(password) => {
           if (!selectedRallye) {
-            Alert.alert(language === 'de' ? "Fehler" : "Error", language === 'de' ? "Bitte wähle zuerst eine Rallye aus." : "Please select a rally first.");
+            Alert.alert(
+              language === "de" ? "Fehler" : "Error",
+              language === "de"
+                ? "Bitte wähle zuerst eine Rallye aus."
+                : "Please select a rally first."
+            );
             return;
           }
           onPasswordSubmit(password, selectedRallye);
         }}
       />
       <Card
-        title={language === 'de' ? "Campus-Gelände erkunden" : "Explore Campus"}
-        description={language === 'de' ? "Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck" : "Explore the campus at your own pace without time pressure"}
+        title={language === "de" ? "Campus-Gelände erkunden" : "Explore Campus"}
+        description={
+          language === "de"
+            ? "Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck"
+            : "Explore the campus at your own pace without time pressure"
+        }
         icon="compass"
         onPress={onContinueWithoutRallye}
       />
@@ -92,17 +101,27 @@ export default function WelcomeScreen({
   );
 
   const OfflineContent = ({ loading, onRefresh }) => (
-    <View style={[
-            globalStyles.welcomeStyles.offline,
-            { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
-            ]}>
-      <Text style={[globalStyles.welcomeStyles.text, { marginBottom: 20 },
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-            ]}>
-        {language === 'de' ? "Du bist offline…" : "You are offline…"}
+    <View
+      style={[
+        globalStyles.welcomeStyles.offline,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          globalStyles.welcomeStyles.text,
+          { marginBottom: 20 },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}
+      >
+        {language === "de" ? "Du bist offline…" : "You are offline…"}
       </Text>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        {language === 'de' ? "Aktualisieren" : "Refresh"}
+        {language === "de" ? "Aktualisieren" : "Refresh"}
       </UIButton>
     </View>
   );
@@ -157,7 +176,9 @@ export default function WelcomeScreen({
               },
             ]}
           >
-            {language === 'de' ? "DHBW Lörrach Campus Rallye" : "DHBW Lörrach Campus Rallye"}
+            {language === "de"
+              ? "DHBW Lörrach Campus Rallye"
+              : "DHBW Lörrach Campus Rallye"}
           </Text>
           <Image
             style={globalStyles.welcomeStyles.logo}

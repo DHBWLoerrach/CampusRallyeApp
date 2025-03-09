@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Text } from 'react-native';
+import { store$ } from '../services/storage/Store';
 
 function calculateTimeRemaining(endTime) {
   const now = new Date();
-  const totalMilliseconds = endTime - now;
+  const totalMilliseconds = new Date(endTime).getTime() - now;
 
   let totalSeconds = Math.floor(totalMilliseconds / 1000);
 
@@ -46,6 +47,7 @@ export default function TimeHeader({ endTime }) {
       setTimeRemaining(updatedTime);
 
       if (updatedTime.totalMilliseconds <= 0) {
+        store$.timeExpired.set(true);
         clearInterval(timerId);
       }
     }, 1000);

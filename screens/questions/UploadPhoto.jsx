@@ -6,16 +6,14 @@ import { globalStyles } from '../../utils/GlobalStyles';
 import Colors from '../../utils/Colors';
 import { ThemeContext } from '../../utils/ThemeContext';
 import { uploadPhotoAnswer } from '../../services/storage/answerStorage';
-import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
 
-export default function UploadPhoto({ handleSendEmail }) {
+export default function UploadPhoto() {
   const [picture, setPicture] = useState(null);
   const cameraRef = useRef(null);
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
 
   function PhotoCamera() {
-    const [facing, setFacing] = useState('back');
+    const [facing, setFacing] = useState("back");
     return (
       <View style={[
         globalStyles.rallyeStatesStyles.infoBox,
@@ -34,20 +32,21 @@ export default function UploadPhoto({ handleSendEmail }) {
                 const picture = await cameraRef.current.takePictureAsync();
                 setPicture(picture);
               } catch (error) {
-                console.log(language === 'de' ? 'Fehler beim Aufnehmen des Fotos' : 'Error taking picture', error);
+                console.log('error taking picture', error);
               }
             }}
           >
-            {language === 'de' ? 'Aufnahme' : 'Take Photo'}
+            Aufnahme
           </UIButton>
           <UIButton
             icon="camera-rotate"
             color={Colors.dhbwGray}
             onPress={() => setFacing((current) => current === 'back' ? 'front' : 'back')}
           >
-            {language === 'de' ? 'Kamera wechseln' : 'Switch Camera'}
+            Kamera wechseln
           </UIButton>
         </View>
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     );
   }
@@ -66,15 +65,16 @@ export default function UploadPhoto({ handleSendEmail }) {
             color={Colors.dhbwGray}
             onPress={() => setPicture(null)}
           >
-            {language === 'de' ? 'Neues Foto' : 'New Photo'}
+            Neues Foto
           </UIButton>
           <UIButton
             icon="envelope"
             onPress={() => uploadPhotoAnswer(picture.uri)}
           >
-            {language === 'de' ? 'Foto senden' : 'Send Photo'}
+            Foto senden
           </UIButton>
         </View>
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     );
   }

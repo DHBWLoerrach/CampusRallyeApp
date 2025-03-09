@@ -29,17 +29,21 @@ export default function ImageQuestions() {
       .from(bucket)
       .getPublicUrl(currentQuestion.bucket_path);
     if (error) {
-      console.error(language === 'de' ? "Fehler beim Abrufen der Bild-URL:" : "Error fetching image URL:", error);
+      console.error(
+        language === "de"
+          ? "Fehler beim Abrufen der Bild-URL:"
+          : "Error fetching image URL:",
+        error
+      );
       return;
     }
     setPictureUri(data.publicUrl);
-  }
+  };
 
   // Vergleicht die Antwort, speichert das Ergebnis und leitet zur nächsten Frage weiter
   const handleNext = async () => {
     const correctlyAnswered =
       answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
-    console.log(correctlyAnswered);
 
     if (correctlyAnswered) {
       store$.points.set(store$.points.get() + currentQuestion.points);
@@ -59,16 +63,14 @@ export default function ImageQuestions() {
   const handleAnswerSubmit = () => {
     if (answer.trim() === "") {
       Alert.alert(
-        language === 'de' ? "Fehler" : "Error",
-        language === 'de' ? "Bitte gebe eine Antwort ein." : "Please enter an answer."
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Bitte gebe eine Antwort ein."
+          : "Please enter an answer."
       );
       return;
     }
-    confirmAlert(
-      language === 'de' ? "Antwort bestätigen" : "Confirm answer",
-      language === 'de' ? "Bist du sicher, dass du diese Antwort einreichen möchtest?" : "Are you sure you want to submit this answer?",
-      handleNext
-    );
+    confirmAlert(answer, handleNext);
   };
 
   return (
@@ -128,7 +130,7 @@ export default function ImageQuestions() {
         >
           <Image
             source={{
-              uri: `http://10.0.0.20:54321/storage/v1/object/public/upload_photo_answers/${currentQuestion.bucket_path}`,
+              uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${currentQuestion.bucket_path}`,
             }}
             style={{
               height: "100%",
@@ -163,8 +165,12 @@ export default function ImageQuestions() {
             ]}
             value={answer}
             onChangeText={(text) => setAnswer(text)}
-            placeholder={language === 'de' ? "Deine Antwort..." : "Your answer..."}
-            placeholderTextColor={isDarkMode ? Colors.darkMode.text : Colors.lightMode.text}
+            placeholder={
+              language === "de" ? "Deine Antwort..." : "Your answer..."
+            }
+            placeholderTextColor={
+              isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
+            }
           />
         </View>
 
@@ -183,24 +189,11 @@ export default function ImageQuestions() {
             disabled={answer.trim() === ""}
             onPress={handleAnswerSubmit}
           >
-            {language === 'de' ? "Antwort senden" : "Submit answer"}
+            {language === "de" ? "Antwort senden" : "Submit answer"}
           </UIButton>
         </View>
 
-        {currentQuestion.hint && (
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              {
-                backgroundColor: isDarkMode
-                  ? Colors.darkMode.card
-                  : Colors.lightMode.card,
-              },
-            ]}
-          >
-            <Hint hint={currentQuestion.hint} />
-          </View>
-        )}
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
     </ScrollView>
   );

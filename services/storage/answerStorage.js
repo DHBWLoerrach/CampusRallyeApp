@@ -2,6 +2,7 @@ import { supabase } from "../../utils/Supabase";
 import { StorageKeys, getStorageItem, setStorageItem } from "./asyncStorage";
 import { store$ } from "./Store";
 import { Buffer } from "buffer";
+import * as FileSystem from "expo-file-system";
 
 export async function getOfflineQueue() {
   return getStorageItem(StorageKeys.OFFLINE_QUEUE) || [];
@@ -48,15 +49,10 @@ export async function saveAnswer(
 
 export async function uploadPhotoAnswer(imageUri) {
   try {
-    const response = await fetch(imageUri);
-    const base64 = await response.blob().then(
-      (blob) =>
-        new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(blob);
-        })
-    );
+    // Lese das Bild als Base64-String mit expo FileSystem
+    const base64 = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
     const buffer = Buffer.from(base64, "base64");
 
     const teamId = store$.team.get().id;
@@ -72,6 +68,9 @@ export async function uploadPhotoAnswer(imageUri) {
     if (uploadError) throw uploadError;
 
     await saveAnswer(teamId, questionId, true, points, filePath);
+
+    store$.points.set(store$.points.get() + points);
+    store$.gotoNextQuestion();
 
     return data;
   } catch (error) {
