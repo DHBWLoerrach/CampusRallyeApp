@@ -22,7 +22,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
     const loadTeam = async () => {
       const localTeam = await getCurrentTeam(rallye.id);
       const {data: onlineTeam, error: teamError} = await supabase
-        .from("rallyeTeam")
+        .from("rallye_team")
         .select("*")
         .eq("rallye_id", rallye.id)
         .eq("id", localTeam?.id)

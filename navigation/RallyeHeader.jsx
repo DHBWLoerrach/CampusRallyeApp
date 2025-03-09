@@ -35,9 +35,10 @@ const RallyeHeader = observer(function RallyeHeader({
               fontWeight: '500',
             }}
           >
+            {rallye.tour_mode && 'Gelände erkunden'}
             {rallye.status === 'preparing' && 'Vorbereitungen'}
             {rallye.status === 'post_processing' && 'Abstimmung'}
-            {rallye.status === 'running' && 'Zeit abgelaufen'}
+            {rallye.status === 'running' && !rallye.tour_mode && 'Zeit abgelaufen'}
             {rallye.status === 'ended' && 'Rallye beendet'}
           </Text>
         )

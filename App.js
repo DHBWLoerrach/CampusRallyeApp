@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { observer } from '@legendapp/state/react';
 import { store$ } from './services/storage/Store';
 import { supabase } from './utils/Supabase';
-import { getTourModeRallye } from './services/storage/rallyeStorage';
+import { getTourModeRallye, setCurrentRallye } from './services/storage/rallyeStorage';
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
 import { ThemeContext, themeStore$ } from './utils/ThemeContext';
@@ -55,7 +55,9 @@ const App = observer(function App() {
     if (tourRallye) {
       console.log(tourRallye);
       store$.team.set(null);
+      store$.reset();
       store$.rallye.set(tourRallye);
+      await setCurrentRallye(tourRallye);
       store$.enabled.set(true);
     } else {
       Alert.alert("Fehler", "Kein Tour Mode Rallye verfügbar.");

@@ -35,7 +35,6 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
-  const tour_mode = store$.tour_mode.get();
   const questions = store$.questions.get();
   const currentQuestion = store$.currentQuestion.get();
   const points = store$.points.get();
@@ -44,7 +43,6 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
 
   const loadQuestions = async () => {
     setLoading(true);
-    consolog.log("Loading questions");
     try {
       // 1. Hole aus der Join-Tabelle alle question_ids der aktuell ausgewählten Rallye
       const { data: joinData, error: joinError } = await supabase
@@ -63,13 +61,22 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       }
 
       // 2. Hole bereits beantwortete Fragen des aktuellen Teams
+      let answeredIds = [];
+      if (!rallye.tour_mode) {
       const { data: answeredData, error: answeredError } = await supabase
         .from("team_questions")
         .select("question_id")
         .eq("team_id", team.id);
 
       if (answeredError) throw answeredError;
-      const answeredIds = answeredData.map((row) => row.question_id);
+        answeredIds = answeredData.map((row) => row.question_id);
+      }
+
+      if (answeredIds.length === questionIds.length) {
+        store$.allQuestionsAnswered.set(true);
+        store$.questionIndex.set(0);
+        return;
+      }
 
       // Filtere die Frage-IDs, die schon beantwortet wurden
       const filteredQuestionIds = questionIds.filter(
@@ -170,7 +177,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   };
 
   useEffect(() => {
-    if (rallye && team) {
+    if (rallye && (team || rallye.tour_mode)) {
       loadQuestions();
     }
     if (questions) loadAnswers();
@@ -300,8 +307,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     );
   }
 
+  console.log("Questions:", questions);
+  console.log("allQuestionsAnswered:", allQuestionsAnswered);
+
   if (questions.length > 0 && !allQuestionsAnswered) {
-    console.log("Hier");
     const questionType = currentQuestion?.question_type;
     const QuestionComponent = questionTypeComponents[questionType];
     if (!QuestionComponent) {
@@ -378,7 +387,6 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       <RallyeStates.ExplorationFinishedState
         goBackToLogin={() => {
           store$.reset();
-          store$.rallye.set(null);
           store$.enabled.set(false);
         }}
         points={points}

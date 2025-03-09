@@ -69,7 +69,6 @@ NetInfo.addEventListener((state) => {
 
 export const store$ = observable({
   rallye: null,
-  rallyeTeam: null,
   teamQuestions: [],
   enabled: false,
   questions: [],
@@ -88,15 +87,16 @@ export const store$ = observable({
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get();
-    return answers.filter((a) => a.question_id === current.id && a.correct === true)[0];
+    return answers.filter(
+      (a) => a.question_id === current.id && a.correct === true
+    )[0];
   },
 
   currentMultipleChoiceAnswers: () => {
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get();
-    return answers.filter(
-      (a) => a.question_id === current.id);
+    return answers.filter((a) => a.question_id === current.id);
   },
 
   gotoNextQuestion: () => {
@@ -119,14 +119,12 @@ export const store$ = observable({
     store$.questionIndex.set(0);
     store$.points.set(0);
     store$.allQuestionsAnswered.set(false);
-    store$.rallyeTeam.set(null);
     store$.teamQuestions.set([]);
     store$.questions.set([]);
     store$.questionIndex.set(0);
     store$.points.set(0);
     store$.answers.set([]);
     store$.multipleChoiceAnswers.set([]);
-    store$.team.set(null);
     store$.votingAllowed.set(true);
   },
 
