@@ -9,6 +9,7 @@ import UIButton from "../../ui/UIButton";
 import Hint from "../../ui/Hint";
 import { supabase } from "../../utils/Supabase";
 import { ThemeContext } from "../../utils/ThemeContext";
+import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
 
 export default function ImageQuestions() {
   const currentQuestion = store$.currentQuestion.get();
@@ -17,6 +18,7 @@ export default function ImageQuestions() {
   const [answer, setAnswer] = useState("");
   const [pictureUri, setPictureUri] = useState("https://dhbw-loerrach.de/fileadmin/standards_homepage/images_header/header_bereiche-und-einrichtungen/Wir_ueber_uns.jpg");
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
     getPictureUri();
@@ -28,7 +30,7 @@ export default function ImageQuestions() {
       .from(bucket)
       .getPublicUrl(currentQuestion.bucket_path);
     if (error) {
-      console.error("Error fetching image URL:", error);
+      console.error(language === 'de' ? "Fehler beim Abrufen der Bild-URL:" : "Error fetching image URL:", error);
       return;
     }
     setPictureUri(data.publicUrl);
@@ -58,10 +60,17 @@ export default function ImageQuestions() {
   // Validiert die Eingabe, zeigt ggf. einen Bestätigungsdialog und ruft handleNext auf
   const handleAnswerSubmit = () => {
     if (answer.trim() === "") {
-      Alert.alert("Fehler", "Bitte gebe eine Antwort ein.");
+      Alert.alert(
+        language === 'de' ? "Fehler" : "Error",
+        language === 'de' ? "Bitte gebe eine Antwort ein." : "Please enter an answer."
+      );
       return;
     }
-    confirmAlert(answer, handleNext);
+    confirmAlert(
+      language === 'de' ? "Antwort bestätigen" : "Confirm answer",
+      language === 'de' ? "Bist du sicher, dass du diese Antwort einreichen möchtest?" : "Are you sure you want to submit this answer?",
+      handleNext
+    );
   };
 
   return (
@@ -109,7 +118,7 @@ export default function ImageQuestions() {
             ]}
             value={answer}
             onChangeText={(text) => setAnswer(text)}
-            placeholder="Deine Antwort..."
+            placeholder={language === 'de' ? "Deine Antwort..." : "Your answer..."}
             placeholderTextColor={isDarkMode ? Colors.darkMode.text : Colors.lightMode.text}
           />
         </View>
@@ -123,7 +132,7 @@ export default function ImageQuestions() {
             disabled={answer.trim() === ""}
             onPress={handleAnswerSubmit}
           >
-            Antwort senden
+            {language === 'de' ? "Antwort senden" : "Submit answer"}
           </UIButton>
         </View>
 

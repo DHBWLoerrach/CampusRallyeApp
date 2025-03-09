@@ -8,6 +8,7 @@ import Hint from "../../ui/Hint";
 import UIButton from "../../ui/UIButton";
 import { saveAnswer } from "../../services/storage/answerStorage";
 import { ThemeContext } from "../../utils/ThemeContext";
+import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
 
 export default function MultipleChoiceQuestions() {
   const [answer, setAnswer] = useState("");
@@ -16,6 +17,7 @@ export default function MultipleChoiceQuestions() {
   const currentMultipleChoiceAnswers = store$.currentMultipleChoiceAnswers.get();
   const team = store$.team.get();
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   const handleNext = async () => {
     const correctlyAnswered =
@@ -36,11 +38,18 @@ export default function MultipleChoiceQuestions() {
 
   const handleAnswerSubmit = () => {
     if (answer.trim() === "") {
-      Alert.alert("Fehler", "Bitte wähle eine Antwort aus.");
+      Alert.alert(
+        language === 'de' ? "Fehler" : "Error",
+        language === 'de' ? "Bitte wähle eine Antwort aus." : "Please select an answer."
+      );
       return;
     }
     // Zeige einen Bestätigungsdialog vor dem Absenden
-    confirmAlert(answer, handleNext);
+    confirmAlert(
+      language === 'de' ? "Antwort bestätigen" : "Confirm answer",
+      language === 'de' ? "Bist du sicher, dass du diese Antwort einreichen möchtest?" : "Are you sure you want to submit this answer?",
+      handleNext
+    );
   };
 
   return (
@@ -108,7 +117,7 @@ export default function MultipleChoiceQuestions() {
             disabled={!answer}
             onPress={handleAnswerSubmit}
           >
-            Antwort senden
+            {language === 'de' ? "Antwort senden" : "Submit answer"}
           </UIButton>
         </View>
       </View>

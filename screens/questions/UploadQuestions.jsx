@@ -9,6 +9,7 @@ import UploadPhoto from './UploadPhoto';
 import UIButton from '../../ui/UIButton';
 import Hint from '../../ui/Hint';
 import { ThemeContext } from '../../utils/ThemeContext';
+import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
 
 export default function UploadQuestions() {
   const rallye = store$.rallye.get();
@@ -16,6 +17,7 @@ export default function UploadQuestions() {
   const currentQuestion = store$.currentQuestion.get();
   const [permission, requestPermission] = useCameraPermissions();
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   if (!permission?.granted) {
     return (
@@ -24,10 +26,10 @@ export default function UploadQuestions() {
         { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
       ]}>
         <Text style={{ textAlign: 'center', marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
-          Wir brauchen Zugriff auf die Kamera
+          {language === 'de' ? 'Wir brauchen Zugriff auf die Kamera' : 'We need access to the camera'}
         </Text>
         <UIButton onPress={requestPermission}>
-          Zugriff auf Kamera erlauben
+          {language === 'de' ? 'Zugriff auf Kamera erlauben' : 'Allow access to camera'}
         </UIButton>
       </View>
     );
@@ -47,25 +49,25 @@ export default function UploadQuestions() {
 
     let mailOptions = {
       recipients: [rallye.mail_adress],
-      subject: 'Foto/Video -- Team: ' + team.name,
-      body: `Das ist die Aufnahme unseres Teams!\n\nFrage: ${currentQuestion.question}`,
+      subject: language === 'de' ? `Foto/Video -- Team: ${team.name}` : `Photo/Video -- Team: ${team.name}`,
+      body: language === 'de' ? `Das ist die Aufnahme unseres Teams!\n\nFrage: ${currentQuestion.question}` : `This is the recording of our team!\n\nQuestion: ${currentQuestion.question}`,
       attachments: [resizedImageUri],
     };
     try {
       await MailComposer.composeAsync(mailOptions);
     } catch (error) {
-      console.error('Fehler beim Senden der E-Mail: ', error);
+      console.error(language === 'de' ? 'Fehler beim Senden der E-Mail: ' : 'Error sending email: ', error);
     }
   };
 
   const handleAnswerSubmit = () => {
     Alert.alert(
-      'Sicherheitsfrage',
-      'Hast du die E-Mail mit dem Foto/Video gesendet?',
+      language === 'de' ? 'Sicherheitsfrage' : 'Security question',
+      language === 'de' ? 'Hast du die E-Mail mit dem Foto/Video gesendet?' : 'Did you send the email with the photo/video?',
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
         {
-          text: 'Ja, ich habe die E-Mail gesendet',
+          text: language === 'de' ? 'Ja, ich habe die E-Mail gesendet' : 'Yes, I sent the email',
           onPress: async () => {
             await store$.savePoints(true, currentQuestion.points);
             store$.gotoNextQuestion();
@@ -102,9 +104,7 @@ export default function UploadQuestions() {
             globalStyles.rallyeStatesStyles.infoSubtitle,
             { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}>
-            Falls das Senden des Fotos/Videos hier nicht klappt, dann macht das 
-            Foto/Video auf dem Handy in der Kamera-App und schickt es per E-Mail 
-            mit dem Namen eures Teams an:
+            {language === 'de' ? 'Falls das Senden des Fotos/Videos hier nicht klappt, dann macht das Foto/Video auf dem Handy in der Kamera-App und schickt es per E-Mail mit dem Namen eures Teams an:' : 'If sending the photo/video does not work here, take the photo/video on the phone in the camera app and send it by email with the name of your team to:'}
           </Text>
           <Text
             style={{ color: Colors.dhbwRed, textAlign: 'center', padding: 10 }}
@@ -114,7 +114,7 @@ export default function UploadQuestions() {
           </Text>
 
           <UIButton onPress={handleAnswerSubmit}>
-            Weiter
+            {language === 'de' ? 'Weiter' : 'Next'}
           </UIButton>
         </View>
 

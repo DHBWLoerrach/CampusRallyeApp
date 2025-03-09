@@ -8,12 +8,14 @@ import { confirmAlert } from "../../utils/ConfirmAlert";
 import Hint from "../../ui/Hint";
 import { saveAnswer } from "../../services/storage/answerStorage";
 import { ThemeContext } from "../../utils/ThemeContext";
+import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   const handleNext = async () => {
     const correctly_answered =
@@ -41,11 +43,18 @@ export default function SkillQuestions() {
 
   const handleAnswerSubmit = () => {
     if (answer.trim() === "") {
-      Alert.alert("Fehler", "Bitte gebe eine Antwort ein.");
+      Alert.alert(
+        language === 'de' ? "Fehler" : "Error",
+        language === 'de' ? "Bitte gebe eine Antwort ein." : "Please enter an answer."
+      );
       return;
     }
 
-    confirmAlert(answer, handleNext);
+    confirmAlert(
+      language === 'de' ? "Antwort bestätigen" : "Confirm answer",
+      language === 'de' ? "Bist du sicher, dass du diese Antwort einreichen möchtest?" : "Are you sure you want to submit this answer?",
+      handleNext
+    );
   };
 
   return (
@@ -76,7 +85,7 @@ export default function SkillQuestions() {
             ]}
             value={answer}
             onChangeText={(text) => setAnswer(text.trim())}
-            placeholder="Deine Antwort..."
+            placeholder={language === 'de' ? "Deine Antwort..." : "Your answer..."}
             placeholderTextColor={isDarkMode ? Colors.darkMode.text : Colors.lightMode.text}
           />
         </View>
@@ -90,7 +99,7 @@ export default function SkillQuestions() {
             disabled={!answer.trim()}
             onPress={handleAnswerSubmit}
           >
-            Antwort senden
+            {language === 'de' ? "Antwort senden" : "Submit answer"}
           </UIButton>
         </View>
       </View>

@@ -12,6 +12,7 @@ import Colors from "../utils/Colors";
 import { globalStyles } from "../utils/GlobalStyles";
 import UIButton from "./UIButton";
 import { ThemeContext } from "../utils/ThemeContext";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 const Card = ({
   title,
@@ -26,6 +27,7 @@ const Card = ({
   const [password, setPassword] = useState("");
   const flipAnim = useRef(new Animated.Value(0)).current;
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   const flipCard = () => {
     Animated.spring(flipAnim, {
@@ -67,7 +69,10 @@ const Card = ({
 
   const handlePasswordSubmit = () => {
     if (!selectedRallye && icon === "map-marker") {
-      Alert.alert("Fehler", "Bitte wähle zuerst eine Rallye aus.");
+      Alert.alert(
+        language === 'de' ? "Fehler" : "Error",
+        language === 'de' ? "Bitte wähle zuerst eine Rallye aus." : "Please select a rallye first."
+      );
       return;
     }
     onPasswordSubmit(password);
@@ -113,7 +118,7 @@ const Card = ({
           globalStyles.cardStyles.cardTitle,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
-          Passwort eingeben
+          {language === 'de' ? "Passwort eingeben" : "Enter password"}
         </Text>
         <TextInput
           style={[
@@ -123,7 +128,7 @@ const Card = ({
           secureTextEntry
           value={password}
           onChangeText={setPassword}
-          placeholder="Passwort"
+          placeholder={language === 'de' ? "Passwort" : "Password"}
           placeholderTextColor={isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray}
         />
         <View style={globalStyles.cardStyles.buttonRow}>
@@ -134,7 +139,7 @@ const Card = ({
             variant="custom"
             color={Colors.dhbwRedLight}
           >
-            Zurück
+            {language === 'de' ? "Zurück" : "Back"}
           </UIButton>
           <UIButton
             style={[globalStyles.cardStyles.button]}
@@ -143,7 +148,7 @@ const Card = ({
             variant="custom"
             color={Colors.dhbwRed}
           >
-            Bestätigen
+            {language === 'de' ? "Bestätigen" : "Confirm"}
           </UIButton>
         </View>
       </Animated.View>

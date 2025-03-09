@@ -6,10 +6,12 @@ import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/GlobalStyles';
 import { ThemeContext } from '../utils/ThemeContext';
 import Colors from '../utils/Colors';
+import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   return (
     <View style={[
@@ -27,7 +29,7 @@ export default function SettingsScreen() {
           globalStyles.settingsStyles.tileText,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
-          Impressum
+          {language === 'de' ? 'Impressum' : 'Imprint'}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -41,16 +43,16 @@ export default function SettingsScreen() {
           globalStyles.settingsStyles.tileText,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
-          Informationen
+          {language === 'de' ? 'Informationen' : 'Information'}
         </Text>
       </TouchableOpacity>
       
-      {/* <UIButton
+      <UIButton
         style={globalStyles.settingsStyles.button}
         icon="arrow-left" onPress={() => store$.enabled.set(false)}
       >
-        <Text>Zurück zur Anmeldung</Text>
-      </UIButton> */}
+        {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
+      </UIButton>
     </View>
   );
 }

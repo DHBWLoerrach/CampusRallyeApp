@@ -10,6 +10,7 @@ import { globalStyles } from '../utils/GlobalStyles';
 import Constants from 'expo-constants';
 import { useContext } from 'react';
 import { ThemeContext } from '../utils/ThemeContext';
+import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 const AppVersion = () => {
   let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
@@ -21,6 +22,7 @@ const AppVersion = () => {
 
 export default function InformationScreen() {
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   return (
     <ScrollView style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}>
@@ -32,39 +34,31 @@ export default function InformationScreen() {
           globalStyles.informationStyles.paragraph,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
         ]}>
-          Die Idee zu dieser Campus Rallye App entstand aus einer Idee von
-          Ulrike Menke, Managerin Studienzentrum IT-Management und Informatik
-          der DHBW Lörrach (SZI).
+          {language === 'de' ? 'Die Idee zu dieser Campus Rallye App entstand aus einer Idee von Ulrike Menke, Managerin Studienzentrum IT-Management und Informatik der DHBW Lörrach (SZI).' : 'The idea for this Campus Rallye App came from an idea by Ulrike Menke, Manager of the IT Management and Computer Science Study Center at DHBW Lörrach (SZI).'}
         </Text>
         <Text style={[
           globalStyles.informationStyles.paragraph,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
         ]}>
-          Die Konzeption und Umsetzung erfolgte an der DHBW Lörrach durch
-          Studierende im Rahmen von Studienarbeiten und Projekten am SZI unter
-          Betreuung und Leitung von Ulrike Menke und Selina Quade
-          (Konzeptgestaltung und Projektbetreuung) und Prof. Dr. Erik Behrends
-          (technische Umsetzung).
+          {language === 'de' ? 'Die Konzeption und Umsetzung erfolgte an der DHBW Lörrach durch Studierende im Rahmen von Studienarbeiten und Projekten am SZI unter Betreuung und Leitung von Ulrike Menke und Selina Quade (Konzeptgestaltung und Projektbetreuung) und Prof. Dr. Erik Behrends (technische Umsetzung).' : 'The conception and implementation was carried out at DHBW Lörrach by students as part of study projects and projects at SZI under the supervision and direction of Ulrike Menke and Selina Quade (concept design and project supervision) and Prof. Dr. Erik Behrends (technical implementation).'}
         </Text>
         <Text style={[
           globalStyles.informationStyles.paragraph,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
         ]}>
-          Bisher haben folgende Studierende an der Entwicklung dieser App
-          mitgewirkt:
+          {language === 'de' ? 'Bisher haben folgende Studierende an der Entwicklung dieser App mitgewirkt:' : 'The following students have contributed to the development of this app so far:'}
           {"\n\t"}
-          Fabian Kaiser, Sophie Strittmatter (TIF20)
+          {language === 'de' ? 'Fabian Kaiser, Sophie Strittmatter (TIF20)' : 'Fabian Kaiser, Sophie Strittmatter (TIF20)'}
           {"\n\t"}
-          Patrick Furtwängler, Marvin Obert (TIF21)
+          {language === 'de' ? 'Patrick Furtwängler, Marvin Obert (TIF21)' : 'Patrick Furtwängler, Marvin Obert (TIF21)'}
           {"\n\t"}
-          Roman von Bosse, Leon Jegg (TIF22)
+          {language === 'de' ? 'Roman von Bosse, Leon Jegg (TIF22)' : 'Roman von Bosse, Leon Jegg (TIF22)'}
         </Text>
         <Text style={[
           globalStyles.informationStyles.paragraph,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
         ]}>
-          Die Campus Rallye App wird als Open Source Projekt kontinuierlich
-          weiterentwickelt:
+          {language === 'de' ? 'Die Campus Rallye App wird als Open Source Projekt kontinuierlich weiterentwickelt:' : 'The Campus Rallye App is continuously developed as an open source project:'}
           {"\n"}
           <Text
             style={{ color: Colors.dhbwRed }}

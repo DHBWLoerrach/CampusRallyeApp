@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { observer } from '@legendapp/state/react';
@@ -8,6 +8,7 @@ import { getTourModeRallye } from './services/storage/rallyeStorage';
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
 import { ThemeContext, themeStore$ } from './utils/ThemeContext';
+import { LanguageProvider } from './utils/LanguageContext'; // Import LanguageProvider
 
 const App = observer(function App() {
   const [loading, setLoading] = useState(false);
@@ -64,19 +65,21 @@ const App = observer(function App() {
 
   return (
     <ThemeContext.Provider value={{ isDarkMode: themeStore$.isDarkMode.get(), toggleDarkMode }}>
-      <NavigationContainer>
-        {enabled ? (
-          <MainNavigator />
-        ) : (
-          <WelcomeScreen
-            onPasswordSubmit={handlePasswordSubmit}
-            onContinueWithoutRallye={handleNoPasswordSubmit}
-            networkAvailable={online}
-            loading={loading}
-            onRefresh={onRefresh}
-          />
-        )}
-      </NavigationContainer>
+      <LanguageProvider>
+        <NavigationContainer>
+          {enabled ? (
+            <MainNavigator />
+          ) : (
+            <WelcomeScreen
+              onPasswordSubmit={handlePasswordSubmit}
+              onContinueWithoutRallye={handleNoPasswordSubmit}
+              networkAvailable={online}
+              loading={loading}
+              onRefresh={onRefresh}
+            />
+          )}
+        </NavigationContainer>
+      </LanguageProvider>
     </ThemeContext.Provider>
   );
 });

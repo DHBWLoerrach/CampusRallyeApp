@@ -9,6 +9,7 @@ import RallyeSelectionModal from "../ui/RallyeSelectionModal";
 import { getActiveRallyes, getCurrentRallye, setCurrentRallye } from "../services/storage";
 import { ThemeContext } from "../utils/ThemeContext";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -21,6 +22,7 @@ export default function WelcomeScreen({
   const [activeRallyes, setActiveRallyes] = useState([]);
   const [selectedRallye, setSelectedRallye] = useState(null);
   const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
+  const { language, toggleLanguage } = useLanguage(); // Use LanguageContext
 
   // Sicherstellen dass Rallyes beim ersten Render geladen werden
   useEffect(() => {
@@ -47,8 +49,8 @@ export default function WelcomeScreen({
             { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
             ]}>
       <Card
-        title="An Campus Rallye teilnehmen"
-        description="Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
+        title={language === 'de' ? "An Campus Rallye teilnehmen" : "Join Campus Rallye"}
+        description={language === 'de' ? "Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team" : "Join a guided rally and explore the campus with your team"}
         icon="map-marker"
         onShowModal={() => {
           setShowRallyeModal(true);
@@ -56,15 +58,15 @@ export default function WelcomeScreen({
         selectedRallye={selectedRallye}
         onPasswordSubmit={(password) => {
           if (!selectedRallye) {
-            Alert.alert("Fehler", "Bitte wähle zuerst eine Rallye aus.");
+            Alert.alert(language === 'de' ? "Fehler" : "Error", language === 'de' ? "Bitte wähle zuerst eine Rallye aus." : "Please select a rally first.");
             return;
           }
           onPasswordSubmit(password, selectedRallye);
         }}
       />
       <Card
-        title="Campus-Gelände erkunden"
-        description="Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck"
+        title={language === 'de' ? "Campus-Gelände erkunden" : "Explore Campus"}
+        description={language === 'de' ? "Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck" : "Explore the campus at your own pace without time pressure"}
         icon="compass"
         onPress={onContinueWithoutRallye}
       />
@@ -79,10 +81,10 @@ export default function WelcomeScreen({
       <Text style={[globalStyles.welcomeStyles.text, { marginBottom: 20 },
             { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
             ]}>
-        Du bist offline…
+        {language === 'de' ? "Du bist offline…" : "You are offline…"}
       </Text>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        Aktualisieren
+        {language === 'de' ? "Aktualisieren" : "Refresh"}
       </UIButton>
     </View>
   );
@@ -108,6 +110,16 @@ export default function WelcomeScreen({
               color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
             />
           </TouchableOpacity>
+          <TouchableOpacity
+            style={{ position: "absolute", top: 40, right: 13 }}
+            onPress={toggleLanguage}
+          >
+            <MaterialIcons
+              name="language"
+              size={24}
+              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+            />
+          </TouchableOpacity>
         </View>
         <View style={globalStyles.welcomeStyles.header}>
           <Text
@@ -117,7 +129,7 @@ export default function WelcomeScreen({
               { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }
             ]}
           >
-            DHBW Lörrach Campus Rallye
+            {language === 'de' ? "DHBW Lörrach Campus Rallye" : "DHBW Lörrach Campus Rallye"}
           </Text>
           <Image
             style={globalStyles.welcomeStyles.logo}

@@ -8,6 +8,7 @@ import Hint from "../../ui/Hint";
 import Colors from "../../utils/Colors";
 import { saveAnswer } from "../../services/storage/answerStorage";
 import { ThemeContext } from "../../utils/ThemeContext";
+import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
 
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
@@ -18,6 +19,7 @@ export default function QRCodeQuestions() {
   const team = store$.team.get();
   const [isProcessing, setIsProcessing] = useState(false);
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   const submitSurrender = async () => {
     setScanMode(false);
@@ -27,22 +29,22 @@ export default function QRCodeQuestions() {
       }
       store$.gotoNextQuestion();
     } catch (error) {
-      console.error("Fehler beim Aufgeben:", error);
-      Alert.alert("Fehler", "Beim Aufgeben ist ein Fehler aufgetreten.");
+      console.error(language === 'de' ? "Fehler beim Aufgeben:" : "Error surrendering:", error);
+      Alert.alert(language === 'de' ? "Fehler" : "Error", language === 'de' ? "Beim Aufgeben ist ein Fehler aufgetreten." : "An error occurred while surrendering.");
     }
   };
 
   const handleSurrender = () => {
     Alert.alert(
-      "Sicherheitsfrage",
-      `Willst du diese Aufgabe wirklich aufgeben?`,
+      language === 'de' ? "Sicherheitsfrage" : "Security question",
+      language === 'de' ? "Willst du diese Aufgabe wirklich aufgeben?" : "Do you really want to give up this task?",
       [
         {
-          text: "Abbrechen",
+          text: language === 'de' ? "Abbrechen" : "Cancel",
           style: "cancel",
         },
         {
-          text: "Ja, ich möchte aufgeben",
+          text: language === 'de' ? "Ja, ich möchte aufgeben" : "Yes, I want to give up",
           onPress: submitSurrender,
         },
       ]
@@ -60,14 +62,14 @@ export default function QRCodeQuestions() {
 
       if (currentAnswer.text.toLowerCase() !== data.toLowerCase()) {
         Alert.alert(
-          `Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.`
+          language === 'de' ? "Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort." : "The QR code is incorrect! You are probably not at the right place."
         );
         setScanMode(false);
       } else if (currentAnswer.text.toLowerCase() === data.toLowerCase()) {
         setScanMode(false);
-        Alert.alert("OK", `Das ist der richtige QR-Code!`, [
+        Alert.alert("OK", language === 'de' ? "Das ist der richtige QR-Code!" : "This is the correct QR code!", [
           {
-            text: "Weiter",
+            text: language === 'de' ? "Weiter" : "Next",
             onPress: async () => {
               await store$.savePoints(true, currentQuestion.points);
               await saveAnswer(team.id, currentQuestion.id, true, currentQuestion.points);
@@ -95,10 +97,10 @@ export default function QRCodeQuestions() {
         { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
       ]}>
         <Text style={{ textAlign: "center", marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
-          Wir brauchen Zugriff auf die Kamera
+          {language === 'de' ? "Wir brauchen Zugriff auf die Kamera" : "We need access to the camera"}
         </Text>
         <UIButton onPress={requestPermission}>
-          Zugriff auf Kamera erlauben
+          {language === 'de' ? "Zugriff auf Kamera erlauben" : "Allow access to camera"}
         </UIButton>
       </View>
     );
@@ -141,14 +143,14 @@ export default function QRCodeQuestions() {
               icon={scanMode ? "circle-stop" : "qrcode"}
               onPress={() => setScanMode(!scanMode)}
             >
-              {scanMode ? "Kamera ausblenden" : "QR-Code scannen"}
+              {scanMode ? language === 'de' ? "Kamera ausblenden" : "Hide Camera" : language === 'de' ? "QR-Code scannen" : "Scan QR Code"}
             </UIButton>
             <UIButton
               icon="face-frown-open"
               color={Colors.dhbwGray}
               onPress={handleSurrender}
             >
-              Aufgeben
+              {language === 'de' ? "Aufgeben" : "Surrender"}
             </UIButton>
           </View>
         </View>

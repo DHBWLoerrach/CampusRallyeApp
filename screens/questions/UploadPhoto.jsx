@@ -6,11 +6,13 @@ import { globalStyles } from '../../utils/GlobalStyles';
 import Colors from '../../utils/Colors';
 import { ThemeContext } from '../../utils/ThemeContext';
 import { uploadPhotoAnswer } from '../../services/storage/answerStorage';
+import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
 
 export default function UploadPhoto({ handleSendEmail }) {
   const [picture, setPicture] = useState(null);
   const cameraRef = useRef(null);
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   function PhotoCamera() {
     const [facing, setFacing] = useState('back');
@@ -32,18 +34,18 @@ export default function UploadPhoto({ handleSendEmail }) {
                 const picture = await cameraRef.current.takePictureAsync();
                 setPicture(picture);
               } catch (error) {
-                console.log('error taking picture', error);
+                console.log(language === 'de' ? 'Fehler beim Aufnehmen des Fotos' : 'Error taking picture', error);
               }
             }}
           >
-            Aufnahme
+            {language === 'de' ? 'Aufnahme' : 'Take Photo'}
           </UIButton>
           <UIButton
             icon="camera-rotate"
             color={Colors.dhbwGray}
             onPress={() => setFacing((current) => current === 'back' ? 'front' : 'back')}
           >
-            Kamera wechseln
+            {language === 'de' ? 'Kamera wechseln' : 'Switch Camera'}
           </UIButton>
         </View>
       </View>
@@ -64,13 +66,13 @@ export default function UploadPhoto({ handleSendEmail }) {
             color={Colors.dhbwGray}
             onPress={() => setPicture(null)}
           >
-            Neues Foto
+            {language === 'de' ? 'Neues Foto' : 'New Photo'}
           </UIButton>
           <UIButton
             icon="envelope"
             onPress={() => uploadPhotoAnswer(picture.uri)}
           >
-            Foto senden
+            {language === 'de' ? 'Foto senden' : 'Send Photo'}
           </UIButton>
         </View>
       </View>

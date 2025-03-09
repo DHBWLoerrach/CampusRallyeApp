@@ -6,6 +6,7 @@ import UIButton from "../ui/UIButton";
 import Colors from "../utils/Colors";
 import { globalStyles } from "../utils/GlobalStyles";
 import { ThemeContext } from "../utils/ThemeContext";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 import { TouchableOpacity } from "react-native";
 
 export default function VotingScreen({ onRefresh, loading }) {
@@ -20,6 +21,8 @@ export default function VotingScreen({ onRefresh, loading }) {
   const [sendingResult, setSendingResult] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
     const fetchDataSupabase = async () => {
@@ -97,19 +100,18 @@ export default function VotingScreen({ onRefresh, loading }) {
             globalStyles.rallyeStatesStyles.infoTitle,
             { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}>
-            Die Abstimmung wurde beendet
+            {language === 'de' ? 'Die Abstimmung wurde beendet' : 'The voting has ended'}
           </Text>
           <Text style={[
             globalStyles.rallyeStatesStyles.infoSubtitle,
             { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}>
-            Lade diese Seite neu, um das Ergebnis zu sehen, nachdem die Rallye
-            beendet wurde.
+            {language === 'de' ? 'Lade diese Seite neu, um das Ergebnis zu sehen, nachdem die Rallye beendet wurde.' : 'Reload this page to see the result after the rally has ended.'}
           </Text>
         </View>
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
           <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-            Aktualisieren
+            {language === 'de' ? 'Aktualisieren' : 'Refresh'}
           </UIButton>
         </View>
       </View>
@@ -132,8 +134,7 @@ export default function VotingScreen({ onRefresh, loading }) {
               { color: Colors.dhbwRed, marginTop: 20 },
             ]}
           >
-            Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die
-            oben gestellte Aufgabe am besten gelöst hat.
+            {language === 'de' ? 'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.' : 'Give an extra point to the team that you think solved the task above the best.'}
           </Text>
         </View>
 
@@ -161,7 +162,7 @@ export default function VotingScreen({ onRefresh, loading }) {
             disabled={!selectedTeam || sendingResult}
             onPress={handleNextQuestion}
           >
-            Nächste Abstimmung
+            {language === 'de' ? 'Nächste Abstimmung' : 'Next Vote'}
           </UIButton>
         </View>
       </View>

@@ -21,6 +21,7 @@ import { globalStyles } from "../utils/GlobalStyles";
 import { supabase } from "../utils/Supabase";
 import Colors from "../utils/Colors";
 import { ThemeContext } from "../utils/ThemeContext";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 const questionTypeComponents = {
   knowledge: SkillQuestions,
@@ -39,6 +40,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   const points = store$.points.get();
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   const loadQuestions = async () => {
     setLoading(true);
@@ -106,7 +108,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       );
     } catch (error) {
       console.error("Fehler beim Laden der Fragen:", error);
-      Alert.alert("Fehler", "Die Fragen konnten nicht geladen werden.");
+      Alert.alert(
+        language === 'de' ? "Fehler" : "Error",
+        language === 'de' ? "Die Fragen konnten nicht geladen werden." : "The questions could not be loaded."
+      );
     } finally {
       setLoading(false);
     }
@@ -190,22 +195,25 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       store$.gotoNextQuestion();
     } catch (error) {
       console.error("Fehler beim Speichern der Antwort:", error);
-      Alert.alert("Fehler", "Antwort konnte nicht gespeichert werden.");
+      Alert.alert(
+        language === 'de' ? "Fehler" : "Error",
+        language === 'de' ? "Antwort konnte nicht gespeichert werden." : "Answer could not be saved."
+      );
     }
   };
 
   // Wird aufgerufen, wenn der Nutzer die Aufgabe aufgeben möchte
   const handleSurrender = () => {
     Alert.alert(
-      "Aufgabe aufgeben",
-      "Willst du diese Aufgabe wirklich aufgeben?",
+      language === 'de' ? "Aufgabe aufgeben" : "Surrender task",
+      language === 'de' ? "Willst du diese Aufgabe wirklich aufgeben?" : "Do you really want to give up this task?",
       [
         {
-          text: "Abbrechen",
+          text: language === 'de' ? "Abbrechen" : "Cancel",
           style: "cancel",
         },
         {
-          text: "Ja, aufgeben",
+          text: language === 'de' ? "Ja, aufgeben" : "Yes, give up",
           onPress: async () => {
             try {
               // Beim Aufgeben wird die Frage als falsch bewertet und es gibt keine Punktzahl
@@ -216,8 +224,8 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
             } catch (error) {
               console.error("Fehler beim Aufgeben:", error);
               Alert.alert(
-                "Fehler",
-                "Beim Aufgeben ist ein Fehler aufgetreten."
+                language === 'de' ? "Fehler" : "Error",
+                language === 'de' ? "Beim Aufgeben ist ein Fehler aufgetreten." : "An error occurred while giving up."
               );
             }
           },
@@ -229,7 +237,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   const onRefresh = async () => {
     const networkState = await NetInfo.fetch();
     if (!networkState.isConnected) {
-      Alert.alert("Fehler", "Keine Internetverbindung verfügbar");
+      Alert.alert(
+        language === 'de' ? "Fehler" : "Error",
+        language === 'de' ? "Keine Internetverbindung verfügbar" : "No internet connection available"
+      );
       return;
     }
     if (rallye.status === "running") {
@@ -302,7 +313,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
           { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
         ]}>
           <Text style={{ color: "red", textAlign: "center" }}>
-            Unbekannter Fragentyp: {questionType}
+            {language === 'de' ? "Unbekannter Fragentyp" : "Unknown question type"}: {questionType}
           </Text>
         </View>
       );

@@ -4,6 +4,7 @@ import { globalStyles } from "../utils/GlobalStyles";
 import UIButton from "../ui/UIButton";
 import { ThemeContext } from "../utils/ThemeContext";
 import Colors from "../utils/Colors";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 const RallyeSelectionModal = ({
   visible,
@@ -12,6 +13,8 @@ const RallyeSelectionModal = ({
   onSelect,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
+
   const renderItem = ({ item }) => (
     <View style={[globalStyles.rallyeModal.rallyeCard, { backgroundColor: isDarkMode ? Colors.darkMode.dhbwGray : globalStyles.rallyeModal.rallyeCard.backgroundColor }]}>
       <View style={globalStyles.rallyeModal.rallyeInfo}>
@@ -20,7 +23,6 @@ const RallyeSelectionModal = ({
           {item.studiengang}
         </Text>
         <Text style={[globalStyles.rallyeModal.rallyeStatus, { color: isDarkMode ? Colors.darkMode.text : globalStyles.rallyeModal.rallyeStatus.color }]}>
-
           {item.status.split("_").join(" ")}
         </Text>
       </View>
@@ -28,7 +30,7 @@ const RallyeSelectionModal = ({
         onPress={() => onSelect(item)}
         style={globalStyles.rallyeModal.selectButton}
       >
-        Auswählen
+        {language === 'de' ? 'Auswählen' : 'Select'}
       </UIButton>
     </View>
   );
@@ -43,7 +45,7 @@ const RallyeSelectionModal = ({
       <View style={globalStyles.rallyeModal.modalContainer}>
         <View style={[globalStyles.rallyeModal.modalContent, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.background }]}>
           <Text style={[globalStyles.rallyeModal.modalTitle, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }]}>
-            Aktive Rallyes
+            {language === 'de' ? 'Aktive Rallyes' : 'Active Rallyes'}
           </Text>
           {activeRallyes.length > 0 ? (
             <FlatList
@@ -53,14 +55,14 @@ const RallyeSelectionModal = ({
             />
           ) : (
             <Text style={globalStyles.rallyeModal.noDataText}>
-              Keine aktiven Rallyes verfügbar
+              {language === 'de' ? 'Keine aktiven Rallyes verfügbar' : 'No active rallyes available'}
             </Text>
           )}
           <UIButton
             onPress={onClose}
             style={globalStyles.rallyeModal.cancelButton}
           >
-            Abbrechen
+            {language === 'de' ? 'Abbrechen' : 'Cancel'}
           </UIButton>
         </View>
       </View>

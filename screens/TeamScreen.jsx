@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { Text, View } from "react-native";
+import { Text, View, Alert } from "react-native";
 import { observer } from "@legendapp/state/react";
 import { store$ } from "../services/storage/Store";
 import { supabase } from "../utils/Supabase";
@@ -9,12 +9,14 @@ import generateTeamName from "../utils/RandomTeamNames";
 import { getCurrentTeam, setCurrentTeam } from "../services/storage";
 import { ThemeContext } from "../utils/ThemeContext";
 import Colors from "../utils/Colors";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
     if (!rallye) return;
@@ -52,10 +54,10 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
             { marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}
         >
-          Du nimmst gerade nicht an einer Rallye teil.
+          {language === 'de' ? 'Du nimmst gerade nicht an einer Rallye teil.' : 'You are not currently participating in a rally.'}
         </Text>
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
-          Zurück zur Anmeldung
+          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
         </UIButton>
       </View>
     );
@@ -66,7 +68,6 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
       <View style={[
               globalStyles.teamStyles.infoBox, 
               { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.background },
-              //{ shadowColor: isDarkMode ? "#fff" : "#000" },
               ]}>
         <Text
           style={[
@@ -74,7 +75,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
             { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}
         >
-          Name deines Teams:
+          {language === 'de' ? 'Name deines Teams:' : 'Your team name:'}
         </Text>
         <Text
           style={[
@@ -84,7 +85,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
         >
           {team.name}
         </Text>
-        <UIButton onPress={gotoRallye}>Gehe zur Rallye</UIButton>
+        <UIButton onPress={gotoRallye}>{language === 'de' ? 'Gehe zur Rallye' : 'Go to Rally'}</UIButton>
       </View>
     );
   }
@@ -115,8 +116,8 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
       } catch (err) {
         console.error("Error creating team:", err);
         Alert.alert(
-          "Fehler",
-          "Team konnte nicht erstellt werden. Bitte erneut versuchen."
+          language === 'de' ? 'Fehler' : 'Error',
+          language === 'de' ? 'Team konnte nicht erstellt werden. Bitte erneut versuchen.' : 'Team could not be created. Please try again.'
         );
       } finally {
         setLoading(false);
@@ -131,10 +132,10 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
             { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}
         >
-          Bilde ein Team, um an der Rallye teilzunehmen.
+          {language === 'de' ? 'Bilde ein Team, um an der Rallye teilzunehmen.' : 'Create a team to participate in the rally.'}
         </Text>
         <UIButton disabled={loading} onPress={createTeam}>
-          Team bilden
+          {language === 'de' ? 'Team bilden' : 'Create Team'}
         </UIButton>
       </View>
     );

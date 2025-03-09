@@ -6,6 +6,7 @@ import { globalStyles } from "../utils/GlobalStyles";
 import UIButton from "../ui/UIButton";
 import Colors from "../utils/Colors";
 import { ThemeContext } from "../utils/ThemeContext";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
@@ -13,6 +14,7 @@ export default function ScoreboardScreen() {
   const points = store$.points.get();
   const [sortedTeams, setSortedTeams] = useState([]);
   const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
     if (rallye.status !== "ended") return;
@@ -110,7 +112,7 @@ export default function ScoreboardScreen() {
           globalStyles.rallyeStatesStyles.infoTitle,
           { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
         ]}>
-          Punktestand
+          {language === 'de' ? 'Punktestand' : 'Scoreboard'}
         </Text>
         {ourTeam && (
           <Text
@@ -119,7 +121,7 @@ export default function ScoreboardScreen() {
               { marginTop: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
             ]}
           >
-            Dein Team: {ourTeam.name}
+            {language === 'de' ? 'Dein Team:' : 'Your Team:'} {ourTeam.name}
           </Text>
         )}
       </View>
@@ -137,9 +139,15 @@ export default function ScoreboardScreen() {
             backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.veryLightGray,
           }}
         >
-          <Text style={globalStyles.scoreboardStyles.headerCell}>Platz</Text>
-          <Text style={globalStyles.scoreboardStyles.headerCellWide}>Team</Text>
-          <Text style={globalStyles.scoreboardStyles.headerCell}>Punkte</Text>
+          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
+            {language === 'de' ? 'Platz' : 'Rank'}
+          </Text>
+          <Text style={[globalStyles.scoreboardStyles.headerCellWide, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
+            {language === 'de' ? 'Team' : 'Team'}
+          </Text>
+          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
+            {language === 'de' ? 'Punkte' : 'Points'}
+          </Text>
         </View>
 
         {/* ScrollView für die Teamliste */}
@@ -186,7 +194,7 @@ export default function ScoreboardScreen() {
         { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
       ]}>
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
-          Zurück zur Anmeldung
+          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
         </UIButton>
       </View>
     </ScrollView>
