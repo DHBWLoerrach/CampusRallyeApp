@@ -121,10 +121,7 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
   );
 };
 
-export const ExplorationFinishedState = ({
-  goBackToLogin,
-  points,
-}) => {
+export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
   const { isDarkMode } = useContext(ThemeContext);
   const { language } = useLanguage(); // Use LanguageContext
 
@@ -142,6 +139,7 @@ export const ExplorationFinishedState = ({
     </View>
   );
 };
+
 
 export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => {
   const { isDarkMode } = useContext(ThemeContext);

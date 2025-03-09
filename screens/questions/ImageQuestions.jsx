@@ -16,7 +16,6 @@ export default function ImageQuestions() {
   const currentAnswer = store$.currentAnswer.get();
   const team = store$.team.get();
   const [answer, setAnswer] = useState("");
-  const [pictureUri, setPictureUri] = useState("https://dhbw-loerrach.de/fileadmin/standards_homepage/images_header/header_bereiche-und-einrichtungen/Wir_ueber_uns.jpg");
   const { isDarkMode } = useContext(ThemeContext);
   const { language } = useLanguage(); // Use LanguageContext
 
@@ -56,7 +55,6 @@ export default function ImageQuestions() {
     store$.gotoNextQuestion();
     setAnswer("");
   };
-
   // Validiert die Eingabe, zeigt ggf. einen Bestätigungsdialog und ruft handleNext auf
   const handleAnswerSubmit = () => {
     if (answer.trim() === "") {
@@ -75,28 +73,62 @@ export default function ImageQuestions() {
 
   return (
     <ScrollView
-      contentContainerStyle={[globalStyles.default.refreshContainer, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
     >
-      <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
-          <Text style={[
-            globalStyles.rallyeStatesStyles.infoTitle,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-          ]}>
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoTitle,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+          >
             {currentQuestion.question}
           </Text>
         </View>
 
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
           <Image
             source={{
-              uri: pictureUri,
+              uri: `http://10.0.0.20:54321/storage/v1/object/public/upload_photo_answers/${currentQuestion.bucket_path}`,
             }}
             style={{
               height: "100%",
@@ -107,14 +139,27 @@ export default function ImageQuestions() {
           />
         </View>
 
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
           <TextInput
             style={[
               globalStyles.skillStyles.input,
-              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text, borderColor: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+                borderColor: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
             ]}
             value={answer}
             onChangeText={(text) => setAnswer(text)}
@@ -123,10 +168,16 @@ export default function ImageQuestions() {
           />
         </View>
 
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
           <UIButton
             color={answer.trim() !== "" ? Colors.dhbwRed : Colors.dhbwGray}
             disabled={answer.trim() === ""}
@@ -137,10 +188,16 @@ export default function ImageQuestions() {
         </View>
 
         {currentQuestion.hint && (
-          <View style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-          ]}>
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              {
+                backgroundColor: isDarkMode
+                  ? Colors.darkMode.card
+                  : Colors.lightMode.card,
+              },
+            ]}
+          >
             <Hint hint={currentQuestion.hint} />
           </View>
         )}
