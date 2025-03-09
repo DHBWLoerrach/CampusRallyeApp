@@ -31,11 +31,11 @@ export const PreparationState = ({ loading, onRefresh }) => {
       style={globalStyles.rallyeStatesStyles.successIcon}
     />
 
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+    <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}>
+      <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
         Die Rallye hat noch nicht begonnen
       </Text>
-      <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+      <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
         Bitte warte auf den Start der Rallye
       </Text>
     </View>
@@ -82,13 +82,13 @@ export const TeamNotSelectedState = () => {
       ]}>
         <Text style={[
           globalStyles.rallyeStatesStyles.infoTitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
           Kein Team ausgewählt
         </Text>
         <Text style={[
           globalStyles.rallyeStatesStyles.infoSubtitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
           Bitte bilde zuerst ein Team
         </Text>
@@ -123,13 +123,13 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
       ]}>
         <Text style={[
           globalStyles.rallyeStatesStyles.infoTitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
           Keine Fragen verfügbar
         </Text>
         <Text style={[
           globalStyles.rallyeStatesStyles.infoSubtitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
           Momentan sind keine Fragen zum Beantworten verfügbar
         </Text>
@@ -187,13 +187,13 @@ export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => {
       ]}>
         <Text style={[
           globalStyles.rallyeStatesStyles.infoTitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
           Zeit abgelaufen
         </Text>
         <Text style={[
           globalStyles.rallyeStatesStyles.infoSubtitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
           Die Zeit für die Rallye ist abgelaufen
         </Text>
@@ -205,19 +205,18 @@ export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => {
       ]}>
         <Text style={[
           globalStyles.rallyeStatesStyles.pointsTitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray },
         ]}>
           Team: {teamName}
         </Text>
         <Text style={[
           globalStyles.rallyeStatesStyles.pointsValue,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
         ]}>
           {points} Punkte
         </Text>
       </View>
 
-    <Text style={globalStyles.rallyeStatesStyles.footer}>
+    <Text style={[globalStyles.rallyeStatesStyles.footer, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
       Wartet bis die Rallye beendet wird, um das Ergebnis zu sehen.{'\n'}
       Geht zum vereinbarten Treffpunkt.
     </Text>
