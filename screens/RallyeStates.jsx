@@ -273,7 +273,7 @@ export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
       >
         <Text
           style={[
-            globalStyles.rallyeStatesStyles.title,
+            globalStyles.rallyeStatesStyles.infoTitle,
             {
               color: isDarkMode
                 ? Colors.darkMode.text

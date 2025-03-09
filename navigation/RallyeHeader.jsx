@@ -19,7 +19,7 @@ const RallyeHeader = observer(function RallyeHeader({ rallye, percentage }) {
   return (
     <View style={{ alignItems: "center", flex: 1, justifyContent: "center" }}>
       {rallye ? (
-        rallye.status === "running" &&
+        rallye.status === "running" && !rallye.tour_mode &&
         new Date(currentTime$).getTime() <
           new Date(rallye.end_time).getTime() ? (
           <View style={{ alignItems: "center" }}>

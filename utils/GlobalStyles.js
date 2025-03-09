@@ -155,6 +155,23 @@ export const globalStyles = StyleSheet.create({
       elevation: 5,
       maxHeight: SCREEN_HEIGHT * 0.33,
     },
+    infoCameraBox: {
+      minWidth: "100%",
+      padding: SCREEN_WIDTH * 0.04,
+      backgroundColor: "white",
+      borderRadius: 10,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+      maxHeight: SCREEN_HEIGHT * 0.33,
+    },
     infoTitle: {
       fontSize: normalizeFont(20),
       textAlign: "center",
@@ -659,14 +676,14 @@ export const globalStyles = StyleSheet.create({
       paddingVertical: SCREEN_HEIGHT * 0.02,
     },
     camera: {
-      width: SCREEN_WIDTH * 0.8,
+      width: "100%",
       aspectRatio: 1,
-      maxHeight: SCREEN_HEIGHT * 0.4,
+      maxHeight: "100%",
     },
     image: {
-      width: SCREEN_WIDTH * 0.8,
+      width: "100%",
       aspectRatio: 1,
-      maxHeight: SCREEN_HEIGHT * 0.4,
+      maxHeight: "100%",
     },
     buttonRow: {
       flexDirection: "row",
