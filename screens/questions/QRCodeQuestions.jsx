@@ -109,7 +109,7 @@ export default function QRCodeQuestions() {
       contentContainerStyle={globalStyles.default.refreshContainer}
       style={{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }}
     >
-      <View style={globalStyles.default.container}>
+      <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
         <View style={[
           globalStyles.rallyeStatesStyles.infoBox,
           { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
@@ -123,10 +123,10 @@ export default function QRCodeQuestions() {
         </View>
 
         {scanMode && (
-          <View style={globalStyles.qrCodeStyles.cameraBox}>
+          <View style={[globalStyles.qrCodeStyles.cameraBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}>
             <CameraView
               ref={cameraRef}
-              style={globalStyles.qrCodeStyles.camera}
+              style={[globalStyles.qrCodeStyles.camera, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}
               onBarcodeScanned={handleQRCode}
             />
           </View>

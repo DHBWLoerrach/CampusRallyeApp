@@ -59,7 +59,9 @@ export const PreparationState = ({ loading, onRefresh }) => {
 
 export const EndedState = () => <Scoreboard />;
 
-export const TeamNotSelectedState = () => {(
+export const TeamNotSelectedState = () => {
+  const { isDarkMode } = useContext(ThemeContext);
+  (
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -142,12 +144,14 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
 export const ExplorationFinishedState = ({
   goBackToLogin,
   points,
-}) => (
-  <View style={globalStyles.default.container}>
-    <Text style={globalStyles.default.bigText}>
+}) => {
+  const { isDarkMode } = useContext(ThemeContext);
+  (
+  <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
+    <Text style={[globalStyles.default.bigText, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
       Alle Fragen wurden beantwortet.
     </Text>
-    <Text style={[globalStyles.default.bigText, { marginBottom: 10 }]}>
+    <Text style={[globalStyles.default.bigText, { marginBottom: 10 }, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
       Erreichte Punktzahl: {points}
     </Text>
     <UIButton icon="arrow-left" onPress={goBackToLogin}>
@@ -155,8 +159,11 @@ export const ExplorationFinishedState = ({
     </UIButton>
   </View>
 );
+};
 
-export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => (
+export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => {
+  const { isDarkMode } = useContext(ThemeContext);
+  (
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -216,13 +223,16 @@ export const TimeExpiredState = ({loading, onRefresh, teamName, points}) => (
     </Text>
   </ScrollView>
 );
+};
 
 export const AllQuestionsAnsweredState = ({
   loading,
   onRefresh,
   points,
   teamName,
-}) => (
+}) => {
+  const { isDarkMode } = useContext(ThemeContext);
+  return(
   <ScrollView
     contentContainerStyle={[
       globalStyles.default.refreshContainer,
@@ -242,25 +252,26 @@ export const AllQuestionsAnsweredState = ({
 
     <Text style={globalStyles.rallyeStatesStyles.title}>Glückwunsch!</Text>
 
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+    <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}>
+      <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
         Alle Fragen beantwortet
       </Text>
-      <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+      <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
         Team: {teamName}
       </Text>
     </View>
 
-    <View style={globalStyles.rallyeStatesStyles.infoBox}>
-      <Text style={globalStyles.rallyeStatesStyles.pointsTitle}>
+    <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }]}>
+      <Text style={[globalStyles.rallyeStatesStyles.pointsTitle, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
         Erreichte Punkte
       </Text>
       <Text style={globalStyles.rallyeStatesStyles.pointsValue}>{points}</Text>
     </View>
 
-    <Text style={globalStyles.rallyeStatesStyles.footer}>
+    <Text style={[globalStyles.rallyeStatesStyles.footer, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
       Wartet auf die Beendigung der Rallye{"\n"}
       und geht zum vereinbarten Treffpunkt.
     </Text>
   </ScrollView>
 );
+};

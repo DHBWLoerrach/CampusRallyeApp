@@ -141,9 +141,9 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
   }
 
   return (
-    <View style={globalStyles.default.container}>
-      <Text style={globalStyles.teamStyles.title}>{rallye.name}</Text>
-      <View style={globalStyles.teamStyles.container}>
+    <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
+      <Text style={[globalStyles.teamStyles.title, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }, ]}>{rallye.name}</Text>
+      <View style={[globalStyles.teamStyles.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
         {team ? (
           <ShowTeam gotoRallye={() => navigation.navigate("rallye")} />
         ) : (

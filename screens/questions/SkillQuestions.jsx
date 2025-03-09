@@ -52,7 +52,7 @@ export default function SkillQuestions() {
     <ScrollView
       contentContainerStyle={[globalStyles.default.refreshContainer, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
     >
-      <View style={globalStyles.default.container}>
+      <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
         <View style={[
           globalStyles.rallyeStatesStyles.infoBox,
           { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
