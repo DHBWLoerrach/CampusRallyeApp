@@ -1,15 +1,19 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { observer } from '@legendapp/state/react';
-import { store$ } from './utils/Store';
+import { store$ } from './services/storage/Store';
 import { supabase } from './utils/Supabase';
+import {
+  getTourModeRallye,
+  setCurrentRallye,
+} from './services/storage/rallyeStorage';
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
+import { ThemeContext, themeStore$ } from './utils/ThemeContext';
+import { LanguageProvider } from './utils/LanguageContext'; // Import LanguageProvider
 
 const App = observer(function App() {
-  const [realPassword, setRealPassword] = useState(null);
   const [loading, setLoading] = useState(false);
   const [online, setOnline] = useState(true);
   const enabled = store$.enabled.get();
@@ -21,11 +25,10 @@ const App = observer(function App() {
   const onRefresh = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from('login')
-      .select('password, rallye!inner(id)')
-      .eq('rallye.is_active_rallye', true);
+      .from('rallye')
+      .select('*')
+      .eq('is_active', true);
     if (data) {
-      setRealPassword(data[0].password);
       setOnline(true);
     } else {
       setOnline(false);
@@ -33,46 +36,63 @@ const App = observer(function App() {
     setLoading(false);
   };
 
-  const handlePasswordSubmit = async (password) => {
-    if (password === realPassword) {
-      const { data } = await supabase
-        .from('rallye')
-        .select('*')
-        .eq('is_active_rallye', true);
-      const rallye = data[0];
-      if (rallye.end_time) {
-        rallye.end_time = new Date(rallye.end_time);
+  const handlePasswordSubmit = async (password, selectedRallye) => {
+    try {
+      if (password === selectedRallye.password) {
+        store$.rallye.set(selectedRallye);
+        store$.enabled.set(true);
+      } else {
+        Alert.alert(
+          'Falsches Passwort',
+          'Bitte geben Sie das richtige Passwort ein.'
+        );
       }
-      store$.rallye.set(rallye);
-      store$.enabled.set(true);
-    } else {
-      Alert.alert(
-        'Falsches Passwort',
-        'Bitte geben Sie das richtige Passwort ein.'
-      );
+    } catch (error) {
+      console.error('Fehler beim Überprüfen des Passworts:', error);
+      Alert.alert('Fehler', 'Es ist ein Fehler aufgetreten.');
     }
   };
 
-  const handleNoPasswordSubmit = () => {
-    store$.rallye.set(null);
-    store$.enabled.set(true);
+  const handleNoPasswordSubmit = async () => {
+    const tourRallye = await getTourModeRallye();
+    if (tourRallye) {
+      store$.team.set(null);
+      store$.reset();
+      store$.rallye.set(tourRallye);
+      await setCurrentRallye(tourRallye);
+      store$.enabled.set(true);
+    } else {
+      Alert.alert('Fehler', 'Kein Tour Mode Rallye verfügbar.');
+    }
+  };
+
+  const toggleDarkMode = () => {
+    themeStore$.isDarkMode.set(!themeStore$.isDarkMode.get());
   };
 
   return (
-    <NavigationContainer>
-      {enabled ? (
-        <MainNavigator />
-      ) : (
-        <WelcomeScreen
-          onPasswordSubmit={handlePasswordSubmit}
-          onContinueWithoutRallye={handleNoPasswordSubmit}
-          networkAvailable={online}
-          loading={loading}
-          onRefresh={onRefresh}
-        />
-      )}
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <ThemeContext.Provider
+      value={{
+        isDarkMode: themeStore$.isDarkMode.get(),
+        toggleDarkMode,
+      }}
+    >
+      <LanguageProvider>
+        <NavigationContainer>
+          {enabled ? (
+            <MainNavigator />
+          ) : (
+            <WelcomeScreen
+              onPasswordSubmit={handlePasswordSubmit}
+              onContinueWithoutRallye={handleNoPasswordSubmit}
+              networkAvailable={online}
+              loading={loading}
+              onRefresh={onRefresh}
+            />
+          )}
+        </NavigationContainer>
+      </LanguageProvider>
+    </ThemeContext.Provider>
   );
 });
 

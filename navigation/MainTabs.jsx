@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { observer } from '@legendapp/state/react';
-import MaterialIcon from '@expo/vector-icons/MaterialIcons';
-import { supabase } from '../utils/Supabase';
-import { store$ } from '../utils/Store';
-import RallyeHeader from './RallyeHeader';
-import RallyeScreen from '../screens/RallyeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import TeamScreen from '../screens/TeamScreen';
-import Color from '../utils/Colors';
+import { useEffect, useState, useContext } from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { observer } from "@legendapp/state/react";
+import MaterialIcon from "@expo/vector-icons/MaterialIcons";
+import { supabase } from "../utils/Supabase";
+import { store$ } from "../services/storage/Store";
+import RallyeHeader from "./RallyeHeader";
+import RallyeScreen from "../screens/RallyeScreen";
+import SettingsScreen from "../screens/SettingsScreen";
+import TeamScreen from "../screens/TeamScreen";
+import Colors from "../utils/Colors";
+import { ThemeContext } from "../utils/ThemeContext";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 const Tab = createBottomTabNavigator();
 
@@ -20,16 +22,15 @@ const MainTabs = observer(function MainTabs() {
   const currentQuestion = store$.currentQuestion.get();
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
   const index = store$.questionIndex.get();
+  const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
     if (rallye && team) {
       const fetchData = async () => {
-        let { data, error } = await supabase.rpc(
-          'get_question_count',
-          {
-            groupid: team.id,
-          }
-        );
+        let { data, error } = await supabase.rpc("get_question_count", {
+          groupid: team.id,
+        });
         let value =
           parseFloat(data[0].answeredquestions) /
           parseFloat(data[0].totalquestions);
@@ -46,40 +47,71 @@ const MainTabs = observer(function MainTabs() {
     }
   }, [currentQuestion, team, allQuestionsAnswered]);
 
+  const HomeScreen = () => {
+    useEffect(() => {
+      store$.enabled.set(false);
+    }, []);
+
+    return null;
+  };
+
   return (
     <Tab.Navigator
-      initialRouteName={rallye ? 'team' : 'rallye'}
+      initialRouteName={
+        rallye && rallye.status === "running" && !rallye.tour_mode
+          ? "team"
+          : "rallye"
+      }
       screenOptions={({ route }) => ({
-        headerStyle: { backgroundColor: Color.dhbwRed },
-        headerTintColor: Color.tabHeader,
+        headerStyle: { backgroundColor: Colors.dhbwRed },
+        headerTintColor: Colors.tabHeader,
         tabBarIcon: ({ focused }) => {
           const icons = {
-            rallye: 'map',
-            settings: 'settings',
-            team: 'people',
+            home: "home",
+            rallye: "map",
+            settings: "settings",
+            team: "people",
           };
           return (
             <MaterialIcon
               name={icons[route.name]}
               size={30}
-              color={focused ? Color.dhbwRed : Color.dhbwGray}
+              color={
+                focused
+                  ? Colors.dhbwRed
+                  : isDarkMode
+                  ? Colors.darkMode.tabBarIcon
+                  : Colors.dhbwGray
+              }
             />
           );
         },
-        tabBarActiveTintColor: Color.dhbwRed,
-        tabBarInactiveTintColor: Color.dhbwGray,
+        tabBarActiveTintColor: Colors.dhbwRed,
+        tabBarInactiveTintColor: Colors.dhbwGray,
+        tabBarStyle: {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
       })}
     >
       <Tab.Screen
-        name="team"
-        component={TeamScreen}
-        options={{ title: 'Team' }}
+        name="home"
+        component={HomeScreen}
+        options={{ title: language === 'de' ? "Anmeldung" : "Registration" }}
       />
+      {!rallye.tour_mode ? (
+        <Tab.Screen
+          name="team"
+          component={TeamScreen}
+          options={{ title: language === 'de' ? "Team" : "Team" }}
+        />
+      ) : null}
       <Tab.Screen
         name="rallye"
         component={RallyeScreen}
         options={{
-          title: 'Rallye',
+          title: language === 'de' ? "Rallye" : "Rallye",
           headerTitle: () => (
             <RallyeHeader rallye={rallye} percentage={percentage} />
           ),
@@ -88,7 +120,7 @@ const MainTabs = observer(function MainTabs() {
       <Tab.Screen
         name="settings"
         component={SettingsScreen}
-        options={{ title: 'Einstellungen' }}
+        options={{ title: language === 'de' ? "Einstellungen" : "Settings" }}
       />
     </Tab.Navigator>
   );

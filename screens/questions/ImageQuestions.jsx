@@ -1,75 +1,196 @@
-import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Image,
-  Button,
-  Platform,
-  Alert,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
-import { store$ } from '../../utils/Store';
-import Constants from '../../utils/Constants';
-import Colors from '../../utils/Colors';
-import { globalStyles } from '../../utils/Styles';
-import { confirmAlert } from '../../utils/ConfirmAlert';
-import Hint from '../../ui/Hint';
+import { useEffect, useState, useContext } from "react";
+import { View, Text, TextInput, Image, ScrollView, Alert } from "react-native";
+import { store$ } from "../../services/storage/Store";
+import { saveAnswer } from "../../services/storage/answerStorage";
+import Colors from "../../utils/Colors";
+import { globalStyles } from "../../utils/GlobalStyles";
+import { confirmAlert } from "../../utils/ConfirmAlert";
+import UIButton from "../../ui/UIButton";
+import Hint from "../../ui/Hint";
+import { supabase } from "../../utils/Supabase";
+import { ThemeContext } from "../../utils/ThemeContext";
+import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
 
 export default function ImageQuestions() {
-  const [answer, setAnswer] = useState('');
   const currentQuestion = store$.currentQuestion.get();
+  const currentAnswer = store$.currentAnswer.get();
+  const team = store$.team.get();
+  const [answer, setAnswer] = useState("");
+  const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
-  const handleNext = async () => {
-    const correctly_answered =
-      answer.trim() === currentQuestion.answer;
-    await store$.savePoints(
-      correctly_answered,
-      currentQuestion.points
-    );
-    store$.gotoNextQuestion();
-    setAnswer('');
+  useEffect(() => {
+    getPictureUri();
+  }, []);
+
+  const getPictureUri = async () => {
+    const bucket = "test";
+    const { data, error } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(currentQuestion.bucket_path);
+    if (error) {
+      console.error(
+        language === "de"
+          ? "Fehler beim Abrufen der Bild-URL:"
+          : "Error fetching image URL:",
+        error
+      );
+      return;
+    }
+    setPictureUri(data.publicUrl);
   };
 
+  // Vergleicht die Antwort, speichert das Ergebnis und leitet zur nächsten Frage weiter
+  const handleNext = async () => {
+    const correctlyAnswered =
+      answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
+
+    if (correctlyAnswered) {
+      store$.points.set(store$.points.get() + currentQuestion.points);
+    }
+
+    await saveAnswer(
+      team.id,
+      currentQuestion.id,
+      correctlyAnswered,
+      correctlyAnswered ? currentQuestion.points : 0,
+      answer
+    );
+    store$.gotoNextQuestion();
+    setAnswer("");
+  };
+  // Validiert die Eingabe, zeigt ggf. einen Bestätigungsdialog und ruft handleNext auf
   const handleAnswerSubmit = () => {
-    if (answer.trim() === '') {
-      Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
+    if (answer.trim() === "") {
+      Alert.alert(
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Bitte gebe eine Antwort ein."
+          : "Please enter an answer."
+      );
       return;
     }
     confirmAlert(answer, handleNext);
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.contentContainer}>
-      <View style={styles.container}>
-        <Text style={globalStyles.question}>
-          {currentQuestion.question}
-        </Text>
-        <Image
-          source={{ uri: currentQuestion.uri }}
-          style={styles.picture}
-        />
-        <TextInput
-          style={styles.input}
-          value={answer}
-          onChangeText={setAnswer}
-          placeholder="Gib hier deine Antwort ein"
-        />
+    <ScrollView
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
         <View
-          style={
-            !answer
-              ? styles.buttonContainerDeactive
-              : styles.buttonContainer
-          }
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
         >
-          <Button //Red Button
-            style={styles.button}
-            color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
-            title="Antwort senden"
-            onPress={handleAnswerSubmit}
-            disabled={!answer}
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoTitle,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+          >
+            {currentQuestion.question}
+          </Text>
+        </View>
+
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <Image
+            source={{
+              uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${currentQuestion.bucket_path}`,
+            }}
+            style={{
+              height: "100%",
+              borderRadius: 10,
+              paddingVertical: 10,
+            }}
+            resizeMode="contain"
           />
+        </View>
+
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <TextInput
+            style={[
+              globalStyles.skillStyles.input,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+                borderColor: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+            value={answer}
+            onChangeText={(text) => setAnswer(text)}
+            placeholder={
+              language === "de" ? "Deine Antwort..." : "Your answer..."
+            }
+            placeholderTextColor={
+              isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
+            }
+          />
+        </View>
+
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <UIButton
+            color={answer.trim() !== "" ? Colors.dhbwRed : Colors.dhbwGray}
+            disabled={answer.trim() === ""}
+            onPress={handleAnswerSubmit}
+          >
+            {language === "de" ? "Antwort senden" : "Submit answer"}
+          </UIButton>
         </View>
 
         {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
@@ -77,57 +198,3 @@ export default function ImageQuestions() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 200, // quickfix for keyboard covering input on small screens
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    width: '100%',
-    height: 40,
-    borderColor: Colors.dhbwGray,
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    fontSize: Constants.bigFont,
-  },
-  answerContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  answerLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  answer: {
-    fontSize: 16,
-  },
-  buttonContainer: {
-    backgroundColor: Colors.dhbwRed,
-    margin: 6,
-    borderRadius: 5,
-  },
-  buttonContainerDeactive: {
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
-  },
-  picture: {
-    width: 300,
-    height: 300,
-    marginBottom: 20,
-  },
-});

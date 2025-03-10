@@ -1,61 +1,43 @@
-import { useState, useEffect } from 'react';
-import { Text, Alert, View, StyleSheet } from 'react-native';
-import { store$ } from '../utils/Store';
-import UIButton from './UIButton';
-import Colors from '../utils/Colors';
+import { useState } from "react";
+import { Alert, TouchableOpacity } from "react-native";
+import { store$ } from "../services/storage/Store";
+import { MaterialIcons } from "@expo/vector-icons";
+import { globalStyles } from "../utils/GlobalStyles";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 export default function Hint({ hint }) {
   const [showHint, setShowHint] = useState(false);
   const currentQuestion = store$.currentQuestion.get();
+  const { language } = useLanguage(); // Use LanguageContext
 
   const handleHint = () => {
-    Alert.alert(
-      'Sicherheitsfrage',
-      `Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.`,
-      [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
-        },
-        {
-          text: 'Ja, ich möchte einen Tipp',
-          onPress: () => {
-            setShowHint(true);
-            currentQuestion.points -= 1;
+    if (!showHint) {
+      Alert.alert(
+        language === 'de' ? "Sicherheitsfrage" : "Security question",
+        language === 'de' ? `Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.` : `Are you sure you want to receive a hint? This will cost you some points.`,
+        [
+          {
+            text: language === 'de' ? "Abbrechen" : "Cancel",
+            style: "cancel",
           },
-        },
-      ]
-    );
+          {
+            text: language === 'de' ? "Ja, ich möchte einen Tipp" : "Yes, I want a hint",
+            onPress: () => {
+              setShowHint(true);
+              currentQuestion.points -= 1;
+              Alert.alert(language === 'de' ? "Tipp" : "Hint", hint);
+            },
+          },
+        ]
+      );
+    } else {
+      Alert.alert(language === 'de' ? "Tipp" : "Hint", hint);
+    }
   };
 
   return (
-    <View style={styles.hintContainer}>
-      {!showHint && (
-        <UIButton onPress={handleHint} color={Colors.contrastBlue}>
-          Tipp anfordern
-        </UIButton>
-      )}
-
-      {showHint && (
-        <>
-          <Text style={styles.hintTitle}>Tipp:</Text>
-          <Text style={styles.hintText}>{hint}</Text>
-        </>
-      )}
-    </View>
+    <TouchableOpacity style={globalStyles.fab} onPress={handleHint}>
+      <MaterialIcons name="lightbulb-outline" size={24} color="white" />
+    </TouchableOpacity>
   );
 }
-const styles = StyleSheet.create({
-  hintTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginVertical: 20,
-  },
-  hintText: {
-    fontSize: 18,
-    marginTop: 10,
-  },
-  hintContainer: {
-    marginTop: 20,
-  },
-});

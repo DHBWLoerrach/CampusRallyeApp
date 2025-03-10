@@ -1,67 +1,87 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { store$ } from '../utils/Store';
+import { useContext } from 'react';
+import { store$ } from '../services/storage/Store';
 import UIButton from '../ui/UIButton';
+import { globalStyles } from '../utils/GlobalStyles';
+import { ThemeContext } from '../utils/ThemeContext';
+import Colors from '../utils/Colors';
+import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
+  const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        globalStyles.settingsStyles.container,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
       <TouchableOpacity
-        style={styles.tile}
+        style={[
+          globalStyles.settingsStyles.tile,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.card
+              : Colors.lightMode.card,
+          },
+        ]}
         onPress={() => navigation.navigate('Impressum')}
       >
-        <Text style={styles.tileText}>Impressum</Text>
+        <Text
+          style={[
+            globalStyles.settingsStyles.tileText,
+            {
+              color: isDarkMode
+                ? Colors.darkMode.text
+                : Colors.lightMode.dhbwGray,
+            },
+          ]}
+        >
+          {language === 'de' ? 'Impressum' : 'Imprint'}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={styles.tile}
+        style={[
+          globalStyles.settingsStyles.tile,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.card
+              : Colors.lightMode.card,
+          },
+        ]}
         onPress={() => navigation.navigate('Informationen')}
       >
-        <Text style={styles.tileText}>Informationen</Text>
+        <Text
+          style={[
+            globalStyles.settingsStyles.tileText,
+            {
+              color: isDarkMode
+                ? Colors.darkMode.text
+                : Colors.lightMode.dhbwGray,
+            },
+          ]}
+        >
+          {language === 'de' ? 'Informationen' : 'Information'}
+        </Text>
       </TouchableOpacity>
+
       <UIButton
-        style={styles.button}
-        icon="arrow-left" onPress={() => store$.enabled.set(false)}
+        style={globalStyles.settingsStyles.button}
+        icon="arrow-left"
+        onPress={() => store$.enabled.set(false)}
       >
-        <Text>Zurück zur Anmeldung</Text>
+        {language === 'de'
+          ? 'Zurück zur Anmeldung'
+          : 'Back to Registration'}
       </UIButton>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  tile: {
-    width: '80%',
-    height: 100,
-    marginVertical: 10,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'grey',
-  },
-
-  tileText: {
-    fontSize: 20,
-    color: 'grey',
-  },
-
-  button: {
-    paddingTop: 20,
-    marginVertical: 10,
-  },
-});

@@ -1,19 +1,25 @@
-import { useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   Image,
-  Modal,
-  Pressable,
-  StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
-} from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Colors from '../utils/Colors';
-import UIButton from '../ui/UIButton';
+  TouchableOpacity,
+} from "react-native";
+import Colors from "../utils/Colors";
+import UIButton from "../ui/UIButton";
+import { globalStyles } from "../utils/GlobalStyles";
+import Card from "../ui/Card";
+import { useState, useEffect, useContext } from "react";
+import { Alert } from "react-native";
+import RallyeSelectionModal from "../ui/RallyeSelectionModal";
+import {
+  getActiveRallyes,
+  getCurrentRallye,
+  setCurrentRallye,
+} from "../services/storage";
+import { ThemeContext } from "../utils/ThemeContext";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useLanguage } from "../utils/LanguageContext";
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -22,162 +28,190 @@ export default function WelcomeScreen({
   loading,
   onRefresh,
 }) {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [showRallyeModal, setShowRallyeModal] = useState(false);
+  const [activeRallyes, setActiveRallyes] = useState([]);
+  const [selectedRallye, setSelectedRallye] = useState(null);
+  const { isDarkMode, toggleDarkMode } = useContext(ThemeContext);
+  const { language, toggleLanguage } = useLanguage(); // Use LanguageContext
 
-  const PasswordModal = ({ onStart }) => {
-    const [password, setPassword] = useState('');
-    return (
-      <Modal
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          onPress={() => {
-            setModalVisible(false);
-            setPassword('');
-          }}
-        >
-          <View style={styles.popoverContent}>
-            <TextInput
-              placeholder="Passwort eingeben"
-              secureTextEntry={true}
-              style={styles.passwordInput}
-              onChangeText={setPassword}
-              value={password}
-            />
-            <Pressable onPress={() => onStart(password)}>
-              <FontAwesome
-                name="arrow-right"
-                size={32}
-                color={Colors.dhbwRed}
-                marginRight={5}
-              />
-            </Pressable>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-    );
+  useEffect(() => {
+    (async () => {
+      const rallyes = await getActiveRallyes();
+      setActiveRallyes(rallyes);
+    })();
+  }, [showRallyeModal]);
+
+  const handleRallyeSelect = async (rallye) => {
+    setSelectedRallye(rallye);
+    await setCurrentRallye(rallye);
+    setShowRallyeModal(false);
   };
 
   const OnlineContent = () => (
-    <>
-      <View style={styles.button}>
-        <PasswordModal onStart={onPasswordSubmit} />
-        <UIButton onPress={() => setModalVisible(true)}>
-          An Campus Rallye teilnehmen{'\n'}(Passwort erforderlich)
-        </UIButton>
-      </View>
-      <UIButton onPress={onContinueWithoutRallye}>
-        Campus-Gelände erkunden
-      </UIButton>
-    </>
+    <View
+      style={[
+        globalStyles.welcomeStyles.container,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
+      <Card
+        title={
+          language === "de"
+            ? "An Campus Rallye teilnehmen"
+            : "Join Campus Rallye"
+        }
+        description={
+          language === "de"
+            ? "Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
+            : "Join a guided rally and explore the campus with your team"
+        }
+        icon="map-marker"
+        onShowModal={() => {
+          setShowRallyeModal(true);
+        }}
+        selectedRallye={selectedRallye}
+        onPasswordSubmit={(password) => {
+          if (!selectedRallye) {
+            Alert.alert(
+              language === "de" ? "Fehler" : "Error",
+              language === "de"
+                ? "Bitte wähle zuerst eine Rallye aus."
+                : "Please select a rally first."
+            );
+            return;
+          }
+          onPasswordSubmit(password, selectedRallye);
+        }}
+      />
+      <Card
+        title={language === "de" ? "Campus-Gelände erkunden" : "Explore Campus"}
+        description={
+          language === "de"
+            ? "Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck"
+            : "Explore the campus at your own pace without time pressure"
+        }
+        icon="compass"
+        onPress={onContinueWithoutRallye}
+      />
+    </View>
   );
 
   const OfflineContent = ({ loading, onRefresh }) => (
-    <View style={styles.offline}>
-      <Text style={[styles.text, { marginBottom: 20 }]}>
-        Du bist offline…
+    <View
+      style={[
+        globalStyles.welcomeStyles.offline,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          globalStyles.welcomeStyles.text,
+          { marginBottom: 20 },
+          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+        ]}
+      >
+        {language === "de" ? "Du bist offline…" : "You are offline…"}
       </Text>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        Aktualisieren
+        {language === "de" ? "Aktualisieren" : "Refresh"}
       </UIButton>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.headerImage}
-        source={require('../assets/dhbw-campus-header.png')}
+    <>
+      <View
+        style={[
+          globalStyles.welcomeStyles.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
+        <View style={{ position: "relative" }}>
+          <Image
+            style={globalStyles.welcomeStyles.headerImage}
+            source={require("../assets/dhbw-campus-header.png")}
+          />
+          <TouchableOpacity
+            style={{ position: "absolute", top: 40, left: 13 }}
+            onPress={toggleDarkMode}
+          >
+            <MaterialIcons
+              name={isDarkMode ? "brightness-3" : "brightness-7"}
+              size={24}
+              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ position: "absolute", top: 40, right: 13 }}
+            onPress={toggleLanguage}
+          >
+            <MaterialIcons
+              name="language"
+              size={24}
+              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={globalStyles.welcomeStyles.header}>
+          <Text
+            style={[
+              globalStyles.welcomeStyles.text,
+              globalStyles.welcomeStyles.title,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+          >
+            {language === "de"
+              ? "DHBW Lörrach Campus Rallye"
+              : "DHBW Lörrach Campus Rallye"}
+          </Text>
+          <Image
+            style={globalStyles.welcomeStyles.logo}
+            source={require("../assets/dhbw-logo.png")}
+          />
+        </View>
+        <View
+          style={[
+            globalStyles.welcomeStyles.content,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.background
+                : Colors.lightMode.background,
+            },
+          ]}
+        >
+          {loading && (
+            <View>
+              <ActivityIndicator size="large" color={Colors.dhbwRed} />
+            </View>
+          )}
+          {networkAvailable && !loading && <OnlineContent />}
+          {!networkAvailable && !loading && (
+            <OfflineContent onRefresh={onRefresh} loading={loading} />
+          )}
+        </View>
+      </View>
+      <RallyeSelectionModal
+        visible={showRallyeModal}
+        onClose={() => setShowRallyeModal(false)}
+        activeRallyes={activeRallyes}
+        onSelect={handleRallyeSelect}
       />
-      <View style={styles.header}>
-        <Text style={[styles.text, styles.title]}>
-          DHBW Lörrach Campus Rallye
-        </Text>
-        <Image
-          style={styles.logo}
-          source={require('../assets/dhbw-logo.png')}
-        />
-      </View>
-      <View style={styles.content}>
-        {loading && (
-          <View>
-            <ActivityIndicator size="large" color={Colors.dhbwRed} />
-          </View>
-        )}
-        {networkAvailable && !loading && <OnlineContent />}
-        {!networkAvailable && !loading && (
-          <OfflineContent onRefresh={onRefresh} loading={loading} />
-        )}
-      </View>
-    </View>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 10,
-  },
-  headerImage: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height / 3,
-  },
-  header: {
-    marginTop: 10,
-    flexDirection: 'row',
-  },
-  logo: {
-    marginLeft: 20,
-    width: 60,
-    height: 60,
-  },
-  text: {
-    color: Colors.dhbwGray,
-    fontSize: 20,
-  },
-  title: {
-    flex: 1,
-    color: Colors.dhbwRed,
-    fontWeight: 500,
-    alignSelf: 'center',
-  },
-  content: {
-    flex: 1,
-    width: '100%',
-  },
-  button: {
-    width: '100%',
-    marginVertical: 60,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.75)',
-  },
-  popoverContent: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: Colors.dhbwRed,
-  },
-  passwordInput: {
-    height: 50,
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  offline: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '50%',
-  },
-});

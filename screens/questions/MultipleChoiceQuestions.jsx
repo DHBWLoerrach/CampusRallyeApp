@@ -1,152 +1,175 @@
-import { useState } from 'react';
-import {
-  View,
-  Text,
-  Button,
-  Alert,
-  StyleSheet,
-  ScrollView,
-  Platform,
-} from 'react-native';
-import { TouchableOpacity } from 'react-native';
-import { store$ } from '../../utils/Store';
-import Constants from '../../utils/Constants';
-import Colors from '../../utils/Colors';
-import { globalStyles } from '../../utils/Styles';
-import { confirmAlert } from '../../utils/ConfirmAlert';
-import Hint from '../../ui/Hint';
+import { useState, useContext } from "react";
+import { View, Text, Alert, ScrollView, TouchableOpacity } from "react-native";
+import { store$ } from "../../services/storage/Store";
+import Colors from "../../utils/Colors";
+import { globalStyles } from "../../utils/GlobalStyles";
+import { confirmAlert } from "../../utils/ConfirmAlert";
+import Hint from "../../ui/Hint";
+import UIButton from "../../ui/UIButton";
+import { saveAnswer } from "../../services/storage/answerStorage";
+import { ThemeContext } from "../../utils/ThemeContext";
+import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
 
 export default function MultipleChoiceQuestions() {
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
+  const currentAnswer = store$.currentAnswer.get();
+  const currentMultipleChoiceAnswers =
+    store$.currentMultipleChoiceAnswers.get();
+  const team = store$.team.get();
+  const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   const handleNext = async () => {
-    correctly_answered = answer.trim() === currentQuestion.answer;
-    await store$.savePoints(
-      correctly_answered,
-      currentQuestion.points
+    const correctlyAnswered =
+      answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
+    if (correctlyAnswered) {
+      store$.points.set(store$.points.get() + currentQuestion.points);
+    }
+    await saveAnswer(
+      team.id,
+      currentQuestion.id,
+      correctlyAnswered,
+      correctlyAnswered ? currentQuestion.points : 0,
+      answer
     );
     store$.gotoNextQuestion();
-    setAnswer('');
+    setAnswer("");
   };
 
   const handleAnswerSubmit = () => {
-    if (answer.trim() === '') {
-      Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
+    if (answer.trim() === "") {
+      Alert.alert(
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Bitte wähle eine Antwort aus."
+          : "Please select an answer."
+      );
       return;
     }
+    // Zeige einen Bestätigungsdialog vor dem Absenden
     confirmAlert(answer, handleNext);
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.contentContainer}>
-      <View style={styles.container}>
-        <Text style={globalStyles.question}>
-          {currentQuestion.question}
-        </Text>
-        <View>
-          {currentQuestion.multiple_answer.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.squareButton}
-              onPress={() => setAnswer(option)}
-            >
-              <View
+    <ScrollView
+      contentContainerStyle={globalStyles.default.refreshContainer}
+      style={{
+        backgroundColor: isDarkMode
+          ? Colors.darkMode.background
+          : Colors.lightMode.background,
+      }}
+    >
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoTitle,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+          >
+            {currentQuestion.question}
+          </Text>
+        </View>
+
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          {currentMultipleChoiceAnswers &&
+            currentMultipleChoiceAnswers.map((option) => (
+              <TouchableOpacity
+                key={Math.random()}
                 style={[
-                  styles.innerSquare,
+                  globalStyles.multipleChoiceStyles.squareButton,
                   {
-                    backgroundColor:
-                      answer === option ? Colors.dhbwRed : 'white',
+                    borderColor:
+                      answer === option.text
+                        ? Colors.dhbwRed
+                        : isDarkMode
+                        ? Colors.darkMode.text
+                        : Colors.dhbwGray,
                   },
                 ]}
-              />
-              <Text style={styles.answerText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
+                onPress={() => setAnswer(option.text)}
+              >
+                <View
+                  style={[
+                    globalStyles.multipleChoiceStyles.innerSquare,
+                    {
+                      backgroundColor:
+                        answer === option.text
+                          ? Colors.dhbwRed
+                          : isDarkMode
+                          ? Colors.darkMode.card
+                          : "white",
+                    },
+                  ]}
+                />
+                <Text
+                  style={[
+                    globalStyles.multipleChoiceStyles.answerText,
+                    {
+                      color: isDarkMode
+                        ? Colors.darkMode.text
+                        : Colors.lightMode.text,
+                    },
+                  ]}
+                >
+                  {option.text}
+                </Text>
+              </TouchableOpacity>
+            ))}
         </View>
+
         <View
-          style={
-            !answer
-              ? styles.buttonContainerDeactive
-              : styles.buttonContainer
-          }
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
         >
-          <Button //Red Button
-            style={styles.button}
-            color={Platform.OS === 'ios' ? 'white' : Colors.dhbwRed}
-            title="Antwort senden"
-            onPress={handleAnswerSubmit}
+          <UIButton
+            color={answer ? Colors.dhbwRed : Colors.dhbwGray}
             disabled={!answer}
-          />
+            onPress={handleAnswerSubmit}
+          >
+            {language === "de" ? "Antwort senden" : "Submit answer"}
+          </UIButton>
         </View>
-        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
       </View>
+      {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  squareButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    marginStart: 30,
-    marginBottom: 20,
-  },
-  answerText: {
-    fontSize: 20,
-  },
-  innerSquare: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: Colors.dhbwGray,
-  },
-  contentContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 200, // quickfix for keyboard covering input on small screens
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    width: '100%',
-    height: 40,
-    borderColor: Colors.dhbwGray,
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    fontSize: Constants.bigFont,
-  },
-  answerContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  answerLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  answer: {
-    fontSize: 16,
-  },
-  buttonContainer: {
-    backgroundColor: Colors.dhbwRed,
-    margin: 6,
-    borderRadius: 5,
-  },
-  buttonContainerDeactive: {
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
-  },
-});

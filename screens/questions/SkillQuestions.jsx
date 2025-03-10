@@ -1,39 +1,54 @@
-import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Alert,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
-import { store$ } from '../../utils/Store';
-import UIButton from '../../ui/UIButton';
-import Constants from '../../utils/Constants';
-import Colors from '../../utils/Colors';
-import { globalStyles } from '../../utils/Styles';
-import { confirmAlert } from '../../utils/ConfirmAlert';
-import Hint from '../../ui/Hint';
+import { useState, useContext } from "react";
+import { View, Text, TextInput, Alert, ScrollView } from "react-native";
+import { store$ } from "../../services/storage/Store";
+import UIButton from "../../ui/UIButton";
+import Colors from "../../utils/Colors";
+import { globalStyles } from "../../utils/GlobalStyles";
+import { confirmAlert } from "../../utils/ConfirmAlert";
+import Hint from "../../ui/Hint";
+import { saveAnswer } from "../../services/storage/answerStorage";
+import { ThemeContext } from "../../utils/ThemeContext";
+import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
 
 export default function SkillQuestions() {
-  const [answer, setAnswer] = useState('');
+  const [answer, setAnswer] = useState("");
   const currentQuestion = store$.currentQuestion.get();
+  const currentAnswer = store$.currentAnswer.get();
+  const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   const handleNext = async () => {
-    correctly_answered =
-      answer.trim().toLowerCase() ===
-      currentQuestion.answer.toLowerCase();
-    await store$.savePoints(
-      correctly_answered,
-      currentQuestion.points
-    );
+    const correctly_answered =
+      answer.trim().toLowerCase() === currentAnswer.text.toLowerCase();
+
+    if (correctly_answered) {
+      store$.points.set(store$.points.get() + currentQuestion.points);
+    }
+
+    // Speichere die Antwort über den saveAnswer Service
+    const team = store$.team.get();
+    if (team && currentQuestion) {
+      await saveAnswer(
+        team.id,
+        currentQuestion.id,
+        correctly_answered,
+        correctly_answered ? currentQuestion.points : 0,
+        answer
+      );
+    }
+
     store$.gotoNextQuestion();
-    setAnswer('');
+    setAnswer("");
   };
 
   const handleAnswerSubmit = () => {
-    if (answer.trim() === '') {
-      Alert.alert('Fehler', 'Bitte gebe eine Antwort ein.');
+    if (answer.trim() === "") {
+      Alert.alert(
+        language === "de" ? "Fehler" : "Error",
+        language === "de"
+          ? "Bitte gebe eine Antwort ein."
+          : "Please enter an answer."
+      );
       return;
     }
 
@@ -41,86 +56,103 @@ export default function SkillQuestions() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.contentContainer}>
-      <View style={styles.container}>
-        <Text style={globalStyles.question}>
-          {currentQuestion.question}
-        </Text>
-        <TextInput
-          style={styles.input}
-          value={answer}
-          onChangeText={setAnswer}
-          placeholder="Gib hier deine Antwort ein"
-        />
+    <ScrollView
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
         <View
-          style={
-            !answer
-              ? styles.buttonContainerDeactive
-              : styles.buttonContainer
-          }
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
         >
-          <UIButton
-            color={answer ? Colors.dhbwRed : Colors.dhbwGray}
-            title="Antwort senden"
-            onPress={handleAnswerSubmit}
-            disabled={!answer}
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoTitle,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
           >
-            Antwort senden
-          </UIButton>
+            {currentQuestion.question}
+          </Text>
         </View>
 
-        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <TextInput
+            style={[
+              globalStyles.skillStyles.input,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+                borderColor: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+            value={answer}
+            onChangeText={(text) => setAnswer(text.trim())}
+            placeholder={
+              language === "de" ? "Deine Antwort..." : "Your answer..."
+            }
+            placeholderTextColor={
+              isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
+            }
+          />
+        </View>
+
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <UIButton
+            color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
+            disabled={!answer.trim()}
+            onPress={handleAnswerSubmit}
+          >
+            {language === "de" ? "Antwort senden" : "Submit answer"}
+          </UIButton>
+        </View>
       </View>
+      {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 200, // quickfix for keyboard covering input on small screens
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    width: '100%',
-    height: 40,
-    borderColor: Colors.dhbwGray,
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    fontSize: Constants.bigFont,
-  },
-  answerContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  answerLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  answer: {
-    fontSize: 16,
-  },
-  buttonContainer: {
-    backgroundColor: Colors.dhbwRed,
-    margin: 6,
-    borderRadius: 5,
-  },
-  buttonContainerDeactive: {
-    backgroundColor: Colors.dhbwGray,
-    margin: 6,
-    borderRadius: 5,
-  },
-});

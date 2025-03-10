@@ -1,49 +1,63 @@
-import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
-import { observer } from '@legendapp/state/react';
-import { store$ } from '../utils/Store';
-import { supabase } from '../utils/Supabase';
-import { getData, storeData } from '../utils/LocalStorage';
-import UIButton from '../ui/UIButton';
-import { globalStyles } from '../utils/Styles';
-import Colors from '../utils/Colors';
-import generateTeamName from '../utils/RandomTeamNames';
+import { useState, useEffect, useContext } from "react";
+import { Text, View, Alert } from "react-native";
+import { observer } from "@legendapp/state/react";
+import { store$ } from "../services/storage/Store";
+import { supabase } from "../utils/Supabase";
+import UIButton from "../ui/UIButton";
+import { globalStyles } from "../utils/GlobalStyles";
+import generateTeamName from "../utils/RandomTeamNames";
+import { getCurrentTeam, setCurrentTeam } from "../services/storage";
+import { ThemeContext } from "../utils/ThemeContext";
+import Colors from "../utils/Colors";
+import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
+  const { isDarkMode } = useContext(ThemeContext);
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
-    if (!rallye) {
-      return;
-    }
-    const fetchLocalStorage = async () => {
-      const teamId = await getData(rallye.id + '');
-      if (teamId !== null) {
-        const { data } = await supabase
-          .from('rallye_group')
-          .select('*')
-          .eq('id', teamId);
-        if (data.length > 0) {
-          store$.team.set(data[0]);
-        }
+    if (!rallye) return;
+
+    const loadTeam = async () => {
+      const localTeam = await getCurrentTeam(rallye.id);
+      const {data: onlineTeam, error: teamError} = await supabase
+        .from("rallye_team")
+        .select("*")
+        .eq("rallye_id", rallye.id)
+        .eq("id", localTeam?.id)
+        .single();
+
+      if (localTeam && !teamError) {
+        store$.team.set(localTeam);
+      } else {
+        store$.team.set(null);
       }
     };
-    fetchLocalStorage();
+
+    loadTeam();
   }, [rallye]);
 
   if (!rallye) {
     return (
-      <View style={globalStyles.container}>
-        <Text style={[globalStyles.bigText, { marginBottom: 10 }]}>
-          Du nimmst gerade nicht an einer Rallye teil.
-        </Text>
-        <UIButton
-          icon="arrow-left"
-          onPress={() => store$.enabled.set(false)}
+      <View
+        style={[
+          globalStyles.default.container,
+          { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+        ]}
+      >
+        <Text
+          style={[
+            globalStyles.default.bigText,
+            { marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}
         >
-          Zurück zur Anmeldung
+          {language === 'de' ? 'Du nimmst gerade nicht an einer Rallye teil.' : 'You are not currently participating in a rally.'}
+        </Text>
+        <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
+          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
         </UIButton>
       </View>
     );
@@ -51,18 +65,28 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
 
   function ShowTeam({ gotoRallye }) {
     return (
-      <>
-        <Text style={[globalStyles.bigText]}>Name deines Teams:</Text>
+      <View style={[
+              globalStyles.teamStyles.infoBox, 
+              { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.background },
+              ]}>
         <Text
           style={[
-            globalStyles.bigText,
-            { color: Colors.dhbwRed, marginBottom: 20 },
+            globalStyles.teamStyles.message,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}
+        >
+          {language === 'de' ? 'Name deines Teams:' : 'Your team name:'}
+        </Text>
+        <Text
+          style={[
+            globalStyles.teamStyles.teamName,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}
         >
           {team.name}
         </Text>
-        <UIButton onPress={gotoRallye}>Gehe zur Rallye</UIButton>
-      </>
+        <UIButton onPress={gotoRallye}>{language === 'de' ? 'Gehe zur Rallye' : 'Go to Rally'}</UIButton>
+      </View>
     );
   }
 
@@ -70,51 +94,63 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
     async function createTeam() {
       setLoading(true);
       const teamName = generateTeamName();
-      // TODO input name and validate team: unique, not empty, not too long
+
       try {
         const { data, error } = await supabase
-          .from('rallye_group')
+          .from("rallye_team")
           .insert({
             name: teamName,
             rallye_id: rallye.id,
           })
           .select();
-        store$.team.set(data[0]);
-        storeData(rallye.id + '', data[0].id);
+
+        if (error) throw error;
+
+        if (data && data[0]) {
+          store$.reset();
+          store$.team.set(data[0]);
+          await setCurrentTeam(rallye.id, data[0]);
+        } else {
+          throw new Error("No data returned from database");
+        }
       } catch (err) {
-        console.log('error creating team: ', err);
+        console.error("Error creating team:", err);
+        Alert.alert(
+          language === 'de' ? 'Fehler' : 'Error',
+          language === 'de' ? 'Team konnte nicht erstellt werden. Bitte erneut versuchen.' : 'Team could not be created. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
     }
 
     return (
-      <>
-        <Text style={[globalStyles.bigText, { marginBottom: 10 }]}>
-          Bilde ein Team, um an der Rallye teilzunehmen.
+      <View style={[globalStyles.teamStyles.infoBox, { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.background }]}>
+        <Text
+          style={[
+            globalStyles.teamStyles.message,
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          ]}
+        >
+          {language === 'de' ? 'Bilde ein Team, um an der Rallye teilzunehmen.' : 'Create a team to participate in the rally.'}
         </Text>
         <UIButton disabled={loading} onPress={createTeam}>
-          Team bilden
+          {language === 'de' ? 'Team bilden' : 'Create Team'}
         </UIButton>
-      </>
+      </View>
     );
   }
 
   return (
-    <View style={globalStyles.container}>
-      <Text
-        style={[
-          globalStyles.bigText,
-          { marginBottom: 10, fontWeight: '600' },
-        ]}
-      >
-        {rallye.name}
-      </Text>
-      {team ? (
-        <ShowTeam gotoRallye={() => navigation.navigate('rallye')} />
-      ) : (
-        <BuildTeam />
-      )}
+    <View style={[globalStyles.default.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
+      <Text style={[globalStyles.teamStyles.title, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }, ]}>{rallye.name}</Text>
+      <View style={[globalStyles.teamStyles.container, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}>
+        {team ? (
+          <ShowTeam gotoRallye={() => navigation.navigate("rallye")} />
+        ) : (
+          <BuildTeam />
+        )}
+      </View>
     </View>
   );
 });
