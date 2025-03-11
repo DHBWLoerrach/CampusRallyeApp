@@ -7,8 +7,7 @@ import { ThemeContext } from '../utils/ThemeContext';
 import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 const AppVersion = () => {
-  // let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
-  let versionString = `Version: ${Constants.expoConfig.version} (${Constants.expoConfig.sdkVersion})`;
+  let versionString = `Version: ${Constants.expoConfig.version}`;
   if (Constants.expoVersion) {
     versionString = `App runs in Expo version ${Constants.expoVersion}`;
   }
