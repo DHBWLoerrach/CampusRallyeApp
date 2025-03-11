@@ -10,7 +10,6 @@ import {
 import { observer } from '@legendapp/state/react';
 import { store$ } from '../services/storage/Store';
 import { saveAnswer } from '../services/storage/answerStorage';
-import NetInfo from '@react-native-community/netinfo';
 import SkillQuestions from './questions/SkillQuestions';
 import UploadPhoto from './questions/UploadPhoto';
 import QRCodeQuestions from './questions/QRCodeQuestions';
@@ -260,16 +259,6 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   };
 
   const onRefresh = async () => {
-    const networkState = await NetInfo.fetch();
-    if (!networkState.isConnected) {
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Keine Internetverbindung verfügbar'
-          : 'No internet connection available'
-      );
-      return;
-    }
     if (rallye.status === 'running') {
       await loadQuestions();
       await loadAnswers();

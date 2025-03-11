@@ -1,72 +1,8 @@
-import { observable } from "@legendapp/state";
-import { getCurrentRallye, getCurrentTeam } from ".";
-import { supabase } from "../../utils/Supabase";
-import NetInfo from "@react-native-community/netinfo";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const OFFLINE_QUEUE_KEY = "offlineQueue";
-let syncInProgress = false;
+import { observable } from '@legendapp/state';
+import { getCurrentRallye, getCurrentTeam } from '.';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Hilfsfunktion zum Abrufen der offline Queue
-const getOfflineQueue = async () => {
-  try {
-    const queue = await AsyncStorage.getItem(OFFLINE_QUEUE_KEY);
-    return queue ? JSON.parse(queue) : [];
-  } catch (error) {
-    console.error("Error reading offline queue:", error);
-    return [];
-  }
-};
-
-// Hilfsfunktion zum Speichern der offline Queue
-const saveOfflineQueue = async (queue) => {
-  try {
-    await AsyncStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
-  } catch (error) {
-    console.error("Error saving offline queue:", error);
-  }
-};
-
-// Verarbeitung der offline Queue
-const processOfflineQueue = async () => {
-  if (syncInProgress) return;
-
-  try {
-    syncInProgress = true;
-    const queue = await getOfflineQueue();
-
-    if (queue.length === 0) return;
-
-    for (const action of queue) {
-      try {
-        const { error } = await supabase
-          .from(action.table)
-          .insert(action.data)
-          .select();
-
-        if (error) throw error;
-      } catch (error) {
-        console.error("Error processing offline action:", error);
-        return; // Bei Fehler Synchronisation abbrechen
-      }
-    }
-
-    // Queue leeren nach erfolgreicher Synchronisation
-    await AsyncStorage.removeItem(OFFLINE_QUEUE_KEY);
-  } catch (error) {
-    console.error("Error in processOfflineQueue:", error);
-  } finally {
-    syncInProgress = false;
-  }
-};
-
-// Network Listener initialisieren
-NetInfo.addEventListener((state) => {
-  if (state.isConnected) {
-    processOfflineQueue();
-  }
-});
-
 export const store$ = observable({
   rallye: null,
   teamQuestions: [],
@@ -82,7 +18,8 @@ export const store$ = observable({
   timeExpired: false,
 
   // Hilfsfunktionen
-  currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
+  currentQuestion: () =>
+    store$.questions.get()[store$.questionIndex.get()],
 
   currentAnswer: () => {
     const current = store$.currentQuestion();
@@ -97,7 +34,9 @@ export const store$ = observable({
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get();
-    const filtered = answers.filter((a) => a.question_id === current.id);
+    const filtered = answers.filter(
+      (a) => a.question_id === current.id
+    );
     const shuffleArray = (array) => {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -119,7 +58,7 @@ export const store$ = observable({
     }
     // Persistiere den aktuellen Index
     AsyncStorage.setItem(
-      "currentQuestionIndex",
+      'currentQuestionIndex',
       String(store$.questionIndex.get())
     );
   },
@@ -146,7 +85,9 @@ export const store$ = observable({
       const loadTeam = await getCurrentTeam(rallye.id);
       loadTeam ? store$.team.set(loadTeam) : store$.team.set(null);
     }
-    const savedIndex = await AsyncStorage.getItem("currentQuestionIndex");
+    const savedIndex = await AsyncStorage.getItem(
+      'currentQuestionIndex'
+    );
     if (savedIndex !== null) {
       store$.questionIndex.set(parseInt(savedIndex, 10));
     }
