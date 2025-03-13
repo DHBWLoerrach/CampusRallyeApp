@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Colors from '../utils/Colors';
-import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/GlobalStyles';
 import Card from '../ui/Card';
 import { useState, useEffect, useContext } from 'react';
@@ -14,7 +13,6 @@ import { Alert } from 'react-native';
 import RallyeSelectionModal from '../ui/RallyeSelectionModal';
 import {
   getActiveRallyes,
-  getCurrentRallye,
   setCurrentRallye,
 } from '../services/storage';
 import { ThemeContext } from '../utils/ThemeContext';
@@ -24,7 +22,6 @@ import { useLanguage } from '../utils/LanguageContext';
 export default function WelcomeScreen({
   onPasswordSubmit,
   onContinueWithoutRallye,
-  networkAvailable,
   loading,
   onRefresh,
 }) {
@@ -101,36 +98,6 @@ export default function WelcomeScreen({
         icon="compass"
         onPress={onContinueWithoutRallye}
       />
-    </View>
-  );
-
-  const OfflineContent = ({ loading, onRefresh }) => (
-    <View
-      style={[
-        globalStyles.welcomeStyles.offline,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
-    >
-      <Text
-        style={[
-          globalStyles.welcomeStyles.text,
-          { marginBottom: 20 },
-          {
-            color: isDarkMode
-              ? Colors.darkMode.text
-              : Colors.lightMode.text,
-          },
-        ]}
-      >
-        {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
-      </Text>
-      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        {language === 'de' ? 'Aktualisieren' : 'Refresh'}
-      </UIButton>
     </View>
   );
 
@@ -219,10 +186,7 @@ export default function WelcomeScreen({
               />
             </View>
           )}
-          {networkAvailable && !loading && <OnlineContent />}
-          {!networkAvailable && !loading && (
-            <OfflineContent onRefresh={onRefresh} loading={loading} />
-          )}
+          {!loading && <OnlineContent />}
         </View>
       </View>
       <RallyeSelectionModal
