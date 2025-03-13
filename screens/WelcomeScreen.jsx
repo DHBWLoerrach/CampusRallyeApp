@@ -4,22 +4,22 @@ import {
   Text,
   View,
   TouchableOpacity,
-} from "react-native";
-import Colors from "../utils/Colors";
-import UIButton from "../ui/UIButton";
-import { globalStyles } from "../utils/GlobalStyles";
-import Card from "../ui/Card";
-import { useState, useEffect, useContext } from "react";
-import { Alert } from "react-native";
-import RallyeSelectionModal from "../ui/RallyeSelectionModal";
+} from 'react-native';
+import Colors from '../utils/Colors';
+import UIButton from '../ui/UIButton';
+import { globalStyles } from '../utils/GlobalStyles';
+import Card from '../ui/Card';
+import { useState, useEffect, useContext } from 'react';
+import { Alert } from 'react-native';
+import RallyeSelectionModal from '../ui/RallyeSelectionModal';
 import {
   getActiveRallyes,
   getCurrentRallye,
   setCurrentRallye,
-} from "../services/storage";
-import { ThemeContext } from "../utils/ThemeContext";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useLanguage } from "../utils/LanguageContext";
+} from '../services/storage';
+import { ThemeContext } from '../utils/ThemeContext';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useLanguage } from '../utils/LanguageContext';
 
 export default function WelcomeScreen({
   onPasswordSubmit,
@@ -60,14 +60,14 @@ export default function WelcomeScreen({
     >
       <Card
         title={
-          language === "de"
-            ? "An Campus Rallye teilnehmen"
-            : "Join Campus Rallye"
+          language === 'de'
+            ? 'An Campus Rallye teilnehmen'
+            : 'Join Campus Rallye'
         }
         description={
-          language === "de"
-            ? "Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team"
-            : "Join a guided rally and explore the campus with your team"
+          language === 'de'
+            ? 'Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team'
+            : 'Join a guided rally and explore the campus with your team'
         }
         icon="map-marker"
         onShowModal={() => {
@@ -77,10 +77,10 @@ export default function WelcomeScreen({
         onPasswordSubmit={(password) => {
           if (!selectedRallye) {
             Alert.alert(
-              language === "de" ? "Fehler" : "Error",
-              language === "de"
-                ? "Bitte wähle zuerst eine Rallye aus."
-                : "Please select a rally first."
+              language === 'de' ? 'Fehler' : 'Error',
+              language === 'de'
+                ? 'Bitte wähle zuerst eine Rallye aus.'
+                : 'Please select a rally first.'
             );
             return;
           }
@@ -88,11 +88,15 @@ export default function WelcomeScreen({
         }}
       />
       <Card
-        title={language === "de" ? "Campus-Gelände erkunden" : "Explore Campus"}
+        title={
+          language === 'de'
+            ? 'Campus-Gelände erkunden'
+            : 'Explore Campus'
+        }
         description={
-          language === "de"
-            ? "Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck"
-            : "Explore the campus at your own pace without time pressure"
+          language === 'de'
+            ? 'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck'
+            : 'Explore the campus at your own pace without time pressure'
         }
         icon="compass"
         onPress={onContinueWithoutRallye}
@@ -115,13 +119,17 @@ export default function WelcomeScreen({
         style={[
           globalStyles.welcomeStyles.text,
           { marginBottom: 20 },
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+          {
+            color: isDarkMode
+              ? Colors.darkMode.text
+              : Colors.lightMode.text,
+          },
         ]}
       >
-        {language === "de" ? "Du bist offline…" : "You are offline…"}
+        {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
       </Text>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        {language === "de" ? "Aktualisieren" : "Refresh"}
+        {language === 'de' ? 'Aktualisieren' : 'Refresh'}
       </UIButton>
     </View>
   );
@@ -138,29 +146,37 @@ export default function WelcomeScreen({
           },
         ]}
       >
-        <View style={{ position: "relative" }}>
+        <View style={{ position: 'relative' }}>
           <Image
             style={globalStyles.welcomeStyles.headerImage}
-            source={require("../assets/dhbw-campus-header.png")}
+            source={require('../assets/dhbw-campus-header.png')}
           />
           <TouchableOpacity
-            style={{ position: "absolute", top: 40, left: 13 }}
+            style={{ position: 'absolute', top: 40, left: 13 }}
             onPress={toggleDarkMode}
           >
             <MaterialIcons
-              name={isDarkMode ? "brightness-3" : "brightness-7"}
+              name={isDarkMode ? 'brightness-3' : 'brightness-7'}
               size={24}
-              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+              color={
+                isDarkMode
+                  ? Colors.lightMode.text
+                  : Colors.darkMode.text
+              }
             />
           </TouchableOpacity>
           <TouchableOpacity
-            style={{ position: "absolute", top: 40, right: 13 }}
+            style={{ position: 'absolute', top: 40, right: 13 }}
             onPress={toggleLanguage}
           >
             <MaterialIcons
               name="language"
               size={24}
-              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+              color={
+                isDarkMode
+                  ? Colors.lightMode.text
+                  : Colors.darkMode.text
+              }
             />
           </TouchableOpacity>
         </View>
@@ -176,13 +192,13 @@ export default function WelcomeScreen({
               },
             ]}
           >
-            {language === "de"
-              ? "DHBW Lörrach Campus Rallye"
-              : "DHBW Lörrach Campus Rallye"}
+            {language === 'de'
+              ? 'DHBW Lörrach Campus Rallye'
+              : 'DHBW Lörrach Campus Rallye'}
           </Text>
           <Image
             style={globalStyles.welcomeStyles.logo}
-            source={require("../assets/dhbw-logo.png")}
+            source={require('../assets/dhbw-logo.png')}
           />
         </View>
         <View
@@ -197,7 +213,10 @@ export default function WelcomeScreen({
         >
           {loading && (
             <View>
-              <ActivityIndicator size="large" color={Colors.dhbwRed} />
+              <ActivityIndicator
+                size="large"
+                color={Colors.dhbwRed}
+              />
             </View>
           )}
           {networkAvailable && !loading && <OnlineContent />}
