@@ -66,7 +66,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
             : 'You are not currently participating in a rally.'}
         </Text>
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
-          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
+          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to registration'}
         </UIButton>
       </View>
     );
@@ -105,7 +105,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
           {team.name}
         </Text>
         <UIButton onPress={gotoRallye}>
-          {language === 'de' ? 'Gehe zur Rallye' : 'Go to Rally'}
+          {language === 'de' ? 'Gehe zur Rallye' : 'Go to rally'}
         </UIButton>
       </View>
     );
