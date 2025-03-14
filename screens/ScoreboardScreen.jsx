@@ -1,12 +1,12 @@
-import { useState, useEffect, useContext } from "react";
-import { ScrollView, Text, View } from "react-native";
-import { store$ } from "../services/storage/Store";
-import { supabase } from "../utils/Supabase";
-import { globalStyles } from "../utils/GlobalStyles";
-import UIButton from "../ui/UIButton";
-import Colors from "../utils/Colors";
-import { ThemeContext } from "../utils/ThemeContext";
-import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
+import { useState, useEffect, useContext } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { store$ } from '../services/storage/Store';
+import { supabase } from '../utils/Supabase';
+import { globalStyles } from '../utils/GlobalStyles';
+import UIButton from '../ui/UIButton';
+import Colors from '../utils/Colors';
+import { ThemeContext } from '../utils/ThemeContext';
+import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
@@ -17,23 +17,21 @@ export default function ScoreboardScreen() {
   const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
-    if (rallye.status !== "ended") return;
+    if (rallye.status !== 'ended') return;
     const fetchData = async () => {
       try {
         let { data } = await supabase
-          .from("rallye_team")
-          .select("id, name, created_at, time_played")
-          .eq("rallye_id", rallye.id);
-
+          .from('rallye_team')
+          .select('id, name, created_at, time_played')
+          .eq('rallye_id', rallye.id);
 
         const { data: teamPoints, error } = await supabase
-          .from("team_questions")
-          .select("team_id, points")
+          .from('team_questions')
+          .select('team_id, points')
           .in(
-            "team_id",
+            'team_id',
             data.map((team) => team.id)
           );
-
 
         if (error) throw error;
 
@@ -88,7 +86,7 @@ export default function ScoreboardScreen() {
           setSortedTeams(rankedData);
         }
       } catch (error) {
-        console.error("Error fetching total points data:", error);
+        console.error('Error fetching total points data:', error);
       }
     };
     fetchData();
@@ -99,24 +97,43 @@ export default function ScoreboardScreen() {
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,
-        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
       ]}
     >
-      <View style={[
-        globalStyles.rallyeStatesStyles.infoBox,
-        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-      ]}>
-        <Text style={[
-          globalStyles.rallyeStatesStyles.infoTitle,
-          { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-        ]}>
+      <View
+        style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.card
+              : Colors.lightMode.card,
+          },
+        ]}
+      >
+        <Text
+          style={[
+            globalStyles.rallyeStatesStyles.infoTitle,
+            {
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+            },
+          ]}
+        >
           {language === 'de' ? 'Punktestand' : 'Scoreboard'}
         </Text>
         {ourTeam && (
           <Text
             style={[
               globalStyles.rallyeStatesStyles.infoSubtitle,
-              { marginTop: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+              {
+                marginTop: 10,
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
             ]}
           >
             {language === 'de' ? 'Dein Team:' : 'Your Team:'} {ourTeam.name}
@@ -124,32 +141,79 @@ export default function ScoreboardScreen() {
         )}
       </View>
 
-      <View style={[
-        globalStyles.rallyeStatesStyles.infoBox,
-        { padding: 0, backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-      ]}>
+      <View
+        style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          {
+            padding: 0,
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.card
+              : Colors.lightMode.card,
+          },
+        ]}
+      >
         <View
           style={{
-            flexDirection: "row",
+            flexDirection: 'row',
             padding: 15,
             borderBottomWidth: 1,
-            borderBottomColor: isDarkMode ? Colors.darkMode.cellBorder : Colors.lightMode.cellBorder,
-            backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.veryLightGray,
+            borderBottomColor: isDarkMode
+              ? Colors.darkMode.cellBorder
+              : Colors.lightMode.cellBorder,
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.veryLightGray,
           }}
         >
-          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
+          <Text
+            style={[
+              globalStyles.scoreboardStyles.headerCell,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.dhbwGray,
+              },
+            ]}
+          >
             {language === 'de' ? 'Platz' : 'Rank'}
           </Text>
-          <Text style={[globalStyles.scoreboardStyles.headerCellWide, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
+          <Text
+            style={[
+              globalStyles.scoreboardStyles.headerCellWide,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.dhbwGray,
+              },
+            ]}
+          >
             {language === 'de' ? 'Team' : 'Team'}
           </Text>
-          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray }]}>
+          <Text
+            style={[
+              globalStyles.scoreboardStyles.headerCell,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.dhbwGray,
+              },
+            ]}
+          >
             {language === 'de' ? 'Punkte' : 'Points'}
           </Text>
         </View>
 
         {/* ScrollView für die Teamliste */}
-        <ScrollView style={[{ maxHeight: 300 }, { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.veryLightGray }]}>
+        <ScrollView
+          style={[
+            { maxHeight: 300 },
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.background
+                : Colors.veryLightGray,
+            },
+          ]}
+        >
           {sortedTeams.map((team, index) => (
             <View
               key={index}
@@ -157,13 +221,23 @@ export default function ScoreboardScreen() {
                 globalStyles.scoreboardStyles.row,
                 team.group_name === ourTeam?.name &&
                   globalStyles.scoreboardStyles.rowHighlighted,
-                { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+                {
+                  backgroundColor: isDarkMode
+                    ? Colors.darkMode.card
+                    : Colors.lightMode.card,
+                },
               ]}
             >
-              <Text style={[
-                globalStyles.scoreboardStyles.cell,
-                { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-              ]}>
+              <Text
+                style={[
+                  globalStyles.scoreboardStyles.cell,
+                  {
+                    color: isDarkMode
+                      ? Colors.darkMode.text
+                      : Colors.lightMode.text,
+                  },
+                ]}
+              >
                 {team.rank}
               </Text>
               <Text
@@ -171,15 +245,25 @@ export default function ScoreboardScreen() {
                   globalStyles.scoreboardStyles.cellWide,
                   team.group_name === ourTeam?.name &&
                     globalStyles.scoreboardStyles.cellHighlighted,
-                  { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+                  {
+                    color: isDarkMode
+                      ? Colors.darkMode.text
+                      : Colors.lightMode.text,
+                  },
                 ]}
               >
                 {team.group_name}
               </Text>
-              <Text style={[
-                globalStyles.scoreboardStyles.cell,
-                { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-              ]}>
+              <Text
+                style={[
+                  globalStyles.scoreboardStyles.cell,
+                  {
+                    color: isDarkMode
+                      ? Colors.darkMode.text
+                      : Colors.lightMode.text,
+                  },
+                ]}
+              >
                 {team.total_points}
               </Text>
             </View>
@@ -187,10 +271,16 @@ export default function ScoreboardScreen() {
         </ScrollView>
       </View>
 
-      <View style={[
-        globalStyles.rallyeStatesStyles.infoBox,
-        { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-      ]}>
+      <View
+        style={[
+          globalStyles.rallyeStatesStyles.infoBox,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.card
+              : Colors.lightMode.card,
+          },
+        ]}
+      >
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
           {language === 'de' ? 'Rallye beenden' : 'Quit Rallye'}
         </UIButton>

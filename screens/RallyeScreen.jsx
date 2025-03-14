@@ -64,11 +64,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       // 2. Hole bereits beantwortete Fragen des aktuellen Teams
       let answeredIds = [];
       if (!rallye.tour_mode) {
-        const { data: answeredData, error: answeredError } =
-          await supabase
-            .from('team_questions')
-            .select('question_id')
-            .eq('team_id', team.id);
+        const { data: answeredData, error: answeredError } = await supabase
+          .from('team_questions')
+          .select('question_id')
+          .eq('team_id', team.id);
 
         if (answeredError) throw answeredError;
         answeredIds = answeredData.map((row) => row.question_id);
@@ -86,11 +85,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       );
 
       // 3. Lese die entsprechenden (unbeantworteten) Fragen aus der questions Tabelle aus
-      const { data: questionsData, error: questionsError } =
-        await supabase
-          .from('questions')
-          .select('*')
-          .in('id', filteredQuestionIds);
+      const { data: questionsData, error: questionsError } = await supabase
+        .from('questions')
+        .select('*')
+        .in('id', filteredQuestionIds);
       if (questionsError) throw questionsError;
 
       // Mapping der Felder für die UI
@@ -235,12 +233,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
             try {
               // Beim Aufgeben wird die Frage als falsch bewertet und es gibt keine Punktzahl
               if (team && currentQuestion) {
-                await saveAnswer(
-                  team.id,
-                  currentQuestion.id,
-                  false,
-                  0
-                );
+                await saveAnswer(team.id, currentQuestion.id, false, 0);
               }
               store$.gotoNextQuestion();
             } catch (error) {
@@ -300,10 +293,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
 
   if (rallye.status === 'preparing') {
     return (
-      <RallyeStates.PreparationState
-        loading={loading}
-        onRefresh={onRefresh}
-      />
+      <RallyeStates.PreparationState loading={loading} onRefresh={onRefresh} />
     );
   }
 
@@ -362,10 +352,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
           },
         ]}
         refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={onRefresh}
-          />
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
         }
       >
         <View

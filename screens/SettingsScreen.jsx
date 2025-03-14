@@ -78,9 +78,7 @@ export default function SettingsScreen() {
         icon="arrow-left"
         onPress={() => store$.enabled.set(false)}
       >
-        {language === 'de'
-          ? 'Zurück zur Anmeldung'
-          : 'Back to Registration'}
+        {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
       </UIButton>
     </View>
   );

@@ -18,8 +18,7 @@ export const store$ = observable({
   timeExpired: false,
 
   // Hilfsfunktionen
-  currentQuestion: () =>
-    store$.questions.get()[store$.questionIndex.get()],
+  currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
 
   currentAnswer: () => {
     const current = store$.currentQuestion();
@@ -34,9 +33,7 @@ export const store$ = observable({
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get();
-    const filtered = answers.filter(
-      (a) => a.question_id === current.id
-    );
+    const filtered = answers.filter((a) => a.question_id === current.id);
     const shuffleArray = (array) => {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -85,9 +82,7 @@ export const store$ = observable({
       const loadTeam = await getCurrentTeam(rallye.id);
       loadTeam ? store$.team.set(loadTeam) : store$.team.set(null);
     }
-    const savedIndex = await AsyncStorage.getItem(
-      'currentQuestionIndex'
-    );
+    const savedIndex = await AsyncStorage.getItem('currentQuestionIndex');
     if (savedIndex !== null) {
       store$.questionIndex.set(parseInt(savedIndex, 10));
     }

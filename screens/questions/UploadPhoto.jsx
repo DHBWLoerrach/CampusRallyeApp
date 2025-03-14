@@ -1,14 +1,17 @@
-import { CameraView } from "expo-camera";
-import { useContext, useRef, useState } from "react";
-import { Alert, Image, Text, View } from "react-native";
-import { saveAnswer, uploadPhotoAnswer } from "../../services/storage/answerStorage";
-import { store$ } from "../../services/storage/Store";
-import Hint from "../../ui/Hint";
-import UIButton from "../../ui/UIButton";
-import Colors from "../../utils/Colors";
-import { globalStyles } from "../../utils/GlobalStyles";
-import { useLanguage } from "../../utils/LanguageContext";
-import { ThemeContext } from "../../utils/ThemeContext";
+import { CameraView } from 'expo-camera';
+import { useContext, useRef, useState } from 'react';
+import { Alert, Image, Text, View } from 'react-native';
+import {
+  saveAnswer,
+  uploadPhotoAnswer,
+} from '../../services/storage/answerStorage';
+import { store$ } from '../../services/storage/Store';
+import Hint from '../../ui/Hint';
+import UIButton from '../../ui/UIButton';
+import Colors from '../../utils/Colors';
+import { globalStyles } from '../../utils/GlobalStyles';
+import { useLanguage } from '../../utils/LanguageContext';
+import { ThemeContext } from '../../utils/ThemeContext';
 
 export default function UploadPhoto() {
   const [picture, setPicture] = useState(null);
@@ -28,34 +31,34 @@ export default function UploadPhoto() {
       store$.gotoNextQuestion();
     } catch (error) {
       console.error(
-        language === "de" ? "Fehler beim Aufgeben:" : "Error surrendering:",
+        language === 'de' ? 'Fehler beim Aufgeben:' : 'Error surrendering:',
         error
       );
       Alert.alert(
-        language === "de" ? "Fehler" : "Error",
-        language === "de"
-          ? "Beim Aufgeben ist ein Fehler aufgetreten."
-          : "An error occurred while surrendering."
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Beim Aufgeben ist ein Fehler aufgetreten.'
+          : 'An error occurred while surrendering.'
       );
     }
   };
 
   const handleSurrender = () => {
     Alert.alert(
-      language === "de" ? "Sicherheitsfrage" : "Security question",
-      language === "de"
-        ? "Willst du diese Aufgabe wirklich aufgeben?"
-        : "Do you really want to give up this task?",
+      language === 'de' ? 'Sicherheitsfrage' : 'Security question',
+      language === 'de'
+        ? 'Willst du diese Aufgabe wirklich aufgeben?'
+        : 'Do you really want to give up this task?',
       [
         {
-          text: language === "de" ? "Abbrechen" : "Cancel",
-          style: "cancel",
+          text: language === 'de' ? 'Abbrechen' : 'Cancel',
+          style: 'cancel',
         },
         {
           text:
-            language === "de"
-              ? "Ja, ich möchte aufgeben"
-              : "Yes, I want to give up",
+            language === 'de'
+              ? 'Ja, ich möchte aufgeben'
+              : 'Yes, I want to give up',
           onPress: submitSurrender,
         },
       ]
@@ -63,7 +66,7 @@ export default function UploadPhoto() {
   };
 
   function PhotoCamera() {
-    const [facing, setFacing] = useState("back");
+    const [facing, setFacing] = useState('back');
     return (
       <View style={globalStyles.default.container}>
         <View
@@ -114,7 +117,7 @@ export default function UploadPhoto() {
                   const picture = await cameraRef.current.takePictureAsync();
                   setPicture(picture);
                 } catch (error) {
-                  console.log("error taking picture", error);
+                  console.log('error taking picture', error);
                 }
               }}
             >
@@ -124,7 +127,7 @@ export default function UploadPhoto() {
               icon="camera-rotate"
               color={Colors.dhbwGray}
               onPress={() =>
-                setFacing((current) => (current === "back" ? "front" : "back"))
+                setFacing((current) => (current === 'back' ? 'front' : 'back'))
               }
             >
               Kamera wechseln
@@ -134,7 +137,7 @@ export default function UploadPhoto() {
               color={Colors.dhbwGray}
               onPress={handleSurrender}
             >
-              {language === "de" ? "Aufgeben" : "Surrender"}
+              {language === 'de' ? 'Aufgeben' : 'Surrender'}
             </UIButton>
           </View>
         </View>
@@ -197,7 +200,7 @@ export default function UploadPhoto() {
               color={Colors.dhbwGray}
               onPress={handleSurrender}
             >
-              {language === "de" ? "Aufgeben" : "Surrender"}
+              {language === 'de' ? 'Aufgeben' : 'Surrender'}
             </UIButton>
           </View>
           {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}

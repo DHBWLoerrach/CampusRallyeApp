@@ -21,15 +21,31 @@ export default function UploadQuestions() {
 
   if (!permission?.granted) {
     return (
-      <View style={[
-        globalStyles.default.container,
-        { backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background },
-      ]}>
-        <Text style={{ textAlign: 'center', marginBottom: 10, color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text }}>
-          {language === 'de' ? 'Wir brauchen Zugriff auf die Kamera' : 'We need access to the camera'}
+      <View
+        style={[
+          globalStyles.default.container,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
+        <Text
+          style={{
+            textAlign: 'center',
+            marginBottom: 10,
+            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+          }}
+        >
+          {language === 'de'
+            ? 'Wir brauchen Zugriff auf die Kamera'
+            : 'We need access to the camera'}
         </Text>
         <UIButton onPress={requestPermission}>
-          {language === 'de' ? 'Zugriff auf Kamera erlauben' : 'Allow access to camera'}
+          {language === 'de'
+            ? 'Zugriff auf Kamera erlauben'
+            : 'Allow access to camera'}
         </UIButton>
       </View>
     );
@@ -49,25 +65,41 @@ export default function UploadQuestions() {
 
     let mailOptions = {
       recipients: [rallye.mail_adress],
-      subject: language === 'de' ? `Foto/Video -- Team: ${team.name}` : `Photo/Video -- Team: ${team.name}`,
-      body: language === 'de' ? `Das ist die Aufnahme unseres Teams!\n\nFrage: ${currentQuestion.question}` : `This is the recording of our team!\n\nQuestion: ${currentQuestion.question}`,
+      subject:
+        language === 'de'
+          ? `Foto/Video -- Team: ${team.name}`
+          : `Photo/Video -- Team: ${team.name}`,
+      body:
+        language === 'de'
+          ? `Das ist die Aufnahme unseres Teams!\n\nFrage: ${currentQuestion.question}`
+          : `This is the recording of our team!\n\nQuestion: ${currentQuestion.question}`,
       attachments: [resizedImageUri],
     };
     try {
       await MailComposer.composeAsync(mailOptions);
     } catch (error) {
-      console.error(language === 'de' ? 'Fehler beim Senden der E-Mail: ' : 'Error sending email: ', error);
+      console.error(
+        language === 'de'
+          ? 'Fehler beim Senden der E-Mail: '
+          : 'Error sending email: ',
+        error
+      );
     }
   };
 
   const handleAnswerSubmit = () => {
     Alert.alert(
       language === 'de' ? 'Sicherheitsfrage' : 'Security question',
-      language === 'de' ? 'Hast du die E-Mail mit dem Foto/Video gesendet?' : 'Did you send the email with the photo/video?',
+      language === 'de'
+        ? 'Hast du die E-Mail mit dem Foto/Video gesendet?'
+        : 'Did you send the email with the photo/video?',
       [
         { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
         {
-          text: language === 'de' ? 'Ja, ich habe die E-Mail gesendet' : 'Yes, I sent the email',
+          text:
+            language === 'de'
+              ? 'Ja, ich habe die E-Mail gesendet'
+              : 'Yes, I sent the email',
           onPress: async () => {
             await store$.savePoints(true, currentQuestion.points);
             store$.gotoNextQuestion();
@@ -78,33 +110,66 @@ export default function UploadQuestions() {
   };
 
   return (
-    <ScrollView 
-      contentContainerStyle={[globalStyles.default.refreshContainer,{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }]}
+    <ScrollView
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
     >
       <View style={globalStyles.default.container}>
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
-          <Text style={[
-            globalStyles.rallyeStatesStyles.infoTitle,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-          ]}>
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoTitle,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+          >
             {currentQuestion.question}
           </Text>
         </View>
 
         <UploadPhoto handleSendEmail={handleSendEmail} />
 
-        <View style={[
-          globalStyles.rallyeStatesStyles.infoBox,
-          { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-        ]}>
-          <Text style={[
-            globalStyles.rallyeStatesStyles.infoSubtitle,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-          ]}>
-            {language === 'de' ? 'Falls das Senden des Fotos/Videos hier nicht klappt, dann macht das Foto/Video auf dem Handy in der Kamera-App und schickt es per E-Mail mit dem Namen eures Teams an:' : 'If sending the photo/video does not work here, take the photo/video on the phone in the camera app and send it by email with the name of your team to:'}
+        <View
+          style={[
+            globalStyles.rallyeStatesStyles.infoBox,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              globalStyles.rallyeStatesStyles.infoSubtitle,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
+            ]}
+          >
+            {language === 'de'
+              ? 'Falls das Senden des Fotos/Videos hier nicht klappt, dann macht das Foto/Video auf dem Handy in der Kamera-App und schickt es per E-Mail mit dem Namen eures Teams an:'
+              : 'If sending the photo/video does not work here, take the photo/video on the phone in the camera app and send it by email with the name of your team to:'}
           </Text>
           <Text
             style={{ color: Colors.dhbwRed, textAlign: 'center', padding: 10 }}
@@ -119,10 +184,16 @@ export default function UploadQuestions() {
         </View>
 
         {currentQuestion.hint && (
-          <View style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-          ]}>
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              {
+                backgroundColor: isDarkMode
+                  ? Colors.darkMode.card
+                  : Colors.lightMode.card,
+              },
+            ]}
+          >
             <Hint hint={currentQuestion.hint} />
           </View>
         )}

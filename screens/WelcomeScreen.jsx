@@ -11,10 +11,7 @@ import Card from '../ui/Card';
 import { useState, useEffect, useContext } from 'react';
 import { Alert } from 'react-native';
 import RallyeSelectionModal from '../ui/RallyeSelectionModal';
-import {
-  getActiveRallyes,
-  setCurrentRallye,
-} from '../services/storage';
+import { getActiveRallyes, setCurrentRallye } from '../services/storage';
 import { ThemeContext } from '../utils/ThemeContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLanguage } from '../utils/LanguageContext';
@@ -85,11 +82,7 @@ export default function WelcomeScreen({
         }}
       />
       <Card
-        title={
-          language === 'de'
-            ? 'Campus-Gelände erkunden'
-            : 'Explore Campus'
-        }
+        title={language === 'de' ? 'Campus-Gelände erkunden' : 'Explore Campus'}
         description={
           language === 'de'
             ? 'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck'
@@ -125,11 +118,7 @@ export default function WelcomeScreen({
             <MaterialIcons
               name={isDarkMode ? 'brightness-3' : 'brightness-7'}
               size={24}
-              color={
-                isDarkMode
-                  ? Colors.lightMode.text
-                  : Colors.darkMode.text
-              }
+              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -139,11 +128,7 @@ export default function WelcomeScreen({
             <MaterialIcons
               name="language"
               size={24}
-              color={
-                isDarkMode
-                  ? Colors.lightMode.text
-                  : Colors.darkMode.text
-              }
+              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
             />
           </TouchableOpacity>
         </View>
@@ -180,10 +165,7 @@ export default function WelcomeScreen({
         >
           {loading && (
             <View>
-              <ActivityIndicator
-                size="large"
-                color={Colors.dhbwRed}
-              />
+              <ActivityIndicator size="large" color={Colors.dhbwRed} />
             </View>
           )}
           {!loading && <OnlineContent />}

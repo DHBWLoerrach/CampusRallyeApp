@@ -1,16 +1,16 @@
-import { Alert } from "react-native";
+import { Alert } from 'react-native';
 
 export const confirmAlert = (answer, onConfirm) => {
   Alert.alert(
-    "Sicherheitsfrage",
+    'Sicherheitsfrage',
     `Willst du wirklich "${answer}" als Antwort abschicken?`,
     [
       {
-        text: "Abbrechen",
-        style: "cancel",
+        text: 'Abbrechen',
+        style: 'cancel',
       },
       {
-        text: "Ja, ich möchte die Antwort abschicken",
+        text: 'Ja, ich möchte die Antwort abschicken',
         onPress: onConfirm,
       },
     ]

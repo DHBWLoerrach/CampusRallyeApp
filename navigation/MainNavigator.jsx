@@ -20,10 +20,7 @@ export default function MainNavigator() {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="Impressum" component={ImprintScreen} />
-      <Stack.Screen
-        name="Informationen"
-        component={InformationScreen}
-      />
+      <Stack.Screen name="Informationen" component={InformationScreen} />
     </Stack.Navigator>
   );
 }

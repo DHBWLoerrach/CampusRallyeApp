@@ -1,17 +1,17 @@
-import { useState, useContext } from "react";
-import { View, Text, TextInput, Alert, ScrollView } from "react-native";
-import { store$ } from "../../services/storage/Store";
-import UIButton from "../../ui/UIButton";
-import Colors from "../../utils/Colors";
-import { globalStyles } from "../../utils/GlobalStyles";
-import { confirmAlert } from "../../utils/ConfirmAlert";
-import Hint from "../../ui/Hint";
-import { saveAnswer } from "../../services/storage/answerStorage";
-import { ThemeContext } from "../../utils/ThemeContext";
-import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
+import { useState, useContext } from 'react';
+import { View, Text, TextInput, Alert, ScrollView } from 'react-native';
+import { store$ } from '../../services/storage/Store';
+import UIButton from '../../ui/UIButton';
+import Colors from '../../utils/Colors';
+import { globalStyles } from '../../utils/GlobalStyles';
+import { confirmAlert } from '../../utils/ConfirmAlert';
+import Hint from '../../ui/Hint';
+import { saveAnswer } from '../../services/storage/answerStorage';
+import { ThemeContext } from '../../utils/ThemeContext';
+import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
 
 export default function SkillQuestions() {
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState('');
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
   const { isDarkMode } = useContext(ThemeContext);
@@ -38,16 +38,16 @@ export default function SkillQuestions() {
     }
 
     store$.gotoNextQuestion();
-    setAnswer("");
+    setAnswer('');
   };
 
   const handleAnswerSubmit = () => {
-    if (answer.trim() === "") {
+    if (answer.trim() === '') {
       Alert.alert(
-        language === "de" ? "Fehler" : "Error",
-        language === "de"
-          ? "Bitte gebe eine Antwort ein."
-          : "Please enter an answer."
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Bitte gebe eine Antwort ein.'
+          : 'Please enter an answer.'
       );
       return;
     }
@@ -125,7 +125,7 @@ export default function SkillQuestions() {
             value={answer}
             onChangeText={(text) => setAnswer(text.trim())}
             placeholder={
-              language === "de" ? "Deine Antwort..." : "Your answer..."
+              language === 'de' ? 'Deine Antwort...' : 'Your answer...'
             }
             placeholderTextColor={
               isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
@@ -148,7 +148,7 @@ export default function SkillQuestions() {
             disabled={!answer.trim()}
             onPress={handleAnswerSubmit}
           >
-            {language === "de" ? "Antwort senden" : "Submit answer"}
+            {language === 'de' ? 'Antwort senden' : 'Submit answer'}
           </UIButton>
         </View>
       </View>

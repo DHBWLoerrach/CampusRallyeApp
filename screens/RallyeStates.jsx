@@ -1,14 +1,14 @@
-import { RefreshControl, ScrollView, Text, View } from "react-native";
-import VotingScreen from "./VotingScreen";
-import Scoreboard from "./ScoreboardScreen";
-import UIButton from "../ui/UIButton";
-import { globalStyles } from "../utils/GlobalStyles";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import Colors from "../utils/Colors";
-import React from "react";
-import { useContext } from "react";
-import { ThemeContext } from "../utils/ThemeContext";
-import { useLanguage } from "../utils/LanguageContext"; // Import LanguageContext
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import VotingScreen from './VotingScreen';
+import Scoreboard from './ScoreboardScreen';
+import UIButton from '../ui/UIButton';
+import { globalStyles } from '../utils/GlobalStyles';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Colors from '../utils/Colors';
+import React from 'react';
+import { useContext } from 'react';
+import { ThemeContext } from '../utils/ThemeContext';
+import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 export const PreparationState = ({ loading, onRefresh }) => {
   const { isDarkMode } = useContext(ThemeContext);
@@ -56,9 +56,9 @@ export const PreparationState = ({ loading, onRefresh }) => {
             },
           ]}
         >
-          {language === "de"
-            ? "Die Rallye hat noch nicht begonnen"
-            : "The rally has not started yet"}
+          {language === 'de'
+            ? 'Die Rallye hat noch nicht begonnen'
+            : 'The rally has not started yet'}
         </Text>
         <Text
           style={[
@@ -70,9 +70,9 @@ export const PreparationState = ({ loading, onRefresh }) => {
             },
           ]}
         >
-          {language === "de"
-            ? "Bitte warte auf den Start der Rallye"
-            : "Please wait for the rally to start"}
+          {language === 'de'
+            ? 'Bitte warte auf den Start der Rallye'
+            : 'Please wait for the rally to start'}
         </Text>
       </View>
       <View
@@ -86,7 +86,7 @@ export const PreparationState = ({ loading, onRefresh }) => {
         ]}
       >
         <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-          {language === "de" ? "Aktualisieren" : "Refresh"}
+          {language === 'de' ? 'Aktualisieren' : 'Refresh'}
         </UIButton>
       </View>
     </ScrollView>
@@ -142,7 +142,7 @@ export const TeamNotSelectedState = () => {
             },
           ]}
         >
-          {language === "de" ? "Kein Team ausgewählt" : "No team selected"}
+          {language === 'de' ? 'Kein Team ausgewählt' : 'No team selected'}
         </Text>
         <Text
           style={[
@@ -154,9 +154,9 @@ export const TeamNotSelectedState = () => {
             },
           ]}
         >
-          {language === "de"
-            ? "Bitte bilde zuerst ein Team"
-            : "Please create a team first"}
+          {language === 'de'
+            ? 'Bitte bilde zuerst ein Team'
+            : 'Please create a team first'}
         </Text>
       </View>
     </ScrollView>
@@ -209,9 +209,9 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
             },
           ]}
         >
-          {language === "de"
-            ? "Keine Fragen verfügbar"
-            : "No questions available"}
+          {language === 'de'
+            ? 'Keine Fragen verfügbar'
+            : 'No questions available'}
         </Text>
         <Text
           style={[
@@ -223,14 +223,14 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
             },
           ]}
         >
-          {language === "de"
-            ? "Momentan sind keine Fragen zum Beantworten verfügbar"
-            : "Currently no questions available to answer"}
+          {language === 'de'
+            ? 'Momentan sind keine Fragen zum Beantworten verfügbar'
+            : 'Currently no questions available to answer'}
         </Text>
       </View>
 
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        {language === "de" ? "Aktualisieren" : "Refresh"}
+        {language === 'de' ? 'Aktualisieren' : 'Refresh'}
       </UIButton>
     </ScrollView>
   );
@@ -259,7 +259,7 @@ export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
       />
 
       <Text style={globalStyles.rallyeStatesStyles.title}>
-        {language === "de" ? "Glückwunsch!" : "Congratulations!"}
+        {language === 'de' ? 'Glückwunsch!' : 'Congratulations!'}
       </Text>
       <View
         style={[
@@ -281,9 +281,9 @@ export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
             },
           ]}
         >
-          {language === "de"
-            ? "Alle Fragen wurden beantwortet."
-            : "All questions have been answered."}
+          {language === 'de'
+            ? 'Alle Fragen wurden beantwortet.'
+            : 'All questions have been answered.'}
         </Text>
 
         <Text
@@ -296,7 +296,7 @@ export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
             },
           ]}
         >
-          {language === "de" ? "Erreichte Punktzahl:" : "Points achieved:"}{" "}
+          {language === 'de' ? 'Erreichte Punktzahl:' : 'Points achieved:'}{' '}
           {points}
         </Text>
       </View>
@@ -311,7 +311,7 @@ export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
         ]}
       >
         <UIButton icon="arrow-left" onPress={goBackToLogin}>
-          {language === "de" ? "Zurück zur Anmeldung" : "Back to Registration"}
+          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
         </UIButton>
       </View>
     </ScrollView>
@@ -345,7 +345,7 @@ export const TimeExpiredState = ({ loading, onRefresh, teamName, points }) => {
       />
 
       <Text style={globalStyles.rallyeStatesStyles.title}>
-        {language === "de" ? "Zeit abgelaufen!" : "Time up!"}
+        {language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'}
       </Text>
 
       <View
@@ -368,7 +368,7 @@ export const TimeExpiredState = ({ loading, onRefresh, teamName, points }) => {
             },
           ]}
         >
-          {language === "de" ? "Team:" : "Team:"} {teamName}
+          {language === 'de' ? 'Team:' : 'Team:'} {teamName}
         </Text>
       </View>
 
@@ -392,7 +392,7 @@ export const TimeExpiredState = ({ loading, onRefresh, teamName, points }) => {
             },
           ]}
         >
-          {language === "de" ? "Erreichte Punkte" : "Points achieved"}
+          {language === 'de' ? 'Erreichte Punkte' : 'Points achieved'}
         </Text>
         <Text style={globalStyles.rallyeStatesStyles.pointsValue}>
           {points}
@@ -409,9 +409,9 @@ export const TimeExpiredState = ({ loading, onRefresh, teamName, points }) => {
           },
         ]}
       >
-        {language === "de"
-          ? "Wartet auf die Beendigung der Rallye\nund geht zum vereinbarten Treffpunkt."
-          : "Wait for the rally to end\nand go to the agreed meeting point."}
+        {language === 'de'
+          ? 'Wartet auf die Beendigung der Rallye\nund geht zum vereinbarten Treffpunkt.'
+          : 'Wait for the rally to end\nand go to the agreed meeting point.'}
       </Text>
     </ScrollView>
   );
@@ -449,7 +449,7 @@ export const AllQuestionsAnsweredState = ({
       />
 
       <Text style={globalStyles.rallyeStatesStyles.title}>
-        {language === "de" ? "Glückwunsch!" : "Congratulations!"}
+        {language === 'de' ? 'Glückwunsch!' : 'Congratulations!'}
       </Text>
 
       <View
@@ -472,9 +472,9 @@ export const AllQuestionsAnsweredState = ({
             },
           ]}
         >
-          {language === "de"
-            ? "Alle Fragen beantwortet"
-            : "All questions answered"}
+          {language === 'de'
+            ? 'Alle Fragen beantwortet'
+            : 'All questions answered'}
         </Text>
         <Text
           style={[
@@ -486,7 +486,7 @@ export const AllQuestionsAnsweredState = ({
             },
           ]}
         >
-          {language === "de" ? "Team:" : "Team:"} {teamName}
+          {language === 'de' ? 'Team:' : 'Team:'} {teamName}
         </Text>
       </View>
 
@@ -510,7 +510,7 @@ export const AllQuestionsAnsweredState = ({
             },
           ]}
         >
-          {language === "de" ? "Erreichte Punkte" : "Points achieved"}
+          {language === 'de' ? 'Erreichte Punkte' : 'Points achieved'}
         </Text>
         <Text style={globalStyles.rallyeStatesStyles.pointsValue}>
           {points}
@@ -527,9 +527,9 @@ export const AllQuestionsAnsweredState = ({
           },
         ]}
       >
-        {language === "de"
-          ? "Wartet auf die Beendigung der Rallye\nund geht zum vereinbarten Treffpunkt."
-          : "Wait for the rally to end\nand go to the agreed meeting point."}
+        {language === 'de'
+          ? 'Wartet auf die Beendigung der Rallye\nund geht zum vereinbarten Treffpunkt.'
+          : 'Wait for the rally to end\nand go to the agreed meeting point.'}
       </Text>
     </ScrollView>
   );

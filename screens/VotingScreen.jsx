@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { View, Text, FlatList, Image } from "react-native";
-import { store$ } from "../services/storage/Store";
-import { supabase } from "../utils/Supabase";
-import UIButton from "../ui/UIButton";
-import Colors from "../utils/Colors";
-import { globalStyles } from "../utils/GlobalStyles";
-import { TouchableOpacity } from "react-native";
+import { useState, useEffect } from 'react';
+import { View, Text, FlatList, Image } from 'react-native';
+import { store$ } from '../services/storage/Store';
+import { supabase } from '../utils/Supabase';
+import UIButton from '../ui/UIButton';
+import Colors from '../utils/Colors';
+import { globalStyles } from '../utils/GlobalStyles';
+import { TouchableOpacity } from 'react-native';
 
 export default function VotingScreen({ onRefresh, loading }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -23,7 +23,7 @@ export default function VotingScreen({ onRefresh, loading }) {
 
   const getVotingData = async () => {
     try {
-      const { data, error } = await supabase.rpc("get_voting_content", {
+      const { data, error } = await supabase.rpc('get_voting_content', {
         rallye_id_param: rallye.id,
         own_team_id_param: team.id,
       });
@@ -32,33 +32,33 @@ export default function VotingScreen({ onRefresh, loading }) {
       }
       setVoting(data || []);
     } catch (error) {
-      console.error("Error fetching voting questions:", error);
+      console.error('Error fetching voting questions:', error);
     }
   };
 
   const getCount = async () => {
     try {
       const { data: count, error: countError } = await supabase
-        .from("voting")
-        .select("question_id")
-        .eq("rallye_id", rallye.id);
+        .from('voting')
+        .select('question_id')
+        .eq('rallye_id', rallye.id);
       if (countError) {
-        console.error("Error fetching voting questions:", countError);
+        console.error('Error fetching voting questions:', countError);
         return;
       }
       setCounter(count.length);
 
       const { data, error } = await supabase
-        .from("rallye_team")
-        .select("id")
-        .eq("rallye_id", rallye.id);
+        .from('rallye_team')
+        .select('id')
+        .eq('rallye_id', rallye.id);
       if (error) {
-        console.error("Error fetching team count:", error);
+        console.error('Error fetching team count:', error);
         return;
       }
       setTeamCount(data.length);
     } catch (error) {
-      console.error("Error fetching team count:", error);
+      console.error('Error fetching team count:', error);
     }
   };
 
@@ -95,13 +95,13 @@ export default function VotingScreen({ onRefresh, loading }) {
   const handleNextQuestion = async () => {
     // Update der Punkte
     const { data, error } = await supabase.rpc(
-      "increment_team_question_points",
+      'increment_team_question_points',
       {
         target_answer_id: selectedUpdateId,
       }
     );
     if (error) {
-      console.error("Error updating team question:", error);
+      console.error('Error updating team question:', error);
       return;
     }
 
@@ -110,11 +110,11 @@ export default function VotingScreen({ onRefresh, loading }) {
     setSelectedTeam(null);
     setSendingResult(false);
   };
-  
+
   if (!votingAllowed || teamCount < 2) {
     return (
       <View
-        style={[globalStyles.default.container, { backgroundColor: "white" }]}
+        style={[globalStyles.default.container, { backgroundColor: 'white' }]}
       >
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
           <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
@@ -142,13 +142,13 @@ export default function VotingScreen({ onRefresh, loading }) {
     <View
       style={[
         globalStyles.default.container,
-        { backgroundColor: "white", flex: 1 },
+        { backgroundColor: 'white', flex: 1 },
       ]}
     >
       <FlatList
         data={currentQuestion}
         keyExtractor={() => {
-          Math.random().toString().split(".")[1];
+          Math.random().toString().split('.')[1];
         }}
         onRefresh={getVotingData}
         refreshing={loading}
@@ -179,7 +179,7 @@ export default function VotingScreen({ onRefresh, loading }) {
               setSelectedUpdateId(item.tq_id);
             }}
             activeOpacity={1.0}
-            style={{ alignItems: "flex-start", paddingTop: 10 }}
+            style={{ alignItems: 'flex-start', paddingTop: 10 }}
           >
             <View
               style={[
@@ -188,12 +188,12 @@ export default function VotingScreen({ onRefresh, loading }) {
                   borderColor:
                     selectedTeam === item.rt_id
                       ? Colors.dhbwRed
-                      : "transparent",
+                      : 'transparent',
                   borderWidth: selectedTeam === item.rt_id ? 2 : 0,
                 },
               ]}
             >
-              {item.question_type === "knowledge" ? (
+              {item.question_type === 'knowledge' ? (
                 <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
                   {item.tq_team_answer}
                 </Text>
@@ -206,9 +206,9 @@ export default function VotingScreen({ onRefresh, loading }) {
                     <Image
                       source={{ uri: imageUri }}
                       style={{
-                        width: "100%",
+                        width: '100%',
                         height: 200,
-                        resizeMode: "contain",
+                        resizeMode: 'contain',
                         marginBottom: 10,
                       }}
                     />

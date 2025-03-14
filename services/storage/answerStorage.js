@@ -1,8 +1,8 @@
-import { supabase } from "../../utils/Supabase";
-import { StorageKeys, getStorageItem, setStorageItem } from "./asyncStorage";
-import { store$ } from "./Store";
-import { Buffer } from "buffer";
-import * as FileSystem from "expo-file-system";
+import { supabase } from '../../utils/Supabase';
+import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
+import { store$ } from './Store';
+import { Buffer } from 'buffer';
+import * as FileSystem from 'expo-file-system';
 
 export async function getOfflineQueue() {
   return getStorageItem(StorageKeys.OFFLINE_QUEUE) || [];
@@ -23,11 +23,11 @@ export async function saveAnswer(
   questionId,
   answeredCorrectly,
   points,
-  answer = ""
+  answer = ''
 ) {
   try {
     // Ergebnis in der Tabelle team_questions speichern
-    const { error } = await supabase.from("team_questions").insert({
+    const { error } = await supabase.from('team_questions').insert({
       team_id: teamId,
       question_id: questionId,
       correct: answeredCorrectly,
@@ -37,10 +37,10 @@ export async function saveAnswer(
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error("Error saving answer:", error);
+    console.error('Error saving answer:', error);
     // Optional: Offline Queue verwenden, falls keine Verbindung besteht.
     await addToOfflineQueue({
-      type: "SAVE_ANSWER",
+      type: 'SAVE_ANSWER',
       data: { teamId, questionId, answeredCorrectly, points },
     });
     return false;
@@ -53,7 +53,7 @@ export async function uploadPhotoAnswer(imageUri) {
     const base64 = await FileSystem.readAsStringAsync(imageUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    const buffer = Buffer.from(base64, "base64");
+    const buffer = Buffer.from(base64, 'base64');
 
     const teamId = store$.team.get().id;
     const questionId = store$.currentQuestion.get().id;
@@ -63,8 +63,8 @@ export async function uploadPhotoAnswer(imageUri) {
     const filePath = `${fileName}`;
 
     const { data, error: uploadError } = await supabase.storage
-      .from("upload_photo_answers")
-      .upload(filePath, buffer, { upsert: true, contentType: "image/*" });
+      .from('upload_photo_answers')
+      .upload(filePath, buffer, { upsert: true, contentType: 'image/*' });
     if (uploadError) throw uploadError;
 
     await saveAnswer(teamId, questionId, true, points, filePath);
@@ -74,11 +74,11 @@ export async function uploadPhotoAnswer(imageUri) {
 
     return data;
   } catch (error) {
-    console.error("Error uploading image answer:", error);
+    console.error('Error uploading image answer:', error);
 
     // Offline Queue für fehlgeschlagene Foto-Uploads verwenden.
     await addToOfflineQueue({
-      type: "UPLOAD_PHOTO_ANSWER",
+      type: 'UPLOAD_PHOTO_ANSWER',
       data: { teamId, questionId, imageUri },
     });
     return false;

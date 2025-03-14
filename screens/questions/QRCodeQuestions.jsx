@@ -31,9 +31,7 @@ export default function QRCodeQuestions() {
       store$.gotoNextQuestion();
     } catch (error) {
       console.error(
-        language === 'de'
-          ? 'Fehler beim Aufgeben:'
-          : 'Error surrendering:',
+        language === 'de' ? 'Fehler beim Aufgeben:' : 'Error surrendering:',
         error
       );
       Alert.alert(
@@ -80,9 +78,7 @@ export default function QRCodeQuestions() {
             : 'The QR code is incorrect! You are probably not at the right place.'
         );
         setScanMode(false);
-      } else if (
-        currentAnswer.text.toLowerCase() === data.toLowerCase()
-      ) {
+      } else if (currentAnswer.text.toLowerCase() === data.toLowerCase()) {
         setScanMode(false);
         Alert.alert(
           'OK',
@@ -134,9 +130,7 @@ export default function QRCodeQuestions() {
           style={{
             textAlign: 'center',
             marginBottom: 10,
-            color: isDarkMode
-              ? Colors.darkMode.text
-              : Colors.lightMode.text,
+            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
           }}
         >
           {language === 'de'
@@ -155,9 +149,7 @@ export default function QRCodeQuestions() {
   if (isScanCorrect) {
     return (
       <View style={globalStyles.container}>
-        <Text style={globalStyles.question}>
-          QR Code erfolgreich gescannt!
-        </Text>
+        <Text style={globalStyles.question}>QR Code erfolgreich gescannt!</Text>
         <UIButton onPress={() => submitResult(true)}>Weiter</UIButton>
       </View>
     );

@@ -1,17 +1,17 @@
-import { useState, useContext } from "react";
-import { View, Text, Alert, ScrollView, TouchableOpacity } from "react-native";
-import { store$ } from "../../services/storage/Store";
-import Colors from "../../utils/Colors";
-import { globalStyles } from "../../utils/GlobalStyles";
-import { confirmAlert } from "../../utils/ConfirmAlert";
-import Hint from "../../ui/Hint";
-import UIButton from "../../ui/UIButton";
-import { saveAnswer } from "../../services/storage/answerStorage";
-import { ThemeContext } from "../../utils/ThemeContext";
-import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
+import { useState, useContext } from 'react';
+import { View, Text, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { store$ } from '../../services/storage/Store';
+import Colors from '../../utils/Colors';
+import { globalStyles } from '../../utils/GlobalStyles';
+import { confirmAlert } from '../../utils/ConfirmAlert';
+import Hint from '../../ui/Hint';
+import UIButton from '../../ui/UIButton';
+import { saveAnswer } from '../../services/storage/answerStorage';
+import { ThemeContext } from '../../utils/ThemeContext';
+import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
 
 export default function MultipleChoiceQuestions() {
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState('');
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
   const currentMultipleChoiceAnswers =
@@ -34,16 +34,16 @@ export default function MultipleChoiceQuestions() {
       answer
     );
     store$.gotoNextQuestion();
-    setAnswer("");
+    setAnswer('');
   };
 
   const handleAnswerSubmit = () => {
-    if (answer.trim() === "") {
+    if (answer.trim() === '') {
       Alert.alert(
-        language === "de" ? "Fehler" : "Error",
-        language === "de"
-          ? "Bitte wähle eine Antwort aus."
-          : "Please select an answer."
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Bitte wähle eine Antwort aus.'
+          : 'Please select an answer.'
       );
       return;
     }
@@ -130,7 +130,7 @@ export default function MultipleChoiceQuestions() {
                           ? Colors.dhbwRed
                           : isDarkMode
                           ? Colors.darkMode.card
-                          : "white",
+                          : 'white',
                     },
                   ]}
                 />
@@ -165,7 +165,7 @@ export default function MultipleChoiceQuestions() {
             disabled={!answer}
             onPress={handleAnswerSubmit}
           >
-            {language === "de" ? "Antwort senden" : "Submit answer"}
+            {language === 'de' ? 'Antwort senden' : 'Submit answer'}
           </UIButton>
         </View>
       </View>

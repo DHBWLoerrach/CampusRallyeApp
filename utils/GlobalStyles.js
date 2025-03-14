@@ -1,10 +1,10 @@
 // utils/globalStyles.js
-import { StyleSheet, Dimensions } from "react-native";
-import Colors from "./Colors";
-import Constants from "./Constants";
+import { StyleSheet, Dimensions } from 'react-native';
+import Colors from './Colors';
+import Constants from './Constants';
 
 // Bildschirmmaße für dynamische Berechnungen
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Helfer-Funktion für responsive Schriftgrößen
 const normalizeFont = (size) => {
@@ -16,11 +16,11 @@ export const globalStyles = StyleSheet.create({
   default: {
     container: {
       flex: 1,
-      flexDirection: "column",
+      flexDirection: 'column',
       flexGrow: 1,
-      alignItems: "center",
-      justifyContent: "space-between",
-      backgroundColor: "#fff",
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: '#fff',
       paddingVertical: SCREEN_HEIGHT * 0.02,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       maxWidth: SCREEN_WIDTH,
@@ -28,19 +28,19 @@ export const globalStyles = StyleSheet.create({
     bigText: {
       color: Colors.dhbwGray,
       fontSize: normalizeFont(24),
-      textAlign: "center",
+      textAlign: 'center',
     },
     refreshContainer: {
       flexGrow: 1,
     },
     section: {
       marginBottom: 20,
-      backgroundColor: "#fff",
+      backgroundColor: '#fff',
       borderRadius: 10,
       borderWidth: 1,
       padding: 20,
-      width: "100%",
-      shadowColor: "#000",
+      width: '100%',
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
         height: 2,
@@ -52,38 +52,38 @@ export const globalStyles = StyleSheet.create({
     question: {
       fontSize: 20,
       marginBottom: 30,
-      textAlign: "center",
+      textAlign: 'center',
     },
   },
 
   rallyeModal: {
     modalContainer: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0,0,0,0.5)',
     },
     modalContent: {
-      backgroundColor: "white",
+      backgroundColor: 'white',
       padding: 20,
       borderRadius: 10,
-      width: "85%",
-      maxHeight: "80%",
+      width: '85%',
+      maxHeight: '80%',
     },
     modalTitle: {
       fontSize: 22,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 15,
-      textAlign: "center",
+      textAlign: 'center',
     },
     rallyeCard: {
-      backgroundColor: "#f2f2f2",
+      backgroundColor: '#f2f2f2',
       borderRadius: 8,
       padding: 15,
       marginVertical: 8,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     rallyeInfo: {
       flex: 1,
@@ -91,17 +91,17 @@ export const globalStyles = StyleSheet.create({
     },
     rallyeName: {
       fontSize: 18,
-      fontWeight: "600",
+      fontWeight: '600',
       marginBottom: 5,
     },
     rallyeStudiengang: {
       fontSize: 16,
-      color: "#555",
+      color: '#555',
       marginBottom: 3,
     },
     rallyeStatus: {
       fontSize: 14,
-      color: "#888",
+      color: '#888',
     },
     selectButton: {
       paddingVertical: 8,
@@ -109,14 +109,14 @@ export const globalStyles = StyleSheet.create({
     },
     cancelButton: {
       marginTop: 20,
-      alignSelf: "center",
+      alignSelf: 'center',
       paddingVertical: 8,
       paddingHorizontal: 20,
     },
     noDataText: {
-      textAlign: "center",
+      textAlign: 'center',
       fontSize: 16,
-      color: "#777",
+      color: '#777',
       marginVertical: 10,
     },
   },
@@ -124,28 +124,28 @@ export const globalStyles = StyleSheet.create({
   rallyeStatesStyles: {
     container: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "space-around",
-      backgroundColor: "white",
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      backgroundColor: 'white',
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       paddingVertical: SCREEN_HEIGHT * 0.03,
     },
     successIcon: {
-      marginBottom: "8%",
+      marginBottom: '8%',
     },
     title: {
       color: Colors.dhbwRed,
-      fontWeight: "400",
+      fontWeight: '400',
       fontSize: normalizeFont(30),
-      marginBottom: "8%",
-      textAlign: "center",
+      marginBottom: '8%',
+      textAlign: 'center',
     },
     infoBox: {
-      minWidth: "100%",
+      minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderRadius: 10,
-      shadowColor: "#000",
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
         height: 2,
@@ -156,13 +156,13 @@ export const globalStyles = StyleSheet.create({
       maxHeight: SCREEN_HEIGHT * 0.33,
     },
     infoCameraBox: {
-      minWidth: "100%",
+      minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderRadius: 10,
-      justifyContent: "center",
-      alignItems: "center",
-      shadowColor: "#000",
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
         height: 2,
@@ -174,56 +174,56 @@ export const globalStyles = StyleSheet.create({
     },
     infoTitle: {
       fontSize: normalizeFont(20),
-      textAlign: "center",
+      textAlign: 'center',
       color: Colors.dhbwGray,
     },
     infoSubtitle: {
       fontSize: 16,
-      textAlign: "center",
+      textAlign: 'center',
       color: Colors.dhbwGray,
-      marginTop: "3%",
+      marginTop: '3%',
     },
     pointsTitle: {
       fontSize: 22,
-      textAlign: "center",
+      textAlign: 'center',
       color: Colors.dhbwGray,
     },
     pointsValue: {
       fontSize: 40,
-      textAlign: "center",
+      textAlign: 'center',
       color: Colors.dhbwRed,
-      fontWeight: "600",
-      marginTop: "3%",
+      fontWeight: '600',
+      marginTop: '3%',
     },
     footer: {
       fontSize: 18,
-      textAlign: "center",
+      textAlign: 'center',
       color: Colors.dhbwGray,
       marginTop: 20,
       paddingHorizontal: 20,
     },
     iconContainer: {
-      alignItems: "center",
+      alignItems: 'center',
       marginBottom: 30,
     },
     footer: {
       fontSize: 18,
-      textAlign: "center",
+      textAlign: 'center',
       color: Colors.dhbwGray,
     },
   },
 
   cardStyles: {
     card: {
-      width: "100%",
+      width: '100%',
       height: SCREEN_HEIGHT * 0.22,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderRadius: 15,
       padding: SCREEN_WIDTH * 0.04,
       marginVertical: SCREEN_HEIGHT * 0.015,
-      alignItems: "center",
-      justifyContent: "center",
-      shadowColor: "#000",
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
         height: 2,
@@ -234,32 +234,32 @@ export const globalStyles = StyleSheet.create({
     },
     cardTitle: {
       fontSize: normalizeFont(16),
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: Colors.dhbwGray,
       marginTop: SCREEN_HEIGHT * 0.01,
-      textAlign: "center",
+      textAlign: 'center',
     },
     cardDescription: {
       fontSize: normalizeFont(14),
       color: Colors.dhbwGray,
-      textAlign: "center",
+      textAlign: 'center',
       marginTop: SCREEN_HEIGHT * 0.01,
       paddingHorizontal: SCREEN_WIDTH * 0.02,
     },
     cardFace: {
-      width: "100%",
-      height: "100%",
-      alignItems: "center",
-      justifyContent: "center",
-      backfaceVisibility: "hidden",
-      position: "absolute",
+      width: '100%',
+      height: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backfaceVisibility: 'hidden',
+      position: 'absolute',
     },
     cardBack: {
-      backgroundColor: "white",
-      transform: [{ rotateY: "180deg" }],
+      backgroundColor: 'white',
+      transform: [{ rotateY: '180deg' }],
     },
     passwordInput: {
-      width: "80%",
+      width: '80%',
       height: 40,
       borderWidth: 1,
       borderColor: Colors.dhbwGray,
@@ -268,7 +268,7 @@ export const globalStyles = StyleSheet.create({
       marginVertical: 20,
     },
     buttonRow: {
-      flexDirection: "row",
+      flexDirection: 'row',
       gap: 10,
     },
     button: {
@@ -277,45 +277,45 @@ export const globalStyles = StyleSheet.create({
       borderRadius: 5,
     },
     buttonText: {
-      color: "white",
-      fontWeight: "bold",
+      color: 'white',
+      fontWeight: 'bold',
     },
   },
 
   scoreboardStyles: {
     container: {
       flex: 1,
-      backgroundColor: "white",
+      backgroundColor: 'white',
     },
     title: {
       color: Colors.dhbwGray,
       fontSize: 30,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 10,
-      textAlign: "center",
+      textAlign: 'center',
     },
     teamInfo: {
       fontSize: 20,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: Colors.dhbwGray,
       marginBottom: 10,
-      textAlign: "center",
+      textAlign: 'center',
     },
     tableHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
+      flexDirection: 'row',
+      justifyContent: 'space-between',
       marginBottom: 5,
     },
     headerText: {
       color: Colors.dhbwGray,
       fontSize: 20,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       flex: 1,
-      textAlign: "center",
+      textAlign: 'center',
     },
     tableRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
+      flexDirection: 'row',
+      justifyContent: 'space-between',
       padding: 10,
       borderBottomWidth: 1,
       borderBottomColor: Colors.lightGray,
@@ -326,7 +326,7 @@ export const globalStyles = StyleSheet.create({
     rowText: {
       flex: 1,
       fontSize: 16,
-      textAlign: "center",
+      textAlign: 'center',
     },
     scrollContent: {
       paddingVertical: SCREEN_HEIGHT * 0.02,
@@ -334,22 +334,22 @@ export const globalStyles = StyleSheet.create({
     },
     headerCell: {
       flex: 1,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: Colors.dhbwGray,
-      textAlign: "center",
+      textAlign: 'center',
     },
 
     headerCellWide: {
       flex: 3,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: Colors.dhbwGray,
-      textAlign: "center",
+      textAlign: 'center',
     },
 
     row: {
-      flexDirection: "row",
+      flexDirection: 'row',
       padding: 15,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderBottomWidth: 1,
       borderBottomColor: Colors.lightGray,
     },
@@ -361,17 +361,17 @@ export const globalStyles = StyleSheet.create({
     cell: {
       flex: 1,
       color: Colors.dhbwGray,
-      textAlign: "center",
+      textAlign: 'center',
     },
 
     cellWide: {
       flex: 3,
-      textAlign: "center",
+      textAlign: 'center',
     },
 
     cellHighlighted: {
       color: Colors.dhbwRed,
-      fontWeight: "bold",
+      fontWeight: 'bold',
     },
   },
 
@@ -382,11 +382,11 @@ export const globalStyles = StyleSheet.create({
     text: {
       fontSize: 20,
       color: Colors.dhbwGray,
-      textAlign: "center",
+      textAlign: 'center',
     },
     row: {
-      flexDirection: "row",
-      flexWrap: "wrap",
+      flexDirection: 'row',
+      flexWrap: 'wrap',
       marginBottom: 5,
     },
     label: {
@@ -396,33 +396,33 @@ export const globalStyles = StyleSheet.create({
     },
     value: {
       fontSize: 16,
-      fontWeight: "bold",
+      fontWeight: 'bold',
     },
   },
 
   settingsStyles: {
     container: {
       flex: 1,
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
 
     tile: {
-      width: "80%",
+      width: '80%',
       height: 100,
       marginVertical: 10,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderRadius: 10,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       borderWidth: 1,
-      borderColor: "grey",
+      borderColor: 'grey',
     },
 
     tileText: {
       fontSize: 20,
-      color: "grey",
+      color: 'grey',
     },
 
     button: {
@@ -434,24 +434,24 @@ export const globalStyles = StyleSheet.create({
   imageStyles: {
     container: {
       flex: 1,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       padding: 20,
     },
     questionBox: {
-      width: "90%",
+      width: '90%',
       marginBottom: 20,
       padding: 20,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderRadius: 10,
       // ...shadowStyle,
     },
     title: {
       fontSize: 24,
       color: Colors.dhbwGray,
-      textAlign: "center",
+      textAlign: 'center',
     },
     input: {
-      width: "100%",
+      width: '100%',
       height: 50,
       borderColor: Colors.dhbwGray,
       borderWidth: 1,
@@ -463,17 +463,17 @@ export const globalStyles = StyleSheet.create({
     image: {
       width: SCREEN_WIDTH * 0.9,
       height: SCREEN_HEIGHT * 0.3,
-      resizeMode: "contain",
+      resizeMode: 'contain',
     },
     contentContainer: {
       flexGrow: 1,
-      justifyContent: "center",
+      justifyContent: 'center',
       paddingBottom: 200, // quickfix for keyboard covering input on small screens
     },
     container: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
+      alignItems: 'center',
+      justifyContent: 'center',
       padding: 20,
     },
     inputLabel: {
@@ -481,7 +481,7 @@ export const globalStyles = StyleSheet.create({
       marginBottom: 5,
     },
     input: {
-      width: "100%",
+      width: '100%',
       height: 40,
       borderColor: Colors.dhbwGray,
       borderWidth: 1,
@@ -491,11 +491,11 @@ export const globalStyles = StyleSheet.create({
     },
     answerContainer: {
       marginTop: 20,
-      alignItems: "center",
+      alignItems: 'center',
     },
     answerLabel: {
       fontSize: 16,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 5,
     },
     answer: {
@@ -520,9 +520,9 @@ export const globalStyles = StyleSheet.create({
 
   multipleChoiceStyles: {
     squareButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "flex-start",
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
       marginStart: 30,
       marginBottom: 20,
     },
@@ -538,13 +538,13 @@ export const globalStyles = StyleSheet.create({
     },
     contentContainer: {
       flexGrow: 1,
-      justifyContent: "center",
+      justifyContent: 'center',
       paddingBottom: 200, // quickfix for keyboard covering input on small screens
     },
     container: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
+      alignItems: 'center',
+      justifyContent: 'center',
       padding: 20,
     },
     inputLabel: {
@@ -552,7 +552,7 @@ export const globalStyles = StyleSheet.create({
       marginBottom: 5,
     },
     input: {
-      width: "100%",
+      width: '100%',
       height: 40,
       borderColor: Colors.dhbwGray,
       borderWidth: 1,
@@ -562,11 +562,11 @@ export const globalStyles = StyleSheet.create({
     },
     answerContainer: {
       marginTop: 20,
-      alignItems: "center",
+      alignItems: 'center',
     },
     answerLabel: {
       fontSize: 16,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 5,
     },
     answer: {
@@ -587,26 +587,26 @@ export const globalStyles = StyleSheet.create({
   qrCodeStyles: {
     container: {
       flex: 1,
-      flexDirection: "column",
-      alignItems: "center",
-      backgroundColor: "#fff",
+      flexDirection: 'column',
+      alignItems: 'center',
+      backgroundColor: '#fff',
       marginTop: 20,
     },
     camera: {
-      width: "100%",
-      height: "100%",
+      width: '100%',
+      height: '100%',
     },
     buttonRow: {
-      flexDirection: "column",
+      flexDirection: 'column',
       gap: 10,
       marginVertical: 20,
     },
     cameraBox: {
-      width: "100%",
+      width: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderRadius: 10,
-      shadowColor: "#000",
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
         height: 2,
@@ -621,13 +621,13 @@ export const globalStyles = StyleSheet.create({
   skillStyles: {
     contentContainer: {
       flexGrow: 1,
-      justifyContent: "center",
+      justifyContent: 'center',
       paddingBottom: 200,
     },
     container: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
+      alignItems: 'center',
+      justifyContent: 'center',
       padding: 10,
     },
     inputLabel: {
@@ -635,7 +635,7 @@ export const globalStyles = StyleSheet.create({
       marginBottom: 5,
     },
     input: {
-      minWidth: "100%",
+      minWidth: '100%',
       height: 40,
       borderColor: Colors.dhbwGray,
       borderWidth: 1,
@@ -646,11 +646,11 @@ export const globalStyles = StyleSheet.create({
     },
     answerContainer: {
       marginTop: 20,
-      alignItems: "center",
+      alignItems: 'center',
     },
     answerLabel: {
       fontSize: 16,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 5,
     },
     answer: {
@@ -671,22 +671,22 @@ export const globalStyles = StyleSheet.create({
   uploadStyles: {
     container: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "space-around",
+      alignItems: 'center',
+      justifyContent: 'space-around',
       paddingVertical: SCREEN_HEIGHT * 0.02,
     },
     camera: {
-      width: "100%",
+      width: '100%',
       aspectRatio: 1,
-      maxHeight: "100%",
+      maxHeight: '100%',
     },
     image: {
-      width: "100%",
+      width: '100%',
       aspectRatio: 1,
-      maxHeight: "100%",
+      maxHeight: '100%',
     },
     buttonRow: {
-      flexDirection: "row",
+      flexDirection: 'row',
       gap: SCREEN_WIDTH * 0.05,
       marginVertical: SCREEN_HEIGHT * 0.02,
     },
@@ -695,8 +695,8 @@ export const globalStyles = StyleSheet.create({
   uploadQuestionStyles: {
     container: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "space-between",
+      alignItems: 'center',
+      justifyContent: 'space-between',
       marginHorizontal: SCREEN_WIDTH * 0.05,
     },
     buttonContainer: {
@@ -714,13 +714,13 @@ export const globalStyles = StyleSheet.create({
     button: {
       container: {
         backgroundColor: Colors.dhbwRed,
-        alignItems: "center",
+        alignItems: 'center',
       },
       text: {
-        color: "white",
+        color: 'white',
       },
       disabled: {
-        backgroundColor: "grey",
+        backgroundColor: 'grey',
       },
       sizes: {
         small: {
@@ -746,7 +746,7 @@ export const globalStyles = StyleSheet.create({
         marginBottom: SCREEN_HEIGHT * 0.02,
       },
       quote: {
-        fontStyle: "italic",
+        fontStyle: 'italic',
         marginHorizontal: 15,
       },
       headline: {
@@ -772,7 +772,7 @@ export const globalStyles = StyleSheet.create({
   questionStyles: {
     container: {
       flex: 1,
-      justifyContent: "space-between",
+      justifyContent: 'space-between',
       padding: SCREEN_WIDTH * 0.05,
       maxHeight: SCREEN_HEIGHT * 0.9,
     },
@@ -781,7 +781,7 @@ export const globalStyles = StyleSheet.create({
       flex: 0,
     },
     inputContainer: {
-      width: "100%",
+      width: '100%',
       flex: 0,
     },
     input: {
@@ -794,7 +794,7 @@ export const globalStyles = StyleSheet.create({
     image: {
       width: SCREEN_WIDTH * 0.9,
       height: SCREEN_HEIGHT * 0.3,
-      resizeMode: "contain",
+      resizeMode: 'contain',
     },
   },
 
@@ -809,7 +809,7 @@ export const globalStyles = StyleSheet.create({
   hintStyles: {
     hintTitle: {
       fontSize: 20,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginVertical: 20,
     },
     hintText: {
@@ -824,19 +824,19 @@ export const globalStyles = StyleSheet.create({
   uiButtonStyles: {
     button: {
       container: {
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
         paddingVertical: SCREEN_HEIGHT * 0.015,
         paddingHorizontal: SCREEN_WIDTH * 0.04,
       },
       text: {
-        color: "white",
-        fontWeight: "600",
+        color: 'white',
+        fontWeight: '600',
         fontSize: normalizeFont(16),
-        textAlign: "center",
+        textAlign: 'center',
       },
       disabled: {
-        backgroundColor: "lightgrey",
+        backgroundColor: 'lightgrey',
       },
       sizes: {
         small: {
@@ -870,20 +870,20 @@ export const globalStyles = StyleSheet.create({
   welcomeStyles: {
     container: {
       flex: 1,
-      alignItems: "center",
-      backgroundColor: "#fff",
+      alignItems: 'center',
+      backgroundColor: '#fff',
       paddingHorizontal: SCREEN_WIDTH * 0.04,
-      justifyContent: "space-evenly",
+      justifyContent: 'space-evenly',
     },
     headerImage: {
       width: SCREEN_WIDTH,
       height: SCREEN_HEIGHT * 0.3,
-      resizeMode: "cover",
+      resizeMode: 'cover',
     },
     header: {
       marginTop: SCREEN_HEIGHT * 0.01,
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     logo: {
       width: SCREEN_WIDTH * 0.12,
@@ -897,43 +897,43 @@ export const globalStyles = StyleSheet.create({
     title: {
       flex: 1,
       color: Colors.dhbwRed,
-      fontWeight: "500",
+      fontWeight: '500',
       fontSize: normalizeFont(18),
     },
     content: {
       flex: 1,
-      width: "100%",
-      justifyContent: "center",
+      width: '100%',
+      justifyContent: 'center',
       paddingVertical: SCREEN_HEIGHT * 0.02,
     },
     button: {
-      width: "100%",
+      width: '100%',
       marginVertical: 60,
     },
     offline: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
+      alignItems: 'center',
+      justifyContent: 'center',
     },
   },
 
   teamStyles: {
     container: {
       flex: 1,
-      alignItems: "center",
-      backgroundColor: "white",
-      justifyContent: "center",
+      alignItems: 'center',
+      backgroundColor: 'white',
+      justifyContent: 'center',
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       paddingVertical: SCREEN_HEIGHT * 0.03,
-      width: "100%",
+      width: '100%',
     },
     infoBox: {
-      width: "100%",
+      width: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: "white",
+      backgroundColor: 'white',
       borderRadius: 10,
       marginBottom: SCREEN_HEIGHT * 0.02,
-      shadowColor: "#000",
+      shadowColor: '#000',
       shadowOffset: {
         width: 0,
         height: 2,
@@ -945,36 +945,36 @@ export const globalStyles = StyleSheet.create({
     title: {
       fontSize: normalizeFont(24),
       color: Colors.dhbwGray,
-      textAlign: "center",
-      fontWeight: "600",
+      textAlign: 'center',
+      fontWeight: '600',
       marginBottom: SCREEN_HEIGHT * 0.02,
     },
     teamName: {
       fontSize: normalizeFont(22),
       color: Colors.dhbwRed,
-      textAlign: "center",
+      textAlign: 'center',
       marginVertical: SCREEN_HEIGHT * 0.02,
     },
     message: {
       fontSize: normalizeFont(18),
       color: Colors.dhbwGray,
-      textAlign: "center",
+      textAlign: 'center',
       marginBottom: SCREEN_HEIGHT * 0.02,
     },
   },
 
   fab: {
-    position: "absolute",
+    position: 'absolute',
     right: 20,
     bottom: 20,
     backgroundColor: Colors.dhbwRed,
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     elevation: 6,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,

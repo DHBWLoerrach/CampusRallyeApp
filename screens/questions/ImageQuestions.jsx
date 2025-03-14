@@ -1,21 +1,21 @@
-import { useEffect, useState, useContext } from "react";
-import { View, Text, TextInput, Image, ScrollView, Alert } from "react-native";
-import { store$ } from "../../services/storage/Store";
-import { saveAnswer } from "../../services/storage/answerStorage";
-import Colors from "../../utils/Colors";
-import { globalStyles } from "../../utils/GlobalStyles";
-import { confirmAlert } from "../../utils/ConfirmAlert";
-import UIButton from "../../ui/UIButton";
-import Hint from "../../ui/Hint";
-import { supabase } from "../../utils/Supabase";
-import { ThemeContext } from "../../utils/ThemeContext";
-import { useLanguage } from "../../utils/LanguageContext"; // Import LanguageContext
+import { useEffect, useState, useContext } from 'react';
+import { View, Text, TextInput, Image, ScrollView, Alert } from 'react-native';
+import { store$ } from '../../services/storage/Store';
+import { saveAnswer } from '../../services/storage/answerStorage';
+import Colors from '../../utils/Colors';
+import { globalStyles } from '../../utils/GlobalStyles';
+import { confirmAlert } from '../../utils/ConfirmAlert';
+import UIButton from '../../ui/UIButton';
+import Hint from '../../ui/Hint';
+import { supabase } from '../../utils/Supabase';
+import { ThemeContext } from '../../utils/ThemeContext';
+import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
 
 export default function ImageQuestions() {
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
   const team = store$.team.get();
-  const [answer, setAnswer] = useState("");
+  const [answer, setAnswer] = useState('');
   const { isDarkMode } = useContext(ThemeContext);
   const { language } = useLanguage(); // Use LanguageContext
 
@@ -24,15 +24,15 @@ export default function ImageQuestions() {
   }, []);
 
   const getPictureUri = async () => {
-    const bucket = "test";
+    const bucket = 'test';
     const { data, error } = supabase.storage
       .from(bucket)
       .getPublicUrl(currentQuestion.bucket_path);
     if (error) {
       console.error(
-        language === "de"
-          ? "Fehler beim Abrufen der Bild-URL:"
-          : "Error fetching image URL:",
+        language === 'de'
+          ? 'Fehler beim Abrufen der Bild-URL:'
+          : 'Error fetching image URL:',
         error
       );
       return;
@@ -57,16 +57,16 @@ export default function ImageQuestions() {
       answer
     );
     store$.gotoNextQuestion();
-    setAnswer("");
+    setAnswer('');
   };
   // Validiert die Eingabe, zeigt ggf. einen Bestätigungsdialog und ruft handleNext auf
   const handleAnswerSubmit = () => {
-    if (answer.trim() === "") {
+    if (answer.trim() === '') {
       Alert.alert(
-        language === "de" ? "Fehler" : "Error",
-        language === "de"
-          ? "Bitte gebe eine Antwort ein."
-          : "Please enter an answer."
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Bitte gebe eine Antwort ein.'
+          : 'Please enter an answer.'
       );
       return;
     }
@@ -133,7 +133,7 @@ export default function ImageQuestions() {
               uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${currentQuestion.bucket_path}`,
             }}
             style={{
-              height: "100%",
+              height: '100%',
               borderRadius: 10,
               paddingVertical: 10,
             }}
@@ -166,7 +166,7 @@ export default function ImageQuestions() {
             value={answer}
             onChangeText={(text) => setAnswer(text)}
             placeholder={
-              language === "de" ? "Deine Antwort..." : "Your answer..."
+              language === 'de' ? 'Deine Antwort...' : 'Your answer...'
             }
             placeholderTextColor={
               isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
@@ -185,11 +185,11 @@ export default function ImageQuestions() {
           ]}
         >
           <UIButton
-            color={answer.trim() !== "" ? Colors.dhbwRed : Colors.dhbwGray}
-            disabled={answer.trim() === ""}
+            color={answer.trim() !== '' ? Colors.dhbwRed : Colors.dhbwGray}
+            disabled={answer.trim() === ''}
             onPress={handleAnswerSubmit}
           >
-            {language === "de" ? "Antwort senden" : "Submit answer"}
+            {language === 'de' ? 'Antwort senden' : 'Submit answer'}
           </UIButton>
         </View>
 

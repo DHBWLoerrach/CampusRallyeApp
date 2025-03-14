@@ -1,10 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const StorageKeys = {
-  CURRENT_RALLYE: "currentRallye",
-  TEAM: "team",
-  OFFLINE_QUEUE: "offlineQueue",
-  ANSWERS: "answers",
+  CURRENT_RALLYE: 'currentRallye',
+  TEAM: 'team',
+  OFFLINE_QUEUE: 'offlineQueue',
+  ANSWERS: 'answers',
 };
 
 export async function getStorageItem(key) {

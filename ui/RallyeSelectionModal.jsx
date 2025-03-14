@@ -31,9 +31,7 @@ const RallyeSelectionModal = ({
           style={[
             globalStyles.rallyeModal.rallyeName,
             {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.text,
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
           ]}
         >

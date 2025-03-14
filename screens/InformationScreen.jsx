@@ -45,9 +45,7 @@ export default function InformationScreen() {
           style={[
             globalStyles.informationStyles.paragraph,
             {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.text,
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
           ]}
         >
@@ -59,9 +57,7 @@ export default function InformationScreen() {
           style={[
             globalStyles.informationStyles.paragraph,
             {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.text,
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
           ]}
         >
@@ -73,9 +69,7 @@ export default function InformationScreen() {
           style={[
             globalStyles.informationStyles.paragraph,
             {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.text,
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
           ]}
         >
@@ -99,9 +93,7 @@ export default function InformationScreen() {
           style={[
             globalStyles.informationStyles.paragraph,
             {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.text,
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
           ]}
         >
@@ -112,9 +104,7 @@ export default function InformationScreen() {
           <Text
             style={{ color: Colors.dhbwRed }}
             onPress={() =>
-              Linking.openURL(
-                'https://github.com/DHBWLoerrach/CampusRallyeApp'
-              )
+              Linking.openURL('https://github.com/DHBWLoerrach/CampusRallyeApp')
             }
           >
             https://github.com/DHBWLoerrach/CampusRallyeApp

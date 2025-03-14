@@ -50,7 +50,9 @@ export default ({
           style={{ marginRight: 10 }}
         />
       )}
-      <Text style={[globalStyles.uiButtonStyles.button.text, textStyle]}>{children}</Text>
+      <Text style={[globalStyles.uiButtonStyles.button.text, textStyle]}>
+        {children}
+      </Text>
     </Pressable>
   );
 };
