@@ -101,7 +101,7 @@ export default function UploadQuestions() {
               ? 'Ja, ich habe die E-Mail gesendet'
               : 'Yes, I sent the email',
           onPress: async () => {
-            await store$.savePoints(true, currentQuestion.points);
+            store$.points.set(store$.points.get() + currentQuestion.points);
             store$.gotoNextQuestion();
           },
         },
