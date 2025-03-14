@@ -71,10 +71,11 @@ const App = observer(function App() {
     themeStore$.isDarkMode.set(!themeStore$.isDarkMode.get());
   };
 
+  const darkMode = themeStore$.isDarkMode.get();
   return (
     <ThemeContext.Provider
       value={{
-        isDarkMode: themeStore$.isDarkMode.get(),
+        isDarkMode: darkMode,
         toggleDarkMode,
       }}
     >
@@ -90,7 +91,7 @@ const App = observer(function App() {
               onRefresh={onRefresh}
             />
           )}
-          <StatusBar style="auto" />
+          <StatusBar style={darkMode ? 'dark' : 'light'} />
         </NavigationContainer>
       </LanguageProvider>
     </ThemeContext.Provider>
