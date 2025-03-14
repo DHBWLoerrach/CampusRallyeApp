@@ -7,13 +7,21 @@ import { useContext } from 'react';
 import { ThemeContext } from '../utils/ThemeContext';
 import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
-const AppVersion = () => {
+const AppVersion = ({ isDarkMode }) => {
+  console.log(isDarkMode);
   let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
   if (Constants.expoVersion) {
     versionString = `App runs in Expo version ${Constants.expoVersion}`;
   }
   return (
-    <Text style={globalStyles.informationStyles.paragraph}>
+    <Text
+      style={[
+        globalStyles.informationStyles.paragraph,
+        {
+          color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+        },
+      ]}
+    >
       {versionString}
     </Text>
   );
@@ -110,7 +118,7 @@ export default function InformationScreen() {
             https://github.com/DHBWLoerrach/CampusRallyeApp
           </Text>
         </Text>
-        <AppVersion />
+        <AppVersion isDarkMode={isDarkMode} />
       </View>
     </ScrollView>
   );
