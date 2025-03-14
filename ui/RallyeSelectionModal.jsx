@@ -6,6 +6,17 @@ import { ThemeContext } from '../utils/ThemeContext';
 import Colors from '../utils/Colors';
 import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
+function getStatusText(status, language) {
+  switch (status) {
+    case 'preparing':
+      return language === 'de' ? 'Noch nicht gestartet' : 'Not started';
+    case 'running':
+      return language === 'de' ? 'Gestartet' : 'Started';
+    default:
+      return language === 'de' ? 'Beendet' : 'Ended';
+  }
+}
+
 const RallyeSelectionModal = ({
   visible,
   onClose,
@@ -59,7 +70,7 @@ const RallyeSelectionModal = ({
             },
           ]}
         >
-          {item.status.split('_').join(' ')}
+          {getStatusText(item.status, language)}
         </Text>
       </View>
       <UIButton
