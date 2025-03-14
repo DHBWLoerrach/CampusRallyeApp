@@ -111,8 +111,10 @@ export default function WelcomeScreen({
             style={globalStyles.welcomeStyles.headerImage}
             source={require('../assets/dhbw-campus-header.png')}
           />
+
           <TouchableOpacity
             style={{ position: 'absolute', top: 40, left: 13 }}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
             onPress={toggleDarkMode}
           >
             <MaterialIcons
@@ -123,6 +125,7 @@ export default function WelcomeScreen({
           </TouchableOpacity>
           <TouchableOpacity
             style={{ position: 'absolute', top: 40, right: 13 }}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
             onPress={toggleLanguage}
           >
             <MaterialIcons
