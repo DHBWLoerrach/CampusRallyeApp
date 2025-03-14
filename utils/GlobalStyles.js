@@ -255,7 +255,6 @@ export const globalStyles = StyleSheet.create({
       position: 'absolute',
     },
     cardBack: {
-      backgroundColor: 'white',
       transform: [{ rotateY: '180deg' }],
     },
     passwordInput: {
