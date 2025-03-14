@@ -3,7 +3,6 @@ import * as Progress from 'react-native-progress';
 import { observer } from '@legendapp/state/react';
 import { currentTime } from '@legendapp/state/helpers/time';
 import TimeHeader from './TimeHeader';
-import { store$ } from '../services/storage/Store';
 
 const RallyeHeader = observer(function RallyeHeader({ rallye, percentage }) {
   const currentTime$ = currentTime.get();

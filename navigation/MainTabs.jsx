@@ -29,7 +29,8 @@ const MainTabs = observer(function MainTabs() {
     if (rallye && team) {
       const fetchData = async () => {
         let { data, error } = await supabase.rpc('get_question_count', {
-          groupid: team.id,
+          team_id_param: team.id,
+          rallye_id_param: rallye.id,
         });
         let value =
           parseFloat(data[0].answeredquestions) /
