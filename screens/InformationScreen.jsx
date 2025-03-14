@@ -1,4 +1,5 @@
 import { View, Text, Linking, ScrollView } from 'react-native';
+import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/GlobalStyles';
@@ -7,7 +8,7 @@ import { ThemeContext } from '../utils/ThemeContext';
 import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 const AppVersion = () => {
-  let versionString = `Version: ${Constants.expoConfig.version}`;
+  let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
   if (Constants.expoVersion) {
     versionString = `App runs in Expo version ${Constants.expoVersion}`;
   }
