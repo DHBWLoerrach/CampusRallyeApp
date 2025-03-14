@@ -8,7 +8,7 @@ import Hint from '../../ui/Hint';
 import Colors from '../../utils/Colors';
 import { saveAnswer } from '../../services/storage/answerStorage';
 import { ThemeContext } from '../../utils/ThemeContext';
-import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../../utils/LanguageContext';
 
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
@@ -20,7 +20,7 @@ export default function QRCodeQuestions() {
   const team = store$.team.get();
   const [isProcessing, setIsProcessing] = useState(false);
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   const submitSurrender = async () => {
     setScanMode(false);
@@ -67,7 +67,6 @@ export default function QRCodeQuestions() {
 
   const handleQRCode = ({ data }) => {
     if (isProcessing) return;
-
     try {
       setIsProcessing(true);
 
@@ -89,7 +88,7 @@ export default function QRCodeQuestions() {
             {
               text: language === 'de' ? 'Weiter' : 'Next',
               onPress: async () => {
-                await store$.savePoints(true, currentQuestion.points);
+                store$.points.set(store$.points.get() + currentQuestion.points);
                 await saveAnswer(
                   team.id,
                   currentQuestion.id,
