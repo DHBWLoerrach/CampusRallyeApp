@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Text } from 'react-native';
 import { store$ } from '../services/storage/Store';
+import { useLanguage } from '../utils/LanguageContext';
 
 function calculateTimeRemaining(endTime) {
   const now = new Date();
@@ -39,6 +40,7 @@ export default function TimeHeader({ endTime }) {
   const [timeRemaining, setTimeRemaining] = useState(
     calculateTimeRemaining(endTime)
   );
+  const { language } = useLanguage(); // Use LanguageContext
 
   useEffect(() => {
     // Update the timer every second
@@ -64,7 +66,8 @@ export default function TimeHeader({ endTime }) {
         fontWeight: '500',
       }}
     >
-      Verbleibende Zeit {formatTimeUnit(timeRemaining.hours)}:
+      {language === 'de' ? 'Verbleibende Zeit: ' : 'Remaining time: '}
+      {formatTimeUnit(timeRemaining.hours)}:
       {formatTimeUnit(timeRemaining.minutes)}:
       {formatTimeUnit(timeRemaining.seconds)}
     </Text>
