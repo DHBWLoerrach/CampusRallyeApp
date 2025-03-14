@@ -8,7 +8,6 @@ import { ThemeContext } from '../utils/ThemeContext';
 import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
 
 const AppVersion = ({ isDarkMode }) => {
-  console.log(isDarkMode);
   let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
   if (Constants.expoVersion) {
     versionString = `App runs in Expo version ${Constants.expoVersion}`;
@@ -85,17 +84,11 @@ export default function InformationScreen() {
             ? 'Bisher haben folgende Studierende an der Entwicklung dieser App mitgewirkt:'
             : 'The following students have contributed to the development of this app so far:'}
           {'\n\t'}
-          {language === 'de'
-            ? 'Fabian Kaiser, Sophie Strittmatter (TIF20)'
-            : 'Fabian Kaiser, Sophie Strittmatter (TIF20)'}
+          Fabian Kaiser, Sophie Strittmatter (TIF20)
           {'\n\t'}
-          {language === 'de'
-            ? 'Patrick Furtwängler, Marvin Obert (TIF21)'
-            : 'Patrick Furtwängler, Marvin Obert (TIF21)'}
+          Patrick Furtwängler, Marvin Obert (TIF21)
           {'\n\t'}
-          {language === 'de'
-            ? 'Roman von Bosse, Leon Jegg (TIF22)'
-            : 'Roman von Bosse, Leon Jegg (TIF22)'}
+          Roman von Bosse, Leon Jegg (TIF22)
         </Text>
         <Text
           style={[
