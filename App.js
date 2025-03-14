@@ -88,6 +88,7 @@ const App = observer(function App() {
               onPasswordSubmit={handlePasswordSubmit}
               onContinueWithoutRallye={handleNoPasswordSubmit}
               loading={loading}
+              networkAvailable={online}
               onRefresh={onRefresh}
             />
           )}

@@ -1,6 +1,69 @@
 import { observable } from '@legendapp/state';
-import { getCurrentRallye, getCurrentTeam } from '.';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+import { getCurrentRallye, getCurrentTeam } from '.';
+
+const OFFLINE_QUEUE_KEY = 'offlineQueue';
+let syncInProgress = false;
+
+// Hilfsfunktion zum Abrufen der offline Queue
+const getOfflineQueue = async () => {
+  try {
+    const queue = await AsyncStorage.getItem(OFFLINE_QUEUE_KEY);
+    return queue ? JSON.parse(queue) : [];
+  } catch (error) {
+    console.error('Error reading offline queue:', error);
+    return [];
+  }
+};
+
+// Hilfsfunktion zum Speichern der offline Queue
+const saveOfflineQueue = async (queue) => {
+  try {
+    await AsyncStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+  } catch (error) {
+    console.error('Error saving offline queue:', error);
+  }
+};
+
+// Verarbeitung der offline Queue
+const processOfflineQueue = async () => {
+  if (syncInProgress) return;
+
+  try {
+    syncInProgress = true;
+    const queue = await getOfflineQueue();
+
+    if (queue.length === 0) return;
+
+    for (const action of queue) {
+      try {
+        const { error } = await supabase
+          .from(action.table)
+          .insert(action.data)
+          .select();
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error processing offline action:', error);
+        return; // Bei Fehler Synchronisation abbrechen
+      }
+    }
+
+    // Queue leeren nach erfolgreicher Synchronisation
+    await AsyncStorage.removeItem(OFFLINE_QUEUE_KEY);
+  } catch (error) {
+    console.error('Error in processOfflineQueue:', error);
+  } finally {
+    syncInProgress = false;
+  }
+};
+
+NetInfo.addEventListener((state) => {
+  if (state.isConnected) {
+    processOfflineQueue();
+  }
+});
 
 // Hilfsfunktion zum Abrufen der offline Queue
 export const store$ = observable({

@@ -1,24 +1,30 @@
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Text,
   View,
   TouchableOpacity,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/GlobalStyles';
+import UIButton from '../ui/UIButton';
 import Card from '../ui/Card';
 import { useState, useEffect, useContext } from 'react';
-import { Alert } from 'react-native';
 import RallyeSelectionModal from '../ui/RallyeSelectionModal';
-import { getActiveRallyes, setCurrentRallye } from '../services/storage';
+import {
+  getActiveRallyes,
+  getCurrentRallye,
+  setCurrentRallye,
+} from '../services/storage';
 import { ThemeContext } from '../utils/ThemeContext';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useLanguage } from '../utils/LanguageContext';
 
 export default function WelcomeScreen({
   onPasswordSubmit,
   onContinueWithoutRallye,
+  networkAvailable,
   loading,
   onRefresh,
 }) {
@@ -40,6 +46,34 @@ export default function WelcomeScreen({
     await setCurrentRallye(rallye);
     setShowRallyeModal(false);
   };
+
+  const OfflineContent = ({ loading, onRefresh }) => (
+    <View
+      style={[
+        globalStyles.welcomeStyles.offline,
+        {
+          backgroundColor: isDarkMode
+            ? Colors.darkMode.background
+            : Colors.lightMode.background,
+        },
+      ]}
+    >
+      <Text
+        style={[
+          globalStyles.welcomeStyles.text,
+          { marginBottom: 20 },
+          {
+            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+          },
+        ]}
+      >
+        {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
+      </Text>
+      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+        {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+      </UIButton>
+    </View>
+  );
 
   const OnlineContent = () => (
     <View
@@ -171,7 +205,10 @@ export default function WelcomeScreen({
               <ActivityIndicator size="large" color={Colors.dhbwRed} />
             </View>
           )}
-          {!loading && <OnlineContent />}
+          {networkAvailable && !loading && <OnlineContent />}
+          {!networkAvailable && !loading && (
+            <OfflineContent onRefresh={onRefresh} loading={loading} />
+          )}
         </View>
       </View>
       <RallyeSelectionModal
