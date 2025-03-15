@@ -6,7 +6,7 @@ import { globalStyles } from '../utils/GlobalStyles';
 import UIButton from '../ui/UIButton';
 import Colors from '../utils/Colors';
 import { ThemeContext } from '../utils/ThemeContext';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../utils/LanguageContext';
 
 export default function ScoreboardScreen() {
   const rallye = store$.rallye.get();
@@ -14,7 +14,7 @@ export default function ScoreboardScreen() {
   const points = store$.points.get();
   const [sortedTeams, setSortedTeams] = useState([]);
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   useEffect(() => {
     if (rallye.status !== 'ended') return;
@@ -282,7 +282,7 @@ export default function ScoreboardScreen() {
         ]}
       >
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
-          {language === 'de' ? 'Rallye beenden' : 'Quit Rallye'}
+          {language === 'de' ? 'Rallye beenden' : 'Quit rallye'}
         </UIButton>
       </View>
     </ScrollView>

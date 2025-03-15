@@ -8,11 +8,11 @@ import Colors from '../utils/Colors';
 import React from 'react';
 import { useContext } from 'react';
 import { ThemeContext } from '../utils/ThemeContext';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../utils/LanguageContext';
 
 export const PreparationState = ({ loading, onRefresh }) => {
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   return (
     <ScrollView
@@ -311,7 +311,7 @@ export const ExplorationFinishedState = ({ goBackToLogin, points }) => {
         ]}
       >
         <UIButton icon="arrow-left" onPress={goBackToLogin}>
-          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
+          {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to registration'}
         </UIButton>
       </View>
     </ScrollView>

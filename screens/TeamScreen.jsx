@@ -9,15 +9,14 @@ import generateTeamName from '../utils/RandomTeamNames';
 import { getCurrentTeam, setCurrentTeam } from '../services/storage';
 import { ThemeContext } from '../utils/ThemeContext';
 import Colors from '../utils/Colors';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../utils/LanguageContext';
 
 const TeamScreen = observer(function TeamScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const rallye = store$.rallye.get();
   const team = store$.team.get();
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
-
+  const { language } = useLanguage();
   useEffect(() => {
     if (!rallye) return;
 
@@ -171,7 +170,7 @@ const TeamScreen = observer(function TeamScreen({ navigation }) {
             : 'Create a team to participate in the rally.'}
         </Text>
         <UIButton disabled={loading} onPress={createTeam}>
-          {language === 'de' ? 'Team bilden' : 'Create Team'}
+          {language === 'de' ? 'Team bilden' : 'Create team'}
         </UIButton>
       </View>
     );

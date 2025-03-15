@@ -3,8 +3,10 @@ import * as Progress from 'react-native-progress';
 import { observer } from '@legendapp/state/react';
 import { currentTime } from '@legendapp/state/helpers/time';
 import TimeHeader from './TimeHeader';
+import { useLanguage } from '../utils/LanguageContext';
 
 const RallyeHeader = observer(function RallyeHeader({ rallye, percentage }) {
+  const { language } = useLanguage();
   const currentTime$ = currentTime.get();
 
   const ProgressBar = () => (
@@ -34,13 +36,17 @@ const RallyeHeader = observer(function RallyeHeader({ rallye, percentage }) {
               fontWeight: '500',
             }}
           >
-            {rallye.tour_mode && 'Gelände erkunden'}
-            {rallye.status === 'preparing' && 'Vorbereitungen'}
-            {rallye.status === 'post_processing' && 'Abstimmung'}
+            {rallye.tour_mode &&
+              (language === 'de' ? 'Campus erkunden' : 'Explore campus')}
+            {rallye.status === 'preparing' &&
+              (language === 'de' ? 'Vorbereitungen' : 'Preparations')}
+            {rallye.status === 'post_processing' &&
+              (language === 'de' ? 'Abstimmung' : 'Voting')}
             {rallye.status === 'running' &&
               !rallye.tour_mode &&
-              'Zeit abgelaufen'}
-            {rallye.status === 'ended' && 'Rallye beendet'}
+              (language === 'de' ? 'Zeit abgelaufen' : 'Time is up')}
+            {rallye.status === 'ended' &&
+              (language === 'de' ? 'Rallye beendet' : 'Rallye ended')}
           </Text>
         )
       ) : (

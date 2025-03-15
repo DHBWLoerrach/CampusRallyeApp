@@ -6,12 +6,12 @@ import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/GlobalStyles';
 import { ThemeContext } from '../utils/ThemeContext';
 import Colors from '../utils/Colors';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../utils/LanguageContext';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   return (
     <View
@@ -78,7 +78,7 @@ export default function SettingsScreen() {
         icon="arrow-left"
         onPress={() => store$.enabled.set(false)}
       >
-        {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
+        {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to registration'}
       </UIButton>
     </View>
   );

@@ -92,7 +92,7 @@ export default function ImprintScreen() {
             {'\n'}
             {language === 'de' ? 'Königstraße 46' : 'Königstraße 46'}
             {'\n'}
-            {language === 'de' ? '70173 Stuttgart' : '70173 Stuttgart'}
+            {language === 'de' ? '70173 Stuttgart' : '70173 Stuttgart\nGermany'}
             {'\n'}
             {language === 'de'
               ? 'Telefon: +49 711 279 - 0'
