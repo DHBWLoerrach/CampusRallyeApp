@@ -1,5 +1,13 @@
 import { useState, useContext } from 'react';
-import { View, Text, TextInput, Alert, ScrollView } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  ScrollView,
+  View,
+} from 'react-native';
 import { store$ } from '../../services/storage/Store';
 import UIButton from '../../ui/UIButton';
 import Colors from '../../utils/Colors';
@@ -56,19 +64,13 @@ export default function SkillQuestions() {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        globalStyles.default.refreshContainer,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
     >
-      <View
-        style={[
-          globalStyles.default.container,
+      <ScrollView
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.background
@@ -78,81 +80,92 @@ export default function SkillQuestions() {
       >
         <View
           style={[
-            globalStyles.rallyeStatesStyles.infoBox,
+            globalStyles.default.container,
             {
               backgroundColor: isDarkMode
-                ? Colors.darkMode.card
-                : Colors.lightMode.card,
+                ? Colors.darkMode.background
+                : Colors.lightMode.background,
             },
           ]}
         >
-          <Text
+          <View
             style={[
-              globalStyles.rallyeStatesStyles.infoTitle,
+              globalStyles.rallyeStatesStyles.infoBox,
               {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
+                backgroundColor: isDarkMode
+                  ? Colors.darkMode.card
+                  : Colors.lightMode.card,
               },
             ]}
           >
-            {currentQuestion.question}
-          </Text>
-        </View>
+            <Text
+              style={[
+                globalStyles.rallyeStatesStyles.infoTitle,
+                {
+                  color: isDarkMode
+                    ? Colors.darkMode.text
+                    : Colors.lightMode.text,
+                },
+              ]}
+            >
+              {currentQuestion.question}
+            </Text>
+          </View>
 
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.card
-                : Colors.lightMode.card,
-            },
-          ]}
-        >
-          <TextInput
+          <View
             style={[
-              globalStyles.skillStyles.input,
+              globalStyles.rallyeStatesStyles.infoBox,
               {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-                borderColor: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
+                backgroundColor: isDarkMode
+                  ? Colors.darkMode.card
+                  : Colors.lightMode.card,
               },
             ]}
-            value={answer}
-            onChangeText={(text) => setAnswer(text.trim())}
-            placeholder={
-              language === 'de' ? 'Deine Antwort...' : 'Your answer...'
-            }
-            placeholderTextColor={
-              isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
-            }
-          />
-        </View>
-
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.card
-                : Colors.lightMode.card,
-            },
-          ]}
-        >
-          <UIButton
-            color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
-            disabled={!answer.trim()}
-            onPress={handleAnswerSubmit}
           >
-            {language === 'de' ? 'Antwort senden' : 'Submit answer'}
-          </UIButton>
+            <TextInput
+              style={[
+                globalStyles.skillStyles.input,
+                {
+                  color: isDarkMode
+                    ? Colors.darkMode.text
+                    : Colors.lightMode.text,
+                  borderColor: isDarkMode
+                    ? Colors.darkMode.text
+                    : Colors.lightMode.text,
+                },
+              ]}
+              value={answer}
+              onChangeText={(text) => setAnswer(text.trim())}
+              placeholder={
+                language === 'de' ? 'Deine Antwort...' : 'Your answer...'
+              }
+              placeholderTextColor={
+                isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
+              }
+            />
+          </View>
+
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              {
+                backgroundColor: isDarkMode
+                  ? Colors.darkMode.card
+                  : Colors.lightMode.card,
+              },
+            ]}
+          >
+            <UIButton
+              color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
+              disabled={!answer.trim()}
+              onPress={handleAnswerSubmit}
+            >
+              {language === 'de' ? 'Antwort senden' : 'Submit answer'}
+            </UIButton>
+          </View>
         </View>
-      </View>
-      {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
-    </ScrollView>
+        {currentQuestion.hint && <Hint hint={currentQuestion.hint} />}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

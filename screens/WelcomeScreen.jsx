@@ -2,6 +2,8 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   View,
   TouchableOpacity,
@@ -125,7 +127,10 @@ export default function WelcomeScreen({
   );
 
   return (
-    <>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
       <View
         style={[
           globalStyles.welcomeStyles.container,
@@ -213,6 +218,6 @@ export default function WelcomeScreen({
         activeRallyes={activeRallyes}
         onSelect={handleRallyeSelect}
       />
-    </>
+    </KeyboardAvoidingView>
   );
 }
