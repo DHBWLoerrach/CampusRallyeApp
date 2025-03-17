@@ -66,3 +66,20 @@ export async function getTeamsByRallye(rallyeId) {
     return [];
   }
 }
+
+export async function getTeamPoints(teamId) {
+  try {
+    const { data, error } = await supabase
+      .from("team_questions")
+      .select("points")
+      .eq("team_id", teamId);
+
+    if (error) throw error;
+    const totalPoints = data.reduce((sum, question) => sum + question.points, 0);
+
+    return totalPoints || 0;
+  } catch (error) {
+    console.error("Error fetching team points:", error);
+    return 0;
+  }
+}
