@@ -19,7 +19,7 @@ export const globalStyles = StyleSheet.create({
       flexDirection: 'column',
       flexGrow: 1,
       alignItems: 'center',
-      justifyContent: 'space-between',
+      justifyContent: 'space-evenly',
       backgroundColor: '#fff',
       paddingVertical: SCREEN_HEIGHT * 0.02,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
