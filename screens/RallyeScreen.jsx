@@ -328,6 +328,10 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     );
   }
 
+  if (rallye.status === 'running' && !team && !rallye.tour_mode) {
+    return <RallyeStates.TeamNotSelectedState />;
+  }
+
   if (questions.length > 0 && !allQuestionsAnswered) {
     const questionType = currentQuestion?.question_type;
     const QuestionComponent = questionTypeComponents[questionType];
