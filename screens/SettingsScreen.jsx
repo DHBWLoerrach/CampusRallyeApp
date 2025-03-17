@@ -47,12 +47,6 @@ export default function SettingsScreen() {
         </Text>
       </TouchableOpacity>
       
-      <UIButton
-        style={globalStyles.settingsStyles.button}
-        icon="arrow-left" onPress={() => store$.enabled.set(false)}
-      >
-        {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to Registration'}
-      </UIButton>
     </View>
   );
 }
