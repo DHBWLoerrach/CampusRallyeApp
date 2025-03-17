@@ -13,11 +13,7 @@ import UIButton from '../ui/UIButton';
 import Card from '../ui/Card';
 import { useState, useEffect, useContext } from 'react';
 import RallyeSelectionModal from '../ui/RallyeSelectionModal';
-import {
-  getActiveRallyes,
-  getCurrentRallye,
-  setCurrentRallye,
-} from '../services/storage';
+import { getActiveRallyes, setCurrentRallye } from '../services/storage';
 import { ThemeContext } from '../utils/ThemeContext';
 import { useLanguage } from '../utils/LanguageContext';
 

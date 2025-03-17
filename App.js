@@ -12,7 +12,7 @@ import {
 import MainNavigator from './navigation/MainNavigator';
 import WelcomeScreen from './screens/WelcomeScreen';
 import { ThemeContext, themeStore$ } from './utils/ThemeContext';
-import { LanguageProvider } from './utils/LanguageContext'; // Import LanguageProvider
+import { LanguageProvider } from './utils/LanguageContext';
 
 const App = observer(function App() {
   const [loading, setLoading] = useState(false);
