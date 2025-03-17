@@ -130,7 +130,7 @@ export default function ImageQuestions() {
         >
           <Image
             source={{
-              uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${currentQuestion.bucket_path}`,
+              uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/question-media/${currentQuestion.bucket_path}`,
             }}
             style={{
               height: "100%",
