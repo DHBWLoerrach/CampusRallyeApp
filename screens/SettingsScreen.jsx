@@ -1,8 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useContext } from 'react';
-import { store$ } from '../services/storage/Store';
-import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/GlobalStyles';
 import { ThemeContext } from '../utils/ThemeContext';
 import Colors from '../utils/Colors';
@@ -72,14 +70,6 @@ export default function SettingsScreen() {
           {language === 'de' ? 'Informationen' : 'Information'}
         </Text>
       </TouchableOpacity>
-
-      <UIButton
-        style={globalStyles.settingsStyles.button}
-        icon="arrow-left"
-        onPress={() => store$.enabled.set(false)}
-      >
-        {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to registration'}
-      </UIButton>
     </View>
   );
 }

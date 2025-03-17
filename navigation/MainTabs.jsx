@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
+import { Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { observer } from '@legendapp/state/react';
 import MaterialIcon from '@expo/vector-icons/MaterialIcons';
@@ -10,7 +11,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import TeamScreen from '../screens/TeamScreen';
 import Colors from '../utils/Colors';
 import { ThemeContext } from '../utils/ThemeContext';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../utils/LanguageContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -48,14 +49,6 @@ const MainTabs = observer(function MainTabs() {
     }
   }, [currentQuestion, team, allQuestionsAnswered]);
 
-  const HomeScreen = () => {
-    useEffect(() => {
-      store$.enabled.set(false);
-    }, []);
-
-    return null;
-  };
-
   return (
     <Tab.Navigator
       initialRouteName={
@@ -66,9 +59,36 @@ const MainTabs = observer(function MainTabs() {
       screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: Colors.dhbwRed },
         headerTintColor: Colors.tabHeader,
+        headerRight: () => {
+          return (
+            <MaterialIcon
+              name="logout"
+              size={30}
+              style={{ marginRight: 10 }}
+              color={Colors.tabHeader}
+              onPress={() => {
+                Alert.alert(
+                  language === 'de' ? 'Abmelden' : 'Logout',
+                  language === 'de'
+                    ? 'Möchtest du dich wirklich abmelden?'
+                    : 'Do you really want to log out?',
+                  [
+                    {
+                      text: language === 'de' ? 'Abbrechen' : 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: language === 'de' ? 'Ja' : 'Yes',
+                      onPress: () => store$.enabled.set(false),
+                    },
+                  ]
+                );
+              }}
+            />
+          );
+        },
         tabBarIcon: ({ focused }) => {
           const icons = {
-            home: 'home',
             rallye: 'map',
             settings: 'settings',
             team: 'people',
@@ -96,11 +116,6 @@ const MainTabs = observer(function MainTabs() {
         },
       })}
     >
-      <Tab.Screen
-        name="home"
-        component={HomeScreen}
-        options={{ title: language === 'de' ? 'Anmeldung' : 'Registration' }}
-      />
       {!rallye.tour_mode ? (
         <Tab.Screen
           name="team"
