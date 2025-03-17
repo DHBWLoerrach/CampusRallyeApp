@@ -12,13 +12,13 @@ import { useLanguage } from '../../utils/LanguageContext';
 
 export default function QRCodeQuestions() {
   const cameraRef = useRef(null);
+  const isProcessingRef = useRef(false);
   const [scanMode, setScanMode] = useState(false);
   const [isScanCorrect, setScanCorrect] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
   const team = store$.team.get();
-  const [isProcessing, setIsProcessing] = useState(false);
   const { isDarkMode } = useContext(ThemeContext);
   const { language } = useLanguage();
 
@@ -66,19 +66,17 @@ export default function QRCodeQuestions() {
   };
 
   const handleQRCode = ({ data }) => {
-    if (isProcessing) return;
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+    setScanMode(false);
     try {
-      setIsProcessing(true);
-
       if (currentAnswer.text.toLowerCase() !== data.toLowerCase()) {
         Alert.alert(
           language === 'de'
             ? 'Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.'
             : 'The QR code is incorrect! You are probably not at the right place.'
         );
-        setScanMode(false);
       } else if (currentAnswer.text.toLowerCase() === data.toLowerCase()) {
-        setScanMode(false);
         Alert.alert(
           'OK',
           language === 'de'
@@ -102,8 +100,9 @@ export default function QRCodeQuestions() {
         );
       }
     } finally {
-      // Nach Verarbeitung Flag zurücksetzen
-      setIsProcessing(false);
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, 2000); // prevent new scan for 2 seconds
     }
   };
 
