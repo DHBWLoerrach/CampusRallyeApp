@@ -209,9 +209,7 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
             },
           ]}
         >
-          {language === 'de'
-            ? 'Keine Fragen verfügbar'
-            : 'No questions available'}
+          {language === 'de' ? 'Keine Fragen' : 'No questions'}
         </Text>
         <Text
           style={[
@@ -224,8 +222,8 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
           ]}
         >
           {language === 'de'
-            ? 'Momentan sind keine Fragen zum Beantworten verfügbar'
-            : 'Currently no questions available to answer'}
+            ? 'Momentan sind keine Fragen verfügbar.'
+            : 'Currently no questions available.'}
         </Text>
       </View>
 

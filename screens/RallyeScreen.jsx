@@ -291,7 +291,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     );
   }
 
-  if (!rallye) {
+  if (!rallye || questions?.length === 0) {
     return (
       <RallyeStates.NoQuestionsAvailableState
         loading={loading}
