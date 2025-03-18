@@ -2,7 +2,6 @@ import { useState, useContext } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
-  Platform,
   Text,
   TextInput,
   ScrollView,
@@ -64,10 +63,7 @@ export default function SkillQuestions() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-    >
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={[
           globalStyles.default.refreshContainer,
