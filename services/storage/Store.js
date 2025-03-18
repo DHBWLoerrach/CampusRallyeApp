@@ -1,7 +1,7 @@
 import { observable } from '@legendapp/state';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { getCurrentRallye, getCurrentTeam } from '.';
+import { getCurrentRallye, getCurrentTeam } from './teamStorage';
 
 const OFFLINE_QUEUE_KEY = 'offlineQueue';
 let syncInProgress = false;
