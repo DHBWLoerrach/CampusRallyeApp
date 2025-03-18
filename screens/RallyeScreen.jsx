@@ -291,7 +291,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
     );
   }
 
-  if (!rallye || questions?.length === 0) {
+  if (!rallye) {
     return (
       <RallyeStates.NoQuestionsAvailableState
         loading={loading}
@@ -328,6 +328,24 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
 
   if (rallye.status === 'running' && !team && !rallye.tour_mode) {
     return <RallyeStates.TeamNotSelectedState />;
+  }
+
+  if (!rallye) {
+    return (
+      <RallyeStates.NoQuestionsAvailableState
+        loading={loading}
+        onRefresh={onRefresh}
+      />
+    );
+  }
+
+  if (!allQuestionsAnswered && questions.length === 0) {
+    return (
+      <RallyeStates.NoQuestionsAvailableState
+        loading={loading}
+        onRefresh={onRefresh}
+      />
+    );
   }
 
   if (questions.length > 0 && !allQuestionsAnswered) {
