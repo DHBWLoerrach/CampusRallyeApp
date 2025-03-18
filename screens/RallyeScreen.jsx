@@ -111,11 +111,9 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       const randomizedQuestions = shuffleArray(mappedQuestions);
 
       store$.questions.set(randomizedQuestions);
-      // Lade den persistierten Fragenindex (z.B. aus AsyncStorage) und setze currentQuestion.
-      // Falls kein gespeicherter Index vorhanden: setze auf 0.
-      store$.currentQuestion.set(
-        randomizedQuestions[store$.questionIndex.get() || 0]
-      );
+      // start with first question of remaining questions
+      store$.currentQuestion.set(randomizedQuestions[0]);
+      store$.questionIndex.set(0);
     } catch (error) {
       console.error('Fehler beim Laden der Fragen:', error);
       Alert.alert(
