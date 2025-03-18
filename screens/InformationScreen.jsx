@@ -69,8 +69,20 @@ export default function InformationScreen() {
           ]}
         >
           {language === 'de'
-            ? 'Die Konzeption und Umsetzung erfolgte an der DHBW Lörrach durch Studierende im Rahmen von Studienarbeiten und Projekten am SZI unter Betreuung und Leitung von Ulrike Menke und Selina Quade (Konzeptgestaltung und Projektbetreuung) und Prof. Dr. Erik Behrends (technische Umsetzung).'
-            : 'The conception and implementation was carried out at DHBW Lörrach by students as part of study projects and projects at SZI under the supervision and direction of Ulrike Menke and Selina Quade (concept design and project supervision) and Prof. Dr. Erik Behrends (technical implementation).'}
+            ? 'Die Konzeption und Umsetzung erfolgt an der DHBW Lörrach durch Studierende im Rahmen von Studienarbeiten und Projekten am SZI unter Betreuung und Leitung von Ulrike Menke (Konzeptgestaltung und Projektbetreuung) und Prof. Dr. Erik Behrends (technische Umsetzung).'
+            : 'The conception and implementation is carried out at DHBW Lörrach by students as part of projects at SZI under the supervision and direction of Ulrike Menke (concept design and project supervision) and Prof. Dr. Erik Behrends (technical implementation).'}
+        </Text>
+        <Text
+          style={[
+            globalStyles.informationStyles.paragraph,
+            {
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+            },
+          ]}
+        >
+          {language === 'de'
+            ? 'Ehemalige Beteiligte von Seiten der DHBW Lörrach: Selina Quade'
+            : 'Former participants from DHBW Lörrach: Selina Quade'}
         </Text>
         <Text
           style={[
