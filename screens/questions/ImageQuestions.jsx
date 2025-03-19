@@ -9,34 +9,31 @@ import UIButton from '../../ui/UIButton';
 import Hint from '../../ui/Hint';
 import { supabase } from '../../utils/Supabase';
 import { ThemeContext } from '../../utils/ThemeContext';
-import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../../utils/LanguageContext';
 
 export default function ImageQuestions() {
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
   const team = store$.team.get();
   const [answer, setAnswer] = useState('');
+  const [pictureUri, setPictureUri] = useState(null);
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   useEffect(() => {
     getPictureUri();
   }, []);
 
   const getPictureUri = async () => {
-    const bucket = 'test';
     const { data, error } = supabase.storage
-      .from(bucket)
+      .from('question-media')
       .getPublicUrl(currentQuestion.bucket_path);
+
     if (error) {
-      console.error(
-        language === 'de'
-          ? 'Fehler beim Abrufen der Bild-URL:'
-          : 'Error fetching image URL:',
-        error
-      );
+      console.error(`Error fetching image URL: ${error.message}`);
       return;
     }
+
     setPictureUri(data.publicUrl);
   };
 
@@ -129,9 +126,7 @@ export default function ImageQuestions() {
           ]}
         >
           <Image
-            source={{
-              uri: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${currentQuestion.bucket_path}`,
-            }}
+            source={{ uri: pictureUri }}
             style={{
               height: '100%',
               borderRadius: 10,
