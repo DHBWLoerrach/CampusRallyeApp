@@ -165,6 +165,9 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   };
 
   const getRallyeStatus = async () => {
+    setLoading(true);
+    // wait for 1 second to avoid flickering
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     try {
       const { data, error } = await supabase
         .from('rallye')
@@ -178,6 +181,8 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching rallye status:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
