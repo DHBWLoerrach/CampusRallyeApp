@@ -15,14 +15,14 @@ import { confirmAlert } from '../../utils/ConfirmAlert';
 import Hint from '../../ui/Hint';
 import { saveAnswer } from '../../services/storage/answerStorage';
 import { ThemeContext } from '../../utils/ThemeContext';
-import { useLanguage } from '../../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../../utils/LanguageContext';
 
 export default function SkillQuestions() {
   const [answer, setAnswer] = useState('');
   const currentQuestion = store$.currentQuestion.get();
   const currentAnswer = store$.currentAnswer.get();
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   const handleNext = async () => {
     const correctly_answered =
