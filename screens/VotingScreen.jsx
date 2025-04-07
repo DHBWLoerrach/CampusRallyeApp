@@ -146,9 +146,7 @@ export default function VotingScreen({ onRefresh, loading }) {
     >
       <FlatList
         data={currentQuestion}
-        keyExtractor={() => {
-          Math.random().toString().split('.')[1];
-        }}
+        keyExtractor={(item) => item.tq_team_id}
         onRefresh={getVotingData}
         refreshing={loading}
         ListHeaderComponent={() =>
