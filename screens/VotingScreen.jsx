@@ -117,7 +117,7 @@ export default function VotingScreen({ onRefresh, loading }) {
       >
         <View style={globalStyles.rallyeStatesStyles.infoBox}>
           <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
-            Die Abstimmung wurde beendet wurde.
+            Die Abstimmung wurde beendet.
           </Text>
           <Text
             style={[
