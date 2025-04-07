@@ -182,7 +182,7 @@ export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
       }
     >
       <FontAwesome
-        name="exclamation-circle"
+        name="question-circle"
         size={80}
         color={Colors.dhbwRed}
         style={globalStyles.rallyeStatesStyles.successIcon}
