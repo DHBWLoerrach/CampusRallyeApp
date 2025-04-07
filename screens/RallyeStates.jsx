@@ -1,12 +1,11 @@
+import { useContext, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import VotingScreen from './VotingScreen';
 import Scoreboard from './ScoreboardScreen';
 import UIButton from '../ui/UIButton';
 import { globalStyles } from '../utils/GlobalStyles';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Colors from '../utils/Colors';
-import React from 'react';
-import { useContext } from 'react';
 import { ThemeContext } from '../utils/ThemeContext';
 import { useLanguage } from '../utils/LanguageContext';
 
@@ -101,7 +100,7 @@ export const EndedState = () => <Scoreboard />;
 
 export const TeamNotSelectedState = () => {
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   return (
     <ScrollView
@@ -165,7 +164,7 @@ export const TeamNotSelectedState = () => {
 
 export const NoQuestionsAvailableState = ({ loading, onRefresh }) => {
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   return (
     <ScrollView
@@ -422,7 +421,7 @@ export const AllQuestionsAnsweredState = ({
   teamName,
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   return (
     <ScrollView
