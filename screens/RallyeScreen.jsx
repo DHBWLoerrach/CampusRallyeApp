@@ -21,7 +21,7 @@ import { globalStyles } from '../utils/GlobalStyles';
 import { supabase } from '../utils/Supabase';
 import Colors from '../utils/Colors';
 import { ThemeContext } from '../utils/ThemeContext';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '../utils/LanguageContext';
 
 const questionTypeComponents = {
   knowledge: SkillQuestions,
@@ -41,7 +41,7 @@ const RallyeScreen = observer(function RallyeScreen({ navigation }) {
   const allQuestionsAnswered = store$.allQuestionsAnswered.get();
   const timeExpired = store$.timeExpired.get();
   const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
 
   const loadQuestions = async () => {
     setLoading(true);
