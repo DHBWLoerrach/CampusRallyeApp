@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { View, Text, FlatList, Image } from 'react-native';
+import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { store$ } from '../services/storage/Store';
-import { supabase } from '../utils/Supabase';
 import UIButton from '../ui/UIButton';
+import { supabase } from '../utils/Supabase';
 import Colors from '../utils/Colors';
 import { globalStyles } from '../utils/GlobalStyles';
-import { TouchableOpacity } from 'react-native';
 
 export default function VotingScreen({ onRefresh, loading }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
