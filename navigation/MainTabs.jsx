@@ -51,11 +51,7 @@ const MainTabs = observer(function MainTabs() {
 
   return (
     <Tab.Navigator
-      initialRouteName={
-        rallye && rallye.status === 'running' && !rallye.tour_mode
-          ? 'team'
-          : 'rallye'
-      }
+      initialRouteName={rallye && !rallye.tour_mode ? 'team' : 'rallye'}
       screenOptions={({ route }) => ({
         headerStyle: { backgroundColor: Colors.dhbwRed },
         headerTintColor: Colors.tabHeader,
