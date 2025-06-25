@@ -4,10 +4,7 @@
     "slug": "CampusRallyeApp",
     "version": "1.0.10",
     "orientation": "portrait",
-    "icon": {
-      "light": "./assets/icon.png",
-      "dark": "./assets/icon-dark.png"
-    },
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -24,6 +21,10 @@
       },
       "entitlements": {
         "aps-environment": "development"
+      },
+      "icon": {
+        "light": "./assets/icon.png",
+        "dark": "./assets/icon-dark.png"
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
@@ -51,6 +52,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "edgeToEdgeEnabled": true,
       "package": "de.dhbwloe.loerrach.CampusRallyeApp"
     },
     "web": {
