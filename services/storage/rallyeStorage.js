@@ -14,9 +14,8 @@ export async function getActiveRallyes() {
     const { data, error } = await supabase
       .from('rallye')
       .select('*')
-      .eq('is_active', true)
+      .not('status', 'in', '(inactive,ended)')
       .eq('tour_mode', false);
-
     if (error) throw error;
 
     data.forEach((rallye) => {
@@ -37,7 +36,6 @@ export async function getTourModeRallye() {
     const { data, error } = await supabase
       .from('rallye')
       .select('*')
-      .eq('is_active', true)
       .eq('tour_mode', true);
 
     if (error) throw error;

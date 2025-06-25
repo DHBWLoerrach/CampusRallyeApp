@@ -28,7 +28,9 @@ const App = observer(function App() {
     const { data } = await supabase
       .from('rallye')
       .select('*')
-      .eq('is_active', true);
+      .not('status', 'in', '(inactive,ended)')
+      .eq('tour_mode', false);
+
     if (data) {
       setOnline(true);
     } else {

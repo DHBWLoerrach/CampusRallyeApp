@@ -12,7 +12,9 @@ function getStatusText(status, language) {
       return language === 'de' ? 'Noch nicht gestartet' : 'Not started';
     case 'running':
       return language === 'de' ? 'Gestartet' : 'Started';
-    default:
+    case 'post_processing':
+      return language === 'de' ? 'Abstimmung' : 'Voting';
+    case 'ended':
       return language === 'de' ? 'Beendet' : 'Ended';
   }
 }
