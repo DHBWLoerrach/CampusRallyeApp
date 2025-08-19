@@ -144,7 +144,7 @@ export default function WelcomeScreen({
         <View style={{ position: 'relative' }}>
           <Image
             style={globalStyles.welcomeStyles.headerImage}
-            source={require('../assets/dhbw-campus-header.png')}
+            source={require('../assets/images/app/dhbw-campus-header.png')}
           />
 
           <TouchableOpacity
@@ -188,7 +188,7 @@ export default function WelcomeScreen({
           </Text>
           <Image
             style={globalStyles.welcomeStyles.logo}
-            source={require('../assets/dhbw-logo.png')}
+            source={require('../assets/images/app/dhbw-logo.png')}
           />
         </View>
         <View
