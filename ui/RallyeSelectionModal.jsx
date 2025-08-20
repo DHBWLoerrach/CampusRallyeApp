@@ -1,10 +1,8 @@
-import React, { useContext } from 'react';
-import { Modal, View, Text, FlatList } from 'react-native';
-import { globalStyles } from '../utils/GlobalStyles';
-import UIButton from '../ui/UIButton';
-import { ThemeContext } from '../utils/ThemeContext';
-import Colors from '../utils/Colors';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { FlatList, Modal, Text, View, useColorScheme } from 'react-native';
+import { globalStyles } from '@/utils/GlobalStyles';
+import UIButton from '@/ui/UIButton';
+import Colors from '@/utils/Colors';
+import { useLanguage } from '@/utils/LanguageContext';
 
 function getStatusText(status, language) {
   switch (status) {
@@ -25,8 +23,9 @@ const RallyeSelectionModal = ({
   activeRallyes,
   onSelect,
 }) => {
-  const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const { language } = useLanguage();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
   const renderItem = ({ item }) => (
     <View

@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
-  Text,
-  TouchableOpacity,
-  Animated,
-  TextInput,
-  View,
   Alert,
+  Animated,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Colors from '../utils/Colors';
-import { globalStyles } from '../utils/GlobalStyles';
+import Colors from '@/utils/Colors';
+import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
-import { ThemeContext } from '../utils/ThemeContext';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '@/utils/LanguageContext'; // Import LanguageContext
 
 const Card = ({
   title,
@@ -26,8 +26,9 @@ const Card = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [password, setPassword] = useState('');
   const flipAnim = useRef(new Animated.Value(0)).current;
-  const { isDarkMode } = useContext(ThemeContext);
-  const { language } = useLanguage(); // Use LanguageContext
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const { language } = useLanguage();
 
   const flipCard = () => {
     Animated.spring(flipAnim, {
