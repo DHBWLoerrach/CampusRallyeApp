@@ -56,7 +56,7 @@ const handleNoPasswordSubmit = async () => {
   }
 };
 
-export default function WelcomeScreen() {
+export default function Welcome() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const { language, toggleLanguage } = useLanguage();
