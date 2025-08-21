@@ -10,10 +10,10 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import UIButton from '@/ui/UIButton';
 import Card from '@/ui/Card';
 import RallyeSelectionModal from '@/ui/RallyeSelectionModal';
@@ -151,7 +151,7 @@ export default function WelcomeScreen() {
             ? 'Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team'
             : 'Join a guided rally and explore the campus with your team'
         }
-        icon="map-marker"
+        icon="mappin.and.ellipse"
         onShowModal={() => {
           setShowRallyeModal(true);
         }}
@@ -176,7 +176,7 @@ export default function WelcomeScreen() {
             ? 'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck'
             : 'Explore the campus at your own pace without time pressure'
         }
-        icon="compass"
+        icon="binoculars"
         onPress={handleNoPasswordSubmit}
       />
     </View>
@@ -208,8 +208,8 @@ export default function WelcomeScreen() {
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
             onPress={toggleLanguage}
           >
-            <MaterialIcons
-              name="language"
+            <IconSymbol
+              name="globe"
               size={24}
               color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
             />

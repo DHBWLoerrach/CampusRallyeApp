@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 const ICON_SIZE = 28;
 
@@ -8,8 +9,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Zuhause',
-          tabBarLabel: 'Heim',
+          title: 'Rallye',
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="map" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -17,6 +20,9 @@ export default function TabLayout() {
         options={{
           title: 'Impressum',
           tabBarLabel: 'Impressum',
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="gearshape" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen

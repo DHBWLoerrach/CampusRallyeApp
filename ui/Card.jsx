@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Alert,
   Animated,
@@ -8,18 +8,18 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
-import { useLanguage } from '@/utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '@/utils/LanguageContext';
 
 const Card = ({
   title,
   description,
   icon,
   onPress,
-  onShowModal, // Neuer prop
+  onShowModal,
   onPasswordSubmit,
   selectedRallye,
 }) => {
@@ -99,7 +99,7 @@ const Card = ({
       <Animated.View
         style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}
       >
-        <FontAwesome name={icon} size={40} color={Colors.dhbwRed} />
+        <IconSymbol name={icon} size={40} color={Colors.dhbwRed} />
         <Text
           style={[
             globalStyles.cardStyles.cardTitle,
