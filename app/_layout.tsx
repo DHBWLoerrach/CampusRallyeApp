@@ -12,7 +12,7 @@ import {
   useRouter,
   useSegments,
 } from 'expo-router';
-import { observer } from '@legendapp/state/react';
+import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import { LanguageProvider } from '@/utils/LanguageContext';
 
@@ -24,7 +24,8 @@ function RootNavigator() {
   const router = useRouter();
   const segments = useSegments(); // ['(tabs)', 'index'] etc.
   const navState = useRootNavigationState(); // ready-check
-  const enabled = store$.enabled.get();
+  // Subscribe reactively to Legend state changes
+  const enabled = useSelector(() => store$.enabled.get());
 
   useEffect(() => {
     if (!navState?.key) return;
@@ -44,8 +45,6 @@ function RootNavigator() {
   );
 }
 
-const ObservedRootNavigator = observer(RootNavigator);
-
 export default function RootLayout() {
-  return <ObservedRootNavigator />;
+  return <RootNavigator />;
 }
