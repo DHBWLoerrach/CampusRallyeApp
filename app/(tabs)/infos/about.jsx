@@ -1,17 +1,11 @@
-import { useContext } from 'react';
-import { View, Text, Linking, ScrollView } from 'react-native';
+import { Linking, ScrollView, Text, useColorScheme, View } from 'react-native';
 import * as Application from 'expo-application';
-import Constants from 'expo-constants';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import { ThemeContext } from '@/utils/ThemeContext';
-import { useLanguage } from '@/utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '@/utils/LanguageContext';
 
 const AppVersion = ({ isDarkMode }) => {
   let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
-  if (Constants.expoVersion) {
-    versionString = `App runs in Expo version ${Constants.expoVersion}`;
-  }
   return (
     <Text
       style={[
@@ -26,11 +20,10 @@ const AppVersion = ({ isDarkMode }) => {
   );
 };
 
-export default function InformationScreen() {
-  const isDarkMode = false;
-  const language = 'de';
-  // const { isDarkMode } = useContext(ThemeContext);
-  // const { language } = useLanguage(); // Use LanguageContext
+export default function About() {
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const { language } = useLanguage();
 
   return (
     <ScrollView

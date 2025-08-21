@@ -1,15 +1,12 @@
-import { useContext } from 'react';
-import { Linking, ScrollView, View, Text } from 'react-native';
+import { Linking, ScrollView, Text, useColorScheme, View } from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import { ThemeContext } from '@/utils/ThemeContext';
-import { useLanguage } from '@/utils/LanguageContext'; // Import LanguageContext
+import { useLanguage } from '@/utils/LanguageContext';
 
-export default function ImprintScreen() {
-  const isDarkMode = false;
-  const language = 'de';
-  // const { isDarkMode } = useContext(ThemeContext);
-  // const { language } = useLanguage(); // Use LanguageContext
+export default function Imprint() {
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const { language } = useLanguage();
 
   return (
     <ScrollView

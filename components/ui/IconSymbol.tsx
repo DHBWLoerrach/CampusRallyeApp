@@ -24,7 +24,7 @@ export type IconSymbolName = keyof typeof MAPPING;
 const MAPPING = {
   house: { name: 'home', source: 'material' },
   map: { name: 'map', source: 'material' },
-  gearshape: { name: 'settings', source: 'material' },
+  'info.circle': { name: 'info-outline', source: 'material' },
   'rectangle.portrait.and.arrow.right': { name: 'logout', source: 'material' },
   globe: { name: 'language', source: 'material' },
   'person.3': { name: 'groups', source: 'material' },

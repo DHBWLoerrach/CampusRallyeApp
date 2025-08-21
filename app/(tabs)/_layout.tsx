@@ -16,19 +16,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="imprint"
-        options={{
-          title: 'Impressum',
-          tabBarLabel: 'Impressum',
-          tabBarIcon: ({ color, size }) => (
-            <IconSymbol name="gearshape" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="information"
+        name="infos"
         options={{
           title: 'Informationen',
+          tabBarLabel: 'Infos',
+          tabBarIcon: ({ color, size }) => (
+            <IconSymbol name="info.circle" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
