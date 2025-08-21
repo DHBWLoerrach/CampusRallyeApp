@@ -30,7 +30,7 @@ function RootNavigator() {
   useEffect(() => {
     if (!navState?.key) return;
     const inTabs = segments[0] === '(tabs)';
-    if (enabled && !inTabs) router.replace('/(tabs)');
+    if (enabled && !inTabs) router.replace('/(tabs)/rallye');
     if (!enabled && inTabs) router.replace('/');
   }, [enabled, segments, router, navState?.key]);
 

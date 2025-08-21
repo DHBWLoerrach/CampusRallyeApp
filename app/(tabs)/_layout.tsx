@@ -1,4 +1,4 @@
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -8,9 +8,10 @@ const ICON_SIZE = 28;
 
 export default function TabLayout() {
   const theme = useTheme();
-  const router = useRouter();
+
   return (
     <Tabs
+      initialRouteName="rallye"
       screenOptions={{
         headerRight: () => (
           <TouchableOpacity
@@ -31,7 +32,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="rallye"
         options={{
           title: 'Rallye',
           tabBarIcon: ({ color, size }) => (
