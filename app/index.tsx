@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from 'react-native';
+import { router } from 'expo-router';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
@@ -30,7 +31,9 @@ const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
   try {
     if (password === selectedRallye.password) {
       store$.rallye.set(selectedRallye);
-      store$.enabled.set(true);
+      await setCurrentRallye(selectedRallye);
+      // Navigate to rally team creation
+      router.push('/rally/team');
     } else {
       Alert.alert(
         'Falsches Passwort',
@@ -50,7 +53,8 @@ const handleNoPasswordSubmit = async () => {
     store$.reset();
     store$.rallye.set(tourRallye);
     await setCurrentRallye(tourRallye);
-    store$.enabled.set(true);
+    // Navigate to explore mode
+    router.push('/explore');
   } else {
     Alert.alert('Fehler', 'Kein Tour Mode Rallye verfügbar.');
   }
