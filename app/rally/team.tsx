@@ -51,7 +51,7 @@ const TeamScreen = observer(function TeamScreen() {
     return (
       <View
         style={[
-          globalStyles.default.container,
+          globalStyles.default?.container || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.background
@@ -61,7 +61,7 @@ const TeamScreen = observer(function TeamScreen() {
       >
         <Text
           style={[
-            globalStyles.default.bigText,
+            globalStyles.default?.bigText || {},
             {
               marginBottom: 10,
               color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
@@ -72,7 +72,12 @@ const TeamScreen = observer(function TeamScreen() {
             ? 'Du nimmst gerade nicht an einer Rallye teil.'
             : 'You are not currently participating in a rally.'}
         </Text>
-        <UIButton icon="arrow-left" onPress={() => router.replace('/')}>
+        <UIButton 
+          icon="arrow-left" 
+          onPress={() => router.replace('/')}
+          color={Colors.dhbwRed}
+          disabled={false}
+        >
           {language === 'de' ? 'Zurück zur Anmeldung' : 'Back to registration'}
         </UIButton>
       </View>
@@ -83,7 +88,7 @@ const TeamScreen = observer(function TeamScreen() {
     return (
       <View
         style={[
-          globalStyles.teamStyles.infoBox,
+          globalStyles.teamStyles?.infoBox || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.card
@@ -93,7 +98,7 @@ const TeamScreen = observer(function TeamScreen() {
       >
         <Text
           style={[
-            globalStyles.teamStyles.message,
+            globalStyles.teamStyles?.message || {},
             {
               color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
@@ -103,7 +108,7 @@ const TeamScreen = observer(function TeamScreen() {
         </Text>
         <Text
           style={[
-            globalStyles.teamStyles.teamName,
+            globalStyles.teamStyles?.teamName || {},
             {
               color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
@@ -111,7 +116,12 @@ const TeamScreen = observer(function TeamScreen() {
         >
           {team?.name}
         </Text>
-        <UIButton onPress={() => router.push('/rally')}>
+        <UIButton 
+          onPress={() => router.push('/rally')}
+          color={Colors.dhbwRed}
+          disabled={false}
+          icon="arrow-right"
+        >
           {language === 'de' ? 'Gehe zur Rallye' : 'Go to rally'}
         </UIButton>
       </View>
@@ -120,6 +130,8 @@ const TeamScreen = observer(function TeamScreen() {
 
   function BuildTeam() {
     async function handleCreateTeam() {
+      if (!rallye) return;
+      
       setLoading(true);
       const teamName = generateTeamName();
 
@@ -147,7 +159,7 @@ const TeamScreen = observer(function TeamScreen() {
     return (
       <View
         style={[
-          globalStyles.teamStyles.infoBox,
+          globalStyles.teamStyles?.infoBox || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.card
@@ -157,7 +169,7 @@ const TeamScreen = observer(function TeamScreen() {
       >
         <Text
           style={[
-            globalStyles.teamStyles.message,
+            globalStyles.teamStyles?.message || {},
             {
               color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
@@ -167,7 +179,12 @@ const TeamScreen = observer(function TeamScreen() {
             ? 'Bilde ein Team, um an der Rallye teilzunehmen.'
             : 'Create a team to participate in the rally.'}
         </Text>
-        <UIButton disabled={loading} onPress={handleCreateTeam}>
+        <UIButton 
+          disabled={loading} 
+          onPress={handleCreateTeam}
+          color={Colors.dhbwRed}
+          icon="users"
+        >
           {language === 'de' ? 'Team bilden' : 'Create team'}
         </UIButton>
       </View>
@@ -177,7 +194,7 @@ const TeamScreen = observer(function TeamScreen() {
   return (
     <View
       style={[
-        globalStyles.default.container,
+        globalStyles.default?.container || {},
         {
           backgroundColor: isDarkMode
             ? Colors.darkMode.background
@@ -187,7 +204,7 @@ const TeamScreen = observer(function TeamScreen() {
     >
       <Text
         style={[
-          globalStyles.teamStyles.title,
+          globalStyles.teamStyles?.title || {},
           {
             color: isDarkMode
               ? Colors.darkMode.text
@@ -199,7 +216,7 @@ const TeamScreen = observer(function TeamScreen() {
       </Text>
       <View
         style={[
-          globalStyles.teamStyles.container,
+          globalStyles.teamStyles?.container || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.background

@@ -40,13 +40,13 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
   }
 
   const totalQuestions = questions?.length || 0;
-  const maxPoints = questions?.reduce((sum, q) => sum + (q.points || 0), 0) || 0;
+  const maxPoints = questions?.reduce((sum: number, q: any) => sum + (q.points || 0), 0) || 0;
 
   return (
     <ScrollView
       contentContainerStyle={[
-        globalStyles.default.refreshContainer,
-        globalStyles.rallyeStatesStyles.container,
+        globalStyles.default?.refreshContainer || {},
+        globalStyles.rallyeStatesStyles?.container || {},
         {
           backgroundColor: isDarkMode
             ? Colors.darkMode.background
@@ -58,16 +58,16 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
         name="trophy"
         size={80}
         color={Colors.dhbwRed}
-        style={globalStyles.rallyeStatesStyles.successIcon}
+        style={globalStyles.rallyeStatesStyles?.successIcon || {}}
       />
 
-      <Text style={globalStyles.rallyeStatesStyles.title}>
+      <Text style={globalStyles.rallyeStatesStyles?.title || {}}>
         {language === 'de' ? 'Exploration beendet!' : 'Exploration completed!'}
       </Text>
 
       <View
         style={[
-          globalStyles.rallyeStatesStyles.infoBox,
+          globalStyles.rallyeStatesStyles?.infoBox || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.card
@@ -77,7 +77,7 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
       >
         <Text
           style={[
-            globalStyles.rallyeStatesStyles.infoTitle,
+            globalStyles.rallyeStatesStyles?.infoTitle || {},
             {
               color: isDarkMode
                 ? Colors.darkMode.text
@@ -89,7 +89,7 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
         </Text>
         <Text
           style={[
-            globalStyles.rallyeStatesStyles.infoSubtitle,
+            globalStyles.rallyeStatesStyles?.infoSubtitle || {},
             {
               color: isDarkMode
                 ? Colors.darkMode.text
@@ -106,7 +106,7 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
         </Text>
         <Text
           style={[
-            globalStyles.rallyeStatesStyles.infoSubtitle,
+            globalStyles.rallyeStatesStyles?.infoSubtitle || {},
             {
               color: isDarkMode
                 ? Colors.darkMode.text
@@ -122,7 +122,7 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
 
       <View
         style={[
-          globalStyles.rallyeStatesStyles.infoBox,
+          globalStyles.rallyeStatesStyles?.infoBox || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.card
@@ -132,7 +132,7 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
       >
         <Text
           style={[
-            globalStyles.rallyeStatesStyles.infoTitle,
+            globalStyles.rallyeStatesStyles?.infoTitle || {},
             {
               color: isDarkMode
                 ? Colors.darkMode.text
@@ -144,7 +144,7 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
         </Text>
         <Text
           style={[
-            globalStyles.rallyeStatesStyles.infoSubtitle,
+            globalStyles.rallyeStatesStyles?.infoSubtitle || {},
             {
               color: isDarkMode
                 ? Colors.darkMode.text
@@ -158,7 +158,7 @@ const ExploreResultsScreen = observer(function ExploreResultsScreen() {
         </Text>
       </View>
 
-      <UIButton icon="home" onPress={goBackToWelcome}>
+      <UIButton icon="home" onPress={goBackToWelcome} color={Colors.dhbwRed} disabled={false}>
         {language === 'de' ? 'Zurück zum Start' : 'Back to start'}
       </UIButton>
     </ScrollView>

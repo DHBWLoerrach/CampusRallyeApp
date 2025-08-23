@@ -1,5 +1,9 @@
 import VotingScreen from '@/screens/VotingScreen';
 
 export default function RallyVotingScreen() {
-  return <VotingScreen />;
+  const onRefresh = async () => {
+    // Refresh voting data
+  };
+
+  return <VotingScreen onRefresh={onRefresh} loading={false} />;
 }

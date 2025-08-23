@@ -54,6 +54,8 @@ const ExploreQuestionsScreen = observer(function ExploreQuestionsScreen() {
   }, [allQuestionsAnswered, questions]);
 
   const loadQuestions = async () => {
+    if (!rallye?.id) return;
+    
     setLoading(true);
     try {
       const { supabase } = await import('@/utils/Supabase');
@@ -62,7 +64,7 @@ const ExploreQuestionsScreen = observer(function ExploreQuestionsScreen() {
       const { data: joinData, error: joinError } = await supabase
         .from('join_rallye_questions')
         .select('question_id')
-        .eq('rallye_id', rallye?.id);
+        .eq('rallye_id', rallye.id);
 
       if (joinError) throw joinError;
 
@@ -119,7 +121,7 @@ const ExploreQuestionsScreen = observer(function ExploreQuestionsScreen() {
     return (
       <View
         style={[
-          globalStyles.default.container,
+          globalStyles.default?.container || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.background
@@ -136,7 +138,7 @@ const ExploreQuestionsScreen = observer(function ExploreQuestionsScreen() {
     return (
       <View
         style={[
-          globalStyles.default.container,
+          globalStyles.default?.container || {},
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.background
@@ -155,7 +157,7 @@ const ExploreQuestionsScreen = observer(function ExploreQuestionsScreen() {
     return null;
   }
 
-  const QuestionComponent = questionTypeComponents[currentQuestion.type];
+  const QuestionComponent = questionTypeComponents[currentQuestion.type as keyof typeof questionTypeComponents];
   
   if (!QuestionComponent) {
     console.error(`Unknown question type: ${currentQuestion.type}`);

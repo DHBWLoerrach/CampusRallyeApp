@@ -127,7 +127,7 @@ export default function Welcome() {
       >
         {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
       </Text>
-      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+      <UIButton icon="rotate" disabled={loading} onPress={onRefresh} color={Colors.dhbwRed}>
         {language === 'de' ? 'Aktualisieren' : 'Refresh'}
       </UIButton>
     </View>
