@@ -1,8 +1,8 @@
-function getRandomElement(arr) {
+function getRandomElement<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-export default function generateTeamName() {
+export default function generateTeamName(): string {
   const adjective = getRandomElement(adjectives);
   const color = getRandomElement(colors);
   const animal = getRandomElement(animals);
@@ -34,7 +34,7 @@ const adjectives = [
   'Terrific',
   'Magnificent',
   'Splendid',
-];
+] as const;
 const colors = [
   'Red',
   'Blue',
@@ -46,7 +46,7 @@ const colors = [
   'Orange',
   'Brown',
   'Silver',
-];
+] as const;
 const animals = [
   'Lions',
   'Tigers',
@@ -69,4 +69,5 @@ const animals = [
   'Scorpions',
   'Pumas',
   'Crocodiles',
-];
+] as const;
+

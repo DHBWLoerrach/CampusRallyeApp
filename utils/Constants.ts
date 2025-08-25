@@ -1,4 +1,4 @@
-export default {
+const Constants = {
   dhbwRed: '#e2001a',
   dhbwRedSecondary: '#9F0013',
   dhbwBlue: '#006ab3',
@@ -6,3 +6,6 @@ export default {
   bigFont: 25,
   smallFont: 15,
 };
+
+export default Constants;
+

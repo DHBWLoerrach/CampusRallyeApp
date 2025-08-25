@@ -1,7 +1,24 @@
 // copied from https://github.com/DHBWLoerrach/CampusApp
 // TO DO: Which colors do we need?
 
-module.exports = {
+export type ThemePalette = {
+  background: string;
+  tabBarText: string;
+  tabBarIcon: string;
+  text: string;
+  icon: string;
+  card: string;
+  scheduleHeader: string;
+  scheduleInfo: string;
+  dhbwGray: string;
+  dhbwRed: string;
+  dhbwRedLight: string;
+  lightGray: string;
+  dhbwRedWebView: string;
+  cellBorder: string;
+};
+
+const Colors = {
   cellBorder: '#EEEEEE',
   veryLightGray: 'rgb(233,233,233)',
   lightGray: '#DADADA',
@@ -31,7 +48,7 @@ module.exports = {
     tabBarText: '#777777',
     tabBarIcon: '#777777',
     background: '#fcfcfc',
-  },
+  } as ThemePalette,
   darkMode: {
     background: '#000',
     tabBarText: '#fff',
@@ -47,5 +64,8 @@ module.exports = {
     lightGray: '#DADADA',
     dhbwRedWebView: 'rgb(226,0,26)', // FIXME: needed by WebView
     cellBorder: '#1f1f1f',
-  },
+  } as ThemePalette,
 };
+
+export default Colors;
+
