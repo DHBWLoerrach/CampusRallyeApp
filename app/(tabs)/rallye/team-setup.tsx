@@ -5,7 +5,7 @@ import { supabase } from '@/utils/Supabase';
 import { store$ } from '@/services/storage/Store';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import UIButton from '@/ui/UIButton';
+import UIButton from '@/components/ui/UIButton';
 import generateTeamName from '@/utils/RandomTeamNames';
 import { setCurrentTeam } from '@/services/storage/teamStorage';
 
@@ -58,4 +58,3 @@ const TeamSetup = observer(function TeamSetup() {
 });
 
 export default TeamSetup;
-

@@ -4,8 +4,8 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { store$ } from '@/services/storage/Store';
 import { globalStyles } from '@/utils/GlobalStyles';
-import UIButton from '@/ui/UIButton';
-import Hint from '@/ui/Hint';
+import UIButton from '@/components/ui/UIButton';
+import Hint from '@/components/ui/Hint';
 import Colors from '@/utils/Colors';
 import { saveAnswer } from '@/services/storage/answerStorage';
 import { ThemeContext } from '@/utils/ThemeContext';
@@ -169,4 +169,3 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     </View>
   );
 }
-

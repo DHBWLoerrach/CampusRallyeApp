@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
-import UIButton from '@/ui/UIButton';
+import UIButton from '@/components/ui/UIButton';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
@@ -196,4 +196,3 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
     </View>
   );
 }
-

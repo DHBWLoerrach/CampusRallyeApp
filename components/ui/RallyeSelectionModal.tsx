@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, Modal, Text, View, useColorScheme, ListRenderItem } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
-import UIButton from '@/ui/UIButton';
+import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 
@@ -132,4 +132,3 @@ export default function RallyeSelectionModal({ visible, onClose, activeRallyes, 
     </Modal>
   );
 }
-

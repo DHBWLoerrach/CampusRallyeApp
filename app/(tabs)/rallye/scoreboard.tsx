@@ -4,7 +4,7 @@ import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import { supabase } from '@/utils/Supabase';
 import { globalStyles } from '@/utils/GlobalStyles';
-import UIButton from '@/ui/UIButton';
+import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 
 type TeamRow = {
@@ -134,4 +134,3 @@ export default function Scoreboard() {
     </ScrollView>
   );
 }
-

@@ -4,8 +4,8 @@ import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { store$ } from '@/services/storage/Store';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import UIButton from '@/ui/UIButton';
-import Hint from '@/ui/Hint';
+import UIButton from '@/components/ui/UIButton';
+import Hint from '@/components/ui/Hint';
 import { confirmAlert } from '@/utils/ConfirmAlert';
 import { ThemeContext } from '@/utils/ThemeContext';
 import { useLanguage } from '@/utils/LanguageContext';
@@ -186,4 +186,3 @@ export default function MultipleChoiceQuestion({ question }: QuestionProps) {
     </ScrollView>
   );
 }
-

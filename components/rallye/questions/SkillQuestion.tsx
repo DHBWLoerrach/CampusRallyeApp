@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { store$ } from '@/services/storage/Store';
-import UIButton from '@/ui/UIButton';
+import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { confirmAlert } from '@/utils/ConfirmAlert';
-import Hint from '@/ui/Hint';
+import Hint from '@/components/ui/Hint';
 import { saveAnswer } from '@/services/storage/answerStorage';
 import { ThemeContext } from '@/utils/ThemeContext';
 import { useLanguage } from '@/utils/LanguageContext';
@@ -163,4 +163,3 @@ export default function SkillQuestion({ question }: QuestionProps) {
     </KeyboardAvoidingView>
   );
 }
-

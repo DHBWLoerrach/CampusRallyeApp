@@ -4,8 +4,8 @@ import { CameraView } from 'expo-camera';
 import { QuestionProps } from '@/types/rallye';
 import { saveAnswer, uploadPhotoAnswer } from '@/services/storage/answerStorage';
 import { store$ } from '@/services/storage/Store';
-import Hint from '@/ui/Hint';
-import UIButton from '@/ui/UIButton';
+import Hint from '@/components/ui/Hint';
+import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
@@ -155,4 +155,3 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
 
   return picture ? <ImagePreview /> : <PhotoCamera />;
 }
-

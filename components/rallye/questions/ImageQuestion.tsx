@@ -6,8 +6,8 @@ import { saveAnswer } from '@/services/storage/answerStorage';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { confirmAlert } from '@/utils/ConfirmAlert';
-import UIButton from '@/ui/UIButton';
-import Hint from '@/ui/Hint';
+import UIButton from '@/components/ui/UIButton';
+import Hint from '@/components/ui/Hint';
 import { supabase } from '@/utils/Supabase';
 import { ThemeContext } from '@/utils/ThemeContext';
 import { useLanguage } from '@/utils/LanguageContext';
@@ -188,4 +188,3 @@ export default function ImageQuestion({ question }: QuestionProps) {
     </ScrollView>
   );
 }
-

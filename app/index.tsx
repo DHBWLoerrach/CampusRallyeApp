@@ -14,9 +14,9 @@ import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import UIButton from '@/ui/UIButton';
-import Card from '@/ui/Card';
-import RallyeSelectionModal from '@/ui/RallyeSelectionModal';
+import UIButton from '@/components/ui/UIButton';
+import Card from '@/components/ui/Card';
+import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
 import { useLanguage } from '@/utils/LanguageContext';
 import { store$ } from '@/services/storage/Store';
 import {
