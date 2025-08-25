@@ -15,6 +15,7 @@ import {
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import { LanguageProvider } from '@/utils/LanguageContext';
+import { ThemeContext, themeStore$ } from '@/utils/ThemeContext';
 
 function RootNavigator() {
   const colorScheme = useColorScheme();
@@ -26,6 +27,10 @@ function RootNavigator() {
   const navState = useRootNavigationState(); // ready-check
   // Subscribe reactively to Legend state changes
   const enabled = useSelector(() => store$.enabled.get());
+  const isDarkMode = useSelector(() => themeStore$.isDarkMode.get());
+  const toggleDarkMode = () => {
+    themeStore$.isDarkMode.set(!themeStore$.isDarkMode.get());
+  };
 
   useEffect(() => {
     if (!navState?.key) return;
@@ -38,9 +43,11 @@ function RootNavigator() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <LanguageProvider>
-        <Slot />
-      </LanguageProvider>
+      <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+        <LanguageProvider>
+          <Slot />
+        </LanguageProvider>
+      </ThemeContext.Provider>
     </ThemeProvider>
   );
 }

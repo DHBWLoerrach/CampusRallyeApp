@@ -16,6 +16,7 @@ export default function TabLayout() {
         name="rallye"
         options={{
           title: 'Rallye',
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <IconSymbol name="map" size={ICON_SIZE} color={color} />
           ),
