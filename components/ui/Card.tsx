@@ -103,7 +103,7 @@ export default function Card({
             : Colors.lightMode.card,
         },
       ]}
-      onPress={icon === 'map-marker' ? onShowModal : onPress}
+      onPress={onShowModal ? onShowModal : onPress}
     >
       <Animated.View
         style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}
@@ -190,4 +190,3 @@ export default function Card({
     </TouchableOpacity>
   );
 }
-
