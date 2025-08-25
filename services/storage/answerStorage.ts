@@ -1,14 +1,14 @@
-import { supabase } from '../../utils/Supabase';
+import { supabase } from '@/utils/Supabase';
 import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
 import { store$ } from './Store';
 import { Buffer } from 'buffer';
 import * as FileSystem from 'expo-file-system';
 
 export async function getOfflineQueue() {
-  return getStorageItem(StorageKeys.OFFLINE_QUEUE) || [];
+  return (await getStorageItem(StorageKeys.OFFLINE_QUEUE)) || [];
 }
 
-export async function addToOfflineQueue(action) {
+export async function addToOfflineQueue(action: any) {
   const queue = await getOfflineQueue();
   queue.push(action);
   await setStorageItem(StorageKeys.OFFLINE_QUEUE, queue);
@@ -19,14 +19,13 @@ export async function clearOfflineQueue() {
 }
 
 export async function saveAnswer(
-  teamId,
-  questionId,
-  answeredCorrectly,
-  points,
-  answer = ''
+  teamId: number,
+  questionId: number,
+  answeredCorrectly: boolean,
+  points: number,
+  answer: string = ''
 ) {
   try {
-    // Ergebnis in der Tabelle team_questions speichern
     const { error } = await supabase.from('team_questions').insert({
       team_id: teamId,
       question_id: questionId,
@@ -38,7 +37,6 @@ export async function saveAnswer(
     return true;
   } catch (error) {
     console.error('Error saving answer:', error);
-    // Optional: Offline Queue verwenden, falls keine Verbindung besteht.
     await addToOfflineQueue({
       type: 'SAVE_ANSWER',
       data: { teamId, questionId, answeredCorrectly, points },
@@ -47,17 +45,17 @@ export async function saveAnswer(
   }
 }
 
-export async function uploadPhotoAnswer(imageUri) {
+export async function uploadPhotoAnswer(imageUri: string) {
   try {
-    // Lese das Bild als Base64-String mit expo FileSystem
     const base64 = await FileSystem.readAsStringAsync(imageUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
     const buffer = Buffer.from(base64, 'base64');
 
-    const teamId = store$.team.get().id;
-    const questionId = store$.currentQuestion.get().id;
-    const points = store$.currentQuestion.get().points;
+    const teamId = (store$.team.get() as any).id as number;
+    const current = store$.currentQuestion.get() as any;
+    const questionId = current.id as number;
+    const points = current.points as number;
 
     const fileName = `${teamId}_${questionId}_${Date.now()}.jpg`;
     const filePath = `${fileName}`;
@@ -69,18 +67,17 @@ export async function uploadPhotoAnswer(imageUri) {
 
     await saveAnswer(teamId, questionId, true, points, filePath);
 
-    store$.points.set(store$.points.get() + points);
+    store$.points.set((store$.points.get() as number) + points);
     store$.gotoNextQuestion();
 
     return data;
   } catch (error) {
     console.error('Error uploading image answer:', error);
-
-    // Offline Queue für fehlgeschlagene Foto-Uploads verwenden.
     await addToOfflineQueue({
       type: 'UPLOAD_PHOTO_ANSWER',
-      data: { teamId, questionId, imageUri },
+      data: { imageUri },
     });
-    return false;
+    return false as const;
   }
 }
+

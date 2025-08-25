@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Alert,
   Animated,
@@ -14,7 +14,17 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
 import { useLanguage } from '@/utils/LanguageContext';
 
-const Card = ({
+type CardProps = {
+  title: string;
+  description: string;
+  icon: any;
+  onPress?: () => void;
+  onShowModal?: () => void;
+  onPasswordSubmit: (password: string) => void;
+  selectedRallye?: any;
+};
+
+export default function Card({
   title,
   description,
   icon,
@@ -22,7 +32,7 @@ const Card = ({
   onShowModal,
   onPasswordSubmit,
   selectedRallye,
-}) => {
+}: CardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [password, setPassword] = useState('');
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -60,13 +70,13 @@ const Card = ({
     transform: [{ rotateY: frontInterpolate }],
     zIndex: isFlipped ? 0 : 1,
     pointerEvents: isFlipped ? 'none' : 'auto',
-  };
+  } as const;
 
   const backAnimatedStyle = {
     transform: [{ rotateY: backInterpolate }],
     zIndex: isFlipped ? 1 : 0,
     pointerEvents: isFlipped ? 'auto' : 'none',
-  };
+  } as const;
 
   const handlePasswordSubmit = () => {
     if (!selectedRallye && icon === 'map-marker') {
@@ -93,7 +103,6 @@ const Card = ({
             : Colors.lightMode.card,
         },
       ]}
-      // Hier die Logik anpassen:
       onPress={icon === 'map-marker' ? onShowModal : onPress}
     >
       <Animated.View
@@ -167,27 +176,18 @@ const Card = ({
         />
         <View style={globalStyles.cardStyles.buttonRow}>
           <UIButton
-            style={[globalStyles.cardStyles.button]}
-            textStyle={globalStyles.cardStyles.buttonText}
             onPress={flipCard}
-            variant="custom"
+            size="dialog"
             color={Colors.dhbwRedLight}
           >
             {language === 'de' ? 'Zurück' : 'Back'}
           </UIButton>
-          <UIButton
-            style={[globalStyles.cardStyles.button]}
-            textStyle={globalStyles.cardStyles.buttonText}
-            onPress={handlePasswordSubmit}
-            variant="custom"
-            color={Colors.dhbwRed}
-          >
+          <UIButton onPress={handlePasswordSubmit} size="dialog" color={Colors.dhbwRed}>
             {language === 'de' ? 'Bestätigen' : 'Confirm'}
           </UIButton>
         </View>
       </Animated.View>
     </TouchableOpacity>
   );
-};
+}
 
-export default Card;

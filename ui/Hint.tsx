@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, TouchableOpacity } from 'react-native';
-import { store$ } from '../services/storage/Store';
+import { store$ } from '@/services/storage/Store';
 import { MaterialIcons } from '@expo/vector-icons';
-import { globalStyles } from '../utils/GlobalStyles';
-import { useLanguage } from '../utils/LanguageContext'; // Import LanguageContext
+import { globalStyles } from '@/utils/GlobalStyles';
+import { useLanguage } from '@/utils/LanguageContext';
 
-export default function Hint({ hint }) {
+export default function Hint({ hint }: { hint: string }) {
   const [showHint, setShowHint] = useState(false);
-  const currentQuestion = store$.currentQuestion.get();
-  const { language } = useLanguage(); // Use LanguageContext
+  const currentQuestion = store$.currentQuestion.get() as any;
+  const { language } = useLanguage();
 
   const handleHint = () => {
     if (!showHint) {
@@ -18,10 +18,7 @@ export default function Hint({ hint }) {
           ? `Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.`
           : `Are you sure you want to receive a hint? This will cost you some points.`,
         [
-          {
-            text: language === 'de' ? 'Abbrechen' : 'Cancel',
-            style: 'cancel',
-          },
+          { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
           {
             text:
               language === 'de'
@@ -29,7 +26,7 @@ export default function Hint({ hint }) {
                 : 'Yes, I want a hint',
             onPress: () => {
               setShowHint(true);
-              currentQuestion.points -= 1;
+              if (currentQuestion) currentQuestion.points -= 1;
               Alert.alert(language === 'de' ? 'Tipp' : 'Hint', hint);
             },
           },
@@ -46,3 +43,4 @@ export default function Hint({ hint }) {
     </TouchableOpacity>
   );
 }
+

@@ -1,10 +1,18 @@
-import { FlatList, Modal, Text, View, useColorScheme } from 'react-native';
+import React from 'react';
+import { FlatList, Modal, Text, View, useColorScheme, ListRenderItem } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 
-function getStatusText(status, language) {
+type RallyeItem = {
+  id: number;
+  name: string;
+  studiengang?: string | null;
+  status: 'preparing' | 'running' | 'post_processing' | 'ended' | string;
+};
+
+function getStatusText(status: RallyeItem['status'], language: 'de' | 'en') {
   switch (status) {
     case 'preparing':
       return language === 'de' ? 'Noch nicht gestartet' : 'Not started';
@@ -14,27 +22,31 @@ function getStatusText(status, language) {
       return language === 'de' ? 'Abstimmung' : 'Voting';
     case 'ended':
       return language === 'de' ? 'Beendet' : 'Ended';
+    default:
+      return String(status);
   }
 }
 
-const RallyeSelectionModal = ({
-  visible,
-  onClose,
-  activeRallyes,
-  onSelect,
-}) => {
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  activeRallyes: RallyeItem[];
+  onSelect: (r: RallyeItem) => void;
+};
+
+export default function RallyeSelectionModal({ visible, onClose, activeRallyes, onSelect }: Props) {
   const { language } = useLanguage();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
 
-  const renderItem = ({ item }) => (
+  const renderItem: ListRenderItem<RallyeItem> = ({ item }) => (
     <View
       style={[
         globalStyles.rallyeModal.rallyeCard,
         {
           backgroundColor: isDarkMode
             ? Colors.darkMode.dhbwGray
-            : globalStyles.rallyeModal.rallyeCard.backgroundColor,
+            : (globalStyles.rallyeModal.rallyeCard as any).backgroundColor,
         },
       ]}
     >
@@ -42,9 +54,7 @@ const RallyeSelectionModal = ({
         <Text
           style={[
             globalStyles.rallyeModal.rallyeName,
-            {
-              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-            },
+            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
           ]}
         >
           {item.name}
@@ -55,7 +65,7 @@ const RallyeSelectionModal = ({
             {
               color: isDarkMode
                 ? Colors.darkMode.text
-                : globalStyles.rallyeModal.rallyeStudiengang.color,
+                : (globalStyles.rallyeModal.rallyeStudiengang as any).color,
             },
           ]}
         >
@@ -67,29 +77,21 @@ const RallyeSelectionModal = ({
             {
               color: isDarkMode
                 ? Colors.darkMode.text
-                : globalStyles.rallyeModal.rallyeStatus.color,
+                : (globalStyles.rallyeModal.rallyeStatus as any).color,
             },
           ]}
         >
           {getStatusText(item.status, language)}
         </Text>
       </View>
-      <UIButton
-        onPress={() => onSelect(item)}
-        style={globalStyles.rallyeModal.selectButton}
-      >
+      <UIButton onPress={() => onSelect(item)} style={globalStyles.rallyeModal.selectButton as any}>
         {language === 'de' ? 'Auswählen' : 'Select'}
       </UIButton>
     </View>
   );
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={globalStyles.rallyeModal.modalContainer}>
         <View
           style={[
@@ -104,11 +106,7 @@ const RallyeSelectionModal = ({
           <Text
             style={[
               globalStyles.rallyeModal.modalTitle,
-              {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-              },
+              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
             ]}
           >
             {language === 'de' ? 'Aktive Rallyes' : 'Active Rallyes'}
@@ -126,16 +124,12 @@ const RallyeSelectionModal = ({
                 : 'No active rallyes available'}
             </Text>
           )}
-          <UIButton
-            onPress={onClose}
-            style={globalStyles.rallyeModal.cancelButton}
-          >
+          <UIButton onPress={onClose} style={globalStyles.rallyeModal.cancelButton as any}>
             {language === 'de' ? 'Abbrechen' : 'Cancel'}
           </UIButton>
         </View>
       </View>
     </Modal>
   );
-};
+}
 
-export default RallyeSelectionModal;
