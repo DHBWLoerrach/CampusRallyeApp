@@ -1,9 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
-  ScrollView,
-  Text,
   TextInput,
   View,
 } from 'react-native';
@@ -15,13 +13,17 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import { confirmAlert } from '@/utils/ConfirmAlert';
 import Hint from '@/components/ui/Hint';
 import { saveAnswer } from '@/services/storage/answerStorage';
-import { ThemeContext } from '@/utils/ThemeContext';
+import { useTheme } from '@/utils/ThemeContext';
 import { useLanguage } from '@/utils/LanguageContext';
+import ThemedScrollView from '@/components/themed/ThemedScrollView';
+import ThemedText from '@/components/themed/ThemedText';
+import { useAppStyles } from '@/utils/AppStyles';
 
 export default function SkillQuestion({ question }: QuestionProps) {
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
+  const s = useAppStyles();
 
   const team = store$.team.get();
   const answers = store$.answers.get() as AnswerRow[];
@@ -62,70 +64,21 @@ export default function SkillQuestion({ question }: QuestionProps) {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={[
-          globalStyles.default.refreshContainer,
-          {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.background
-              : Colors.lightMode.background,
-          },
-        ]}
-      >
-        <View
-          style={[
-            globalStyles.default.container,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.background
-                : Colors.lightMode.background,
-            },
-          ]}
-        >
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              {
-                backgroundColor: isDarkMode
-                  ? Colors.darkMode.card
-                  : Colors.lightMode.card,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                globalStyles.rallyeStatesStyles.infoTitle,
-                {
-                  color: isDarkMode
-                    ? Colors.darkMode.text
-                    : Colors.lightMode.text,
-                },
-              ]}
-            >
+      <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
+        <View style={[globalStyles.default.container]}>
+          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+            <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
               {question.question}
-            </Text>
+            </ThemedText>
           </View>
 
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              {
-                backgroundColor: isDarkMode
-                  ? Colors.darkMode.card
-                  : Colors.lightMode.card,
-              },
-            ]}
-          >
+          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
             <TextInput
               style={[
                 globalStyles.skillStyles.input,
                 {
-                  color: isDarkMode
-                    ? Colors.darkMode.text
-                    : Colors.lightMode.text,
-                  borderColor: isDarkMode
-                    ? Colors.darkMode.text
-                    : Colors.lightMode.text,
+                  color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+                  borderColor: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
                 },
               ]}
               value={answer}
@@ -139,16 +92,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
             />
           </View>
 
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              {
-                backgroundColor: isDarkMode
-                  ? Colors.darkMode.card
-                  : Colors.lightMode.card,
-              },
-            ]}
-          >
+          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
             <UIButton
               color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
               disabled={!answer.trim()}
@@ -159,7 +103,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
           </View>
         </View>
         {question.hint ? <Hint hint={question.hint} /> : null}
-      </ScrollView>
+      </ThemedScrollView>
     </KeyboardAvoidingView>
   );
 }

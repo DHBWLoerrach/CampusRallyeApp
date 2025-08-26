@@ -1,5 +1,5 @@
-import React, { useContext, useRef, useState } from 'react';
-import { Alert, Image, Text, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Alert, Image, View } from 'react-native';
 import { CameraView } from 'expo-camera';
 import { QuestionProps } from '@/types/rallye';
 import { saveAnswer, uploadPhotoAnswer } from '@/services/storage/answerStorage';
@@ -9,13 +9,17 @@ import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
-import { ThemeContext } from '@/utils/ThemeContext';
+import { useTheme } from '@/utils/ThemeContext';
+import ThemedView from '@/components/themed/ThemedView';
+import ThemedText from '@/components/themed/ThemedText';
+import { useAppStyles } from '@/utils/AppStyles';
 
 export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const [picture, setPicture] = useState<{ uri: string } | null>(null);
   const cameraRef = useRef<CameraView | null>(null);
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
+  const s = useAppStyles();
 
   const team = store$.team.get();
 
@@ -54,31 +58,16 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   function PhotoCamera() {
     const [facing, setFacing] = useState<'back' | 'front'>('back');
     return (
-      <View style={globalStyles.default.container}>
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoCameraBox,
-            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-          ]}
-        >
-          <Text
-            style={[
-              globalStyles.rallyeStatesStyles.infoTitle,
-              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-            ]}
-          >
+      <ThemedView variant="background" style={globalStyles.default.container}>
+        <View style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}>
+          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             {question.question}
-          </Text>
+          </ThemedText>
         </View>
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoCameraBox,
-            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-          ]}
-        >
+        <View style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}>
           <CameraView ref={cameraRef} style={globalStyles.uploadStyles.camera} facing={facing} />
         </View>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
             <UIButton
               icon="camera"
@@ -102,33 +91,23 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
           </View>
         </View>
         {question.hint ? <Hint hint={question.hint} /> : null}
-      </View>
+      </ThemedView>
     );
   }
 
   function ImagePreview() {
     return (
-      <View style={globalStyles.default.container}>
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoCameraBox,
-            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
-          ]}
-        >
-          <Text
-            style={[
-              globalStyles.rallyeStatesStyles.infoTitle,
-              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
-            ]}
-          >
+      <ThemedView variant="background" style={globalStyles.default.container}>
+        <View style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}>
+          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             {question.question}
-          </Text>
+          </ThemedText>
         </View>
         <View style={globalStyles.rallyeStatesStyles.infoCameraBox}>
           <Image source={{ uri: picture?.uri }} style={globalStyles.uploadStyles.image} resizeMode="contain" />
         </View>
 
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
             <UIButton icon="recycle" color={Colors.dhbwGray} onPress={() => setPicture(null)}>
               Neues Foto
@@ -149,7 +128,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
           </View>
           {question.hint ? <Hint hint={question.hint} /> : null}
         </View>
-      </View>
+      </ThemedView>
     );
   }
 

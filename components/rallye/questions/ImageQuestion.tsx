@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Alert, Image, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Image, TextInput, View } from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { store$ } from '@/services/storage/Store';
 import { saveAnswer } from '@/services/storage/answerStorage';
@@ -9,14 +9,18 @@ import { confirmAlert } from '@/utils/ConfirmAlert';
 import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
 import { supabase } from '@/utils/Supabase';
-import { ThemeContext } from '@/utils/ThemeContext';
+import { useTheme } from '@/utils/ThemeContext';
 import { useLanguage } from '@/utils/LanguageContext';
+import ThemedScrollView from '@/components/themed/ThemedScrollView';
+import ThemedText from '@/components/themed/ThemedText';
+import { useAppStyles } from '@/utils/AppStyles';
 
 export default function ImageQuestion({ question }: QuestionProps) {
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const [pictureUri, setPictureUri] = useState<string | null>(null);
+  const s = useAppStyles();
 
   const team = store$.team.get();
   const answers = store$.answers.get() as AnswerRow[];
@@ -68,61 +72,16 @@ export default function ImageQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        globalStyles.default.refreshContainer,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
-    >
-      <View
-        style={[
-          globalStyles.default.container,
-          {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.background
-              : Colors.lightMode.background,
-          },
-        ]}
-      >
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.card
-                : Colors.lightMode.card,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              globalStyles.rallyeStatesStyles.infoTitle,
-              {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-              },
-            ]}
-          >
+    <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
+      <View style={[globalStyles.default.container]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             {question.question}
-          </Text>
+          </ThemedText>
         </View>
 
         {pictureUri ? (
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              {
-                backgroundColor: isDarkMode
-                  ? Colors.darkMode.card
-                  : Colors.lightMode.card,
-              },
-            ]}
-          >
+          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
             <Image
               source={{ uri: pictureUri }}
               style={{ height: '100%', borderRadius: 10, paddingVertical: 10 }}
@@ -131,16 +90,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
           </View>
         ) : null}
 
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.card
-                : Colors.lightMode.card,
-            },
-          ]}
-        >
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <TextInput
             style={[
               globalStyles.skillStyles.input,
@@ -164,16 +114,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
           />
         </View>
 
-        <View
-          style={[
-            globalStyles.rallyeStatesStyles.infoBox,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.card
-                : Colors.lightMode.card,
-            },
-          ]}
-        >
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <UIButton
             color={answer.trim() !== '' ? Colors.dhbwRed : Colors.dhbwGray}
             disabled={answer.trim() === ''}
@@ -185,6 +126,6 @@ export default function ImageQuestion({ question }: QuestionProps) {
 
         {question.hint ? <Hint hint={question.hint} /> : null}
       </View>
-    </ScrollView>
+    </ThemedScrollView>
   );
 }
