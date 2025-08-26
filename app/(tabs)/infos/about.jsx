@@ -10,16 +10,9 @@ import ThemedText from '@/components/themed/ThemedText';
 const AppVersion = ({ isDarkMode }) => {
   let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
   return (
-    <Text
-      style={[
-        globalStyles.informationStyles.paragraph,
-        {
-          color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-        },
-      ]}
-    >
+    <ThemedText style={globalStyles.informationStyles.paragraph}>
       {versionString}
-    </Text>
+    </ThemedText>
   );
 };
 
