@@ -41,6 +41,7 @@ export default function TabLayout() {
         options={{
           title: 'Informationen',
           tabBarLabel: 'Infos',
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <IconSymbol name="info.circle" size={ICON_SIZE} color={color} />
           ),
