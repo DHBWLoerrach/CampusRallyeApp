@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import { supabase } from '@/utils/Supabase';
@@ -7,6 +7,9 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
+import ThemedScrollView from '@/components/themed/ThemedScrollView';
+import ThemedText from '@/components/themed/ThemedText';
+import { useAppStyles } from '@/utils/AppStyles';
 
 type TeamRow = {
   id: string;
@@ -25,6 +28,7 @@ export default function Scoreboard() {
   const [rows, setRows] = useState<TeamRow[]>([]);
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const s = useAppStyles();
 
   useEffect(() => {
     if (!rallye || rallye.status !== 'ended') return;
@@ -73,23 +77,20 @@ export default function Scoreboard() {
   }, [rallye?.id, rallye?.status]);
 
   return (
-    <ScrollView
-      contentContainerStyle={[
-        globalStyles.default.refreshContainer,
-        globalStyles.rallyeStatesStyles.container,
-        { backgroundColor: palette.background },
-      ]}
+    <ThemedScrollView
+      variant="background"
+      contentContainerStyle={[globalStyles.default.refreshContainer, globalStyles.rallyeStatesStyles.container]}
     >
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
-        <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>Punktestand</Text>
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+        <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>Punktestand</ThemedText>
         {ourTeam ? (
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10, color: palette.text }]}>
+          <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
             Dein Team: {ourTeam.name}
-          </Text>
+          </ThemedText>
         ) : null}
       </View>
 
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, { padding: 0, backgroundColor: palette.card }]}>
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, { padding: 0 }, s.infoBox]}>
         <View
           style={{
             flexDirection: 'row',
@@ -99,9 +100,9 @@ export default function Scoreboard() {
             backgroundColor: isDarkMode ? palette.scheduleHeader : Colors.veryLightGray,
           }}
         >
-          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: palette.text }]}>Platz</Text>
-          <Text style={[globalStyles.scoreboardStyles.headerCellWide, { color: palette.text }]}>Team</Text>
-          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: palette.text }]}>Punkte</Text>
+          <ThemedText style={[globalStyles.scoreboardStyles.headerCell]}>Platz</ThemedText>
+          <ThemedText style={[globalStyles.scoreboardStyles.headerCellWide]}>Team</ThemedText>
+          <ThemedText style={[globalStyles.scoreboardStyles.headerCell]}>Punkte</ThemedText>
         </View>
 
         <ScrollView style={[{ maxHeight: 300 }, { backgroundColor: isDarkMode ? palette.scheduleHeader : Colors.veryLightGray }]}>
@@ -110,31 +111,31 @@ export default function Scoreboard() {
               key={team.id}
               style={[
                 globalStyles.scoreboardStyles.row,
+                s.listRow,
                 team.group_name === ourTeam?.name && globalStyles.scoreboardStyles.rowHighlighted,
-                { backgroundColor: palette.card, borderBottomColor: palette.cellBorder },
               ]}
             >
-              <Text style={[globalStyles.scoreboardStyles.cell, { color: palette.text }]}>{team.rank}</Text>
-              <Text
+              <ThemedText style={[globalStyles.scoreboardStyles.cell]}>{team.rank}</ThemedText>
+              <ThemedText
                 style={[
                   globalStyles.scoreboardStyles.cellWide,
                   team.group_name === ourTeam?.name && globalStyles.scoreboardStyles.cellHighlighted,
-                  { color: team.group_name === ourTeam?.name ? Colors.dhbwRed : palette.text },
+                  { color: team.group_name === ourTeam?.name ? Colors.dhbwRed : undefined },
                 ]}
               >
                 {team.group_name}
-              </Text>
-              <Text style={[globalStyles.scoreboardStyles.cell, { color: palette.text }]}>{team.total_points}</Text>
+              </ThemedText>
+              <ThemedText style={[globalStyles.scoreboardStyles.cell]}>{team.total_points}</ThemedText>
             </View>
           ))}
         </ScrollView>
       </View>
 
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
           Rallye beenden
         </UIButton>
       </View>
-    </ScrollView>
+    </ThemedScrollView>
   );
 }

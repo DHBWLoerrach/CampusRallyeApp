@@ -7,6 +7,9 @@ import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useTheme } from '@/utils/ThemeContext';
+import ThemedView from '@/components/themed/ThemedView';
+import ThemedText from '@/components/themed/ThemedText';
+import { useAppStyles } from '@/utils/AppStyles';
 
 export default function Voting({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
   const [voting, setVoting] = useState<any[]>([]);
@@ -23,6 +26,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const s = useAppStyles();
 
   const getVotingData = async () => {
     try {
@@ -106,26 +110,26 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
 
   if (!votingAllowed || teamCount < 2) {
     return (
-      <View style={[globalStyles.default.container, { backgroundColor: palette.background }]}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
-          <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
+      <ThemedView variant="background" style={globalStyles.default.container}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             Die Abstimmung wurde beendet.
-          </Text>
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10, color: palette.text }]}>
+          </ThemedText>
+          <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
             Wartet auf die Beendigung der Rallye.
-          </Text>
+          </ThemedText>
         </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
             Aktualisieren
           </UIButton>
         </View>
-      </View>
+      </ThemedView>
     );
   }
 
   return (
-    <View style={[globalStyles.default.container, { backgroundColor: palette.background, flex: 1 }]}>
+    <ThemedView variant="background" style={[globalStyles.default.container, { flex: 1 }]}>
       <FlatList
         data={currentQuestion}
         keyExtractor={(item) => `${item.tq_team_id}`}
@@ -134,14 +138,14 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
         ListHeaderComponent={() =>
           currentQuestion && currentQuestion.length > 0 ? (
             <View style={{ paddingTop: 10, paddingBottom: 30 }}>
-              <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
-                <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
+              <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+                <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
                   {currentQuestion[0]?.question_content}
-                </Text>
-                <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10, color: palette.text }]}>
+                </ThemedText>
+                <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
                   Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
                   die oben gestellte Aufgabe am besten gelöst hat.
-                </Text>
+                </ThemedText>
               </View>
             </View>
           ) : null
@@ -158,17 +162,17 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
             <View
               style={[
                 globalStyles.rallyeStatesStyles.infoBox,
+                s.infoBox,
                 {
                   borderColor: selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
                   borderWidth: selectedTeam === item.rt_id ? 2 : 0,
-                  backgroundColor: palette.card,
                 },
               ]}
             >
               {item.question_type === 'knowledge' ? (
-                <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
+                <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
                   {item.tq_team_answer}
-                </Text>
+                </ThemedText>
               ) : (
                 (() => {
                   const imageUri = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${
@@ -182,21 +186,21 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                   );
                 })()
               )}
-              <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
+              <ThemedText style={globalStyles.rallyeStatesStyles.infoSubtitle}>
                 {item.rt_team_name}
-              </Text>
+              </ThemedText>
             </View>
           </TouchableOpacity>
         )}
         contentContainerStyle={[{ padding: 10 }]}
       />
       <View style={{ padding: 10 }}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <UIButton disabled={!selectedTeam || sendingResult} onPress={handleNextQuestion}>
             Nächste Abstimmung
           </UIButton>
         </View>
       </View>
-    </View>
+    </ThemedView>
   );
 }

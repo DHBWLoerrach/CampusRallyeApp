@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
+import ThemedView from '@/components/themed/ThemedView';
 
 // Reuse existing question components for now
 import SkillQuestion from '@/components/rallye/questions/SkillQuestion';
@@ -26,16 +27,12 @@ export default function QuestionRenderer({ question, onAnswer }: { question: any
   const Cmp = components[type];
   if (!Cmp) {
     return (
-      <View style={[globalStyles.default.container, { backgroundColor: palette.background }]}>
+      <ThemedView variant="background" style={globalStyles.default.container}>
         <Text style={{ color: 'red', textAlign: 'center' }}>Unknown question type: {String(type)}</Text>
-      </View>
+      </ThemedView>
     );
   }
   return (
-    <Cmp
-      onAnswer={onAnswer}
-      question={question}
-      style={{ backgroundColor: palette.card }}
-    />
+    <Cmp onAnswer={onAnswer} question={question} />
   );
 }

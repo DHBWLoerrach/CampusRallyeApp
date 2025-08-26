@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Alert, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Alert, RefreshControl, Text, View } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
 import { store$ } from '@/services/storage/Store';
@@ -13,6 +13,10 @@ import TeamSetup from '@/app/(tabs)/rallye/team-setup';
 import Voting from '@/app/(tabs)/rallye/voting';
 import Scoreboard from '@/app/(tabs)/rallye/scoreboard';
 import QuestionRenderer from '@/app/(tabs)/rallye/question-renderer';
+import ThemedScrollView from '@/components/themed/ThemedScrollView';
+import ThemedText from '@/components/themed/ThemedText';
+import ThemedView from '@/components/themed/ThemedView';
+import { useAppStyles } from '@/utils/AppStyles';
 import { useTheme } from '@/utils/ThemeContext';
 
 function isPreparation(status?: string) {
@@ -22,8 +26,7 @@ function isPreparation(status?: string) {
 const RallyeIndex = observer(function RallyeIndex() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
-  const { isDarkMode } = useTheme();
-  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const s = useAppStyles();
 
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
@@ -33,7 +36,7 @@ const RallyeIndex = observer(function RallyeIndex() {
   const allQuestionsAnswered = useSelector(() => store$.allQuestionsAnswered.get());
   const timeExpired = useSelector(() => store$.timeExpired.get());
 
-  const bgColor = useMemo(() => ({ backgroundColor: palette.background }), [palette.background]);
+  const bgColor = useMemo(() => ({}), []);
 
   const loadAnswers = async () => {
     try {
@@ -228,33 +231,31 @@ const RallyeIndex = observer(function RallyeIndex() {
 
   if (questions.length > 0 && !allQuestionsAnswered) {
     return (
-      <ScrollView
-        contentContainerStyle={[
-          globalStyles.default.refreshContainer,
-          bgColor,
-        ]}
+      <ThemedScrollView
+        variant="background"
+        contentContainerStyle={[globalStyles.default.refreshContainer]}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
       >
-        <View style={[globalStyles.default.container, bgColor]}>
+        <ThemedView variant="background" style={globalStyles.default.container}>
           <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
-        </View>
-      </ScrollView>
+        </ThemedView>
+      </ThemedScrollView>
     );
   }
 
   if (allQuestionsAnswered && rallye.tour_mode) {
     // Exploration finished: show simple summary and back to welcome
     return (
-      <ScrollView contentContainerStyle={[globalStyles.default.refreshContainer, bgColor]}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
-          <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
+      <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             {language === 'de' ? 'Alle Fragen beantwortet.' : 'All questions answered.'}
-          </Text>
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
+          </ThemedText>
+          <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
             {language === 'de' ? 'Erreichte Punkte: ' : 'Points achieved: '} {points}
-          </Text>
+          </ThemedText>
         </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <Text
             onPress={() => {
               store$.reset();
@@ -265,37 +266,37 @@ const RallyeIndex = observer(function RallyeIndex() {
             {language === 'de' ? 'Zurück zum Start' : 'Back to start'}
           </Text>
         </View>
-      </ScrollView>
+      </ThemedScrollView>
     );
   }
 
   if (allQuestionsAnswered && !rallye.tour_mode) {
     // Time up vs finished before end
     return (
-      <ScrollView contentContainerStyle={[globalStyles.default.refreshContainer, bgColor]}
+      <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
       >
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
-          <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             {timeExpired
               ? language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'
               : language === 'de' ? 'Alle Fragen beantwortet' : 'All questions answered'}
-          </Text>
+          </ThemedText>
           {!timeExpired && team ? (
-            <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
+            <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
               {language === 'de' ? 'Team: ' : 'Team: '} {team?.name}
-            </Text>
+            </ThemedText>
           ) : null}
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
+          <ThemedText style={globalStyles.rallyeStatesStyles.infoSubtitle}>
             {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
-          </Text>
+          </ThemedText>
         </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
             {language === 'de' ? 'Aktualisieren' : 'Refresh'}
           </Text>
         </View>
-      </ScrollView>
+      </ThemedScrollView>
     );
   }
 
