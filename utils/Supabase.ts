@@ -1,6 +1,4 @@
-// react-native-url-polyfill/auto is required with expo, see
 // https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native
-import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
@@ -16,4 +14,3 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
-
