@@ -2,14 +2,16 @@ import React, { useRef, useState } from 'react';
 import { Alert, Image, View } from 'react-native';
 import { CameraView } from 'expo-camera';
 import { QuestionProps } from '@/types/rallye';
-import { saveAnswer, uploadPhotoAnswer } from '@/services/storage/answerStorage';
+import {
+  saveAnswer,
+  uploadPhotoAnswer,
+} from '@/services/storage/answerStorage';
 import { store$ } from '@/services/storage/Store';
 import Hint from '@/components/ui/Hint';
 import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
-import { useTheme } from '@/utils/ThemeContext';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
@@ -17,7 +19,6 @@ import { useAppStyles } from '@/utils/AppStyles';
 export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const [picture, setPicture] = useState<{ uri: string } | null>(null);
   const cameraRef = useRef<CameraView | null>(null);
-  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const s = useAppStyles();
 
@@ -50,7 +51,13 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
         : 'Do you really want to give up this task?',
       [
         { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
-        { text: language === 'de' ? 'Ja, ich möchte aufgeben' : 'Yes, I want to give up', onPress: submitSurrender },
+        {
+          text:
+            language === 'de'
+              ? 'Ja, ich möchte aufgeben'
+              : 'Yes, I want to give up',
+          onPress: submitSurrender,
+        },
       ]
     );
   };
@@ -59,13 +66,21 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
     const [facing, setFacing] = useState<'back' | 'front'>('back');
     return (
       <ThemedView variant="background" style={globalStyles.default.container}>
-        <View style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}>
+        <View
+          style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
+        >
           <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             {question.question}
           </ThemedText>
         </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}>
-          <CameraView ref={cameraRef} style={globalStyles.uploadStyles.camera} facing={facing} />
+        <View
+          style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
+        >
+          <CameraView
+            ref={cameraRef}
+            style={globalStyles.uploadStyles.camera}
+            facing={facing}
+          />
         </View>
         <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
@@ -73,7 +88,9 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
               icon="camera"
               onPress={async () => {
                 try {
-                  const pic = await (cameraRef.current as any)?.takePictureAsync();
+                  const pic = await (
+                    cameraRef.current as any
+                  )?.takePictureAsync();
                   if (pic) setPicture(pic);
                 } catch (error) {
                   console.log('error taking picture', error);
@@ -82,10 +99,20 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
             >
               Aufnahme
             </UIButton>
-            <UIButton icon="camera-rotate" color={Colors.dhbwGray} onPress={() => setFacing((c) => (c === 'back' ? 'front' : 'back'))}>
+            <UIButton
+              icon="camera-rotate"
+              color={Colors.dhbwGray}
+              onPress={() =>
+                setFacing((c) => (c === 'back' ? 'front' : 'back'))
+              }
+            >
               Kamera wechseln
             </UIButton>
-            <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+            <UIButton
+              icon="face-frown-open"
+              color={Colors.dhbwGray}
+              onPress={handleSurrender}
+            >
               {language === 'de' ? 'Aufgeben' : 'Surrender'}
             </UIButton>
           </View>
@@ -98,18 +125,28 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   function ImagePreview() {
     return (
       <ThemedView variant="background" style={globalStyles.default.container}>
-        <View style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}>
+        <View
+          style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
+        >
           <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
             {question.question}
           </ThemedText>
         </View>
         <View style={globalStyles.rallyeStatesStyles.infoCameraBox}>
-          <Image source={{ uri: picture?.uri }} style={globalStyles.uploadStyles.image} resizeMode="contain" />
+          <Image
+            source={{ uri: picture?.uri }}
+            style={globalStyles.uploadStyles.image}
+            resizeMode="contain"
+          />
         </View>
 
         <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
-            <UIButton icon="recycle" color={Colors.dhbwGray} onPress={() => setPicture(null)}>
+            <UIButton
+              icon="recycle"
+              color={Colors.dhbwGray}
+              onPress={() => setPicture(null)}
+            >
               Neues Foto
             </UIButton>
             <UIButton
@@ -122,7 +159,11 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
             >
               Foto senden
             </UIButton>
-            <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+            <UIButton
+              icon="face-frown-open"
+              color={Colors.dhbwGray}
+              onPress={handleSurrender}
+            >
               {language === 'de' ? 'Aufgeben' : 'Surrender'}
             </UIButton>
           </View>
