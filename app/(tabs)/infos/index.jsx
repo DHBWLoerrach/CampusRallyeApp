@@ -1,13 +1,13 @@
-import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { globalStyles } from '@/utils/GlobalStyles';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function Infos() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
 
   return (

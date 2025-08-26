@@ -15,7 +15,7 @@ import {
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import { LanguageProvider } from '@/utils/LanguageContext';
-import { ThemeContext, themeStore$ } from '@/utils/ThemeContext';
+import { ThemeContext, themeStore$, ThemeMode } from '@/utils/ThemeContext';
 
 function RootNavigator() {
   const colorScheme = useColorScheme();
@@ -27,10 +27,9 @@ function RootNavigator() {
   const navState = useRootNavigationState(); // ready-check
   // Subscribe reactively to Legend state changes
   const enabled = useSelector(() => store$.enabled.get());
-  const isDarkMode = useSelector(() => themeStore$.isDarkMode.get());
-  const toggleDarkMode = () => {
-    themeStore$.isDarkMode.set(!themeStore$.isDarkMode.get());
-  };
+  const mode = useSelector(() => themeStore$.mode.get());
+  const setMode = (next: ThemeMode) => themeStore$.mode.set(next);
+  const isDark = mode === 'dark' || (mode === 'system' && colorScheme === 'dark');
 
   useEffect(() => {
     if (!navState?.key) return;
@@ -42,8 +41,8 @@ function RootNavigator() {
   if (!loaded || !navState?.key) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+    <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <ThemeContext.Provider value={{ isDarkMode: isDark, mode, setMode }}>
         <LanguageProvider>
           <Slot />
         </LanguageProvider>

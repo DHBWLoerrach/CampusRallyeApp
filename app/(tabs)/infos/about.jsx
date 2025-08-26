@@ -1,8 +1,9 @@
-import { Linking, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Linking, ScrollView, Text, View } from 'react-native';
 import * as Application from 'expo-application';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
 
 const AppVersion = ({ isDarkMode }) => {
   let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
@@ -21,8 +22,7 @@ const AppVersion = ({ isDarkMode }) => {
 };
 
 export default function About() {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
 
   return (

@@ -1,9 +1,10 @@
 import React from 'react';
-import { FlatList, Modal, Text, View, useColorScheme, ListRenderItem } from 'react-native';
+import { FlatList, Modal, Text, View, ListRenderItem } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
 
 type RallyeItem = {
   id: number;
@@ -36,8 +37,7 @@ type Props = {
 
 export default function RallyeSelectionModal({ visible, onClose, activeRallyes, onSelect }: Props) {
   const { language } = useLanguage();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const { isDarkMode } = useTheme();
 
   const renderItem: ListRenderItem<RallyeItem> = ({ item }) => (
     <View

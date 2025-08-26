@@ -4,14 +4,8 @@ import RallyeHeader from '@/components/rallye/RallyeHeader';
 
 export default function RallyeStackLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerRight: () => <LogoutButton />,
-        headerTitle: () => <RallyeHeader />,
-      }}
-    >
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{ title: 'Rallye' }} />
     </Stack>
   );
 }
-

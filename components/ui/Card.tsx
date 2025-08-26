@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from 'react-native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -13,6 +12,7 @@ import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
 
 type CardProps = {
   title: string;
@@ -36,8 +36,7 @@ export default function Card({
   const [isFlipped, setIsFlipped] = useState(false);
   const [password, setPassword] = useState('');
   const flipAnim = useRef(new Animated.Value(0)).current;
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
 
   const flipCard = () => {

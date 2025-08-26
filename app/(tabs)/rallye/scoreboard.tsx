@@ -6,6 +6,7 @@ import { supabase } from '@/utils/Supabase';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
+import { useTheme } from '@/utils/ThemeContext';
 
 type TeamRow = {
   id: string;
@@ -22,6 +23,8 @@ export default function Scoreboard() {
   const rallye = useSelector(() => store$.rallye.get());
   const ourTeam = useSelector(() => store$.team.get());
   const [rows, setRows] = useState<TeamRow[]>([]);
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   useEffect(() => {
     if (!rallye || rallye.status !== 'ended') return;
@@ -74,59 +77,60 @@ export default function Scoreboard() {
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,
-        { backgroundColor: Colors.lightMode.background },
+        { backgroundColor: palette.background },
       ]}
     >
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: Colors.lightMode.card }]}>
-        <Text style={[globalStyles.rallyeStatesStyles.infoTitle]}>Punktestand</Text>
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+        <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>Punktestand</Text>
         {ourTeam ? (
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10, color: palette.text }]}>
             Dein Team: {ourTeam.name}
           </Text>
         ) : null}
       </View>
 
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, { padding: 0, backgroundColor: Colors.lightMode.card }]}>
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, { padding: 0, backgroundColor: palette.card }]}>
         <View
           style={{
             flexDirection: 'row',
             padding: 15,
             borderBottomWidth: 1,
-            borderBottomColor: Colors.lightMode.cellBorder,
-            backgroundColor: Colors.veryLightGray,
+            borderBottomColor: palette.cellBorder,
+            backgroundColor: isDarkMode ? palette.scheduleHeader : Colors.veryLightGray,
           }}
         >
-          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: Colors.lightMode.dhbwGray }]}>Platz</Text>
-          <Text style={[globalStyles.scoreboardStyles.headerCellWide, { color: Colors.lightMode.dhbwGray }]}>Team</Text>
-          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: Colors.lightMode.dhbwGray }]}>Punkte</Text>
+          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: palette.text }]}>Platz</Text>
+          <Text style={[globalStyles.scoreboardStyles.headerCellWide, { color: palette.text }]}>Team</Text>
+          <Text style={[globalStyles.scoreboardStyles.headerCell, { color: palette.text }]}>Punkte</Text>
         </View>
 
-        <ScrollView style={[{ maxHeight: 300 }, { backgroundColor: Colors.veryLightGray }]}>
+        <ScrollView style={[{ maxHeight: 300 }, { backgroundColor: isDarkMode ? palette.scheduleHeader : Colors.veryLightGray }]}>
           {rows.map((team) => (
             <View
               key={team.id}
               style={[
                 globalStyles.scoreboardStyles.row,
                 team.group_name === ourTeam?.name && globalStyles.scoreboardStyles.rowHighlighted,
-                { backgroundColor: Colors.lightMode.card },
+                { backgroundColor: palette.card, borderBottomColor: palette.cellBorder },
               ]}
             >
-              <Text style={[globalStyles.scoreboardStyles.cell]}>{team.rank}</Text>
+              <Text style={[globalStyles.scoreboardStyles.cell, { color: palette.text }]}>{team.rank}</Text>
               <Text
                 style={[
                   globalStyles.scoreboardStyles.cellWide,
                   team.group_name === ourTeam?.name && globalStyles.scoreboardStyles.cellHighlighted,
+                  { color: team.group_name === ourTeam?.name ? Colors.dhbwRed : palette.text },
                 ]}
               >
                 {team.group_name}
               </Text>
-              <Text style={[globalStyles.scoreboardStyles.cell]}>{team.total_points}</Text>
+              <Text style={[globalStyles.scoreboardStyles.cell, { color: palette.text }]}>{team.total_points}</Text>
             </View>
           ))}
         </ScrollView>
       </View>
 
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: Colors.lightMode.card }]}>
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
         <UIButton icon="arrow-left" onPress={() => store$.enabled.set(false)}>
           Rallye beenden
         </UIButton>

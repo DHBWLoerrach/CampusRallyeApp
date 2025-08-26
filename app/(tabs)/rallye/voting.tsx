@@ -6,6 +6,7 @@ import UIButton from '@/components/ui/UIButton';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function Voting({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
   const [voting, setVoting] = useState<any[]>([]);
@@ -20,6 +21,8 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   const getVotingData = async () => {
     try {
@@ -103,16 +106,16 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
 
   if (!votingAllowed || teamCount < 2) {
     return (
-      <View style={[globalStyles.default.container, { backgroundColor: 'white' }]}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
-          <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+      <View style={[globalStyles.default.container, { backgroundColor: palette.background }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+          <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
             Die Abstimmung wurde beendet.
           </Text>
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10, color: palette.text }]}>
             Wartet auf die Beendigung der Rallye.
           </Text>
         </View>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
           <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
             Aktualisieren
           </UIButton>
@@ -122,7 +125,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   }
 
   return (
-    <View style={[globalStyles.default.container, { backgroundColor: 'white', flex: 1 }]}>
+    <View style={[globalStyles.default.container, { backgroundColor: palette.background, flex: 1 }]}>
       <FlatList
         data={currentQuestion}
         keyExtractor={(item) => `${item.tq_team_id}`}
@@ -131,11 +134,11 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
         ListHeaderComponent={() =>
           currentQuestion && currentQuestion.length > 0 ? (
             <View style={{ paddingTop: 10, paddingBottom: 30 }}>
-              <View style={globalStyles.rallyeStatesStyles.infoBox}>
-                <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+              <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+                <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
                   {currentQuestion[0]?.question_content}
                 </Text>
-                <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+                <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10, color: palette.text }]}>
                   Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
                   die oben gestellte Aufgabe am besten gelöst hat.
                 </Text>
@@ -158,11 +161,12 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                 {
                   borderColor: selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
                   borderWidth: selectedTeam === item.rt_id ? 2 : 0,
+                  backgroundColor: palette.card,
                 },
               ]}
             >
               {item.question_type === 'knowledge' ? (
-                <Text style={globalStyles.rallyeStatesStyles.infoTitle}>
+                <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
                   {item.tq_team_answer}
                 </Text>
               ) : (
@@ -178,7 +182,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                   );
                 })()
               )}
-              <Text style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+              <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
                 {item.rt_team_name}
               </Text>
             </View>
@@ -187,7 +191,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
         contentContainerStyle={[{ padding: 10 }]}
       />
       <View style={{ padding: 10 }}>
-        <View style={globalStyles.rallyeStatesStyles.infoBox}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
           <UIButton disabled={!selectedTeam || sendingResult} onPress={handleNextQuestion}>
             Nächste Abstimmung
           </UIButton>

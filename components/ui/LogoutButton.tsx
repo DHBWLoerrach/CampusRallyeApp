@@ -1,8 +1,12 @@
 import { TouchableOpacity } from 'react-native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { store$ } from '@/services/storage/Store';
+import { useTheme } from '@/utils/ThemeContext';
+import Colors from '@/utils/Colors';
 
 export default function LogoutButton() {
+  const { isDarkMode } = useTheme();
+  const color = isDarkMode ? Colors.darkMode.text : Colors.lightMode.text;
   return (
     <TouchableOpacity
       onPress={() => store$.enabled.set(false)}
@@ -13,7 +17,7 @@ export default function LogoutButton() {
       <IconSymbol
         name="rectangle.portrait.and.arrow.right"
         size={22}
-        color="#000"
+        color={color}
       />
     </TouchableOpacity>
   );

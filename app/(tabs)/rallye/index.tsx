@@ -13,6 +13,7 @@ import TeamSetup from '@/app/(tabs)/rallye/team-setup';
 import Voting from '@/app/(tabs)/rallye/voting';
 import Scoreboard from '@/app/(tabs)/rallye/scoreboard';
 import QuestionRenderer from '@/app/(tabs)/rallye/question-renderer';
+import { useTheme } from '@/utils/ThemeContext';
 
 function isPreparation(status?: string) {
   return status === 'preparation' || status === 'preparing';
@@ -21,6 +22,8 @@ function isPreparation(status?: string) {
 const RallyeIndex = observer(function RallyeIndex() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
@@ -30,10 +33,7 @@ const RallyeIndex = observer(function RallyeIndex() {
   const allQuestionsAnswered = useSelector(() => store$.allQuestionsAnswered.get());
   const timeExpired = useSelector(() => store$.timeExpired.get());
 
-  const bgColor = useMemo(
-    () => ({ backgroundColor: Colors.lightMode.background }),
-    []
-  );
+  const bgColor = useMemo(() => ({ backgroundColor: palette.background }), [palette.background]);
 
   const loadAnswers = async () => {
     try {
@@ -246,15 +246,15 @@ const RallyeIndex = observer(function RallyeIndex() {
     // Exploration finished: show simple summary and back to welcome
     return (
       <ScrollView contentContainerStyle={[globalStyles.default.refreshContainer, bgColor]}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: Colors.lightMode.card }]}>
-          <Text style={[globalStyles.rallyeStatesStyles.infoTitle]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+          <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
             {language === 'de' ? 'Alle Fragen beantwortet.' : 'All questions answered.'}
           </Text>
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle]}>
+          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
             {language === 'de' ? 'Erreichte Punkte: ' : 'Points achieved: '} {points}
           </Text>
         </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: Colors.lightMode.card }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
           <Text
             onPress={() => {
               store$.reset();
@@ -275,22 +275,22 @@ const RallyeIndex = observer(function RallyeIndex() {
       <ScrollView contentContainerStyle={[globalStyles.default.refreshContainer, bgColor]}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
       >
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: Colors.lightMode.card }]}>
-          <Text style={[globalStyles.rallyeStatesStyles.infoTitle]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
+          <Text style={[globalStyles.rallyeStatesStyles.infoTitle, { color: palette.text }]}>
             {timeExpired
               ? language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'
               : language === 'de' ? 'Alle Fragen beantwortet' : 'All questions answered'}
           </Text>
           {!timeExpired && team ? (
-            <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle]}>
+            <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
               {language === 'de' ? 'Team: ' : 'Team: '} {team?.name}
             </Text>
           ) : null}
-          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle]}>
+          <Text style={[globalStyles.rallyeStatesStyles.infoSubtitle, { color: palette.text }]}>
             {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
           </Text>
         </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: Colors.lightMode.card }]}>
+        <View style={[globalStyles.rallyeStatesStyles.infoBox, { backgroundColor: palette.card }]}>
           <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
             {language === 'de' ? 'Aktualisieren' : 'Refresh'}
           </Text>
@@ -303,4 +303,3 @@ const RallyeIndex = observer(function RallyeIndex() {
 });
 
 export default RallyeIndex;
-

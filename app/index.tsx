@@ -8,7 +8,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  useColorScheme,
 } from 'react-native';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
@@ -18,6 +17,7 @@ import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
 import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
 import { store$ } from '@/services/storage/Store';
 import {
   getActiveRallyes,
@@ -57,8 +57,7 @@ const handleNoPasswordSubmit = async () => {
 };
 
 export default function Welcome() {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const { isDarkMode } = useTheme();
   const { language, toggleLanguage } = useLanguage();
 
   const [loading, setLoading] = useState(false);

@@ -20,7 +20,7 @@ export const globalStyles = StyleSheet.create({
       flexGrow: 1,
       alignItems: 'center',
       justifyContent: 'space-evenly',
-      backgroundColor: '#fff',
+      backgroundColor: Colors.lightMode.background,
       paddingVertical: SCREEN_HEIGHT * 0.02,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       maxWidth: SCREEN_WIDTH,
@@ -35,7 +35,7 @@ export const globalStyles = StyleSheet.create({
     },
     section: {
       marginBottom: 20,
-      backgroundColor: '#fff',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 10,
       borderWidth: 1,
       padding: 20,
@@ -64,7 +64,7 @@ export const globalStyles = StyleSheet.create({
       backgroundColor: 'rgba(0,0,0,0.5)',
     },
     modalContent: {
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       padding: 20,
       borderRadius: 10,
       width: '85%',
@@ -77,7 +77,7 @@ export const globalStyles = StyleSheet.create({
       textAlign: 'center',
     },
     rallyeCard: {
-      backgroundColor: '#f2f2f2',
+      backgroundColor: Colors.veryLightGray,
       borderRadius: 8,
       padding: 15,
       marginVertical: 8,
@@ -96,12 +96,12 @@ export const globalStyles = StyleSheet.create({
     },
     rallyeStudiengang: {
       fontSize: 16,
-      color: '#555',
+      color: Colors.dhbwGray,
       marginBottom: 3,
     },
     rallyeStatus: {
       fontSize: 14,
-      color: '#888',
+      color: Colors.mediumGray,
     },
     selectButton: {
       paddingVertical: 8,
@@ -116,7 +116,7 @@ export const globalStyles = StyleSheet.create({
     noDataText: {
       textAlign: 'center',
       fontSize: 16,
-      color: '#777',
+      color: Colors.mediumGray,
       marginVertical: 10,
     },
   },
@@ -126,7 +126,7 @@ export const globalStyles = StyleSheet.create({
       flex: 1,
       alignItems: 'center',
       justifyContent: 'space-around',
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.background,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       paddingVertical: SCREEN_HEIGHT * 0.03,
     },
@@ -143,7 +143,7 @@ export const globalStyles = StyleSheet.create({
     infoBox: {
       minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 10,
       shadowColor: '#000',
       shadowOffset: {
@@ -158,7 +158,7 @@ export const globalStyles = StyleSheet.create({
     infoCameraBox: {
       minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 10,
       justifyContent: 'center',
       alignItems: 'center',
@@ -206,18 +206,13 @@ export const globalStyles = StyleSheet.create({
       alignItems: 'center',
       marginBottom: 30,
     },
-    footer: {
-      fontSize: 18,
-      textAlign: 'center',
-      color: Colors.dhbwGray,
-    },
   },
 
   cardStyles: {
     card: {
       width: '100%',
       height: SCREEN_HEIGHT * 0.22,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 15,
       padding: SCREEN_WIDTH * 0.04,
       marginVertical: SCREEN_HEIGHT * 0.015,
@@ -284,7 +279,7 @@ export const globalStyles = StyleSheet.create({
   scoreboardStyles: {
     container: {
       flex: 1,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.background,
     },
     title: {
       color: Colors.dhbwGray,
@@ -348,7 +343,7 @@ export const globalStyles = StyleSheet.create({
     row: {
       flexDirection: 'row',
       padding: 15,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderBottomWidth: 1,
       borderBottomColor: Colors.lightGray,
     },
@@ -411,17 +406,17 @@ export const globalStyles = StyleSheet.create({
       width: '80%',
       height: 100,
       marginVertical: 10,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 10,
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 1,
-      borderColor: 'grey',
+      borderColor: Colors.mediumGray,
     },
 
     tileText: {
       fontSize: 20,
-      color: 'grey',
+      color: Colors.mediumGray,
     },
 
     button: {
@@ -433,14 +428,14 @@ export const globalStyles = StyleSheet.create({
   imageStyles: {
     container: {
       flex: 1,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.background,
       padding: 20,
     },
     questionBox: {
       width: '90%',
       marginBottom: 20,
       padding: 20,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 10,
       // ...shadowStyle,
     },
@@ -588,7 +583,7 @@ export const globalStyles = StyleSheet.create({
       flex: 1,
       flexDirection: 'column',
       alignItems: 'center',
-      backgroundColor: '#fff',
+      backgroundColor: Colors.lightMode.background,
       marginTop: 20,
     },
     camera: {
@@ -603,7 +598,7 @@ export const globalStyles = StyleSheet.create({
     cameraBox: {
       width: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 10,
       shadowColor: '#000',
       shadowOffset: {
@@ -719,7 +714,7 @@ export const globalStyles = StyleSheet.create({
         color: 'white',
       },
       disabled: {
-        backgroundColor: 'grey',
+        backgroundColor: Colors.mediumGray,
       },
       sizes: {
         small: {
@@ -870,7 +865,7 @@ export const globalStyles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
-      backgroundColor: '#fff',
+      backgroundColor: Colors.lightMode.background,
       paddingHorizontal: SCREEN_WIDTH * 0.04,
       justifyContent: 'space-evenly',
     },
@@ -920,7 +915,7 @@ export const globalStyles = StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.background,
       justifyContent: 'center',
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       paddingVertical: SCREEN_HEIGHT * 0.03,
@@ -929,7 +924,7 @@ export const globalStyles = StyleSheet.create({
     infoBox: {
       width: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: 'white',
+      backgroundColor: Colors.lightMode.card,
       borderRadius: 10,
       marginBottom: SCREEN_HEIGHT * 0.02,
       shadowColor: '#000',

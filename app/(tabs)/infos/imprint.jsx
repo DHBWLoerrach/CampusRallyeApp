@@ -1,11 +1,11 @@
-import { Linking, ScrollView, Text, useColorScheme, View } from 'react-native';
+import { Linking, ScrollView, Text, View } from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
 
 export default function Imprint() {
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
 
   return (

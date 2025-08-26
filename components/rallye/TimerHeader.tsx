@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Text } from 'react-native';
 import { store$ } from '@/services/storage/Store';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
+import Colors from '@/utils/Colors';
 
 function calculateTimeRemaining(endTime?: string | Date | null) {
   if (!endTime) {
@@ -23,6 +25,8 @@ const two = (n: number) => n.toString().padStart(2, '0');
 export default function TimerHeader({ endTime }: { endTime?: string | Date | null }) {
   const [t, setT] = useState(() => calculateTimeRemaining(endTime));
   const { language } = useLanguage();
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -37,9 +41,8 @@ export default function TimerHeader({ endTime }: { endTime?: string | Date | nul
   }, [endTime]);
 
   return (
-    <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
+    <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
       {language === 'de' ? 'Zeit: ' : 'Time: '} {two(t.h)}:{two(t.m)}:{two(t.s)}
     </Text>
   );
 }
-

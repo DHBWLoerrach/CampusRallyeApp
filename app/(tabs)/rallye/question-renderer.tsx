@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import Colors from '@/utils/Colors';
+import { useTheme } from '@/utils/ThemeContext';
 
 // Reuse existing question components for now
 import SkillQuestion from '@/components/rallye/questions/SkillQuestion';
@@ -19,11 +20,13 @@ const components: Record<string, any> = {
 };
 
 export default function QuestionRenderer({ question, onAnswer }: { question: any; onAnswer: (correct: boolean, points: number) => void }) {
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const type = question?.question_type;
   const Cmp = components[type];
   if (!Cmp) {
     return (
-      <View style={[globalStyles.default.container, { backgroundColor: Colors.lightMode.background }]}>
+      <View style={[globalStyles.default.container, { backgroundColor: palette.background }]}>
         <Text style={{ color: 'red', textAlign: 'center' }}>Unknown question type: {String(type)}</Text>
       </View>
     );
@@ -32,7 +35,7 @@ export default function QuestionRenderer({ question, onAnswer }: { question: any
     <Cmp
       onAnswer={onAnswer}
       question={question}
-      style={{ backgroundColor: Colors.lightMode.card }}
+      style={{ backgroundColor: palette.card }}
     />
   );
 }

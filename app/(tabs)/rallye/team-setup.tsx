@@ -8,9 +8,12 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import generateTeamName from '@/utils/RandomTeamNames';
 import { setCurrentTeam } from '@/services/storage/teamStorage';
+import { useTheme } from '@/utils/ThemeContext';
 
 const TeamSetup = observer(function TeamSetup() {
   const [loading, setLoading] = useState(false);
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const rallye = useSelector(() => store$.rallye.get());
   const createTeam = async () => {
     setLoading(true);
@@ -39,13 +42,13 @@ const TeamSetup = observer(function TeamSetup() {
   };
 
   return (
-    <View style={[globalStyles.default.container, { backgroundColor: Colors.lightMode.background }]}>
-      <Text style={[globalStyles.teamStyles.title, { color: Colors.lightMode.dhbwGray }]}>
+    <View style={[globalStyles.default.container, { backgroundColor: palette.background }]}>
+      <Text style={[globalStyles.teamStyles.title, { color: palette.dhbwGray }]}>
         {rallye?.name}
       </Text>
-      <View style={[globalStyles.teamStyles.container, { backgroundColor: Colors.lightMode.background }]}>
-        <View style={[globalStyles.teamStyles.infoBox, { backgroundColor: Colors.lightMode.card }]}>
-          <Text style={[globalStyles.teamStyles.message]}>
+      <View style={[globalStyles.teamStyles.container, { backgroundColor: palette.background }]}>
+        <View style={[globalStyles.teamStyles.infoBox, { backgroundColor: palette.card }]}>
+          <Text style={[globalStyles.teamStyles.message, { color: palette.text }]}>
             {'Bilde ein Team, um an der Rallye teilzunehmen.'}
           </Text>
           <UIButton disabled={loading} onPress={createTeam}>
