@@ -7,12 +7,23 @@ import Constants from './Constants';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Helfer-Funktion für responsive Schriftgrößen
-const normalizeFont = (size) => {
+const normalizeFont = (size: number) => {
   const scale = SCREEN_WIDTH / 375; // Basis: iPhone X Breite
   return Math.round(size * scale);
 };
 
-export const globalStyles = StyleSheet.create({
+// Helper to build grouped StyleSheets so TypeScript knows nested keys
+function createGroupedStyles<T extends Record<string, Record<string, any>>>(
+  groups: T
+) {
+  const out: Record<string, any> = {};
+  for (const key in groups) {
+    out[key] = StyleSheet.create(groups[key] as any);
+  }
+  return out as { [K in keyof T]: { [P in keyof T[K]]: any } };
+}
+
+export const globalStyles = createGroupedStyles({
   default: {
     container: {
       flex: 1,
@@ -428,6 +439,8 @@ export const globalStyles = StyleSheet.create({
   imageStyles: {
     container: {
       flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: Colors.lightMode.background,
       padding: 20,
     },
@@ -446,13 +459,13 @@ export const globalStyles = StyleSheet.create({
     },
     input: {
       width: '100%',
-      height: 50,
+      height: 40,
       borderColor: Colors.dhbwGray,
       borderWidth: 1,
       borderRadius: 5,
       padding: 10,
-      fontSize: 16,
-      marginBottom: 15,
+      marginBottom: 20,
+      fontSize: Constants.bigFont,
     },
     image: {
       width: SCREEN_WIDTH * 0.9,
@@ -464,24 +477,9 @@ export const globalStyles = StyleSheet.create({
       justifyContent: 'center',
       paddingBottom: 200, // quickfix for keyboard covering input on small screens
     },
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 20,
-    },
     inputLabel: {
       fontSize: 16,
       marginBottom: 5,
-    },
-    input: {
-      width: '100%',
-      height: 40,
-      borderColor: Colors.dhbwGray,
-      borderWidth: 1,
-      marginBottom: 20,
-      paddingHorizontal: 10,
-      fontSize: Constants.bigFont,
     },
     answerContainer: {
       marginTop: 20,
