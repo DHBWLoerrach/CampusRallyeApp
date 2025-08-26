@@ -1,0 +1,44 @@
+import { makeStyles } from './makeStyles';
+import Colors from './Colors';
+
+export const useAppStyles = makeStyles((p) => ({
+  // Generic screens and sections
+  screen: {
+    flex: 1,
+    backgroundColor: p.background,
+  },
+  section: {
+    backgroundColor: p.card,
+    borderRadius: 10,
+  },
+  card: {
+    backgroundColor: p.card,
+    borderRadius: 10,
+  },
+  infoBox: {
+    backgroundColor: p.card,
+    borderRadius: 10,
+    padding: 16,
+  },
+  listRow: {
+    backgroundColor: p.card,
+    borderBottomWidth: 1,
+    borderBottomColor: p.cellBorder,
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: p.cellBorder,
+  },
+  // Text helpers
+  text: {
+    color: p.text,
+  },
+  muted: {
+    color: Colors.mediumGray,
+  },
+  title: {
+    color: p.text,
+    fontWeight: '600',
+  },
+}));
+

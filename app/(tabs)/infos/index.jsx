@@ -1,9 +1,11 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { globalStyles } from '@/utils/GlobalStyles';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
+import ThemedView from '@/components/themed/ThemedView';
+import ThemedText from '@/components/themed/ThemedText';
 
 export default function Infos() {
   const router = useRouter();
@@ -11,16 +13,7 @@ export default function Infos() {
   const { language } = useLanguage();
 
   return (
-    <View
-      style={[
-        globalStyles.settingsStyles.container,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
-    >
+    <ThemedView variant="background" style={globalStyles.settingsStyles.container}>
       <TouchableOpacity
         style={[
           globalStyles.settingsStyles.tile,
@@ -32,18 +25,9 @@ export default function Infos() {
         ]}
         onPress={() => router.push('/infos/imprint')}
       >
-        <Text
-          style={[
-            globalStyles.settingsStyles.tileText,
-            {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.dhbwGray,
-            },
-          ]}
-        >
+        <ThemedText style={globalStyles.settingsStyles.tileText}>
           {language === 'de' ? 'Impressum' : 'Imprint'}
-        </Text>
+        </ThemedText>
       </TouchableOpacity>
       <TouchableOpacity
         style={[
@@ -56,19 +40,10 @@ export default function Infos() {
         ]}
         onPress={() => router.push('/infos/about')}
       >
-        <Text
-          style={[
-            globalStyles.settingsStyles.tileText,
-            {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.dhbwGray,
-            },
-          ]}
-        >
+        <ThemedText style={globalStyles.settingsStyles.tileText}>
           {language === 'de' ? 'Über diese App' : 'About this app'}
-        </Text>
+        </ThemedText>
       </TouchableOpacity>
-    </View>
+    </ThemedView>
   );
 }
