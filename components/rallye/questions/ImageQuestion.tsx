@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, TextInput, View } from 'react-native';
+import { Alert, Image, View } from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { store$ } from '@/services/storage/Store';
 import { saveAnswer } from '@/services/storage/answerStorage';
@@ -14,6 +14,7 @@ import { useLanguage } from '@/utils/LanguageContext';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
+import ThemedTextInput from '@/components/themed/ThemedTextInput';
 
 export default function ImageQuestion({ question }: QuestionProps) {
   const { isDarkMode } = useTheme();
@@ -91,26 +92,11 @@ export default function ImageQuestion({ question }: QuestionProps) {
         ) : null}
 
         <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <TextInput
-            style={[
-              globalStyles.skillStyles.input,
-              {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-                borderColor: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-              },
-            ]}
+          <ThemedTextInput
+            style={[globalStyles.skillStyles.input]}
             value={answer}
             onChangeText={(text) => setAnswer(text)}
-            placeholder={
-              language === 'de' ? 'Deine Antwort...' : 'Your answer...'
-            }
-            placeholderTextColor={
-              isDarkMode ? Colors.darkMode.text : Colors.lightMode.text
-            }
+            placeholder={language === 'de' ? 'Deine Antwort...' : 'Your answer...'}
           />
         </View>
 

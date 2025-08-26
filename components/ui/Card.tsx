@@ -1,18 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  Alert,
-  Animated,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, Animated, Text, TouchableOpacity, View } from 'react-native';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
+import ThemedTextInput from '@/components/themed/ThemedTextInput';
 
 type CardProps = {
   title: string;
@@ -153,25 +147,12 @@ export default function Card({
         >
           {language === 'de' ? 'Passwort eingeben' : 'Enter password'}
         </Text>
-        <TextInput
-          style={[
-            globalStyles.cardStyles.passwordInput,
-            {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.dhbwGray,
-              borderColor: isDarkMode
-                ? Colors.darkMode.text
-                : Colors.lightMode.dhbwGray,
-            },
-          ]}
+        <ThemedTextInput
+          style={[globalStyles.cardStyles.passwordInput]}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
           placeholder={language === 'de' ? 'Passwort' : 'Password'}
-          placeholderTextColor={
-            isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray
-          }
         />
         <View style={globalStyles.cardStyles.buttonRow}>
           <UIButton
