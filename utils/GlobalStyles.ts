@@ -1,14 +1,13 @@
-// utils/globalStyles.js
 import { StyleSheet, Dimensions } from 'react-native';
 import Colors from './Colors';
 import Constants from './Constants';
 
-// Bildschirmmaße für dynamische Berechnungen
+// Display dimensions for dynamic calculations
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Helfer-Funktion für responsive Schriftgrößen
+// Helper function for responsive font sizes
 const normalizeFont = (size: number) => {
-  const scale = SCREEN_WIDTH / 375; // Basis: iPhone X Breite
+  const scale = SCREEN_WIDTH / 375; // Basis: iPhone X width
   return Math.round(size * scale);
 };
 
@@ -44,29 +43,7 @@ export const globalStyles = createGroupedStyles({
     refreshContainer: {
       flexGrow: 1,
     },
-    section: {
-      marginBottom: 20,
-      backgroundColor: Colors.lightMode.card,
-      borderRadius: 10,
-      borderWidth: 1,
-      padding: 20,
-      width: '100%',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
-    },
-    question: {
-      fontSize: 20,
-      marginBottom: 30,
-      textAlign: 'center',
-    },
   },
-
   rallyeModal: {
     modalContainer: {
       flex: 1,
@@ -131,7 +108,6 @@ export const globalStyles = createGroupedStyles({
       marginVertical: 10,
     },
   },
-
   rallyeStatesStyles: {
     container: {
       flex: 1,
@@ -140,16 +116,6 @@ export const globalStyles = createGroupedStyles({
       backgroundColor: Colors.lightMode.background,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       paddingVertical: SCREEN_HEIGHT * 0.03,
-    },
-    successIcon: {
-      marginBottom: '8%',
-    },
-    title: {
-      color: Colors.dhbwRed,
-      fontWeight: '400',
-      fontSize: normalizeFont(30),
-      marginBottom: '8%',
-      textAlign: 'center',
     },
     infoBox: {
       minWidth: '100%',
@@ -194,31 +160,7 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwGray,
       marginTop: '3%',
     },
-    pointsTitle: {
-      fontSize: 22,
-      textAlign: 'center',
-      color: Colors.dhbwGray,
-    },
-    pointsValue: {
-      fontSize: 40,
-      textAlign: 'center',
-      color: Colors.dhbwRed,
-      fontWeight: '600',
-      marginTop: '3%',
-    },
-    footer: {
-      fontSize: 18,
-      textAlign: 'center',
-      color: Colors.dhbwGray,
-      marginTop: 20,
-      paddingHorizontal: 20,
-    },
-    iconContainer: {
-      alignItems: 'center',
-      marginBottom: 30,
-    },
   },
-
   cardStyles: {
     card: {
       width: '100%',
@@ -276,67 +218,8 @@ export const globalStyles = createGroupedStyles({
       flexDirection: 'row',
       gap: 10,
     },
-    button: {
-      backgroundColor: Colors.dhbwRed,
-      padding: 10,
-      borderRadius: 5,
-    },
-    buttonText: {
-      color: 'white',
-      fontWeight: 'bold',
-    },
   },
-
   scoreboardStyles: {
-    container: {
-      flex: 1,
-      backgroundColor: Colors.lightMode.background,
-    },
-    title: {
-      color: Colors.dhbwGray,
-      fontSize: 30,
-      fontWeight: 'bold',
-      marginBottom: 10,
-      textAlign: 'center',
-    },
-    teamInfo: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: Colors.dhbwGray,
-      marginBottom: 10,
-      textAlign: 'center',
-    },
-    tableHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 5,
-    },
-    headerText: {
-      color: Colors.dhbwGray,
-      fontSize: 20,
-      fontWeight: 'bold',
-      flex: 1,
-      textAlign: 'center',
-    },
-    tableRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      padding: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: Colors.lightGray,
-    },
-    ourTeam: {
-      backgroundColor: Colors.lightGray,
-    },
-    rowText: {
-      flex: 1,
-      fontSize: 16,
-      textAlign: 'center',
-    },
-    scrollContent: {
-      paddingVertical: SCREEN_HEIGHT * 0.02,
-      paddingHorizontal: SCREEN_WIDTH * 0.05,
-    },
     headerCell: {
       flex: 1,
       fontWeight: 'bold',
@@ -379,32 +262,6 @@ export const globalStyles = createGroupedStyles({
       fontWeight: 'bold',
     },
   },
-
-  votingStyles: {
-    main: {
-      padding: 20,
-    },
-    text: {
-      fontSize: 20,
-      color: Colors.dhbwGray,
-      textAlign: 'center',
-    },
-    row: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginBottom: 5,
-    },
-    label: {
-      fontSize: 16,
-      color: Colors.dhbwGray,
-      marginRight: 5,
-    },
-    value: {
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-  },
-
   settingsStyles: {
     container: {
       flex: 1,
@@ -424,92 +281,11 @@ export const globalStyles = createGroupedStyles({
       borderWidth: 1,
       borderColor: Colors.mediumGray,
     },
-
     tileText: {
       fontSize: 20,
       color: Colors.mediumGray,
     },
-
-    button: {
-      paddingTop: 20,
-      marginVertical: 10,
-    },
   },
-
-  imageStyles: {
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: Colors.lightMode.background,
-      padding: 20,
-    },
-    questionBox: {
-      width: '90%',
-      marginBottom: 20,
-      padding: 20,
-      backgroundColor: Colors.lightMode.card,
-      borderRadius: 10,
-      // ...shadowStyle,
-    },
-    title: {
-      fontSize: 24,
-      color: Colors.dhbwGray,
-      textAlign: 'center',
-    },
-    input: {
-      width: '100%',
-      height: 40,
-      borderColor: Colors.dhbwGray,
-      borderWidth: 1,
-      borderRadius: 5,
-      padding: 10,
-      marginBottom: 20,
-      fontSize: Constants.bigFont,
-    },
-    image: {
-      width: SCREEN_WIDTH * 0.9,
-      height: SCREEN_HEIGHT * 0.3,
-      resizeMode: 'contain',
-    },
-    contentContainer: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingBottom: 200, // quickfix for keyboard covering input on small screens
-    },
-    inputLabel: {
-      fontSize: 16,
-      marginBottom: 5,
-    },
-    answerContainer: {
-      marginTop: 20,
-      alignItems: 'center',
-    },
-    answerLabel: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 5,
-    },
-    answer: {
-      fontSize: 16,
-    },
-    buttonContainer: {
-      backgroundColor: Colors.dhbwRed,
-      margin: 6,
-      borderRadius: 5,
-    },
-    buttonContainerDeactive: {
-      backgroundColor: Colors.dhbwGray,
-      margin: 6,
-      borderRadius: 5,
-    },
-    picture: {
-      width: 300,
-      height: 300,
-      marginBottom: 20,
-    },
-  },
-
   multipleChoiceStyles: {
     squareButton: {
       flexDirection: 'row',
@@ -528,62 +304,8 @@ export const globalStyles = createGroupedStyles({
       borderWidth: 1,
       borderColor: Colors.dhbwGray,
     },
-    contentContainer: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingBottom: 200, // quickfix for keyboard covering input on small screens
-    },
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 20,
-    },
-    inputLabel: {
-      fontSize: 16,
-      marginBottom: 5,
-    },
-    input: {
-      width: '100%',
-      height: 40,
-      borderColor: Colors.dhbwGray,
-      borderWidth: 1,
-      marginBottom: 20,
-      paddingHorizontal: 10,
-      fontSize: Constants.bigFont,
-    },
-    answerContainer: {
-      marginTop: 20,
-      alignItems: 'center',
-    },
-    answerLabel: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 5,
-    },
-    answer: {
-      fontSize: 16,
-    },
-    buttonContainer: {
-      backgroundColor: Colors.dhbwRed,
-      margin: 6,
-      borderRadius: 5,
-    },
-    buttonContainerDeactive: {
-      backgroundColor: Colors.dhbwGray,
-      margin: 6,
-      borderRadius: 5,
-    },
   },
-
   qrCodeStyles: {
-    container: {
-      flex: 1,
-      flexDirection: 'column',
-      alignItems: 'center',
-      backgroundColor: Colors.lightMode.background,
-      marginTop: 20,
-    },
     camera: {
       width: '100%',
       height: '100%',
@@ -609,23 +331,7 @@ export const globalStyles = createGroupedStyles({
       maxHeight: SCREEN_HEIGHT * 0.3,
     },
   },
-
   skillStyles: {
-    contentContainer: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      paddingBottom: 200,
-    },
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 10,
-    },
-    inputLabel: {
-      fontSize: 16,
-      marginBottom: 5,
-    },
     input: {
       minWidth: '100%',
       height: 40,
@@ -636,37 +342,8 @@ export const globalStyles = createGroupedStyles({
       paddingHorizontal: 10,
       fontSize: Constants.smallFont,
     },
-    answerContainer: {
-      marginTop: 20,
-      alignItems: 'center',
-    },
-    answerLabel: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 5,
-    },
-    answer: {
-      fontSize: 16,
-    },
-    buttonContainer: {
-      backgroundColor: Colors.dhbwRed,
-      margin: 6,
-      borderRadius: 5,
-    },
-    buttonContainerDeactive: {
-      backgroundColor: Colors.dhbwGray,
-      margin: 6,
-      borderRadius: 5,
-    },
   },
-
   uploadStyles: {
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'space-around',
-      paddingVertical: SCREEN_HEIGHT * 0.02,
-    },
     camera: {
       width: '100%',
       aspectRatio: 1,
@@ -677,59 +354,8 @@ export const globalStyles = createGroupedStyles({
       aspectRatio: 1,
       maxHeight: '100%',
     },
-    buttonRow: {
-      flexDirection: 'row',
-      gap: SCREEN_WIDTH * 0.05,
-      marginVertical: SCREEN_HEIGHT * 0.02,
-    },
   },
-
-  uploadQuestionStyles: {
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginHorizontal: SCREEN_WIDTH * 0.05,
-    },
-    buttonContainer: {
-      marginVertical: SCREEN_HEIGHT * 0.02,
-      borderRadius: 5,
-    },
-  },
-
   imprintStyles: {
-    textSizes: {
-      small: { fontSize: normalizeFont(12) },
-      medium: { fontSize: normalizeFont(20) },
-      dialog: { fontSize: normalizeFont(16) },
-    },
-    button: {
-      container: {
-        backgroundColor: Colors.dhbwRed,
-        alignItems: 'center',
-      },
-      text: {
-        color: 'white',
-      },
-      disabled: {
-        backgroundColor: Colors.mediumGray,
-      },
-      sizes: {
-        small: {
-          padding: 10,
-          borderRadius: 5,
-        },
-        medium: {
-          padding: 10,
-          borderRadius: 5,
-        },
-        dialog: {
-          padding: 10,
-          borderRadius: 3,
-          marginLeft: 7,
-        },
-      },
-    },
     texts: {
       container: {
         padding: SCREEN_WIDTH * 0.04,
@@ -737,20 +363,12 @@ export const globalStyles = createGroupedStyles({
       block: {
         marginBottom: SCREEN_HEIGHT * 0.02,
       },
-      quote: {
-        fontStyle: 'italic',
-        marginHorizontal: 15,
-      },
       headline: {
         fontSize: normalizeFont(18),
         marginBottom: SCREEN_HEIGHT * 0.01,
       },
-      link: {
-        color: Colors.link,
-      },
     },
   },
-
   informationStyles: {
     container: {
       padding: SCREEN_WIDTH * 0.04,
@@ -760,59 +378,6 @@ export const globalStyles = createGroupedStyles({
       fontSize: normalizeFont(14),
     },
   },
-
-  questionStyles: {
-    container: {
-      flex: 1,
-      justifyContent: 'space-between',
-      padding: SCREEN_WIDTH * 0.05,
-      maxHeight: SCREEN_HEIGHT * 0.9,
-    },
-    questionText: {
-      fontSize: normalizeFont(18),
-      flex: 0,
-    },
-    inputContainer: {
-      width: '100%',
-      flex: 0,
-    },
-    input: {
-      height: SCREEN_HEIGHT * 0.06,
-      fontSize: normalizeFont(16),
-    },
-  },
-
-  imageQuestionStyles: {
-    image: {
-      width: SCREEN_WIDTH * 0.9,
-      height: SCREEN_HEIGHT * 0.3,
-      resizeMode: 'contain',
-    },
-  },
-
-  cameraStyles: {
-    camera: {
-      width: SCREEN_WIDTH * 0.8,
-      height: SCREEN_WIDTH * 0.8, // Quadratisch
-      maxHeight: SCREEN_HEIGHT * 0.4, // Max 40% der Höhe
-    },
-  },
-
-  hintStyles: {
-    hintTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginVertical: 20,
-    },
-    hintText: {
-      fontSize: normalizeFont(16),
-    },
-    hintContainer: {
-      marginTop: SCREEN_HEIGHT * 0.02,
-      maxHeight: SCREEN_HEIGHT * 0.15,
-    },
-  },
-
   uiButtonStyles: {
     button: {
       container: {
@@ -858,7 +423,6 @@ export const globalStyles = createGroupedStyles({
       },
     },
   },
-
   welcomeStyles: {
     container: {
       flex: 1,
@@ -908,7 +472,6 @@ export const globalStyles = createGroupedStyles({
       justifyContent: 'center',
     },
   },
-
   teamStyles: {
     container: {
       flex: 1,
@@ -941,12 +504,6 @@ export const globalStyles = createGroupedStyles({
       fontWeight: '600',
       marginBottom: SCREEN_HEIGHT * 0.02,
     },
-    teamName: {
-      fontSize: normalizeFont(22),
-      color: Colors.dhbwRed,
-      textAlign: 'center',
-      marginVertical: SCREEN_HEIGHT * 0.02,
-    },
     message: {
       fontSize: normalizeFont(18),
       color: Colors.dhbwGray,
@@ -954,7 +511,6 @@ export const globalStyles = createGroupedStyles({
       marginBottom: SCREEN_HEIGHT * 0.02,
     },
   },
-
   fab: {
     position: 'absolute',
     right: 20,
