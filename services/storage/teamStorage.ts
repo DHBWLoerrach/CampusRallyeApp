@@ -1,5 +1,10 @@
 import { supabase } from '@/utils/Supabase';
-import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
+import {
+  StorageKeys,
+  getStorageItem,
+  setStorageItem,
+  removeStorageItem,
+} from './asyncStorage';
 
 export async function getCurrentTeam(rallyeId: number) {
   if (!rallyeId) return null;
@@ -9,6 +14,12 @@ export async function getCurrentTeam(rallyeId: number) {
 export async function setCurrentTeam(rallyeId: number, team: any) {
   if (!rallyeId) return null;
   return setStorageItem(`${StorageKeys.TEAM}_${rallyeId}`, team);
+}
+
+// Remove the stored team assignment for a specific rallye
+export async function clearCurrentTeam(rallyeId: number) {
+  if (!rallyeId) return null;
+  return removeStorageItem(`${StorageKeys.TEAM}_${rallyeId}`);
 }
 
 export async function setTimePlayed(rallyeId: number, teamId: number) {
@@ -38,4 +49,3 @@ export async function getTeamsByRallye(rallyeId: number) {
   if (error) throw error;
   return data ?? [];
 }
-
