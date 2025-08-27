@@ -168,7 +168,7 @@ export default function Scoreboard() {
                     color:
                       team.group_name === ourTeam?.name
                         ? Colors.dhbwRed
-                        : undefined,
+                        : Colors.dhbwGray,
                   },
                 ]}
               >
