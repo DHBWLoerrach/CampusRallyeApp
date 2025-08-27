@@ -60,10 +60,15 @@ export default function SkillQuestion({ question }: QuestionProps) {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
-        <View style={[globalStyles.default.container]}>
+      <ThemedScrollView
+        variant="background"
+        contentContainerStyle={[globalStyles.default.refreshContainer]}
+      >
+        <View style={[globalStyles.default.container, s.screen]}>
           <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-            <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+            <ThemedText
+              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+            >
               {question.question}
             </ThemedText>
           </View>
@@ -73,7 +78,9 @@ export default function SkillQuestion({ question }: QuestionProps) {
               style={[globalStyles.skillStyles.input]}
               value={answer}
               onChangeText={(text) => setAnswer(text.trim())}
-              placeholder={language === 'de' ? 'Deine Antwort...' : 'Your answer...'}
+              placeholder={
+                language === 'de' ? 'Deine Antwort...' : 'Your answer...'
+              }
             />
           </View>
 

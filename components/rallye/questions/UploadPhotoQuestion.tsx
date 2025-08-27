@@ -65,11 +65,16 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   function PhotoCamera() {
     const [facing, setFacing] = useState<'back' | 'front'>('back');
     return (
-      <ThemedView variant="background" style={globalStyles.default.container}>
+      <ThemedView
+        variant="background"
+        style={[globalStyles.default.container, s.screen]}
+      >
         <View
           style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
         >
-          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+          <ThemedText
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
             {question.question}
           </ThemedText>
         </View>
@@ -124,11 +129,16 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
 
   function ImagePreview() {
     return (
-      <ThemedView variant="background" style={globalStyles.default.container}>
+      <ThemedView
+        variant="background"
+        style={[globalStyles.default.container, s.screen]}
+      >
         <View
           style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
         >
-          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+          <ThemedText
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
             {question.question}
           </ThemedText>
         </View>

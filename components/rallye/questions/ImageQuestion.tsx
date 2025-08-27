@@ -27,8 +27,10 @@ export default function ImageQuestion({ question }: QuestionProps) {
   const answers = store$.answers.get() as AnswerRow[];
   const correct = useMemo(
     () =>
-      (answers.find((a) => a.question_id === question.id && a.correct)?.text || '')
-        .toLowerCase(),
+      (
+        answers.find((a) => a.question_id === question.id && a.correct)?.text ||
+        ''
+      ).toLowerCase(),
     [answers, question.id]
   );
 
@@ -73,10 +75,15 @@ export default function ImageQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
-      <View style={[globalStyles.default.container]}>
+    <ThemedScrollView
+      variant="background"
+      contentContainerStyle={[globalStyles.default.refreshContainer]}
+    >
+      <View style={[globalStyles.default.container, s.screen]}>
         <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+          <ThemedText
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
             {question.question}
           </ThemedText>
         </View>
@@ -96,7 +103,9 @@ export default function ImageQuestion({ question }: QuestionProps) {
             style={[globalStyles.skillStyles.input]}
             value={answer}
             onChangeText={(text) => setAnswer(text)}
-            placeholder={language === 'de' ? 'Deine Antwort...' : 'Your answer...'}
+            placeholder={
+              language === 'de' ? 'Deine Antwort...' : 'Your answer...'
+            }
           />
         </View>
 

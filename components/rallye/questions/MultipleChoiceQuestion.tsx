@@ -35,7 +35,11 @@ export default function MultipleChoiceQuestion({ question }: QuestionProps) {
   }, [answers, question.id]);
 
   const correctAnswer = useMemo(
-    () => options.find((o) => o.correct)?.text?.toLowerCase().trim() ?? '',
+    () =>
+      options
+        .find((o) => o.correct)
+        ?.text?.toLowerCase()
+        .trim() ?? '',
     [options]
   );
 
@@ -70,10 +74,15 @@ export default function MultipleChoiceQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <ThemedScrollView variant="background" contentContainerStyle={globalStyles.default.refreshContainer}>
-      <View style={[globalStyles.default.container]}>
+    <ThemedScrollView
+      variant="background"
+      contentContainerStyle={globalStyles.default.refreshContainer}
+    >
+      <View style={[globalStyles.default.container, s.screen]}>
         <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+          <ThemedText
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
             {question.question}
           </ThemedText>
         </View>
@@ -88,7 +97,9 @@ export default function MultipleChoiceQuestion({ question }: QuestionProps) {
                   borderColor:
                     answer === (option.text ?? '')
                       ? Colors.dhbwRed
-                      : (isDarkMode ? Colors.darkMode.text : Colors.dhbwGray),
+                      : isDarkMode
+                      ? Colors.darkMode.text
+                      : Colors.dhbwGray,
                 },
               ]}
               onPress={() => setAnswer(option.text ?? '')}
@@ -100,7 +111,9 @@ export default function MultipleChoiceQuestion({ question }: QuestionProps) {
                     backgroundColor:
                       answer === (option.text ?? '')
                         ? Colors.dhbwRed
-                        : (isDarkMode ? Colors.darkMode.card : Colors.lightMode.card),
+                        : isDarkMode
+                        ? Colors.darkMode.card
+                        : Colors.lightMode.card,
                   },
                 ]}
               />

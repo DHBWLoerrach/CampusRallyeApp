@@ -30,7 +30,7 @@ export const globalStyles = createGroupedStyles({
       flexGrow: 1,
       alignItems: 'center',
       justifyContent: 'space-evenly',
-      backgroundColor: Colors.lightMode.background,
+      // backgroundColor intentionally left out to allow themed container (s.screen) to control it
       paddingVertical: SCREEN_HEIGHT * 0.02,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       maxWidth: SCREEN_WIDTH,
@@ -113,14 +113,14 @@ export const globalStyles = createGroupedStyles({
       flex: 1,
       alignItems: 'center',
       justifyContent: 'space-around',
-      backgroundColor: Colors.lightMode.background,
+      // backgroundColor removed for dark mode compatibility (use themed style)
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       paddingVertical: SCREEN_HEIGHT * 0.03,
     },
     infoBox: {
       minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: Colors.lightMode.card,
+      // backgroundColor handled by themed style (s.infoBox)
       borderRadius: 10,
       shadowColor: '#000',
       shadowOffset: {
@@ -135,7 +135,7 @@ export const globalStyles = createGroupedStyles({
     infoCameraBox: {
       minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: Colors.lightMode.card,
+      // backgroundColor handled by themed style (s.infoBox)
       borderRadius: 10,
       justifyContent: 'center',
       alignItems: 'center',
@@ -165,7 +165,7 @@ export const globalStyles = createGroupedStyles({
     card: {
       width: '100%',
       height: SCREEN_HEIGHT * 0.22,
-      backgroundColor: Colors.lightMode.card,
+      // backgroundColor handled by themed style
       borderRadius: 15,
       padding: SCREEN_WIDTH * 0.04,
       marginVertical: SCREEN_HEIGHT * 0.015,
@@ -237,7 +237,7 @@ export const globalStyles = createGroupedStyles({
     row: {
       flexDirection: 'row',
       padding: 15,
-      backgroundColor: Colors.lightMode.card,
+      // backgroundColor handled by themed style
       borderBottomWidth: 1,
       borderBottomColor: Colors.lightGray,
     },
@@ -274,7 +274,7 @@ export const globalStyles = createGroupedStyles({
       width: '80%',
       height: 100,
       marginVertical: 10,
-      backgroundColor: Colors.lightMode.card,
+      // backgroundColor handled by themed style
       borderRadius: 10,
       justifyContent: 'center',
       alignItems: 'center',
@@ -318,7 +318,7 @@ export const globalStyles = createGroupedStyles({
     cameraBox: {
       width: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: Colors.lightMode.card,
+      // backgroundColor handled by themed style
       borderRadius: 10,
       shadowColor: '#000',
       shadowOffset: {
@@ -427,7 +427,7 @@ export const globalStyles = createGroupedStyles({
     container: {
       flex: 1,
       alignItems: 'center',
-      backgroundColor: Colors.lightMode.background,
+      // backgroundColor handled by themed style
       paddingHorizontal: SCREEN_WIDTH * 0.04,
       justifyContent: 'space-evenly',
     },
@@ -476,7 +476,7 @@ export const globalStyles = createGroupedStyles({
     container: {
       flex: 1,
       alignItems: 'center',
-      backgroundColor: Colors.lightMode.background,
+      // backgroundColor handled by themed style
       justifyContent: 'center',
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       paddingVertical: SCREEN_HEIGHT * 0.03,

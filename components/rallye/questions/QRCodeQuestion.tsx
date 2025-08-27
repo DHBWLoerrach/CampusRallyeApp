@@ -25,7 +25,9 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
 
   const team = store$.team.get();
   const answers = store$.answers.get() as AnswerRow[];
-  const correct = (answers.find((a) => a.question_id === question.id && a.correct)?.text || '').toLowerCase();
+  const correct = (
+    answers.find((a) => a.question_id === question.id && a.correct)?.text || ''
+  ).toLowerCase();
 
   const submitSurrender = async () => {
     setScanMode(false);
@@ -41,7 +43,13 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
         : 'Do you really want to give up this task?',
       [
         { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
-        { text: language === 'de' ? 'Ja, ich möchte aufgeben' : 'Yes, I want to give up', onPress: submitSurrender },
+        {
+          text:
+            language === 'de'
+              ? 'Ja, ich möchte aufgeben'
+              : 'Yes, I want to give up',
+          onPress: submitSurrender,
+        },
       ]
     );
   };
@@ -68,7 +76,8 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
               text: language === 'de' ? 'Weiter' : 'Next',
               onPress: async () => {
                 store$.points.set(store$.points.get() + question.points);
-                if (team) await saveAnswer(team.id, question.id, true, question.points);
+                if (team)
+                  await saveAnswer(team.id, question.id, true, question.points);
                 store$.gotoNextQuestion();
               },
             },
@@ -88,43 +97,65 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     return (
       <ThemedView variant="background" style={globalStyles.default.container}>
         <ThemedText style={{ textAlign: 'center', marginBottom: 10 }}>
-          {language === 'de' ? 'Wir brauchen Zugriff auf die Kamera' : 'We need access to the camera'}
+          {language === 'de'
+            ? 'Wir brauchen Zugriff auf die Kamera'
+            : 'We need access to the camera'}
         </ThemedText>
         <UIButton onPress={requestPermission}>
-          {language === 'de' ? 'Zugriff auf Kamera erlauben' : 'Allow access to camera'}
+          {language === 'de'
+            ? 'Zugriff auf Kamera erlauben'
+            : 'Allow access to camera'}
         </UIButton>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView variant="background" style={[globalStyles.default.container, { flex: 1 }]}>
+    <ThemedView
+      variant="background"
+      style={[globalStyles.default.container, s.screen, { flex: 1 }]}
+    >
       <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-        <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
           {question.question}
         </ThemedText>
       </View>
 
-        {scanMode && (
-          <View style={[globalStyles.qrCodeStyles.cameraBox, s.infoBox]}>
-            <CameraView ref={cameraRef} style={globalStyles.qrCodeStyles.camera} onBarcodeScanned={handleQRCode} />
-          </View>
-        )}
-
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <View style={globalStyles.qrCodeStyles.buttonRow}>
-            <UIButton icon={scanMode ? 'circle-stop' : 'qrcode'} onPress={() => setScanMode(!scanMode)}>
-              {scanMode
-                ? language === 'de' ? 'Kamera ausblenden' : 'Hide Camera'
-                : language === 'de' ? 'QR-Code scannen' : 'Scan QR Code'}
-            </UIButton>
-            <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
-              {language === 'de' ? 'Aufgeben' : 'Surrender'}
-            </UIButton>
-          </View>
+      {scanMode && (
+        <View style={[globalStyles.qrCodeStyles.cameraBox, s.infoBox]}>
+          <CameraView
+            ref={cameraRef}
+            style={globalStyles.qrCodeStyles.camera}
+            onBarcodeScanned={handleQRCode}
+          />
         </View>
+      )}
 
-        {question.hint ? <Hint hint={question.hint} /> : null}
+      <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+        <View style={globalStyles.qrCodeStyles.buttonRow}>
+          <UIButton
+            icon={scanMode ? 'circle-stop' : 'qrcode'}
+            onPress={() => setScanMode(!scanMode)}
+          >
+            {scanMode
+              ? language === 'de'
+                ? 'Kamera ausblenden'
+                : 'Hide Camera'
+              : language === 'de'
+              ? 'QR-Code scannen'
+              : 'Scan QR Code'}
+          </UIButton>
+          <UIButton
+            icon="face-frown-open"
+            color={Colors.dhbwGray}
+            onPress={handleSurrender}
+          >
+            {language === 'de' ? 'Aufgeben' : 'Surrender'}
+          </UIButton>
+        </View>
+      </View>
+
+      {question.hint ? <Hint hint={question.hint} /> : null}
     </ThemedView>
   );
 }

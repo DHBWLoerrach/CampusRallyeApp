@@ -1,5 +1,9 @@
 import React from 'react';
-import { TextInput as RNTextInput, TextInputProps, StyleSheet } from 'react-native';
+import {
+  TextInput as RNTextInput,
+  TextInputProps,
+  StyleSheet,
+} from 'react-native';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
 
@@ -7,7 +11,12 @@ type Props = TextInputProps & {
   bordered?: boolean;
 };
 
-export default function ThemedTextInput({ bordered = true, style, placeholderTextColor, ...rest }: Props) {
+export default function ThemedTextInput({
+  bordered = true,
+  style,
+  placeholderTextColor,
+  ...rest
+}: Props) {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
@@ -16,7 +25,7 @@ export default function ThemedTextInput({ bordered = true, style, placeholderTex
     ...(bordered
       ? {
           borderWidth: StyleSheet.hairlineWidth,
-          borderColor: palette.text,
+          borderColor: isDarkMode ? Colors.dhbwGray : Colors.dhbwGray,
           borderRadius: 5,
         }
       : {}),
@@ -25,9 +34,11 @@ export default function ThemedTextInput({ bordered = true, style, placeholderTex
   return (
     <RNTextInput
       style={[baseStyle, style]}
-      placeholderTextColor={placeholderTextColor ?? Colors.mediumGray}
+      placeholderTextColor={
+        placeholderTextColor ??
+        (isDarkMode ? Colors.lightGray : Colors.mediumGray)
+      }
       {...rest}
     />
   );
 }
-
