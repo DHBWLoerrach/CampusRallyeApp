@@ -1,19 +1,20 @@
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import {
   Slot,
   useRootNavigationState,
   useRouter,
   useSegments,
 } from 'expo-router';
+import { useFonts } from 'expo-font';
+import 'react-native-reanimated';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
-import { LanguageProvider } from '@/utils/LanguageContext';
-import { ThemeContext, themeStore$, ThemeMode } from '@/utils/ThemeContext';
 import Colors from '@/utils/Colors';
+import { LanguageProvider } from '@/utils/LanguageContext';
 import { createNavigationTheme } from '@/utils/navigationTheme';
+import { ThemeContext, themeStore$, ThemeMode } from '@/utils/ThemeContext';
 
 function RootNavigator() {
   const colorScheme = useColorScheme();
@@ -27,7 +28,8 @@ function RootNavigator() {
   const enabled = useSelector(() => store$.enabled.get());
   const mode = useSelector(() => themeStore$.mode.get());
   const setMode = (next: ThemeMode) => themeStore$.mode.set(next);
-  const isDark = mode === 'dark' || (mode === 'system' && colorScheme === 'dark');
+  const isDark =
+    mode === 'dark' || (mode === 'system' && colorScheme === 'dark');
   const palette = isDark ? Colors.darkMode : Colors.lightMode;
 
   useEffect(() => {
