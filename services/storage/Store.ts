@@ -129,6 +129,10 @@ export const store$ = observable({
     if (rallye) {
       const loadTeam = await getCurrentTeam((rallye as any).id);
       loadTeam ? store$.team.set(loadTeam) : store$.team.set(null);
+      // Auto-resume into Rallye tabs on app start when actively participating
+      if (!rallye.tour_mode && loadTeam) {
+        store$.enabled.set(true);
+      }
     }
     const savedIndex = await AsyncStorage.getItem('currentQuestionIndex');
     if (savedIndex !== null) {
@@ -138,4 +142,3 @@ export const store$ = observable({
 });
 
 store$.initialize();
-
