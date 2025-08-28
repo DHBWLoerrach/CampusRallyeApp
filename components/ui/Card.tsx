@@ -1,12 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Alert, Animated, Text, TouchableOpacity, View } from 'react-native';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useState, useEffect, useCallback } from 'react';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import UIButton from './UIButton';
-import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useLanguage } from '@/utils/LanguageContext';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
+import UIButton from '@/components/ui/UIButton';
 
 type CardProps = {
   title: string;
@@ -29,19 +36,22 @@ export default function Card({
 }: CardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [password, setPassword] = useState('');
-  const flipAnim = useRef(new Animated.Value(0)).current;
+  const flip = useSharedValue(0);
   const { isDarkMode } = useTheme();
   const { language } = useLanguage();
 
-  const flipCard = () => {
-    Animated.spring(flipAnim, {
-      toValue: isFlipped ? 0 : 180,
-      friction: 8,
-      tension: 45,
-      useNativeDriver: true,
-    }).start();
-    setIsFlipped(!isFlipped);
-  };
+  const flipCard = useCallback(() => {
+    const next = isFlipped ? 0 : 180;
+    flip.value = withSpring(next, {
+      stiffness: 180,
+      damping: 18,
+      mass: 1,
+      overshootClamping: false,
+      restDisplacementThreshold: 0.5,
+      restSpeedThreshold: 0.5,
+    });
+    setIsFlipped((prev) => !prev);
+  }, [flip, isFlipped]);
 
   useEffect(() => {
     if (selectedRallye) {
@@ -49,27 +59,40 @@ export default function Card({
     }
   }, [selectedRallye]);
 
-  const frontInterpolate = flipAnim.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['0deg', '180deg'],
-  });
+  const frontAnimatedStyle = useAnimatedStyle(() => {
+    const rotateY = `${interpolate(
+      flip.value,
+      [0, 180],
+      [0, 180],
+      Extrapolation.CLAMP
+    )}deg`;
+    return {
+      transform: [{ rotateY }],
+      zIndex: isFlipped ? 0 : 1,
+      pointerEvents: isFlipped ? 'none' : 'auto',
+      backfaceVisibility: 'hidden',
+    } as const;
+  }, [isFlipped]);
 
-  const backInterpolate = flipAnim.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['180deg', '360deg'],
-  });
-
-  const frontAnimatedStyle = {
-    transform: [{ rotateY: frontInterpolate }],
-    zIndex: isFlipped ? 0 : 1,
-    pointerEvents: isFlipped ? 'none' : 'auto',
-  } as const;
-
-  const backAnimatedStyle = {
-    transform: [{ rotateY: backInterpolate }],
-    zIndex: isFlipped ? 1 : 0,
-    pointerEvents: isFlipped ? 'auto' : 'none',
-  } as const;
+  const backAnimatedStyle = useAnimatedStyle(() => {
+    const rotateY = `${interpolate(
+      flip.value,
+      [0, 180],
+      [180, 360],
+      Extrapolation.CLAMP
+    )}deg`;
+    return {
+      transform: [{ rotateY }],
+      zIndex: isFlipped ? 1 : 0,
+      pointerEvents: isFlipped ? 'auto' : 'none',
+      backfaceVisibility: 'hidden',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    } as const;
+  }, [isFlipped]);
 
   const handlePasswordSubmit = () => {
     if (!selectedRallye && icon === 'map-marker') {
@@ -98,6 +121,7 @@ export default function Card({
       ]}
       onPress={onShowModal ? onShowModal : onPress}
     >
+      {/* front face */}
       <Animated.View
         style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}
       >
@@ -128,6 +152,7 @@ export default function Card({
         </Text>
       </Animated.View>
 
+      {/* back face */}
       <Animated.View
         style={[
           globalStyles.cardStyles.cardFace,
@@ -162,7 +187,11 @@ export default function Card({
           >
             {language === 'de' ? 'Zurück' : 'Back'}
           </UIButton>
-          <UIButton onPress={handlePasswordSubmit} size="dialog" color={Colors.dhbwRed}>
+          <UIButton
+            onPress={handlePasswordSubmit}
+            size="dialog"
+            color={Colors.dhbwRed}
+          >
             {language === 'de' ? 'Bestätigen' : 'Confirm'}
           </UIButton>
         </View>
