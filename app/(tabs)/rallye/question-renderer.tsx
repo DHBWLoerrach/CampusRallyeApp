@@ -1,5 +1,10 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, Text } from 'react-native';
+import { Text } from 'react-native';
+import Animated, {
+  FadeInDown,
+  FadeOutUp,
+  LinearTransition,
+  Easing,
+} from 'react-native-reanimated';
 import { globalStyles } from '@/utils/GlobalStyles';
 import ThemedView from '@/components/themed/ThemedView';
 import SkillQuestion from '@/components/rallye/questions/SkillQuestion';
@@ -34,32 +39,15 @@ export default function QuestionRenderer({
       </ThemedView>
     );
   }
-  // Fade/slide-in animation on question change for smoother transitions
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(8)).current;
-
-  useEffect(() => {
-    // Reset and animate whenever the question id changes
-    opacity.setValue(0);
-    translateY.setValue(8);
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 420,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 420,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [question?.id]);
-
+  // Reanimated transitions: entering/exiting + layout
   return (
-    <Animated.View style={{ flex: 1, opacity, transform: [{ translateY }] }}>
+    <Animated.View
+      key={question?.id}
+      entering={FadeInDown.duration(220).easing(Easing.out(Easing.quad))}
+      exiting={FadeOutUp.duration(160).easing(Easing.in(Easing.quad))}
+      layout={LinearTransition.springify()}
+      style={{ flex: 1 }}
+    >
       <Cmp onAnswer={onAnswer} question={question} />
     </Animated.View>
   );
