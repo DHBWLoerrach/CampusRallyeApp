@@ -66,8 +66,14 @@ export default function Card({
       [0, 180],
       Extrapolation.CLAMP
     )}deg`;
+    const scale = interpolate(
+      flip.value,
+      [0, 90, 180],
+      [1, 1.02, 1],
+      Extrapolation.CLAMP
+    );
     return {
-      transform: [{ rotateY }],
+      transform: [{ perspective: 800 }, { rotateY }, { scale }],
       zIndex: isFlipped ? 0 : 1,
       pointerEvents: isFlipped ? 'none' : 'auto',
       backfaceVisibility: 'hidden',
@@ -81,8 +87,14 @@ export default function Card({
       [180, 360],
       Extrapolation.CLAMP
     )}deg`;
+    const scale = interpolate(
+      flip.value,
+      [0, 90, 180],
+      [1, 1.02, 1],
+      Extrapolation.CLAMP
+    );
     return {
-      transform: [{ rotateY }],
+      transform: [{ perspective: 800 }, { rotateY }, { scale }],
       zIndex: isFlipped ? 1 : 0,
       pointerEvents: isFlipped ? 'auto' : 'none',
       backfaceVisibility: 'hidden',
