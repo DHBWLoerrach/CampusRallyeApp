@@ -120,7 +120,7 @@ export const globalStyles = createGroupedStyles({
     infoBox: {
       minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      // backgroundColor handled by themed style (s.infoBox)
+      // Theme color handled by ThemedView/AppStyles
       borderRadius: 10,
       shadowColor: '#000',
       shadowOffset: {
@@ -135,7 +135,7 @@ export const globalStyles = createGroupedStyles({
     infoCameraBox: {
       minWidth: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      // backgroundColor handled by themed style (s.infoBox)
+      // Theme color handled by ThemedView/AppStyles
       borderRadius: 10,
       justifyContent: 'center',
       alignItems: 'center',
@@ -485,7 +485,7 @@ export const globalStyles = createGroupedStyles({
     infoBox: {
       width: '100%',
       padding: SCREEN_WIDTH * 0.04,
-      backgroundColor: Colors.lightMode.card,
+      // Theme color handled by ThemedView/AppStyles
       borderRadius: 10,
       marginBottom: SCREEN_HEIGHT * 0.02,
       shadowColor: '#000',

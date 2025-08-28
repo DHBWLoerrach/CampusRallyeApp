@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
@@ -14,6 +14,8 @@ import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
+import InfoBox from '@/components/ui/InfoBox';
+import VStack from '@/components/ui/VStack';
 
 export default function SkillQuestion({ question }: QuestionProps) {
   const { language } = useLanguage();
@@ -62,7 +64,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
     <KeyboardAvoidingView>
       <ThemedScrollView
         variant="background"
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         keyboardDismissMode="interactive"
         automaticallyAdjustKeyboardInsets={false}
         contentInsetAdjustmentBehavior={'never'}
@@ -70,27 +72,16 @@ export default function SkillQuestion({ question }: QuestionProps) {
         scrollIndicatorInsets={{
           bottom: Platform.OS === 'ios' && keyboardVisible ? keyboardHeight : 0,
         }}
-        contentContainerStyle={{ paddingBottom: keyboardHeight }} // scroll to see all content when keyboard is open
+        contentContainerStyle={{ paddingBottom: keyboardHeight }} // allow scrolling above keyboard
       >
-        <View
+        <VStack
           style={[
             globalStyles.default.container,
-            s.screen,
-            {
-              justifyContent: 'flex-start',
-              alignItems: 'stretch',
-              flex: 0,
-              flexGrow: 0,
-            },
+            { alignItems: 'stretch', flex: 0, flexGrow: 0 },
           ]}
+          gap={2}
         >
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              s.infoBox,
-              { maxHeight: undefined, marginBottom: 16 },
-            ]}
-          >
+          <InfoBox mb={2}>
             <ThemedText
               style={[
                 globalStyles.rallyeStatesStyles.infoTitle,
@@ -100,15 +91,9 @@ export default function SkillQuestion({ question }: QuestionProps) {
             >
               {question.question}
             </ThemedText>
-          </View>
+          </InfoBox>
 
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              s.infoBox,
-              { marginBottom: 16 },
-            ]}
-          >
+          <InfoBox mb={2}>
             <ThemedTextInput
               style={[globalStyles.skillStyles.input]}
               value={answer}
@@ -117,17 +102,12 @@ export default function SkillQuestion({ question }: QuestionProps) {
                 language === 'de' ? 'Deine Antwort...' : 'Your answer...'
               }
               returnKeyType="send"
+              blurOnSubmit
               onSubmitEditing={handleSubmit}
             />
-          </View>
+          </InfoBox>
 
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              s.infoBox,
-              { marginBottom: 16 },
-            ]}
-          >
+          <InfoBox mb={2}>
             <UIButton
               color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
               disabled={!answer.trim()}
@@ -135,8 +115,8 @@ export default function SkillQuestion({ question }: QuestionProps) {
             >
               {language === 'de' ? 'Antwort senden' : 'Submit answer'}
             </UIButton>
-          </View>
-        </View>
+          </InfoBox>
+        </VStack>
         {question.hint ? <Hint hint={question.hint} /> : null}
       </ThemedScrollView>
     </KeyboardAvoidingView>

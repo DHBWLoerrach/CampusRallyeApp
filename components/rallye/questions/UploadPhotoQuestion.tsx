@@ -14,6 +14,8 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
+import InfoBox from '@/components/ui/InfoBox';
+import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 
 export default function UploadPhotoQuestion({ question }: QuestionProps) {
@@ -65,120 +67,79 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   function PhotoCamera() {
     const [facing, setFacing] = useState<'back' | 'front'>('back');
     return (
-      <ThemedView
-        variant="background"
-        style={[globalStyles.default.container, s.screen]}
-      >
-        <View
-          style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
-        >
-          <ThemedText
-            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-          >
-            {question.question}
-          </ThemedText>
-        </View>
-        <View
-          style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
-        >
-          <CameraView
-            ref={cameraRef}
-            style={globalStyles.uploadStyles.camera}
-            facing={facing}
-          />
-        </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <View style={globalStyles.qrCodeStyles.buttonRow}>
-            <UIButton
-              icon="camera"
-              onPress={async () => {
-                try {
-                  const pic = await (
-                    cameraRef.current as any
-                  )?.takePictureAsync();
-                  if (pic) setPicture(pic);
-                } catch (error) {
-                  console.log('error taking picture', error);
-                }
-              }}
-            >
-              Aufnahme
-            </UIButton>
-            <UIButton
-              icon="camera-rotate"
-              color={Colors.dhbwGray}
-              onPress={() =>
-                setFacing((c) => (c === 'back' ? 'front' : 'back'))
-              }
-            >
-              Kamera wechseln
-            </UIButton>
-            <UIButton
-              icon="face-frown-open"
-              color={Colors.dhbwGray}
-              onPress={handleSurrender}
-            >
-              {language === 'de' ? 'Aufgeben' : 'Surrender'}
-            </UIButton>
-          </View>
-        </View>
-        {question.hint ? <Hint hint={question.hint} /> : null}
+      <ThemedView variant="background" style={[globalStyles.default.container, s.screen]}>
+        <VStack style={{ width: '100%' }} gap={2}>
+          <InfoBox mb={2}>
+            <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
+              {question.question}
+            </ThemedText>
+          </InfoBox>
+          <InfoBox mb={2} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
+            <CameraView ref={cameraRef} style={globalStyles.uploadStyles.camera} facing={facing} />
+          </InfoBox>
+          <InfoBox mb={2}>
+            <View style={globalStyles.qrCodeStyles.buttonRow}>
+              <UIButton
+                icon="camera"
+                onPress={async () => {
+                  try {
+                    const pic = await (cameraRef.current as any)?.takePictureAsync();
+                    if (pic) setPicture(pic);
+                  } catch (error) {
+                    console.log('error taking picture', error);
+                  }
+                }}
+              >
+                Aufnahme
+              </UIButton>
+              <UIButton icon="camera-rotate" color={Colors.dhbwGray} onPress={() => setFacing((c) => (c === 'back' ? 'front' : 'back'))}>
+                Kamera wechseln
+              </UIButton>
+              <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+                {language === 'de' ? 'Aufgeben' : 'Surrender'}
+              </UIButton>
+            </View>
+          </InfoBox>
+          {question.hint ? <Hint hint={question.hint} /> : null}
+        </VStack>
       </ThemedView>
     );
   }
 
   function ImagePreview() {
     return (
-      <ThemedView
-        variant="background"
-        style={[globalStyles.default.container, s.screen]}
-      >
-        <View
-          style={[globalStyles.rallyeStatesStyles.infoCameraBox, s.infoBox]}
-        >
-          <ThemedText
-            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-          >
-            {question.question}
-          </ThemedText>
-        </View>
-        <View style={globalStyles.rallyeStatesStyles.infoCameraBox}>
-          <Image
-            source={{ uri: picture?.uri }}
-            style={globalStyles.uploadStyles.image}
-            resizeMode="contain"
-          />
-        </View>
-
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <View style={globalStyles.qrCodeStyles.buttonRow}>
-            <UIButton
-              icon="recycle"
-              color={Colors.dhbwGray}
-              onPress={() => setPicture(null)}
-            >
-              Neues Foto
-            </UIButton>
-            <UIButton
-              icon="envelope"
-              onPress={async () => {
-                if (!picture?.uri) return;
-                await uploadPhotoAnswer(picture.uri);
-                // uploadPhotoAnswer handles saving points, team_questions and navigation
-              }}
-            >
-              Foto senden
-            </UIButton>
-            <UIButton
-              icon="face-frown-open"
-              color={Colors.dhbwGray}
-              onPress={handleSurrender}
-            >
-              {language === 'de' ? 'Aufgeben' : 'Surrender'}
-            </UIButton>
-          </View>
-          {question.hint ? <Hint hint={question.hint} /> : null}
-        </View>
+      <ThemedView variant="background" style={[globalStyles.default.container, s.screen]}>
+        <VStack style={{ width: '100%' }} gap={2}>
+          <InfoBox mb={2}>
+            <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
+              {question.question}
+            </ThemedText>
+          </InfoBox>
+          <InfoBox mb={2} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
+            <Image source={{ uri: picture?.uri }} style={globalStyles.uploadStyles.image} resizeMode="contain" />
+          </InfoBox>
+          <InfoBox mb={2}>
+            <View style={globalStyles.qrCodeStyles.buttonRow}>
+              <UIButton icon="recycle" color={Colors.dhbwGray} onPress={() => setPicture(null)}>
+                Neues Foto
+              </UIButton>
+              <UIButton
+                icon="envelope"
+                onPress={async () => {
+                  if (!picture?.uri) return;
+                  await uploadPhotoAnswer(picture.uri);
+                  // uploadPhotoAnswer handles saving points, team_questions and navigation
+                }}
+              >
+                Foto senden
+              </UIButton>
+              <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+                {language === 'de' ? 'Aufgeben' : 'Surrender'}
+              </UIButton>
+            </View>
+            {question.hint ? <Hint hint={question.hint} /> : null}
+          </InfoBox>
+        </VStack>
       </ThemedView>
     );
   }

@@ -9,6 +9,8 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import { useTheme } from '@/utils/ThemeContext';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
+import InfoBox from '@/components/ui/InfoBox';
+import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 
 export default function Voting({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
@@ -111,19 +113,21 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   if (!votingAllowed || teamCount < 2) {
     return (
       <ThemedView variant="background" style={globalStyles.default.container}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
-            Die Abstimmung wurde beendet.
-          </ThemedText>
-          <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
-            Wartet auf die Beendigung der Rallye.
-          </ThemedText>
-        </View>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-            Aktualisieren
-          </UIButton>
-        </View>
+        <VStack style={{ width: '100%' }} gap={2}>
+          <InfoBox mb={2}>
+            <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+              Die Abstimmung wurde beendet.
+            </ThemedText>
+            <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+              Wartet auf die Beendigung der Rallye.
+            </ThemedText>
+          </InfoBox>
+          <InfoBox mb={2}>
+            <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+              Aktualisieren
+            </UIButton>
+          </InfoBox>
+        </VStack>
       </ThemedView>
     );
   }
@@ -138,7 +142,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
         ListHeaderComponent={() =>
           currentQuestion && currentQuestion.length > 0 ? (
             <View style={{ paddingTop: 10, paddingBottom: 30 }}>
-              <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+              <InfoBox mb={2}>
                 <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
                   {currentQuestion[0]?.question_content}
                 </ThemedText>
@@ -146,7 +150,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                   Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
                   die oben gestellte Aufgabe am besten gelöst hat.
                 </ThemedText>
-              </View>
+              </InfoBox>
             </View>
           ) : null
         }
@@ -159,15 +163,12 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
             activeOpacity={1.0}
             style={{ alignItems: 'flex-start', paddingTop: 10 }}
           >
-            <View
-              style={[
-                globalStyles.rallyeStatesStyles.infoBox,
-                s.infoBox,
-                {
-                  borderColor: selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
-                  borderWidth: selectedTeam === item.rt_id ? 2 : 0,
-                },
-              ]}
+            <InfoBox
+              mb={2}
+              style={{
+                borderColor: selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
+                borderWidth: selectedTeam === item.rt_id ? 2 : 0,
+              }}
             >
               {item.question_type === 'knowledge' ? (
                 <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
@@ -189,17 +190,17 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
               <ThemedText style={globalStyles.rallyeStatesStyles.infoSubtitle}>
                 {item.rt_team_name}
               </ThemedText>
-            </View>
+            </InfoBox>
           </TouchableOpacity>
         )}
         contentContainerStyle={[{ padding: 10 }]}
       />
       <View style={{ padding: 10 }}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+        <InfoBox mb={2}>
           <UIButton disabled={!selectedTeam || sendingResult} onPress={handleNextQuestion}>
             Nächste Abstimmung
           </UIButton>
-        </View>
+        </InfoBox>
       </View>
     </ThemedView>
   );

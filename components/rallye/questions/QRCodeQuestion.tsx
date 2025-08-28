@@ -12,6 +12,8 @@ import { useTheme } from '@/utils/ThemeContext';
 import { useLanguage } from '@/utils/LanguageContext';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
+import InfoBox from '@/components/ui/InfoBox';
+import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 
 export default function QRCodeQuestion({ question }: QuestionProps) {
@@ -111,51 +113,43 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   }
 
   return (
-    <ThemedView
-      variant="background"
-      style={[globalStyles.default.container, s.screen, { flex: 1 }]}
-    >
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-        <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
-          {question.question}
-        </ThemedText>
-      </View>
+    <ThemedView variant="background" style={[globalStyles.default.container, s.screen, { flex: 1 }] }>
+      <VStack style={{ width: '100%' }} gap={2}>
+        <InfoBox mb={2}>
+          <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
+            {question.question}
+          </ThemedText>
+        </InfoBox>
 
-      {scanMode && (
-        <View style={[globalStyles.qrCodeStyles.cameraBox, s.infoBox]}>
-          <CameraView
-            ref={cameraRef}
-            style={globalStyles.qrCodeStyles.camera}
-            onBarcodeScanned={handleQRCode}
-          />
-        </View>
-      )}
+        {scanMode && (
+          <InfoBox mb={2} style={globalStyles.qrCodeStyles.cameraBox}>
+            <CameraView
+              ref={cameraRef}
+              style={globalStyles.qrCodeStyles.camera}
+              onBarcodeScanned={handleQRCode}
+            />
+          </InfoBox>
+        )}
 
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-        <View style={globalStyles.qrCodeStyles.buttonRow}>
-          <UIButton
-            icon={scanMode ? 'circle-stop' : 'qrcode'}
-            onPress={() => setScanMode(!scanMode)}
-          >
-            {scanMode
-              ? language === 'de'
-                ? 'Kamera ausblenden'
-                : 'Hide Camera'
-              : language === 'de'
-              ? 'QR-Code scannen'
-              : 'Scan QR Code'}
-          </UIButton>
-          <UIButton
-            icon="face-frown-open"
-            color={Colors.dhbwGray}
-            onPress={handleSurrender}
-          >
-            {language === 'de' ? 'Aufgeben' : 'Surrender'}
-          </UIButton>
-        </View>
-      </View>
+        <InfoBox mb={2}>
+          <View style={globalStyles.qrCodeStyles.buttonRow}>
+            <UIButton icon={scanMode ? 'circle-stop' : 'qrcode'} onPress={() => setScanMode(!scanMode)}>
+              {scanMode
+                ? language === 'de'
+                  ? 'Kamera ausblenden'
+                  : 'Hide Camera'
+                : language === 'de'
+                ? 'QR-Code scannen'
+                : 'Scan QR Code'}
+            </UIButton>
+            <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+              {language === 'de' ? 'Aufgeben' : 'Surrender'}
+            </UIButton>
+          </View>
+        </InfoBox>
 
-      {question.hint ? <Hint hint={question.hint} /> : null}
+        {question.hint ? <Hint hint={question.hint} /> : null}
+      </VStack>
     </ThemedView>
   );
 }

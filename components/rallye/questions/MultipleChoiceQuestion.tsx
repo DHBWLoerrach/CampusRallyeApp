@@ -14,6 +14,8 @@ import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
 import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
+import InfoBox from '@/components/ui/InfoBox';
+import VStack from '@/components/ui/VStack';
 
 function MultipleChoiceQuestion({ question }: QuestionProps) {
   const { isDarkMode } = useTheme();
@@ -85,16 +87,14 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
       variant="background"
       contentContainerStyle={globalStyles.default.refreshContainer}
     >
-      <View style={[globalStyles.default.container, s.screen]}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <ThemedText
-            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-          >
+      <VStack style={[globalStyles.default.container, { alignItems: 'stretch' }]} gap={2}>
+        <InfoBox mb={2}>
+          <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
             {question.question}
           </ThemedText>
-        </View>
+        </InfoBox>
 
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+        <InfoBox mb={2}>
           {options.length === 0 ? (
             <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
               {language === 'de'
@@ -131,17 +131,15 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                     },
                   ]}
                 />
-                <ThemedText
-                  style={globalStyles.multipleChoiceStyles.answerText}
-                >
+                <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
                   {option.text}
                 </ThemedText>
               </TouchableOpacity>
             ))
           )}
-        </View>
+        </InfoBox>
 
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+        <InfoBox mb={2}>
           <UIButton
             color={answer ? Colors.dhbwRed : Colors.dhbwGray}
             disabled={!answer}
@@ -149,9 +147,9 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
           >
             {language === 'de' ? 'Antwort senden' : 'Submit answer'}
           </UIButton>
-        </View>
-      </View>
-      {question.hint ? <Hint hint={question.hint} /> : null}
+        </InfoBox>
+        {question.hint ? <Hint hint={question.hint} /> : null}
+      </VStack>
     </ThemedScrollView>
   );
 }

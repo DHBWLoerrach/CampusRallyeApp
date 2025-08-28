@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  View,
-} from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
@@ -21,6 +15,8 @@ import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
+import InfoBox from '@/components/ui/InfoBox';
+import VStack from '@/components/ui/VStack';
 
 export default function ImageQuestion({ question }: QuestionProps) {
   const { language } = useLanguage();
@@ -96,20 +92,14 @@ export default function ImageQuestion({ question }: QuestionProps) {
         }}
         contentContainerStyle={{ paddingBottom: keyboardHeight }} // scroll to see all content when keyboard is open
       >
-        <View
+        <VStack
           style={[
             globalStyles.default.container,
-            s.screen,
             { alignItems: 'stretch', flex: 0, flexGrow: 0 },
           ]}
+          gap={2}
         >
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              s.infoBox,
-              { maxHeight: undefined, marginBottom: 16 },
-            ]}
-          >
+          <InfoBox mb={2}>
             <ThemedText
               style={[
                 globalStyles.rallyeStatesStyles.infoTitle,
@@ -119,31 +109,19 @@ export default function ImageQuestion({ question }: QuestionProps) {
             >
               {question.question}
             </ThemedText>
-          </View>
+          </InfoBox>
 
           {pictureUri ? (
-            <View
-              style={[
-                globalStyles.rallyeStatesStyles.infoBox,
-                s.infoBox,
-                { maxHeight: undefined, marginBottom: 16 },
-              ]}
-            >
+            <InfoBox mb={2}>
               <Image
                 source={{ uri: pictureUri }}
                 style={{ width: '100%', height: 250, borderRadius: 10 }}
                 resizeMode="contain"
               />
-            </View>
+            </InfoBox>
           ) : null}
 
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              s.infoBox,
-              { marginBottom: 16 },
-            ]}
-          >
+          <InfoBox mb={2}>
             <ThemedTextInput
               style={[globalStyles.skillStyles.input]}
               value={answer}
@@ -152,17 +130,12 @@ export default function ImageQuestion({ question }: QuestionProps) {
                 language === 'de' ? 'Deine Antwort...' : 'Your answer...'
               }
               returnKeyType="send"
+              blurOnSubmit
               onSubmitEditing={handleSubmit}
             />
-          </View>
+          </InfoBox>
 
-          <View
-            style={[
-              globalStyles.rallyeStatesStyles.infoBox,
-              s.infoBox,
-              { marginBottom: 16 },
-            ]}
-          >
+          <InfoBox mb={2}>
             <UIButton
               color={answer.trim() !== '' ? Colors.dhbwRed : Colors.dhbwGray}
               disabled={answer.trim() === ''}
@@ -170,10 +143,10 @@ export default function ImageQuestion({ question }: QuestionProps) {
             >
               {language === 'de' ? 'Antwort senden' : 'Submit answer'}
             </UIButton>
-          </View>
+          </InfoBox>
 
           {question.hint ? <Hint hint={question.hint} /> : null}
-        </View>
+        </VStack>
       </ThemedScrollView>
     </KeyboardAvoidingView>
   );
