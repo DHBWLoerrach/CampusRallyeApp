@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Text, Platform } from 'react-native';
+import { Text } from 'react-native';
 import Animated, {
-  Easing,
+  interpolate,
+  Extrapolation,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
   withSpring,
 } from 'react-native-reanimated';
 import { globalStyles } from '@/utils/GlobalStyles';
@@ -42,40 +42,99 @@ export default function QuestionRenderer({
       </ThemedView>
     );
   }
-  // Flip animation without backface layers: rotate to 90°, swap, rotate back
-  const [current, setCurrent] = useState(question);
-  const rotateY = useSharedValue(0); // Android rotateY degrees
-  const scaleX = useSharedValue(1);  // iOS scaleX flip illusion
-  const animatedStyle = useAnimatedStyle(() => {
-    if (Platform.OS === 'ios') {
-      return { transform: [{ scaleX: scaleX.value }] };
-    }
-    return { transform: [{ perspective: 1200 }, { rotateY: `${rotateY.value}deg` }] };
-  });
+  // Flip animation using two faces, based on components/ui/Card.tsx pattern
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [frontQuestion, setFrontQuestion] = useState(question);
+  const [backQuestion, setBackQuestion] = useState<any | null>(null);
+  const flip = useSharedValue(0); // 0 (front) ↔ 180 (back)
+
+  // Front face rotates 0→180; back face 180→360
+  const frontStyle = useAnimatedStyle(() => {
+    const rotateY = `${interpolate(
+      flip.value,
+      [0, 180],
+      [0, 180],
+      Extrapolation.CLAMP
+    )}deg`;
+    return {
+      transform: [{ rotateY }],
+      zIndex: isFlipped ? 0 : 1,
+      pointerEvents: isFlipped ? 'none' : 'auto',
+      backfaceVisibility: 'hidden',
+    } as const;
+  }, [isFlipped]);
+
+  const backStyle = useAnimatedStyle(() => {
+    const rotateY = `${interpolate(
+      flip.value,
+      [0, 180],
+      [180, 360],
+      Extrapolation.CLAMP
+    )}deg`;
+    return {
+      transform: [{ rotateY }],
+      zIndex: isFlipped ? 1 : 0,
+      pointerEvents: isFlipped ? 'auto' : 'none',
+      backfaceVisibility: 'hidden',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    } as const;
+  }, [isFlipped]);
 
   useEffect(() => {
-    if (!current || question?.id === current?.id) return;
-    if (Platform.OS === 'ios') {
-      // iOS: avoid 3D backface flicker by scaling width to 0 and back
-      scaleX.value = withTiming(0, { duration: 160, easing: Easing.in(Easing.cubic) }, (finished) => {
-        if (!finished) return;
-        runOnJS(setCurrent)(question);
-        scaleX.value = withSpring(1, { damping: 14, stiffness: 140, mass: 0.9 });
-      });
+    // Only act when question id changes
+    const nextId = question?.id;
+    if (!nextId) return;
+    const frontId = frontQuestion?.id;
+    const backId = backQuestion?.id;
+    if (nextId === frontId || nextId === backId) return;
+
+    if (!isFlipped) {
+      // Prepare back with next question and flip to back (180)
+      setBackQuestion(question);
+      flip.value = withSpring(
+        180,
+        {
+          stiffness: 180,
+          damping: 18,
+          mass: 1,
+          overshootClamping: false,
+          restDisplacementThreshold: 0.5,
+          restSpeedThreshold: 0.5,
+        },
+        () => runOnJS(setIsFlipped)(true)
+      );
     } else {
-      // Android: true rotateY flip
-      rotateY.value = withTiming(90, { duration: 180, easing: Easing.in(Easing.quad) }, (finished) => {
-        if (!finished) return;
-        runOnJS(setCurrent)(question);
-        rotateY.value = -90;
-        rotateY.value = withSpring(0, { damping: 14, stiffness: 140, mass: 0.9 });
-      });
+      // Prepare front with next question and flip to front (0)
+      setFrontQuestion(question);
+      flip.value = withSpring(
+        0,
+        {
+          stiffness: 180,
+          damping: 18,
+          mass: 1,
+          overshootClamping: false,
+          restDisplacementThreshold: 0.5,
+          restSpeedThreshold: 0.5,
+        },
+        () => runOnJS(setIsFlipped)(false)
+      );
     }
   }, [question?.id]);
 
   return (
-    <Animated.View style={[{ flex: 1 }, animatedStyle]}>
-      <Cmp onAnswer={onAnswer} question={current} />
+    <Animated.View style={{ flex: 1 }}>
+      {/* Front face */}
+      <Animated.View style={frontStyle}>
+        <Cmp onAnswer={onAnswer} question={frontQuestion} />
+      </Animated.View>
+      {/* Back face */}
+      <Animated.View style={backStyle}>
+        <Cmp onAnswer={onAnswer} question={backQuestion ?? frontQuestion} />
+      </Animated.View>
     </Animated.View>
   );
 }
