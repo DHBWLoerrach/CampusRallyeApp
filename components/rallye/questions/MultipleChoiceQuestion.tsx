@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { Alert, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { observer, useSelector } from '@legendapp/state/react';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
@@ -102,39 +103,44 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                 : 'Loading answer options…'}
             </ThemedText>
           ) : (
-            options.map((option) => (
-              <TouchableOpacity
+            options.map((option, idx) => (
+              <Animated.View
                 key={String(option.id)}
-                style={[
-                  globalStyles.multipleChoiceStyles.squareButton,
-                  {
-                    borderColor:
-                      answer === (option.text ?? '')
-                        ? Colors.dhbwRed
-                        : isDarkMode
-                        ? Colors.darkMode.text
-                        : Colors.dhbwGray,
-                  },
-                ]}
-                onPress={() => setAnswer(option.text ?? '')}
+                entering={FadeInDown.duration(220).delay(idx * 70)}
+                layout={LinearTransition.springify()}
               >
-                <View
+                <TouchableOpacity
                   style={[
-                    globalStyles.multipleChoiceStyles.innerSquare,
+                    globalStyles.multipleChoiceStyles.squareButton,
                     {
-                      backgroundColor:
+                      borderColor:
                         answer === (option.text ?? '')
                           ? Colors.dhbwRed
                           : isDarkMode
-                          ? Colors.darkMode.card
-                          : Colors.lightMode.card,
+                          ? Colors.darkMode.text
+                          : Colors.dhbwGray,
                     },
                   ]}
-                />
-                <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
-                  {option.text}
-                </ThemedText>
-              </TouchableOpacity>
+                  onPress={() => setAnswer(option.text ?? '')}
+                >
+                  <View
+                    style={[
+                      globalStyles.multipleChoiceStyles.innerSquare,
+                      {
+                        backgroundColor:
+                          answer === (option.text ?? '')
+                            ? Colors.dhbwRed
+                            : isDarkMode
+                            ? Colors.darkMode.card
+                            : Colors.lightMode.card,
+                      },
+                    ]}
+                  />
+                  <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
+                    {option.text}
+                  </ThemedText>
+                </TouchableOpacity>
+              </Animated.View>
             ))
           )}
         </InfoBox>
