@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text } from 'react-native';
+import { Text, Platform } from 'react-native';
 import Animated, {
   Easing,
   runOnJS,
@@ -44,21 +44,33 @@ export default function QuestionRenderer({
   }
   // Flip animation without backface layers: rotate to 90°, swap, rotate back
   const [current, setCurrent] = useState(question);
-  const rotate = useSharedValue(0);
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ perspective: 1200 }, { rotateY: `${rotate.value}deg` }],
-  }));
+  const rotateY = useSharedValue(0); // Android rotateY degrees
+  const scaleX = useSharedValue(1);  // iOS scaleX flip illusion
+  const animatedStyle = useAnimatedStyle(() => {
+    if (Platform.OS === 'ios') {
+      return { transform: [{ scaleX: scaleX.value }] };
+    }
+    return { transform: [{ perspective: 1200 }, { rotateY: `${rotateY.value}deg` }] };
+  });
 
   useEffect(() => {
     if (!current || question?.id === current?.id) return;
-    // Faster first half with ease-in for snappier start
-    rotate.value = withTiming(90, { duration: 180, easing: Easing.in(Easing.quad) }, (finished) => {
-      if (!finished) return;
-      runOnJS(setCurrent)(question);
-      // Snap back with a gentle spring for natural finish
-      rotate.value = -90;
-      rotate.value = withSpring(0, { damping: 14, stiffness: 140, mass: 0.9 });
-    });
+    if (Platform.OS === 'ios') {
+      // iOS: avoid 3D backface flicker by scaling width to 0 and back
+      scaleX.value = withTiming(0, { duration: 160, easing: Easing.in(Easing.cubic) }, (finished) => {
+        if (!finished) return;
+        runOnJS(setCurrent)(question);
+        scaleX.value = withSpring(1, { damping: 14, stiffness: 140, mass: 0.9 });
+      });
+    } else {
+      // Android: true rotateY flip
+      rotateY.value = withTiming(90, { duration: 180, easing: Easing.in(Easing.quad) }, (finished) => {
+        if (!finished) return;
+        runOnJS(setCurrent)(question);
+        rotateY.value = -90;
+        rotateY.value = withSpring(0, { damping: 14, stiffness: 140, mass: 0.9 });
+      });
+    }
   }, [question?.id]);
 
   return (
