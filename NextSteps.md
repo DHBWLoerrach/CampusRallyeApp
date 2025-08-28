@@ -1,6 +1,7 @@
 # Mögliche weitere Schritte
 
 - Die Zeit, die ein Team zum beantworten der Fragen gebraucht hat, soll bei Gleichstand mit in das Ranking einfließen
+- Gleichzeitige Teilnahme an verschiedenen Rallyes ermöglichen?
 - Ein Live-Leaderboard während die Rallye gespielt wird
 - Upload-Fragen: Eine tiefere Strukturierung mit Unterordner in den Buckets
 - Buckets: Aktuell "Public-Buckets". Sicherheit und Datenschutz klären
