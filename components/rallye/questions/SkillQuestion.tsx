@@ -19,7 +19,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const s = useAppStyles();
-  const { keyboardHeight } = useKeyboard();
+  const { keyboardHeight, keyboardVisible } = useKeyboard();
 
   const team = store$.team.get();
   const answers = store$.answers.get() as AnswerRow[];
@@ -59,24 +59,29 @@ export default function SkillQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
-    >
+    <KeyboardAvoidingView>
       <ThemedScrollView
         variant="background"
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[
-          globalStyles.default.refreshContainer,
-          { paddingBottom: keyboardHeight + 40 },
-        ]}
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets={false}
+        contentInsetAdjustmentBehavior={'never'}
+        bounces={Platform.OS === 'ios' ? false : undefined}
+        scrollIndicatorInsets={{
+          bottom: Platform.OS === 'ios' && keyboardVisible ? keyboardHeight : 0,
+        }}
+        contentContainerStyle={{ paddingBottom: keyboardHeight }} // scroll to see all content when keyboard is open
       >
         <View
           style={[
             globalStyles.default.container,
             s.screen,
-            { justifyContent: 'flex-start', alignItems: 'stretch' },
+            {
+              justifyContent: 'flex-start',
+              alignItems: 'stretch',
+              flex: 0,
+              flexGrow: 0,
+            },
           ]}
         >
           <View
