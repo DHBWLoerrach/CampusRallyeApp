@@ -1,36 +1,43 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Alert, TouchableOpacity, View } from 'react-native';
+import { observer, useSelector } from '@legendapp/state/react';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
-import { store$ } from '@/services/storage/Store';
+import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
-import { globalStyles } from '@/utils/GlobalStyles';
-import UIButton from '@/components/ui/UIButton';
-import Hint from '@/components/ui/Hint';
 import { confirmAlert } from '@/utils/ConfirmAlert';
-import { useTheme } from '@/utils/ThemeContext';
+import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
 import { saveAnswer } from '@/services/storage/answerStorage';
+import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
-import { useAppStyles } from '@/utils/AppStyles';
+import UIButton from '@/components/ui/UIButton';
+import Hint from '@/components/ui/Hint';
 
-export default function MultipleChoiceQuestion({ question }: QuestionProps) {
+function MultipleChoiceQuestion({ question }: QuestionProps) {
   const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const s = useAppStyles();
 
   const team = store$.team.get();
-  const answers = store$.answers.get() as AnswerRow[];
+  // Use selector so that the component re-renders once answers are fetched asynchronously
+  const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
 
+  const shuffleCache = useRef<{ key: string; data: AnswerRow[] } | null>(null);
   const options = useMemo(() => {
     const filtered = answers.filter((a) => a.question_id === question.id);
-    // shuffle copy to avoid mutating store data
+    const key = `${question.id}:${filtered.map((f) => f.id).join(',')}`;
+    if (shuffleCache.current && shuffleCache.current.key === key) {
+      return shuffleCache.current.data;
+    }
     const shuffled = [...filtered];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
+    shuffleCache.current = { key, data: shuffled };
     return shuffled;
   }, [answers, question.id]);
 
@@ -88,40 +95,50 @@ export default function MultipleChoiceQuestion({ question }: QuestionProps) {
         </View>
 
         <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          {options.map((option) => (
-            <TouchableOpacity
-              key={String(option.id)}
-              style={[
-                globalStyles.multipleChoiceStyles.squareButton,
-                {
-                  borderColor:
-                    answer === (option.text ?? '')
-                      ? Colors.dhbwRed
-                      : isDarkMode
-                      ? Colors.darkMode.text
-                      : Colors.dhbwGray,
-                },
-              ]}
-              onPress={() => setAnswer(option.text ?? '')}
-            >
-              <View
+          {options.length === 0 ? (
+            <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
+              {language === 'de'
+                ? 'Antwortoptionen werden geladen…'
+                : 'Loading answer options…'}
+            </ThemedText>
+          ) : (
+            options.map((option) => (
+              <TouchableOpacity
+                key={String(option.id)}
                 style={[
-                  globalStyles.multipleChoiceStyles.innerSquare,
+                  globalStyles.multipleChoiceStyles.squareButton,
                   {
-                    backgroundColor:
+                    borderColor:
                       answer === (option.text ?? '')
                         ? Colors.dhbwRed
                         : isDarkMode
-                        ? Colors.darkMode.card
-                        : Colors.lightMode.card,
+                        ? Colors.darkMode.text
+                        : Colors.dhbwGray,
                   },
                 ]}
-              />
-              <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
-                {option.text}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
+                onPress={() => setAnswer(option.text ?? '')}
+              >
+                <View
+                  style={[
+                    globalStyles.multipleChoiceStyles.innerSquare,
+                    {
+                      backgroundColor:
+                        answer === (option.text ?? '')
+                          ? Colors.dhbwRed
+                          : isDarkMode
+                          ? Colors.darkMode.card
+                          : Colors.lightMode.card,
+                    },
+                  ]}
+                />
+                <ThemedText
+                  style={globalStyles.multipleChoiceStyles.answerText}
+                >
+                  {option.text}
+                </ThemedText>
+              </TouchableOpacity>
+            ))
+          )}
         </View>
 
         <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
@@ -138,3 +155,5 @@ export default function MultipleChoiceQuestion({ question }: QuestionProps) {
     </ThemedScrollView>
   );
 }
+
+export default observer(MultipleChoiceQuestion);
