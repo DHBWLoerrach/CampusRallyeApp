@@ -1,23 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Image, View } from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
-import { store$ } from '@/services/storage/Store';
-import { saveAnswer } from '@/services/storage/answerStorage';
+import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
-import { globalStyles } from '@/utils/GlobalStyles';
 import { confirmAlert } from '@/utils/ConfirmAlert';
-import UIButton from '@/components/ui/UIButton';
-import Hint from '@/components/ui/Hint';
-import { supabase } from '@/utils/Supabase';
-import { useTheme } from '@/utils/ThemeContext';
+import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { supabase } from '@/utils/Supabase';
+import { saveAnswer } from '@/services/storage/answerStorage';
+import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
-import { useAppStyles } from '@/utils/AppStyles';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
+import UIButton from '@/components/ui/UIButton';
+import Hint from '@/components/ui/Hint';
 
 export default function ImageQuestion({ question }: QuestionProps) {
-  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const [pictureUri, setPictureUri] = useState<string | null>(null);
