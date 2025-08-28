@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
-import { store$ } from '@/services/storage/Store';
-import UIButton from '@/components/ui/UIButton';
+import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
-import { globalStyles } from '@/utils/GlobalStyles';
 import { confirmAlert } from '@/utils/ConfirmAlert';
-import Hint from '@/components/ui/Hint';
-import { saveAnswer } from '@/services/storage/answerStorage';
-import { useTheme } from '@/utils/ThemeContext';
+import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useKeyboard } from '@/utils/useKeyboard';
+import { saveAnswer } from '@/services/storage/answerStorage';
+import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
-import { useAppStyles } from '@/utils/AppStyles';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
+import UIButton from '@/components/ui/UIButton';
+import Hint from '@/components/ui/Hint';
 
 export default function SkillQuestion({ question }: QuestionProps) {
-  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const s = useAppStyles();
+  const { keyboardHeight } = useKeyboard();
 
   const team = store$.team.get();
   const answers = store$.answers.get() as AnswerRow[];
@@ -59,32 +59,70 @@ export default function SkillQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
       <ThemedScrollView
         variant="background"
-        contentContainerStyle={[globalStyles.default.refreshContainer]}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
+          { paddingBottom: keyboardHeight + 40 },
+        ]}
       >
-        <View style={[globalStyles.default.container, s.screen]}>
-          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+        <View
+          style={[
+            globalStyles.default.container,
+            s.screen,
+            { justifyContent: 'flex-start', alignItems: 'stretch' },
+          ]}
+        >
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              s.infoBox,
+              { maxHeight: undefined, marginBottom: 16 },
+            ]}
+          >
             <ThemedText
-              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+              style={[
+                globalStyles.rallyeStatesStyles.infoTitle,
+                s.text,
+                { textAlign: 'left' },
+              ]}
             >
               {question.question}
             </ThemedText>
           </View>
 
-          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              s.infoBox,
+              { marginBottom: 16 },
+            ]}
+          >
             <ThemedTextInput
               style={[globalStyles.skillStyles.input]}
               value={answer}
-              onChangeText={(text) => setAnswer(text.trim())}
+              onChangeText={(text) => setAnswer(text)}
               placeholder={
                 language === 'de' ? 'Deine Antwort...' : 'Your answer...'
               }
+              returnKeyType="send"
+              onSubmitEditing={handleSubmit}
             />
           </View>
 
-          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              s.infoBox,
+              { marginBottom: 16 },
+            ]}
+          >
             <UIButton
               color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
               disabled={!answer.trim()}

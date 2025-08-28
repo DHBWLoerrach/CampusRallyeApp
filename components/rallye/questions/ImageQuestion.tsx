@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  View,
+} from 'react-native';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
@@ -7,6 +13,7 @@ import { confirmAlert } from '@/utils/ConfirmAlert';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { supabase } from '@/utils/Supabase';
+import { useKeyboard } from '@/utils/useKeyboard';
 import { saveAnswer } from '@/services/storage/answerStorage';
 import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
@@ -20,6 +27,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
   const [answer, setAnswer] = useState<string>('');
   const [pictureUri, setPictureUri] = useState<string | null>(null);
   const s = useAppStyles();
+  const { keyboardHeight } = useKeyboard();
 
   const team = store$.team.get();
   const answers = store$.answers.get() as AnswerRow[];
@@ -35,10 +43,12 @@ export default function ImageQuestion({ question }: QuestionProps) {
   useEffect(() => {
     (async () => {
       if (!question.bucket_path) return;
-      const { data, error } = supabase.storage
+      const result = supabase.storage
         .from('question-media')
         .getPublicUrl(question.bucket_path);
-      if (!error) setPictureUri(data.publicUrl);
+      if (!('error' in result) || !result.error) {
+        setPictureUri(result.data.publicUrl);
+      }
     })();
   }, [question.bucket_path]);
 
@@ -73,52 +83,95 @@ export default function ImageQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <ThemedScrollView
-      variant="background"
-      contentContainerStyle={[globalStyles.default.refreshContainer]}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-      <View style={[globalStyles.default.container, s.screen]}>
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <ThemedText
-            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+      <ThemedScrollView
+        variant="background"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[{ paddingBottom: keyboardHeight + 40 }]}
+      >
+        <View
+          style={[
+            globalStyles.default.container,
+            s.screen,
+            { alignItems: 'stretch' },
+          ]}
+        >
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              s.infoBox,
+              { maxHeight: undefined, marginBottom: 16 },
+            ]}
           >
-            {question.question}
-          </ThemedText>
-        </View>
+            <ThemedText
+              style={[
+                globalStyles.rallyeStatesStyles.infoTitle,
+                s.text,
+                { textAlign: 'left' },
+              ]}
+            >
+              {question.question}
+            </ThemedText>
+          </View>
 
-        {pictureUri ? (
-          <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-            <Image
-              source={{ uri: pictureUri }}
-              style={{ height: '100%', borderRadius: 10, paddingVertical: 10 }}
-              resizeMode="contain"
+          {pictureUri ? (
+            <View
+              style={[
+                globalStyles.rallyeStatesStyles.infoBox,
+                s.infoBox,
+                { maxHeight: undefined, marginBottom: 16 },
+              ]}
+            >
+              <Image
+                source={{ uri: pictureUri }}
+                style={{ width: '100%', height: 250, borderRadius: 10 }}
+                resizeMode="contain"
+              />
+            </View>
+          ) : null}
+
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              s.infoBox,
+              { marginBottom: 16 },
+            ]}
+          >
+            <ThemedTextInput
+              style={[globalStyles.skillStyles.input]}
+              value={answer}
+              onChangeText={(text: string) => setAnswer(text)}
+              placeholder={
+                language === 'de' ? 'Deine Antwort...' : 'Your answer...'
+              }
+              returnKeyType="send"
+              onSubmitEditing={handleSubmit}
             />
           </View>
-        ) : null}
 
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <ThemedTextInput
-            style={[globalStyles.skillStyles.input]}
-            value={answer}
-            onChangeText={(text) => setAnswer(text)}
-            placeholder={
-              language === 'de' ? 'Deine Antwort...' : 'Your answer...'
-            }
-          />
-        </View>
-
-        <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-          <UIButton
-            color={answer.trim() !== '' ? Colors.dhbwRed : Colors.dhbwGray}
-            disabled={answer.trim() === ''}
-            onPress={handleSubmit}
+          <View
+            style={[
+              globalStyles.rallyeStatesStyles.infoBox,
+              s.infoBox,
+              { marginBottom: 16 },
+            ]}
           >
-            {language === 'de' ? 'Antwort senden' : 'Submit answer'}
-          </UIButton>
-        </View>
+            <UIButton
+              color={answer.trim() !== '' ? Colors.dhbwRed : Colors.dhbwGray}
+              disabled={answer.trim() === ''}
+              onPress={handleSubmit}
+            >
+              {language === 'de' ? 'Antwort senden' : 'Submit answer'}
+            </UIButton>
+          </View>
 
-        {question.hint ? <Hint hint={question.hint} /> : null}
-      </View>
-    </ThemedScrollView>
+          {question.hint ? <Hint hint={question.hint} /> : null}
+        </View>
+      </ThemedScrollView>
+    </KeyboardAvoidingView>
   );
 }
