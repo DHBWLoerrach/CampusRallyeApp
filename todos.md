@@ -1,3 +1,5 @@
+**siehe auch GitHub Project und LogSeq**
+
 # Mögliche weitere Schritte
 
 - Die Zeit, die ein Team zum beantworten der Fragen gebraucht hat, soll bei Gleichstand mit in das Ranking einfließen
