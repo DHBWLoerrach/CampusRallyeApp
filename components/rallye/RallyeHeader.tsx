@@ -4,6 +4,7 @@ import { store$ } from '@/services/storage/Store';
 import TimerHeader from '@/components/rallye/TimerHeader';
 import { useTheme } from '@/utils/ThemeContext';
 import Colors from '@/utils/Colors';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 export default function RallyeHeader() {
   const { isDarkMode } = useTheme();
@@ -18,21 +19,40 @@ export default function RallyeHeader() {
   const progressText = qsLen > 0 && !allAnswered ? `${idx + 1}/${qsLen}` : '';
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-      {showTimer && <TimerHeader endTime={rallye?.end_time} />}
-      {showTimer && team?.name ? (
-        <>
-          <Text style={{ color: palette.text, opacity: 0.6 }}>•</Text>
-          <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
-            {team.name}
-          </Text>
-        </>
-      ) : null}
-      {progressText ? (
-        <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
-          {progressText}
-        </Text>
-      ) : null}
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      {/* Left: Team */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        {showTimer && team?.name ? (
+          <>
+            <IconSymbol name="person.3" size={16} color={palette.text} />
+            <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
+              {team.name}
+            </Text>
+          </>
+        ) : null}
+      </View>
+
+      {/* Center: Progress */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        {progressText ? (
+          <>
+            <IconSymbol name="list.number" size={16} color={palette.text} />
+            <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
+              {progressText}
+            </Text>
+          </>
+        ) : null}
+      </View>
+
+      {/* Right: Timer */}
+      <View>{showTimer && <TimerHeader endTime={rallye?.end_time} />}</View>
     </View>
   );
 }

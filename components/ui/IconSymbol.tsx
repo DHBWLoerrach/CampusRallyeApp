@@ -33,6 +33,8 @@ const MAPPING = {
     name: 'map-marker-radius',
     source: 'community',
   },
+  clock: { name: 'schedule', source: 'material' },
+  'list.number': { name: 'format-list-numbered', source: 'community' },
 } as Record<string, IconConfig>;
 
 /**
