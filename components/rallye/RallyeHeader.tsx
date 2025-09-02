@@ -17,34 +17,27 @@ export default function RallyeHeader() {
   return (
     <View
       style={{
-        flex: 1,
+        width: '100%',
         flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
       }}
     >
-      {/* Left: Team */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 6,
-        }}
-      >
-        {showTimer && team?.name ? (
-          <>
-            <IconSymbol name="person.3" size={16} color={palette.text} />
-            <Text
-              style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}
-            >
-              {team.name}
-            </Text>
-          </>
-        ) : null}
-      </View>
-
-      {/* Right: Timer */}
+      {team?.name && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <IconSymbol name="person.3" size={16} color={palette.text} />
+          <Text
+            style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}
+          >
+            {team.name}
+          </Text>
+        </View>
+      )}
       <View>{showTimer && <TimerHeader endTime={rallye?.end_time} />}</View>
     </View>
   );
