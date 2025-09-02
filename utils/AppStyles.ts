@@ -1,5 +1,6 @@
 import { makeStyles } from './makeStyles';
 import Colors from './Colors';
+import Constants from './Constants';
 
 export const useAppStyles = makeStyles((p) => ({
   // Generic screens and sections
@@ -9,15 +10,15 @@ export const useAppStyles = makeStyles((p) => ({
   },
   section: {
     backgroundColor: p.card,
-    borderRadius: 10,
+    borderRadius: Constants.cornerRadius,
   },
   card: {
     backgroundColor: p.card,
-    borderRadius: 10,
+    borderRadius: Constants.cornerRadius,
   },
   infoBox: {
     backgroundColor: p.card,
-    borderRadius: 10,
+    borderRadius: Constants.cornerRadius,
     padding: 16,
   },
   listRow: {
@@ -41,4 +42,3 @@ export const useAppStyles = makeStyles((p) => ({
     fontWeight: '600',
   },
 }));
-

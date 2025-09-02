@@ -5,6 +5,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import Colors from '@/utils/Colors';
+import Constants from '@/utils/Constants';
 import { useTheme } from '@/utils/ThemeContext';
 
 type Props = TextInputProps & {
@@ -26,7 +27,7 @@ export default function ThemedTextInput({
       ? {
           borderWidth: StyleSheet.hairlineWidth,
           borderColor: isDarkMode ? Colors.dhbwGray : Colors.dhbwGray,
-          borderRadius: 5,
+          borderRadius: Constants.cornerRadius,
         }
       : {}),
   } as const;

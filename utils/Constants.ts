@@ -5,7 +5,7 @@ const Constants = {
   dhbwGray: '#4a4a49',
   bigFont: 25,
   smallFont: 15,
+  cornerRadius: 10,
 };
 
 export default Constants;
-

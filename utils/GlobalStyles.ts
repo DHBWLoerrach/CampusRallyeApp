@@ -54,7 +54,7 @@ export const globalStyles = createGroupedStyles({
     modalContent: {
       backgroundColor: Colors.lightMode.card,
       padding: 20,
-      borderRadius: 10,
+      borderRadius: Constants.cornerRadius,
       width: '85%',
       maxHeight: '80%',
     },
@@ -66,7 +66,7 @@ export const globalStyles = createGroupedStyles({
     },
     rallyeCard: {
       backgroundColor: Colors.veryLightGray,
-      borderRadius: 8,
+      borderRadius: Constants.cornerRadius,
       padding: 15,
       marginVertical: 8,
       flexDirection: 'row',
@@ -166,7 +166,7 @@ export const globalStyles = createGroupedStyles({
       width: '100%',
       height: SCREEN_HEIGHT * 0.22,
       // backgroundColor handled by themed style
-      borderRadius: 15,
+      borderRadius: Constants.cornerRadius,
       padding: SCREEN_WIDTH * 0.04,
       marginVertical: SCREEN_HEIGHT * 0.015,
       alignItems: 'center',
@@ -210,7 +210,7 @@ export const globalStyles = createGroupedStyles({
       height: 40,
       borderWidth: 1,
       borderColor: Colors.dhbwGray,
-      borderRadius: 5,
+      borderRadius: Constants.cornerRadius,
       paddingHorizontal: 10,
       marginVertical: 20,
     },
@@ -398,15 +398,15 @@ export const globalStyles = createGroupedStyles({
       sizes: {
         small: {
           padding: SCREEN_WIDTH * 0.02,
-          borderRadius: 5,
+          borderRadius: Constants.cornerRadius,
         },
         medium: {
           padding: SCREEN_WIDTH * 0.03,
-          borderRadius: 5,
+          borderRadius: Constants.cornerRadius,
         },
         dialog: {
           padding: 10,
-          borderRadius: 3,
+          borderRadius: Constants.cornerRadius,
           marginLeft: 7,
         },
       },
