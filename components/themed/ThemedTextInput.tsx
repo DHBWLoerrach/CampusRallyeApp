@@ -23,6 +23,8 @@ export default function ThemedTextInput({
 
   const baseStyle = {
     color: palette.text,
+    paddingVertical: 10,
+    textAlignVertical: 'center' as const,
     ...(bordered
       ? {
           borderWidth: StyleSheet.hairlineWidth,
