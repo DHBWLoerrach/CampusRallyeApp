@@ -30,6 +30,8 @@ const TeamSetup = observer(function TeamSetup() {
         store$.reset();
         store$.team.set(data);
         await setCurrentTeam(rallye.id, data);
+        // Kurze Bestätigung via Bottom Sheet im Rallye-Screen
+        (store$ as any).showTeamNameSheet.set(true);
       }
     } catch (e) {
       console.error('Error creating team:', e);

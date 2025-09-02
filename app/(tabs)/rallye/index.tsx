@@ -20,6 +20,7 @@ import { useAppStyles } from '@/utils/AppStyles';
 import { useTheme } from '@/utils/ThemeContext';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
+import TeamNameSheet from '@/components/ui/TeamNameSheet';
 
 function isPreparation(status?: string) {
   return status === 'preparation' || status === 'preparing';
@@ -32,6 +33,7 @@ const RallyeIndex = observer(function RallyeIndex() {
 
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
+  const showTeamNameSheet = useSelector(() => (store$ as any).showTeamNameSheet.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
   const points = useSelector(() => store$.points.get());
@@ -228,83 +230,113 @@ const RallyeIndex = observer(function RallyeIndex() {
   }
 
   if (!allQuestionsAnswered && questions.length === 0) {
-    return <NoQuestions loading={loading} onRefresh={onRefresh} />;
+    return (
+      <>
+        <NoQuestions loading={loading} onRefresh={onRefresh} />
+        <TeamNameSheet
+          visible={!!showTeamNameSheet}
+          name={team?.name || ''}
+          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+        />
+      </>
+    );
   }
 
   if (questions.length > 0 && !allQuestionsAnswered) {
     return (
-      <ThemedScrollView
-        variant="background"
-        contentContainerStyle={[globalStyles.default.refreshContainer]}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
-      >
-        <ThemedView variant="background" style={globalStyles.default.container}>
-          <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
-        </ThemedView>
-      </ThemedScrollView>
+      <>
+        <ThemedScrollView
+          variant="background"
+          contentContainerStyle={[globalStyles.default.refreshContainer]}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+        >
+          <ThemedView variant="background" style={globalStyles.default.container}>
+            <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
+          </ThemedView>
+        </ThemedScrollView>
+        <TeamNameSheet
+          visible={!!showTeamNameSheet}
+          name={team?.name || ''}
+          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+        />
+      </>
     );
   }
 
   if (allQuestionsAnswered && rallye.tour_mode) {
     // Exploration finished: show simple summary and back to welcome
     return (
-      <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
-        <VStack style={{ width: '100%' }} gap={2}>
-          <InfoBox mb={2}>
-            <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
-              {language === 'de' ? 'Alle Fragen beantwortet.' : 'All questions answered.'}
-            </ThemedText>
-            <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
-              {language === 'de' ? 'Erreichte Punkte: ' : 'Points achieved: '} {points}
-            </ThemedText>
-          </InfoBox>
-          <InfoBox mb={2}>
-            <Text
-              onPress={() => {
-                store$.reset();
-                store$.enabled.set(false);
-              }}
-              style={{ color: Colors.dhbwRed, fontWeight: '600', textAlign: 'center' }}
-            >
-              {language === 'de' ? 'Zurück zum Start' : 'Back to start'}
-            </Text>
-          </InfoBox>
-        </VStack>
-      </ThemedScrollView>
+      <>
+        <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
+          <VStack style={{ width: '100%' }} gap={2}>
+            <InfoBox mb={2}>
+              <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+                {language === 'de' ? 'Alle Fragen beantwortet.' : 'All questions answered.'}
+              </ThemedText>
+              <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+                {language === 'de' ? 'Erreichte Punkte: ' : 'Points achieved: '} {points}
+              </ThemedText>
+            </InfoBox>
+            <InfoBox mb={2}>
+              <Text
+                onPress={() => {
+                  store$.reset();
+                  store$.enabled.set(false);
+                }}
+                style={{ color: Colors.dhbwRed, fontWeight: '600', textAlign: 'center' }}
+              >
+                {language === 'de' ? 'Zurück zum Start' : 'Back to start'}
+              </Text>
+            </InfoBox>
+          </VStack>
+        </ThemedScrollView>
+        <TeamNameSheet
+          visible={!!showTeamNameSheet}
+          name={team?.name || ''}
+          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+        />
+      </>
     );
   }
 
   if (allQuestionsAnswered && !rallye.tour_mode) {
     // Time up vs finished before end
     return (
-      <ThemedScrollView
-        variant="background"
-        contentContainerStyle={[globalStyles.default.refreshContainer]}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
-      >
-        <VStack style={{ width: '100%' }} gap={2}>
-          <InfoBox mb={2}>
-            <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
-              {timeExpired
-                ? language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'
-                : language === 'de' ? 'Alle Fragen beantwortet' : 'All questions answered'}
-            </ThemedText>
-            {!timeExpired && team ? (
-              <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
-                {language === 'de' ? 'Team: ' : 'Team: '} {team?.name}
+      <>
+        <ThemedScrollView
+          variant="background"
+          contentContainerStyle={[globalStyles.default.refreshContainer]}
+          refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+        >
+          <VStack style={{ width: '100%' }} gap={2}>
+            <InfoBox mb={2}>
+              <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+                {timeExpired
+                  ? language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'
+                  : language === 'de' ? 'Alle Fragen beantwortet' : 'All questions answered'}
               </ThemedText>
-            ) : null}
-            <ThemedText style={globalStyles.rallyeStatesStyles.infoSubtitle}>
-              {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
-            </ThemedText>
-          </InfoBox>
-          <InfoBox mb={2}>
-            <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
-              {language === 'de' ? 'Aktualisieren' : 'Refresh'}
-            </Text>
-          </InfoBox>
-        </VStack>
-      </ThemedScrollView>
+              {!timeExpired && team ? (
+                <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+                  {language === 'de' ? 'Team: ' : 'Team: '} {team?.name}
+                </ThemedText>
+              ) : null}
+              <ThemedText style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+                {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
+              </ThemedText>
+            </InfoBox>
+            <InfoBox mb={2}>
+              <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
+                {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+              </Text>
+            </InfoBox>
+          </VStack>
+        </ThemedScrollView>
+        <TeamNameSheet
+          visible={!!showTeamNameSheet}
+          name={team?.name || ''}
+          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+        />
+      </>
     );
   }
 

@@ -9,6 +9,7 @@ export default function RallyeHeader() {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const rallye = useSelector(() => store$.rallye.get());
+  const team = useSelector(() => store$.team.get());
   const idx = useSelector(() => store$.questionIndex.get());
   const qsLen = useSelector(() => store$.questions.get().length);
   const allAnswered = useSelector(() => store$.allQuestionsAnswered.get());
@@ -19,6 +20,14 @@ export default function RallyeHeader() {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
       {showTimer && <TimerHeader endTime={rallye?.end_time} />}
+      {showTimer && team?.name ? (
+        <>
+          <Text style={{ color: palette.text, opacity: 0.6 }}>•</Text>
+          <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
+            {team.name}
+          </Text>
+        </>
+      ) : null}
       {progressText ? (
         <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
           {progressText}

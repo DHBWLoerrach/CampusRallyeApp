@@ -78,6 +78,7 @@ export const store$ = observable({
   votingAllowed: true,
   timeExpired: false,
   teamDeleted: false,
+  showTeamNameSheet: false,
 
   currentQuestion: () => (store$.questions.get() as any[])[store$.questionIndex.get()],
 
