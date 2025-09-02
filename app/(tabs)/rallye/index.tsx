@@ -254,9 +254,10 @@ const RallyeIndex = observer(function RallyeIndex() {
         >
           <ThemedView variant="background" style={globalStyles.default.container}>
             <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
-              {language === 'de'
-                ? `Frage ${idx + 1} von ${qsLen}`
-                : `Question ${idx + 1} of ${qsLen}`}
+              {(rallye?.name ? `${rallye.name} • ` : '') +
+                (language === 'de'
+                  ? `Frage ${idx + 1} von ${qsLen}`
+                  : `Question ${idx + 1} of ${qsLen}`)}
             </ThemedText>
             <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
           </ThemedView>
