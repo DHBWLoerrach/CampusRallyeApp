@@ -2,6 +2,7 @@
 
 # Mögliche weitere Schritte
 
+- Offline-Funktionalität testen (siehe `services/storage/Store.ts`)
 - Die Zeit, die ein Team zum beantworten der Fragen gebraucht hat, soll bei Gleichstand mit in das Ranking einfließen
 - Gleichzeitige Teilnahme an verschiedenen Rallyes ermöglichen?
 - Ein Live-Leaderboard während die Rallye gespielt wird

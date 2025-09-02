@@ -49,3 +49,18 @@ export async function getTeamsByRallye(rallyeId: number) {
   if (error) throw error;
   return data ?? [];
 }
+
+export async function teamExists(rallyeId: number, teamId: number) {
+  if (!rallyeId || !teamId) return false;
+  const { data, error } = await supabase
+    .from('rallye_team')
+    .select('id')
+    .eq('id', teamId)
+    .eq('rallye_id', rallyeId)
+    .maybeSingle();
+  if (error) {
+    console.error('Error checking team existence:', error);
+    return false;
+  }
+  return !!data;
+}

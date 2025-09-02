@@ -2,7 +2,7 @@ import { observable } from '@legendapp/state';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { getCurrentRallye } from './rallyeStorage';
-import { getCurrentTeam } from './teamStorage';
+import { getCurrentTeam, clearCurrentTeam, teamExists } from './teamStorage';
 import { supabase } from '@/utils/Supabase';
 
 const OFFLINE_QUEUE_KEY = 'offlineQueue';
@@ -37,10 +37,15 @@ const processOfflineQueue = async () => {
 
     for (const action of queue) {
       try {
-        const { error } = await supabase.from(action.table).insert(action.data).select();
+        const { error } = await supabase.from((action as any).table).insert((action as any).data).select();
         if (error) throw error;
-      } catch (error) {
-        console.error('Error processing offline action:', error);
+      } catch (error: any) {
+        console.error('Error processing offline action:', {
+          message: error?.message,
+          code: error?.code,
+          details: error?.details,
+          hint: error?.hint,
+        });
         return;
       }
     }
@@ -72,6 +77,7 @@ export const store$ = observable({
   team: null as any,
   votingAllowed: true,
   timeExpired: false,
+  teamDeleted: false,
 
   currentQuestion: () => (store$.questions.get() as any[])[store$.questionIndex.get()],
 
@@ -128,10 +134,28 @@ export const store$ = observable({
     store$.rallye.set(rallye);
     if (rallye) {
       const loadTeam = await getCurrentTeam((rallye as any).id);
-      loadTeam ? store$.team.set(loadTeam) : store$.team.set(null);
-      // Auto-resume into Rallye tabs on app start when actively participating
-      if (!rallye.tour_mode && loadTeam) {
-        store$.enabled.set(true);
+      if (loadTeam) {
+        try {
+          const exists = await teamExists((rallye as any).id, (loadTeam as any).id);
+          if (exists) {
+            store$.team.set(loadTeam);
+            // Auto-resume into Rallye tabs on app start when actively participating
+            if (!rallye.tour_mode) {
+              store$.enabled.set(true);
+            }
+          } else {
+            await clearCurrentTeam((rallye as any).id);
+            store$.team.set(null as any);
+            store$.enabled.set(false);
+            store$.teamDeleted.set(true);
+          }
+        } catch (e) {
+          console.error('Error verifying team existence on init:', e);
+          store$.team.set(loadTeam);
+          if (!rallye.tour_mode) store$.enabled.set(true);
+        }
+      } else {
+        store$.team.set(null);
       }
     }
     const savedIndex = await AsyncStorage.getItem('currentQuestionIndex');
