@@ -89,13 +89,13 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
       contentContainerStyle={globalStyles.default.refreshContainer}
     >
       <VStack style={[globalStyles.default.container, { alignItems: 'stretch' }]} gap={2}>
-        <InfoBox mb={2}>
+        <InfoBox mb={0}>
           <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
             {question.question}
           </ThemedText>
         </InfoBox>
 
-        <InfoBox mb={2}>
+        <InfoBox mb={0}>
           {options.length === 0 ? (
             <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
               {language === 'de'
@@ -145,7 +145,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
           )}
         </InfoBox>
 
-        <InfoBox mb={2}>
+        <InfoBox mb={0}>
           <UIButton
             color={answer ? Colors.dhbwRed : Colors.dhbwGray}
             disabled={!answer}

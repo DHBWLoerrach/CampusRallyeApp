@@ -99,7 +99,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
           ]}
           gap={2}
         >
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <ThemedText
               style={[
                 globalStyles.rallyeStatesStyles.infoTitle,
@@ -112,7 +112,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
           </InfoBox>
 
           {pictureUri ? (
-            <InfoBox mb={2}>
+            <InfoBox mb={0}>
               <Image
                 source={{ uri: pictureUri }}
                 style={{ width: '100%', height: 250, borderRadius: 10 }}
@@ -121,7 +121,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
             </InfoBox>
           ) : null}
 
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <ThemedTextInput
               style={[globalStyles.skillStyles.input]}
               value={answer}
@@ -135,7 +135,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
             />
           </InfoBox>
 
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <UIButton
               color={answer.trim() !== '' ? Colors.dhbwRed : Colors.dhbwGray}
               disabled={answer.trim() === ''}

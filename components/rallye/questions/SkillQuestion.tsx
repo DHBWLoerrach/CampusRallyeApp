@@ -81,7 +81,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
           ]}
           gap={2}
         >
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <ThemedText
               style={[
                 globalStyles.rallyeStatesStyles.infoTitle,
@@ -93,7 +93,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
             </ThemedText>
           </InfoBox>
 
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <ThemedTextInput
               style={[globalStyles.skillStyles.input]}
               value={answer}
@@ -107,7 +107,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
             />
           </InfoBox>
 
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <UIButton
               color={answer.trim() ? Colors.dhbwRed : Colors.dhbwGray}
               disabled={!answer.trim()}

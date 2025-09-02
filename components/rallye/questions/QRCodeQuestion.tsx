@@ -115,14 +115,14 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   return (
     <ThemedView variant="background" style={[globalStyles.default.container, s.screen, { flex: 1 }] }>
       <VStack style={{ width: '100%' }} gap={2}>
-        <InfoBox mb={2}>
+        <InfoBox mb={0}>
           <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
             {question.question}
           </ThemedText>
         </InfoBox>
 
         {scanMode && (
-          <InfoBox mb={2} style={globalStyles.qrCodeStyles.cameraBox}>
+          <InfoBox mb={0} style={globalStyles.qrCodeStyles.cameraBox}>
             <CameraView
               ref={cameraRef}
               style={globalStyles.qrCodeStyles.camera}
@@ -131,7 +131,7 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
           </InfoBox>
         )}
 
-        <InfoBox mb={2}>
+        <InfoBox mb={0}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
             <UIButton icon={scanMode ? 'circle-stop' : 'qrcode'} onPress={() => setScanMode(!scanMode)}>
               {scanMode

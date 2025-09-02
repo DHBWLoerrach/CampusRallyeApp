@@ -69,15 +69,15 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
     return (
       <ThemedView variant="background" style={[globalStyles.default.container, s.screen]}>
         <VStack style={{ width: '100%' }} gap={2}>
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
               {question.question}
             </ThemedText>
           </InfoBox>
-          <InfoBox mb={2} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
+          <InfoBox mb={0} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
             <CameraView ref={cameraRef} style={globalStyles.uploadStyles.camera} facing={facing} />
           </InfoBox>
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <View style={globalStyles.qrCodeStyles.buttonRow}>
               <UIButton
                 icon="camera"
@@ -110,15 +110,15 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
     return (
       <ThemedView variant="background" style={[globalStyles.default.container, s.screen]}>
         <VStack style={{ width: '100%' }} gap={2}>
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
               {question.question}
             </ThemedText>
           </InfoBox>
-          <InfoBox mb={2} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
+          <InfoBox mb={0} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
             <Image source={{ uri: picture?.uri }} style={globalStyles.uploadStyles.image} resizeMode="contain" />
           </InfoBox>
-          <InfoBox mb={2}>
+          <InfoBox mb={0}>
             <View style={globalStyles.qrCodeStyles.buttonRow}>
               <UIButton icon="recycle" color={Colors.dhbwGray} onPress={() => setPicture(null)}>
                 Neues Foto
