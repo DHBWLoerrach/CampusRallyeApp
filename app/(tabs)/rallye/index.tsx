@@ -142,13 +142,14 @@ const RallyeIndex = observer(function RallyeIndex() {
     try {
       const { data, error } = await supabase
         .from('rallye')
-        .select('status, end_time')
+        .select('status, end_time, name')
         .eq('id', rallye.id)
         .single();
       if (error) throw error;
       if (data) {
         store$.rallye.status.set(data.status);
         if (data.end_time) store$.rallye.end_time.set(data.end_time);
+        if (data.name) store$.rallye.name.set(data.name);
       }
     } catch (e) {
       console.error('Error fetching rallye status:', e);
@@ -162,6 +163,8 @@ const RallyeIndex = observer(function RallyeIndex() {
     (async () => {
       await loadQuestions();
       await loadAnswers();
+      // Ensure we refresh dynamic rallye fields like name/status
+      await refreshStatus();
     })();
   }, [rallye?.id, team?.id]);
 
