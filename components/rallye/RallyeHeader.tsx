@@ -39,18 +39,6 @@ export default function RallyeHeader() {
         ) : null}
       </View>
 
-      {/* Center: Progress */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        {progressText ? (
-          <>
-            <IconSymbol name="list.number" size={16} color={palette.text} />
-            <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
-              {progressText}
-            </Text>
-          </>
-        ) : null}
-      </View>
-
       {/* Right: Timer */}
       <View>{showTimer && <TimerHeader endTime={rallye?.end_time} />}</View>
     </View>

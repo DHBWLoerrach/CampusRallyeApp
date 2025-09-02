@@ -33,6 +33,8 @@ const RallyeIndex = observer(function RallyeIndex() {
 
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
+  const idx = useSelector(() => store$.questionIndex.get());
+  const qsLen = useSelector(() => store$.questions.get().length);
   const showTeamNameSheet = useSelector(() => (store$ as any).showTeamNameSheet.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
@@ -251,6 +253,11 @@ const RallyeIndex = observer(function RallyeIndex() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         >
           <ThemedView variant="background" style={globalStyles.default.container}>
+            <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
+              {language === 'de'
+                ? `Frage ${idx + 1} von ${qsLen}`
+                : `Question ${idx + 1} of ${qsLen}`}
+            </ThemedText>
             <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
           </ThemedView>
         </ThemedScrollView>
