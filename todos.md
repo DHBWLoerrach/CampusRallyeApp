@@ -1,5 +1,12 @@
 **siehe auch GitHub Project und LogSeq**
 
+# Todos vor Kennenlerntag am 02.10.25
+
+- Rallye vorbereiten: Fragen, Endzeitpunkt, usw.
+- Abstimmung?
+- Gruppenfoto (Upload-Question) oder Multiple-Choice-Frage?
+- Testen
+
 # Mögliche weitere Schritte
 
 - Offline-Funktionalität testen (siehe `services/storage/Store.ts`)
