@@ -24,12 +24,40 @@ import {
   setCurrentRallye,
   getTourModeRallye,
 } from '@/services/storage/rallyeStorage';
+import {
+  getCurrentTeam,
+  teamExists,
+  clearCurrentTeam,
+} from '@/services/storage/teamStorage';
 
 // TODO: Fix types
 const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
   try {
     if (password === selectedRallye.password) {
+      // Set selected rallye and enable tabs
       store$.rallye.set(selectedRallye);
+
+      // Rehydrate previously created team for this rallye (if any)
+      try {
+        const existingTeam = await getCurrentTeam(selectedRallye.id);
+        if (existingTeam) {
+          const exists = await teamExists(selectedRallye.id, existingTeam.id);
+          if (exists) {
+            store$.team.set(existingTeam);
+          } else {
+            // Clean up stale local reference
+            await clearCurrentTeam(selectedRallye.id);
+            store$.team.set(null);
+          }
+        } else {
+          store$.team.set(null);
+        }
+      } catch (rehydrateErr) {
+        console.error('Error rehydrating team after password submit:', rehydrateErr);
+        // Fall back to no team; UI will handle setup if needed
+        store$.team.set(null);
+      }
+
       store$.enabled.set(true);
     } else {
       Alert.alert(
