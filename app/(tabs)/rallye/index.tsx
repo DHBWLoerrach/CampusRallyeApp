@@ -35,6 +35,8 @@ const RallyeIndex = observer(function RallyeIndex() {
   const team = useSelector(() => store$.team.get());
   const idx = useSelector(() => store$.questionIndex.get());
   const qsLen = useSelector(() => store$.questions.get().length);
+  const totalQuestions = useSelector(() => (store$ as any).totalQuestions.get());
+  const answeredCount = useSelector(() => (store$ as any).answeredCount.get());
   const showTeamNameSheet = useSelector(() => (store$ as any).showTeamNameSheet.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
@@ -74,9 +76,12 @@ const RallyeIndex = observer(function RallyeIndex() {
       if (joinError) throw joinError;
 
       const questionIds = (joinData || []).map((row: any) => row.question_id);
+      // Track total number of questions for progress display
+      (store$ as any).totalQuestions.set(questionIds.length);
       if (questionIds.length === 0) {
         store$.questions.set([]);
         store$.currentQuestion.set(null);
+        (store$ as any).answeredCount.set(0);
         return;
       }
 
@@ -90,6 +95,8 @@ const RallyeIndex = observer(function RallyeIndex() {
         if (answeredError) throw answeredError;
         answeredIds = (answeredData || []).map((row: any) => row.question_id);
       }
+      // Track number of answered questions for progress display
+      (store$ as any).answeredCount.set(answeredIds.length);
 
       if (answeredIds.length === questionIds.length && !rallye.tour_mode) {
         store$.allQuestionsAnswered.set(true);
@@ -256,11 +263,19 @@ const RallyeIndex = observer(function RallyeIndex() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         >
           <ThemedView variant="background" style={globalStyles.default.container}>
-            <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
+          <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
               {(rallye?.name ? `${rallye.name} • ` : '') +
                 (language === 'de'
-                  ? `Frage ${idx + 1} von ${qsLen}`
-                  : `Question ${idx + 1} of ${qsLen}`)}
+                  ? `Frage ${
+                      (rallye?.tour_mode
+                        ? idx + 1
+                        : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
+                    } von ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`
+                  : `Question ${
+                      (rallye?.tour_mode
+                        ? idx + 1
+                        : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
+                    } of ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`)}
             </ThemedText>
             <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
           </ThemedView>

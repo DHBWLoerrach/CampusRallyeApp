@@ -70,6 +70,10 @@ export const store$ = observable({
   enabled: false,
   questions: [] as any[],
   questionIndex: 0,
+  // Total number of questions for the current rallye (not filtered)
+  totalQuestions: 0,
+  // Number of questions already answered by the team (non-tour mode)
+  answeredCount: 0,
   points: 0,
   allQuestionsAnswered: false,
   answers: [] as any[],
@@ -113,6 +117,16 @@ export const store$ = observable({
     } else {
       store$.questionIndex.set(nextIndex);
     }
+    // In team mode, advance the answered counter so the header reflects progress
+    try {
+      const rallye = store$.rallye.get() as any;
+      if (rallye && !rallye.tour_mode) {
+        const current = (store$.answeredCount.get() as number) || 0;
+        const total = ((store$ as any).totalQuestions?.get?.() ?? 0) as number;
+        const next = total > 0 ? Math.min(current + 1, total) : current + 1;
+        (store$ as any).answeredCount.set(next);
+      }
+    } catch {}
     AsyncStorage.setItem('currentQuestionIndex', String(store$.questionIndex.get()));
   },
 
@@ -128,6 +142,8 @@ export const store$ = observable({
     store$.timeExpired.set(false);
     store$.multipleChoiceAnswers.set([]);
     store$.votingAllowed.set(true);
+    store$.totalQuestions.set(0);
+    store$.answeredCount.set(0);
   },
 
   initialize: async () => {
