@@ -2,10 +2,27 @@
 
 # Todos vor Kennenlerntag am 02.10.25
 
+- Release mit Expo 54 (siehe branch)
+  - Icon mit Icon Composer generieren
 - Rallye vorbereiten: Fragen, Endzeitpunkt, usw.
 - Abstimmung?
 - Gruppenfoto (Upload-Question) oder Multiple-Choice-Frage?
 - Testen
+
+# New ui primitives
+
+- Native Tabs
+  - Guide: https://docs.expo.dev/router/advanced/native-tabs/
+  - Reference: https://docs.expo.dev/versions/latest/sdk/router-native-tabs/
+- Expo UI (SwiftUI, Jetpack Compose)
+  - Guide: https://docs.expo.dev/guides/expo-ui-swift-ui/
+  - Reference: https://docs.expo.dev/versions/latest/sdk/ui/
+  - warten bis stabil und auch Android unterstützt wird
+- Glass Effect: https://docs.expo.dev/versions/latest/sdk/glass-effect/
+- Updates dazu im Expo Blog und Changelog:
+  - https://expo.dev/blog
+  - https://expo.dev/changelog
+- hier testen und dann auch in die Campus App einbauen
 
 # Mögliche weitere Schritte
 
