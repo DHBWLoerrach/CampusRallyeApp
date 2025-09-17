@@ -1,13 +1,12 @@
 **siehe auch GitHub Project und LogSeq**
 
-# Todos vor Kennenlerntag am 02.10.25
+# Next
 
-- Release mit Expo 54 (siehe branch)
-  - Icon mit Icon Composer generieren
-- Rallye vorbereiten: Fragen, Endzeitpunkt, usw.
-- Abstimmung?
-- Gruppenfoto (Upload-Question) oder Multiple-Choice-Frage?
+- Neue Screenshots der App in AppStore/PlayStore
+- Abstimmung (Voting)
+- Gruppenfoto (Upload-Question)
 - Testen
+- s.a. Backlog in GitHub Projekt
 
 # New ui primitives
 
