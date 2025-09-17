@@ -6,7 +6,7 @@
 - Abstimmung (Voting)
 - Gruppenfoto (Upload-Question)
 - Testen
-- s.a. Backlog in GitHub Projekt
+- s.a. Backlog in GitHub Projekt und LogSeq
 
 # New ui primitives
 
