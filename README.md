@@ -14,6 +14,12 @@ Test der Webanwendung kann entweder eine eigene Supabase-Instanz in
 der Cloud erstellt werden oder es wird einge lokale Supabase-Instanz
 auf dem eigenen Rechner eingerichtet. 
 
+Supabase-Owner können einen SQL-Dump des Schemas (Tabellen, Funktionen, usw.) ohne Daten wie folgt mit dem Supabase-CLI erstellen:
+
+```
+supabase db dump --db-url "postgresql://postgres:<password>:<serverurl>/postgres" -f schema.sql --schema public
+```
+
 #### Supabase in der Cloud
 
 - Bei https://supabase.com kostenlos anmelden
