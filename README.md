@@ -17,7 +17,7 @@ auf dem eigenen Rechner eingerichtet.
 Supabase-Owner können einen SQL-Dump des Schemas (Tabellen, Funktionen, usw.) ohne Daten wie folgt mit dem Supabase-CLI erstellen:
 
 ```
-supabase db dump --db-url "postgresql://postgres:<password>:<serverurl>/postgres" -f schema.sql --schema public
+supabase db dump --db-url "postgresql://postgres:<password>@<serverurl>/postgres" -f schema.sql --schema public
 ```
 
 #### Supabase in der Cloud
