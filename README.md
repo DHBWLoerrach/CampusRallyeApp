@@ -10,9 +10,21 @@ am [Studienzentrum IT-Management & Informatik](https://dhbw-loerrach.de/szi).
 ### Vorbereitungen (Supabase)
 
 Die Daten werden in Supabase gespeichert. Zur Weiterentwicklung und
-Test der Webanwendung sollte diese mit einer lokalen Supabase-Instanz
-auf dem eigenen Rechner verknüpft werden. Die Einrichtung einer lokalen
-Supabase-Instanz wird in der
+Test der Webanwendung kann entweder eine eigene Supabase-Instanz in 
+der Cloud erstellt werden oder es wird einge lokale Supabase-Instanz
+auf dem eigenen Rechner eingerichtet. 
+
+#### Supabase in der Cloud
+
+- Bei https://supabase.com kostenlos anmelden
+- In Supabase ein neues Projekt erstellen (z.B. `CampusRallye`)
+- Im Supabase-Projekt zum _SQL Editor_ wechseln (via linker Seitenleist)
+- Das SQL-Schema aus dem zugehörigen Backend-Projekt kopieren (siehe Datei `supabase/schema.sql` in https://github.com/DHBWLoerrach/campus-rallye-admin)
+- SQL-Schema im SQL-Editor einfügen und ausführen
+- Daten erstellen (siehe unten)
+
+#### Lokale Supabase
+Die Einrichtung einer lokalen Supabase-Instanz wird in der
 [Supabase-Dokumentation](https://supabase.com/docs/guides/local-development/cli/getting-started) beschrieben.
 
 Hier werden die für dieses Projekt benötigten Schritte aufgelistet:
@@ -32,6 +44,22 @@ Wenn alles geklappt hat, dann kann die lokale Supabase-Instanz mit dem Webinterf
 
 Die Supabase-Instanz kann folgendermaßen heruntergefahren werden: `supabase stop`
 
+#### Daten erstellen
+
+Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstellt werden. 
+
+In der Tabelle `rallye` zwei neue Rallyes bzw. zwei neue Zeilen eintragen (_Insert row_):
+
+- Name: Rallye, Studiengang: Informatik, Status `running` und `end_time` in der Zukunft, `tour_mode=FALSE`
+- Name: Erkundung, Studiengang: Allgemein, Status `running` und `end_time` in der Zukunft, `tour_mode=TRUE`
+
+In der Tabelle `questions` ein paar Fragen mit Punkten erstellen (z.B. Typ _knowledge_), dazu passende Antwort(en) in 
+`answers` mit `question_id` der Frage eintragen und  und in `join_rallye_questions` den Rallyes zuordnen.
+
+Möglich ist auch die lokale Einrichtung und Verwendung der Webandwendung zur Verwaltung 
+von Campus Rallyes. Im GitHub-Projekt (https://github.com/DHBWLoerrach/campus-rallye-admin)
+ist eine Anleitung zur Einrichtung beschrieben.
+
 ### Code der Campus Rallye App
 
 Voraussetzungen für die Weiterentwicklung dieses Projekts sind folgende:
@@ -39,7 +67,7 @@ Voraussetzungen für die Weiterentwicklung dieses Projekts sind folgende:
 - Node.js ist auf dem Entwicklungsgerät installiert.
 - Die lokale Supabase-Instanz wurde eingerichtet (siehe oben)
 
-1. Dieses Github-Repository clonen (mit `git clone git@github.com:DHBWLoerrach/CampusRallyeApp.git` oder einem Git-Client).
+1. Dieses Github-Repository clonen
 
 1. In einem Terminal ins Verzeichnis des geclonten Repositories wechseln.
 
@@ -53,11 +81,19 @@ EXPO_PUBLIC_SUPABASE_URL=http://SERVER:54321
 EXPO_PUBLIC_SUPABASE_ANON_KEY=SUPABASE_ANON_KEY
 ```
 
-Der Eintrag für `EXPO_PUBLIC_SUPABASE_URL` muss die IP-Adresse
-des Servers enthalten. Wird die App auf einem iPhone-Simulator oder
-Android-Emulator auf dem Rechner ausgeführt, der die Supabase-Instanz
-bereitstellt, dann kann für `SERVER` die IP-Adresse von „localhost“
-eingesetzt werden:
+#### Supabase in der Cloud
+
+Im Webinterface von Supabase oben auf _Connect_ klicken und die Daten im Reiter _Mobile Frameworks_ verwenden.
+
+Der benötigte API-Key ist unter _Project Settings_ (Zahnrad in der linken Seitenleiste) und dort unter _API Keys_ zu finden.
+
+**Achtung:** In `.env` muss der API-Key wie folgt eingetragen werden:
+
+```
+EXPO_PUBLIC_SUPABASE_ANON_KEY=API_KEY_HERE
+```
+
+#### Lokale Supabase-Instanz
 
 ```
 EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
@@ -65,7 +101,7 @@ EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 
 Wird die App auf einem Smartphone ausgeführt, dann ist für
 `SERVER` die IP-Adresse des Rechners einzutragen, auf dem
-die Supabase-Instanz läuft.
+die lokale Supabase-Instanz läuft.
 
 Für `EXPO_PUBLIC_SUPABASE_ANON_KEY` muss der Anon Key der
 Supbase-Instanz eingefügt werden. Dieser kann im Terminal
