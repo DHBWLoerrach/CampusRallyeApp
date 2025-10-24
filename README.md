@@ -120,6 +120,9 @@ entsprechenden Tabellen in der Supabase-Instanz in Erfahrung gebracht werden.
 ### App mit Expo testen
 
 `npx expo start -g` started den Metro-Bundler, um die App auf einem Smartphone oder Emulator/Simulator in der Expo Go App zu testen.
+Dazu muss die App _Expo Go_ (https://expo.dev/go) auf dem Handy installiert sein und der QR-Code gescannt werden (Android: in Expo Go, iOS: via Kamera-App).
+
+Hinweis: Im DHBW-Wlan muss der Metro-Bundler mit „Tunnel“-Option gestartet werden:  `npx expo start -g --tunnel`
 
 ### Development Builds der App erstellen
 
