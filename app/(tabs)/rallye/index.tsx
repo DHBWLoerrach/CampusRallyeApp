@@ -350,6 +350,11 @@ const RallyeIndex = observer(function RallyeIndex() {
                 {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
               </ThemedText>
             </InfoBox>
+            <InfoBox>
+              <ThemedText style={globalStyles.rallyeStatesStyles.meetingPoint}>
+                {language === 'de' ? 'Bitte kommt zum vereinbarten Treffpunkt' : 'Please come to the agreed meeting point.'}
+              </ThemedText>
+            </InfoBox>
             <InfoBox mb={2}>
               <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
                 {language === 'de' ? 'Aktualisieren' : 'Refresh'}
