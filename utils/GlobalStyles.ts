@@ -160,6 +160,9 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwGray,
       marginTop: '3%',
     },
+    meetingPoint: {
+      textAlign: 'center',
+    },
   },
   cardStyles: {
     card: {
