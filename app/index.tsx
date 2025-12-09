@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -8,6 +8,8 @@ import {
   Text,
   View,
   TouchableOpacity,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
@@ -116,6 +118,12 @@ export default function Welcome() {
   const [activeRallyes, setActiveRallyes] = useState<Rallye[]>([]);
   const [selectedRallye, setSelectedRallye] = useState<Rallye | null>(null);
 
+  // Auto-Refresh: Refs für Interval und App-State
+  const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const isInitializedRef = useRef<boolean>(false);
+  const AUTO_REFRESH_INTERVAL = 20000; // 20 Sekunden
+
   // Initialisierung: Lade gespeicherte Auswahl und Organisationen beim Start
   useEffect(() => {
     initializeSelection();
@@ -178,7 +186,119 @@ export default function Welcome() {
       setSelectionStep('organization');
     }
     setLoading(false);
+    
+    // Markiere Initialisierung als abgeschlossen für Auto-Refresh
+    isInitializedRef.current = true;
+    console.log('[Init] Initialisierung abgeschlossen, Auto-Refresh aktiviert');
   };
+
+  // Auto-Refresh: Aktualisiert Daten basierend auf aktuellem Schritt
+  const refreshCurrentData = useCallback(async () => {
+    // Nicht refreshen während des Ladens oder vor Initialisierung
+    if (loading || !isInitializedRef.current) return;
+
+    console.log('[Auto-Refresh] Aktualisiere Daten für Schritt:', selectionStep);
+
+    try {
+      if (selectionStep === 'organization') {
+        // Aktualisiere Organisationsliste
+        const orgs = await getOrganizationsWithActiveRallyes();
+        setOrganizations(orgs);
+        setOnline(true);
+      } else if (selectionStep === 'department' && selectedOrganization) {
+        // Aktualisiere Departments und prüfe ob Organisation noch gültig
+        const orgs = await getOrganizationsWithActiveRallyes();
+        const orgStillValid = orgs.find(o => o.id === selectedOrganization.id);
+        
+        if (orgStillValid) {
+          const depts = await getDepartmentsForOrganization(selectedOrganization.id);
+          setDepartments(depts);
+          const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
+          setTourModeRallye(tourRallye);
+          
+          // Falls keine Departments mehr und kein Tour-Mode → zurück zur Org-Auswahl
+          if (depts.length === 0 && !tourRallye) {
+            console.log('[Auto-Refresh] Organisation hat keine aktiven Inhalte mehr, zurück zur Auswahl');
+            await clearSelectedOrganization();
+            setSelectedOrganization(null);
+            setOrganizations(orgs);
+            setSelectionStep('organization');
+          }
+        } else {
+          // Organisation nicht mehr gültig
+          console.log('[Auto-Refresh] Organisation nicht mehr gültig, zurück zur Auswahl');
+          await clearSelectedOrganization();
+          setSelectedOrganization(null);
+          setOrganizations(orgs);
+          setSelectionStep('organization');
+        }
+      } else if (selectionStep === 'rallye' && selectedOrganization && selectedDepartment) {
+        // Aktualisiere Rallyes und prüfe ob Department noch gültig
+        const depts = await getDepartmentsForOrganization(selectedOrganization.id);
+        const deptStillValid = depts.find(d => d.id === selectedDepartment.id);
+        
+        if (deptStillValid) {
+          const rallyes = await getRallyesForDepartment(selectedDepartment.id);
+          setActiveRallyes(rallyes);
+          const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
+          setTourModeRallye(tourRallye);
+          
+          // Falls keine Rallyes mehr und kein Tour-Mode → zurück zur Department-Auswahl
+          if (rallyes.length === 0 && !tourRallye) {
+            console.log('[Auto-Refresh] Department hat keine aktiven Rallyes mehr, zurück zur Auswahl');
+            await clearSelectedDepartment();
+            setSelectedDepartment(null);
+            setDepartments(depts);
+            setSelectionStep('department');
+          }
+        } else {
+          // Department nicht mehr gültig → zurück zur Department-Auswahl
+          console.log('[Auto-Refresh] Department nicht mehr gültig, zurück zur Auswahl');
+          await clearSelectedDepartment();
+          setSelectedDepartment(null);
+          setDepartments(depts);
+          setSelectionStep('department');
+        }
+      }
+    } catch (error) {
+      console.error('[Auto-Refresh] Fehler beim Aktualisieren:', error);
+    }
+  }, [selectionStep, selectedOrganization, selectedDepartment, loading]);
+
+  // Auto-Refresh: Setup und Cleanup des Intervals
+  useEffect(() => {
+    // Initialer Sync nach kurzer Verzögerung (nach Initialisierung)
+    const initialSyncTimeout = setTimeout(() => {
+      if (isInitializedRef.current) {
+        console.log('[Auto-Refresh] Initialer Sync nach App-Start');
+        refreshCurrentData();
+      }
+    }, 2000); // 2 Sekunden nach Mount für initialen Sync
+
+    // Starte Auto-Refresh Interval
+    refreshIntervalRef.current = setInterval(() => {
+      refreshCurrentData();
+    }, AUTO_REFRESH_INTERVAL);
+
+    // App-State Listener: Sync wenn App aus Hintergrund kommt
+    const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
+      if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App kommt in den Vordergrund → sofort refreshen
+        console.log('[Auto-Refresh] App aus Hintergrund aktiviert, führe Sync durch');
+        refreshCurrentData();
+      }
+      appStateRef.current = nextAppState;
+    });
+
+    // Cleanup
+    return () => {
+      clearTimeout(initialSyncTimeout);
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+      appStateSubscription.remove();
+    };
+  }, [refreshCurrentData]);
 
   const loadOrganizations = async () => {
     setLoading(true);
