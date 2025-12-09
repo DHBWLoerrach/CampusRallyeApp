@@ -178,7 +178,35 @@ export default function Welcome() {
         const orgs = await getOrganizationsWithActiveRallyes();
         setOrganizations(orgs);
         setOnline(true);
-        setSelectionStep('organization');
+        
+        // Auto-Selection: Wenn nur eine Organisation verfügbar, automatisch auswählen
+        if (orgs.length === 1) {
+          console.log('[Auto-Select] Nur eine Organisation verfügbar, wähle automatisch aus');
+          const singleOrg = orgs[0];
+          setSelectedOrganization(singleOrg);
+          await storeSelectedOrganization(singleOrg);
+          
+          // Lade Departments und Tour-Mode für diese Organisation
+          const depts = await getDepartmentsForOrganization(singleOrg.id);
+          setDepartments(depts);
+          const tourRallye = await getTourModeRallyeForOrganization(singleOrg.id);
+          setTourModeRallye(tourRallye);
+          
+          // Auto-Selection: Wenn nur ein Department verfügbar, automatisch auswählen
+          if (depts.length === 1) {
+            console.log('[Auto-Select] Nur ein Department verfügbar, wähle automatisch aus');
+            const singleDept = depts[0];
+            setSelectedDepartment(singleDept);
+            await storeSelectedDepartment(singleDept);
+            const rallyes = await getRallyesForDepartment(singleDept.id);
+            setActiveRallyes(rallyes);
+            setSelectionStep('rallye');
+          } else {
+            setSelectionStep('department');
+          }
+        } else {
+          setSelectionStep('organization');
+        }
       }
     } catch (error) {
       console.error('Error initializing selection:', error);
@@ -328,7 +356,18 @@ export default function Welcome() {
       const tourRallye = await getTourModeRallyeForOrganization(org.id);
       setTourModeRallye(tourRallye);
       
-      setSelectionStep('department');
+      // Auto-Selection: Wenn nur ein Department verfügbar, automatisch auswählen
+      if (depts.length === 1) {
+        console.log('[Auto-Select] Nur ein Department verfügbar, wähle automatisch aus');
+        const singleDept = depts[0];
+        setSelectedDepartment(singleDept);
+        await storeSelectedDepartment(singleDept);
+        const rallyes = await getRallyesForDepartment(singleDept.id);
+        setActiveRallyes(rallyes);
+        setSelectionStep('rallye');
+      } else {
+        setSelectionStep('department');
+      }
     } catch (error) {
       console.error('Error loading departments:', error);
       Alert.alert('Fehler', 'Departments konnten nicht geladen werden.');
@@ -357,11 +396,25 @@ export default function Welcome() {
   // Handler für Zurück-Navigation
   const handleBack = async () => {
     if (selectionStep === 'rallye') {
-      // Lösche Department-Auswahl aus Storage
-      await clearSelectedDepartment();
-      setSelectionStep('department');
-      setSelectedDepartment(null);
-      setActiveRallyes([]);
+      // Prüfe ob nur ein Department vorhanden ist (Softlock-Vermeidung)
+      // Wenn ja, springe direkt zur Organisations-Auswahl
+      if (departments.length <= 1) {
+        console.log('[Navigation] Nur ein Department vorhanden, springe direkt zur Organisations-Auswahl');
+        // Lösche Organisation-Auswahl aus Storage (löscht auch Department)
+        await clearSelectedOrganization();
+        setSelectionStep('organization');
+        setSelectedOrganization(null);
+        setSelectedDepartment(null);
+        setDepartments([]);
+        setActiveRallyes([]);
+        setTourModeRallye(null);
+      } else {
+        // Normale Navigation: Zurück zur Department-Auswahl
+        await clearSelectedDepartment();
+        setSelectionStep('department');
+        setSelectedDepartment(null);
+        setActiveRallyes([]);
+      }
     } else if (selectionStep === 'department') {
       // Lösche Organisation-Auswahl aus Storage (löscht auch Department)
       await clearSelectedOrganization();
