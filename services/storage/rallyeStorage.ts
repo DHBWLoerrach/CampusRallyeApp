@@ -1,5 +1,5 @@
 import { supabase } from '@/utils/Supabase';
-import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
+import { StorageKeys, getStorageItem, setStorageItem, removeStorageItem } from './asyncStorage';
 import { Organization, Department, Rallye } from '@/types/rallye';
 
 export async function getCurrentRallye() {
@@ -9,6 +9,36 @@ export async function getCurrentRallye() {
 export async function setCurrentRallye(rallye: any) {
   return setStorageItem(StorageKeys.CURRENT_RALLYE, rallye);
 }
+
+// --- Persistente Auswahl-Speicherung ---
+
+export async function getSelectedOrganization(): Promise<Organization | null> {
+  return getStorageItem<Organization>(StorageKeys.SELECTED_ORGANIZATION);
+}
+
+export async function setSelectedOrganization(org: Organization): Promise<void> {
+  return setStorageItem(StorageKeys.SELECTED_ORGANIZATION, org);
+}
+
+export async function clearSelectedOrganization(): Promise<void> {
+  await removeStorageItem(StorageKeys.SELECTED_ORGANIZATION);
+  // Wenn Organisation gelöscht wird, auch Department löschen
+  await removeStorageItem(StorageKeys.SELECTED_DEPARTMENT);
+}
+
+export async function getSelectedDepartment(): Promise<Department | null> {
+  return getStorageItem<Department>(StorageKeys.SELECTED_DEPARTMENT);
+}
+
+export async function setSelectedDepartment(dept: Department): Promise<void> {
+  return setStorageItem(StorageKeys.SELECTED_DEPARTMENT, dept);
+}
+
+export async function clearSelectedDepartment(): Promise<void> {
+  return removeStorageItem(StorageKeys.SELECTED_DEPARTMENT);
+}
+
+// --- Ende Persistente Auswahl-Speicherung ---
 
 export async function getActiveRallyes() {
   const { data, error } = await supabase

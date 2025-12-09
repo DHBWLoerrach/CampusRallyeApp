@@ -26,6 +26,12 @@ import {
   getDepartmentsForOrganization,
   getRallyesForDepartment,
   getTourModeRallyeForOrganization,
+  getSelectedOrganization as getStoredOrganization,
+  setSelectedOrganization as storeSelectedOrganization,
+  clearSelectedOrganization,
+  getSelectedDepartment as getStoredDepartment,
+  setSelectedDepartment as storeSelectedDepartment,
+  clearSelectedDepartment,
 } from '@/services/storage/rallyeStorage';
 import {
   getCurrentTeam,
@@ -110,17 +116,76 @@ export default function Welcome() {
   const [activeRallyes, setActiveRallyes] = useState<Rallye[]>([]);
   const [selectedRallye, setSelectedRallye] = useState<Rallye | null>(null);
 
-  // Initialisierung: Lade Organisationen beim Start
+  // Initialisierung: Lade gespeicherte Auswahl und Organisationen beim Start
   useEffect(() => {
-    loadOrganizations();
+    initializeSelection();
   }, []);
+
+  const initializeSelection = async () => {
+    setLoading(true);
+    try {
+      // Lade gespeicherte Auswahl
+      const savedOrg = await getStoredOrganization();
+      const savedDept = await getStoredDepartment();
+
+      if (savedOrg) {
+        // Organisation war gespeichert - prüfe ob sie noch existiert/aktiv ist
+        const orgs = await getOrganizationsWithActiveRallyes();
+        setOrganizations(orgs);
+        setOnline(true);
+
+        const orgStillValid = orgs.find(o => o.id === savedOrg.id);
+        if (orgStillValid) {
+          setSelectedOrganization(orgStillValid);
+          
+          // Lade Departments und Tour-Mode für diese Organisation
+          const depts = await getDepartmentsForOrganization(orgStillValid.id);
+          setDepartments(depts);
+          const tourRallye = await getTourModeRallyeForOrganization(orgStillValid.id);
+          setTourModeRallye(tourRallye);
+
+          if (savedDept) {
+            // Department war auch gespeichert - prüfe ob es noch existiert/aktiv ist
+            const deptStillValid = depts.find(d => d.id === savedDept.id);
+            if (deptStillValid) {
+              setSelectedDepartment(deptStillValid);
+              const rallyes = await getRallyesForDepartment(deptStillValid.id);
+              setActiveRallyes(rallyes);
+              setSelectionStep('rallye');
+            } else {
+              // Department nicht mehr gültig - lösche aus Storage
+              await clearSelectedDepartment();
+              setSelectionStep('department');
+            }
+          } else {
+            setSelectionStep('department');
+          }
+        } else {
+          // Organisation nicht mehr gültig - lösche aus Storage
+          await clearSelectedOrganization();
+          setSelectionStep('organization');
+        }
+      } else {
+        // Keine gespeicherte Auswahl - lade Organisationen
+        const orgs = await getOrganizationsWithActiveRallyes();
+        setOrganizations(orgs);
+        setOnline(true);
+        setSelectionStep('organization');
+      }
+    } catch (error) {
+      console.error('Error initializing selection:', error);
+      setOnline(false);
+      setSelectionStep('organization');
+    }
+    setLoading(false);
+  };
 
   const loadOrganizations = async () => {
     setLoading(true);
     try {
       const orgs = await getOrganizationsWithActiveRallyes();
       setOrganizations(orgs);
-      setOnline(orgs.length > 0 || true); // Auch wenn keine Orgs, sind wir online
+      setOnline(orgs.length > 0 || true);
     } catch (error) {
       console.error('Error loading organizations:', error);
       setOnline(false);
@@ -133,6 +198,9 @@ export default function Welcome() {
     setSelectedOrganization(org);
     setLoading(true);
     try {
+      // Speichere Auswahl persistent
+      await storeSelectedOrganization(org);
+      
       const depts = await getDepartmentsForOrganization(org.id);
       setDepartments(depts);
       
@@ -153,6 +221,9 @@ export default function Welcome() {
     setSelectedDepartment(dept);
     setLoading(true);
     try {
+      // Speichere Auswahl persistent
+      await storeSelectedDepartment(dept);
+      
       const rallyes = await getRallyesForDepartment(dept.id);
       setActiveRallyes(rallyes);
       setSelectionStep('rallye');
@@ -164,12 +235,16 @@ export default function Welcome() {
   };
 
   // Handler für Zurück-Navigation
-  const handleBack = () => {
+  const handleBack = async () => {
     if (selectionStep === 'rallye') {
+      // Lösche Department-Auswahl aus Storage
+      await clearSelectedDepartment();
       setSelectionStep('department');
       setSelectedDepartment(null);
       setActiveRallyes([]);
     } else if (selectionStep === 'department') {
+      // Lösche Organisation-Auswahl aus Storage (löscht auch Department)
+      await clearSelectedOrganization();
       setSelectionStep('organization');
       setSelectedOrganization(null);
       setDepartments([]);
