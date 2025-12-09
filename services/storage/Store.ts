@@ -2,7 +2,7 @@ import { observable } from '@legendapp/state';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { getCurrentRallye } from './rallyeStorage';
-import { getCurrentTeam, clearCurrentTeam, teamExists } from './teamStorage';
+import { getCurrentTeam, clearCurrentTeam, teamExists, setTimePlayed } from './teamStorage';
 import { supabase } from '@/utils/Supabase';
 
 const OFFLINE_QUEUE_KEY = 'offlineQueue';
@@ -108,12 +108,26 @@ export const store$ = observable({
     return shuffleArray(filtered);
   },
 
-  gotoNextQuestion: () => {
+  gotoNextQuestion: async() => {
     if ((store$.questions.get() as any[]).length === 0) return;
     let nextIndex = store$.questionIndex.get() + 1;
     if (nextIndex === (store$.questions.get() as any[]).length) {
       store$.allQuestionsAnswered.set(true);
       store$.questionIndex.set(0);
+
+      // Rallye beendet: Zeit speichern
+      try {
+        const rallye = store$.rallye.get() as any;
+        const team = store$.team.get() as any;
+        if (rallye && team && !rallye.tour_mode) {
+          await setTimePlayed(rallye.id, team.id);
+          console.log('Rallye finished, time_played set for team:', team.id);
+        }
+      } catch (err) {
+        console.error('Error setting time_played:', err);
+      }
+
+
     } else {
       store$.questionIndex.set(nextIndex);
     }
