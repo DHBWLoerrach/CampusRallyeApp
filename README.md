@@ -7,6 +7,8 @@ am [Studienzentrum IT-Management & Informatik](https://dhbw-loerrach.de/szi).
 
 ## Setup für Entwickler
 
+Mehrere Schritte zu beachten:
+
 ### Vorbereitungen (Supabase)
 
 Die Daten werden in Supabase gespeichert. Zur Weiterentwicklung und
