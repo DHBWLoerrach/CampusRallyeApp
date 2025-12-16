@@ -160,6 +160,9 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwGray,
       marginTop: '3%',
     },
+    meetingPoint: {
+      textAlign: 'center',
+    },
   },
   cardStyles: {
     card: {
@@ -234,6 +237,34 @@ export const globalStyles = createGroupedStyles({
       textAlign: 'center',
     },
 
+
+
+
+    headerCellRank: {
+      flex: 1,
+      fontWeight: 'bold',
+      color: Colors.dhbwGray,
+      textAlign: 'left',
+    },
+    headerCellTeam: {
+      flex: 3,
+      fontWeight: 'bold',
+      color: Colors.dhbwGray,
+      textAlign: 'center',
+    },
+    headerCellTime: {
+      flex: 1,
+      fontWeight: 'bold',
+      color: Colors.dhbwGray,
+      textAlign: 'center',
+    },
+    headerCellPoints: {
+      flex: 1,
+      fontWeight: 'bold',
+      color: Colors.dhbwGray,
+      textAlign: 'right',
+    },
+    
     row: {
       flexDirection: 'row',
       padding: 15,
@@ -261,6 +292,35 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwRed,
       fontWeight: 'bold',
     },
+
+
+
+
+
+    cellRank: {
+      flex: 0.8,
+      color: Colors.dhbwGray,
+      textAlign: 'center',
+    },
+
+    cellTeam: {
+      flex: 3,
+      textAlign: 'center',
+      color: Colors.dhbwGray,
+    },
+
+    cellTime: {
+      flex: 1.2,
+      color: Colors.dhbwGray,
+      textAlign: 'center',
+    },
+
+    cellPoints: {
+      flex: 1,
+      color: Colors.dhbwGray,
+      textAlign: 'center',
+    },
+
   },
   settingsStyles: {
     container: {
