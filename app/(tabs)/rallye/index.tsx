@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Alert, RefreshControl, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, RefreshControl, Text } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
 import { store$ } from '@/services/storage/Store';
@@ -16,11 +16,10 @@ import QuestionRenderer from '@/app/(tabs)/rallye/question-renderer';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedView from '@/components/themed/ThemedView';
-import { useAppStyles } from '@/utils/AppStyles';
-import { useTheme } from '@/utils/ThemeContext';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import TeamNameSheet from '@/components/ui/TeamNameSheet';
+import SyncStatusBadge from '@/components/ui/SyncStatusBadge';
 
 function isPreparation(status?: string) {
   return status === 'preparation' || status === 'preparing';
@@ -29,22 +28,19 @@ function isPreparation(status?: string) {
 const RallyeIndex = observer(function RallyeIndex() {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
-  const s = useAppStyles();
 
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
   const idx = useSelector(() => store$.questionIndex.get());
   const qsLen = useSelector(() => store$.questions.get().length);
-  const totalQuestions = useSelector(() => (store$ as any).totalQuestions.get());
-  const answeredCount = useSelector(() => (store$ as any).answeredCount.get());
-  const showTeamNameSheet = useSelector(() => (store$ as any).showTeamNameSheet.get());
+  const totalQuestions = useSelector(() => store$.totalQuestions.get());
+  const answeredCount = useSelector(() => store$.answeredCount.get());
+  const showTeamNameSheet = useSelector(() => store$.showTeamNameSheet.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
   const points = useSelector(() => store$.points.get());
   const allQuestionsAnswered = useSelector(() => store$.allQuestionsAnswered.get());
   const timeExpired = useSelector(() => store$.timeExpired.get());
-
-  const bgColor = useMemo(() => ({}), []);
 
   const loadAnswers = async () => {
     try {
@@ -77,11 +73,11 @@ const RallyeIndex = observer(function RallyeIndex() {
 
       const questionIds = (joinData || []).map((row: any) => row.question_id);
       // Track total number of questions for progress display
-      (store$ as any).totalQuestions.set(questionIds.length);
+      store$.totalQuestions.set(questionIds.length);
       if (questionIds.length === 0) {
         store$.questions.set([]);
         store$.currentQuestion.set(null);
-        (store$ as any).answeredCount.set(0);
+        store$.answeredCount.set(0);
         return;
       }
 
@@ -96,7 +92,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         answeredIds = (answeredData || []).map((row: any) => row.question_id);
       }
       // Track number of answered questions for progress display
-      (store$ as any).answeredCount.set(answeredIds.length);
+      store$.answeredCount.set(answeredIds.length);
 
       if (answeredIds.length === questionIds.length && !rallye.tour_mode) {
         store$.allQuestionsAnswered.set(true);
@@ -195,31 +191,6 @@ const RallyeIndex = observer(function RallyeIndex() {
     }
   };
 
-  // Running flow handlers
-  const handleAnswer = async (answeredCorrectly: boolean, answerPoints: number) => {
-    try {
-      if (answeredCorrectly) store$.points.set(points + answerPoints);
-      if (team && currentQuestion) {
-        const { error } = await supabase.from('team_questions').insert({
-          team_id: team.id,
-          question_id: currentQuestion.id,
-          correct: answeredCorrectly,
-          points: answeredCorrectly ? answerPoints : 0,
-        });
-        if (error) throw error;
-      }
-      store$.gotoNextQuestion();
-    } catch (e) {
-      console.error('Fehler beim Speichern der Antwort:', e);
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Antwort konnte nicht gespeichert werden.'
-          : 'Answer could not be saved.'
-      );
-    }
-  };
-
   // Status routing
   if (!rallye) {
     return <NoQuestions loading={loading} onRefresh={onRefresh} />;
@@ -248,7 +219,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );
@@ -263,7 +234,8 @@ const RallyeIndex = observer(function RallyeIndex() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         >
           <ThemedView variant="background" style={globalStyles.default.container}>
-          <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
+            <SyncStatusBadge />
+            <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
               {(rallye?.name ? `${rallye.name} • ` : '') +
                 (language === 'de'
                   ? `Frage ${
@@ -277,13 +249,13 @@ const RallyeIndex = observer(function RallyeIndex() {
                         : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
                     } of ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`)}
             </ThemedText>
-            <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
+            <QuestionRenderer question={currentQuestion} />
           </ThemedView>
         </ThemedScrollView>
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );
@@ -319,7 +291,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );
@@ -365,7 +337,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );

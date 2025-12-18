@@ -10,7 +10,6 @@ import { useTheme } from '@/utils/ThemeContext';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
-import { clearCurrentTeam } from '@/services/storage/teamStorage';
 
 type TeamRow = {
   id: string;
@@ -205,10 +204,6 @@ export default function Scoreboard() {
         <UIButton
           icon="arrow-left"
           onPress={async () => {
-            if (!rallye) {
-              store$.enabled.set(false);
-              return;
-            }
             Alert.alert(
               'Teilnahme an der Rallye beenden',
               'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
@@ -218,16 +213,7 @@ export default function Scoreboard() {
                   text: 'Beenden',
                   style: 'destructive',
                   onPress: async () => {
-                    try {
-                      // Clear team assignment locally
-                      if (rallye?.id) await clearCurrentTeam(rallye.id);
-                      store$.team.set(null);
-                      store$.reset();
-                      store$.enabled.set(false);
-                    } catch (e) {
-                      console.error('Error clearing team on end:', e);
-                      store$.enabled.set(false);
-                    }
+                    void store$.leaveRallye();
                   },
                 },
               ]

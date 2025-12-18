@@ -101,6 +101,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 > Checkboxes sind absichtlich enthalten: sie erlauben „Plan ↔ Umsetzung“ ohne Kontextverlust.
 
 ### B00 — Quality Gates & Safety Net (**NOW**, **T**)
+**Status (codex-exp):** DONE (2025-12-17)  
 **Outcome:** Keine Lint-Errors, klare „Release-Disziplin“; regressions werden früh sichtbar.  
 **Why:** Premium entsteht aus Vorhersagbarkeit. Lint-Errors sind ein Signal für potenziell zufälliges Runtime-Verhalten.  
 **Dependencies:** –  
@@ -108,52 +109,59 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 **Non-scope:** Vollständige Warning-Elimination um jeden Preis.
 
 **Tasks**
-- [ ] T00.1 Policy: „0 Lint-Errors“ als Blocker definieren.
+- [x] T00.1 Policy: „0 Lint-Errors“ als Blocker definieren.
 - [ ] T00.2 `npm run lint` in CI/Pre-Push (optional) – nur wenn Team das will.
-- [ ] T00.3 Warnings in Kategorien clustern und auf Beads verlinken (z.B. Hook deps → B32a).
+- [x] T00.3 Warnings in Kategorien clustern und auf Beads verlinken (z.B. Hook deps → B32a).
 
 **Acceptance**
-- [ ] AC00.1 `npm run lint` liefert 0 Errors.
-- [ ] AC00.2 Es gibt eine kurze, priorisierte Warning-/Debt-Liste.
+- [x] AC00.1 `npm run lint` liefert 0 Errors.
+- [x] AC00.2 Es gibt eine kurze, priorisierte Warning-/Debt-Liste.
+
+**Debt / Warnings (Stand: 2025-12-17)**
+- `react-hooks/exhaustive-deps` in `app/(tabs)/rallye/index.tsx`, `app/(tabs)/rallye/question-renderer.tsx`, `app/(tabs)/rallye/scoreboard.tsx`, `app/(tabs)/rallye/voting.tsx` → Kandidat für `B32a` (gezielte Korrektheit/Perf), weil Fixes hier oft Refactors benötigen (useCallback/Stable-Refs).
+- `no-unused-vars` in `app/(tabs)/infos/index.jsx`, `app/(tabs)/rallye/states/NoQuestions.tsx`, `app/(tabs)/rallye/states/Preparation.tsx`, `app/(tabs)/rallye/team-setup.tsx`, `app/(tabs)/rallye/voting.tsx` → low-risk Cleanup (kann opportunistisch mit `B12`/Screen-Scaffold mitgezogen werden).
 
 ---
 
 ### B01 — Hook-Order fix + Unknown-Type ist kein Dead-End (**NOW**, **T**)
+**Status (codex-exp):** DONE (2025-12-17)  
 **Outcome:** Keine Hook-Rule-Verletzung; unbekannte Frage-Typen blockieren die Rallye nicht.  
 **Why:** Crash/White-Screen oder „festhängen“ zerstört Vertrauen sofort.  
 **Dependencies:** B00
 
 **Tasks**
-- [ ] T01.1 Hooks in `QuestionRenderer` immer ausführen (kein Early Return vor Hooks).
-- [ ] T01.2 Fallback-UI für unbekannte Typen (themed, verständlich).
-- [ ] T01.3 CTA „Frage überspringen“ (damit Nutzer:innen weiterkommen).
-- [ ] T01.4 Logging: `question.id`, `question_type` (debuggability ohne Cloud).
+- [x] T01.1 Hooks in `QuestionRenderer` immer ausführen (kein Early Return vor Hooks).
+- [x] T01.2 Fallback-UI für unbekannte Typen (themed, verständlich).
+- [x] T01.3 CTA „Frage überspringen“ (damit Nutzer:innen weiterkommen).
+- [x] T01.4 Logging: `question.id`, `question_type` (debuggability ohne Cloud).
 
 **Acceptance**
-- [ ] AC01.1 Lint: keine Hook-Errors.
-- [ ] AC01.2 Unknown-Type zeigt verständliche UI + Skip führt zur nächsten Frage.
+- [x] AC01.1 Lint: keine Hook-Errors.
+- [x] AC01.2 Unknown-Type zeigt verständliche UI + Skip führt zur nächsten Frage.
 
 ---
 
 ### B02 — `UIButton` als verlässlicher Primitive (**NOW**, **T+P**)
+**Status (codex-exp):** DONE (2025-12-17)  
 **Outcome:** Buttons sind konsistent (Layout/States/A11y), verhindern Double-Submits, fühlen sich „premium“ an.  
 **Why:** CTA-Qualität prägt die gesamte App. Wenn Buttons „wackeln“, wirkt alles billig.  
 **Dependencies:** B00
 
 **Tasks**
-- [ ] T02.1 `style` (container) + `textStyle` als Props unterstützen.
-- [ ] T02.2 `loading` State: Spinner + disabled + verhindert Mehrfachpress.
-- [ ] T02.3 Outline/Ghost Icon-Farbe korrekt (nicht immer weiß).
-- [ ] T02.4 Pressed feedback (opacity/scale, optional android ripple).
-- [ ] T02.5 A11y: `accessibilityRole`, `accessibilityState`, Label-Prop (optional).
+- [x] T02.1 `style` (container) + `textStyle` als Props unterstützen.
+- [x] T02.2 `loading` State: Spinner + disabled + verhindert Mehrfachpress.
+- [x] T02.3 Outline/Ghost Icon-Farbe korrekt (nicht immer weiß).
+- [x] T02.4 Pressed feedback (opacity/scale, optional android ripple).
+- [x] T02.5 A11y: `accessibilityRole`, `accessibilityState`, Label-Prop (optional).
 
 **Acceptance**
-- [ ] AC02.1 Komponenten, die `UIButton` layouten, brauchen keine Style-Hacks.
-- [ ] AC02.2 Loading verhindert Double-Submit sichtbar.
+- [x] AC02.1 Komponenten, die `UIButton` layouten, brauchen keine Style-Hacks.
+- [x] AC02.2 Loading verhindert Double-Submit sichtbar.
 
 ---
 
 ### B04 — Passwordless Join UX (Rallye wählen → Teilnahme bestätigen) (**NOW**, **P+T**)
+**Status (codex-exp):** DONE (2025-12-17)  
 **Outcome:** Der Einstieg ist gefühlt „geführt“ und fehlertolerant (kein Passwort-/Flip-Gimmick).  
 **Why:** Der erste Screen definiert Vertrauen + Markenwirkung.  
 **Dependencies:** B02 (Button states), B17 (Strings) empfohlen
@@ -164,35 +172,37 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 - Keine accidental taps (Modal/Sheet blockt Hintergrund).
 
 **Tasks**
-- [ ] T04.1 Join-Flow definieren: Auswahl → Confirm → Teilnahme.
-- [ ] T04.2 Replace Card-Flip durch Sheet/Modal oder Inline-Step (stabil, einfach).
-- [ ] T04.3 Fehlerfälle: Rallye nicht verfügbar / Status geändert → klare Meldung + Retry.
-- [ ] T04.4 UX: „Rallye wählen“ zeigt Status/Studiengang prominent (Fehlwahl minimieren).
+- [x] T04.1 Join-Flow definieren: Auswahl → Confirm → Teilnahme.
+- [x] T04.2 Replace Card-Flip durch Sheet/Modal oder Inline-Step (stabil, einfach).
+- [x] T04.3 Fehlerfälle: Rallye nicht verfügbar / Status geändert → klare Meldung + Retry.
+- [x] T04.4 UX: „Rallye wählen“ zeigt Status/Studiengang prominent (Fehlwahl minimieren).
 
 **Acceptance**
-- [ ] AC04.1 Kein Kontextverlust; alle Fehler bleiben im Join-Kontext.
-- [ ] AC04.2 Join ist in 2–3 klaren Schritten möglich.
+- [x] AC04.1 Kein Kontextverlust; alle Fehler bleiben im Join-Kontext.
+- [x] AC04.2 Join ist in 2–3 klaren Schritten möglich.
 
 ---
 
 ### B05 — Session/Resume/Logout Semantik (**NOW**, **T**)
+**Status (codex-exp):** DONE (2025-12-17)  
 **Outcome:** Nutzer:innen verstehen ihren Zustand (fortsetzen/neu starten) und können sauber beenden.  
 **Why:** Überraschendes Auto-Resume wirkt unprofessionell; Zombie-States zerstören Vertrauen.  
 **Dependencies:** B00
 
 **Tasks**
 - [ ] T05.1 Session-Zustände definieren (not_joined / playing / finished / post_processing).
-- [ ] T05.2 App-Start: Resume-Prompt statt stiller Teleportation.
-- [ ] T05.3 Logout/Exit: konsistentes Cleanup (enabled/team mapping/question index pro rallye).
-- [ ] T05.4 Persistenz: `currentQuestionIndex` pro `rallyeId(+teamId)` statt global.
+- [x] T05.2 App-Start: Resume-Prompt statt stiller Teleportation.
+- [x] T05.3 Logout/Exit: konsistentes Cleanup (enabled/team mapping/question index pro rallye).
+- [x] T05.4 Decision: **kein** Persist von `questionIndex` (Fragen werden beim Fetch randomisiert); Fortschritt in Team-Mode über `team_questions`.
 
 **Acceptance**
-- [ ] AC05.1 App-Start zeigt nachvollziehbar „Fortsetzen?“.
-- [ ] AC05.2 Exit führt nicht zu falschen Indizes/Teams in anderer Rallye.
+- [x] AC05.1 App-Start zeigt nachvollziehbar „Fortsetzen?“.
+- [x] AC05.2 Exit führt nicht zu falschen Indizes/Teams in anderer Rallye.
 
 ---
 
 ### B06 — Offline Outbox (nur SAVE_ANSWER) (**NOW**, **T**)
+**Status (codex-exp):** DONE (2025-12-17, MVP)  
 **Outcome:** Text/MC/QR Antworten funktionieren offline und synchronisieren später sicher.  
 **Why:** Campus-Umgebung = instabiles Netz. Offline-Sicherheit ist Trust-Feature.  
 **Dependencies:** B00
@@ -202,77 +212,81 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 - Trigger: App-Start + Foreground + Reconnect.
 
 **Tasks**
-- [ ] T06.1 Ein `OfflineAction` Schema definieren (id, type, createdAt, attempts, nextRetryAt, payloadVersion).
-- [ ] T06.2 Dedizierten Outbox-Service erstellen (`enqueue/list/process`).
-- [ ] T06.3 Trigger implementieren: start/foreground/reconnect (nicht nur NetInfo-change).
-- [ ] T06.4 Retry-Policy + „poison pill“ Handling (nach N Versuchen UI-Hinweis).
+- [x] T06.1 Ein `OfflineAction` Schema definieren (id, type, createdAt, attempts, nextRetryAt, payloadVersion).
+- [x] T06.2 Dedizierten Outbox-Service erstellen (`enqueue/list/process`).
+- [x] T06.3 Trigger implementieren: start/foreground/reconnect (nicht nur NetInfo-change).
+- [x] T06.4 Retry-Policy + Fehlerzustand sichtbar (Backoff + `lastError`; optional später: max-attempts „poison pill“).
 
 **Acceptance**
-- [ ] AC06.1 Queue wird auch beim App-Start online abgearbeitet.
-- [ ] AC06.2 App-Restart verliert keine queued Answers.
+- [x] AC06.1 Queue wird auch beim App-Start online abgearbeitet.
+- [x] AC06.2 App-Restart verliert keine queued Answers.
 
 ---
 
 ### B07 — Outbox Action: `SAVE_ANSWER` idempotent (**NOW**, **T**)
+**Status (codex-exp):** DONE (2025-12-17)  
 **Outcome:** Keine doppelten Inserts; offline queued Answers landen später genau einmal in Supabase.  
 **Why:** Duplikate sind ein Trust-Killer („App zählt doppelt / unfair“).  
 **Dependencies:** B06
 
 **Tasks**
-- [ ] T07.1 Payload vollständig: `team_id`, `question_id`, `correct`, `points`, `team_answer`.
-- [ ] T07.2 Idempotenz-Strategie festlegen (Upsert/Unique Constraint/Pre-check).
-- [ ] T07.3 Processor: pro Action robustes Error-Handling, attempts++, nextRetryAt.
-- [ ] T07.4 Result-Contract: UI erhält `ok | queued | failed`.
+- [x] T07.1 Payload vollständig: `team_id`, `question_id`, `correct`, `points`, `team_answer`.
+- [x] T07.2 Idempotenz-Strategie festlegen (Upsert/Unique Constraint/Pre-check).
+- [x] T07.3 Processor: pro Action robustes Error-Handling, attempts++, nextRetryAt.
+- [x] T07.4 Result-Contract: UI erhält `ok | queued | failed`.
 
 **Acceptance**
-- [ ] AC07.1 Offline beantwortet → später online → Antwort existiert serverseitig genau einmal.
+- [x] AC07.1 Offline beantwortet → später online → Antwort existiert serverseitig genau einmal.
 
 ---
 
 ### B09 — Offline UX & Sync Status sichtbar (**NOW**, **T+P**)
+**Status (codex-exp):** DONE (2025-12-17, MVP)  
 **Outcome:** Nutzer:innen wissen jederzeit, ob etwas queued/syncing/failed ist.  
 **Why:** „Was passiert gerade?“ ist Premium-Feeling und Trust-Basis.  
 **Dependencies:** B06, B07
 
 **Tasks**
-- [ ] T09.1 `SyncStatus` state (queueCount, syncing, lastError).
-- [ ] T09.2 In Rallye/Questions: dezenter Banner/Chip bei offline/syncing.
-- [ ] T09.3 Bei offline submit: Feedback „Gespeichert, wird synchronisiert“.
-- [ ] T09.4 Foto-Aufgaben: offline gate („Upload benötigt Internet“), kein Queue-Versprechen.
+- [x] T09.1 `SyncStatus` state (queueCount, syncing, lastError).
+- [x] T09.2 In Rallye/Questions: dezenter Banner/Chip bei offline/syncing.
+- [x] T09.3 Bei offline submit: Feedback „Gespeichert, wird synchronisiert“ (globaler Sync-Badge statt Popups).
+- [x] T09.4 Foto-Aufgaben: offline gate („Upload benötigt Internet“), kein Queue-Versprechen.
 
 **Acceptance**
-- [ ] AC09.1 Keine silent failures beim Submit.
-- [ ] AC09.2 Foto-Submit ist offline klar blockiert/erklärt.
+- [x] AC09.1 Keine silent failures beim Submit.
+- [x] AC09.2 Foto-Submit ist offline klar blockiert/erklärt.
 
 ---
 
 ### B10 — Unified Answer Pipeline (Single Source of Truth) (**NOW**, **T**)
+**Status (codex-exp):** DONE (2025-12-17)  
 **Outcome:** Alle Fragetypen nutzen dieselbe Submission-Logik (Punkte/Offline/DB/UX).  
 **Why:** Verteilte Logik führt zu Inkonsistenzen (z.B. Punkte lokal vs server, Hint-Kosten, Offline).  
 **Dependencies:** B06, B07, B09
 
 **Tasks**
-- [ ] T10.1 `submitAnswer()` API definieren (inkl. result contract).
-- [ ] T10.2 Question-Components refactoren: nur noch `submitAnswer` nutzen.
-- [ ] T10.3 Klare Zustände: loading/queued/error, disable controls.
-- [ ] T10.4 Doppelpfade entfernen (z.B. parallel vorhandene `handleAnswer`/eigene Speicherroutinen).
+- [x] T10.1 `submitAnswer()` API definieren (inkl. result contract).
+- [x] T10.2 Question-Components refactoren: nur noch `submitAnswer` nutzen.
+- [x] T10.3 Klare Zustände: loading/queued/error, disable controls.
+- [x] T10.4 Doppelpfade entfernen (z.B. parallel vorhandene `handleAnswer`/eigene Speicherroutinen).
 
 **Acceptance**
-- [ ] AC10.1 Submit ist für alle Question Types konsistent (UX + Daten).
+- [x] AC10.1 Submit ist für alle Question Types konsistent (UX + Daten).
 
 ---
 
 ### B11 — Startup Readiness (kein Blank Screen) (**NOW**, **P+T**)
+**Status (codex-exp):** DONE (2025-12-17, MVP)  
 **Outcome:** Kein „leerer Screen“ beim Start; wirkt sofort hochwertiger.  
 **Why:** `return null` bis ready erzeugt „App hängt“-Gefühl.  
 **Dependencies:** B00
 
 **Tasks**
-- [ ] T11.1 Splash bis Fonts + Navigation + Store init (statt „null“).
+- [x] T11.1 Splash bis Fonts + Navigation + Store init (statt „null“).
 - [ ] T11.2 Fallback Loading Screen (falls Splash nicht greift).
 
 **Acceptance**
-- [ ] AC11.1 Kaltstart zeigt nie längere „Leere“.
+- [x] AC11.1 Kaltstart zeigt nie längere „Leere“.
 
 ---
 
@@ -503,4 +517,3 @@ Diese Themen werden **nicht** umgesetzt, solange sich die Produktentscheidungen 
 - **Keine Passwort-/Security-Arbeit**, weil das Produktziel nicht „Zugang schützen“, sondern „Rallye spielen“ ist.
 - **Keine Foto-Outbox**, weil „offline foto später senden“ zwar bequem, aber technisch riskant/aufwendig ist. Trust gewinnt man auch durch ehrliches Online-Gating.
 - **Kein ConfirmSheet-Overengineering**: konsistente Copy + zentrale API liefert 80% des Effekts bei 20% Aufwand.
-
