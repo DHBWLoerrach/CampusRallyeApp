@@ -5,15 +5,9 @@ import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
+import type { RallyeRow } from '@/services/storage/rallyeStorage';
 
-type RallyeItem = {
-  id: number;
-  name: string;
-  studiengang?: string | null;
-  status: 'preparing' | 'running' | 'post_processing' | 'ended' | string;
-};
-
-function getStatusText(status: RallyeItem['status'], language: 'de' | 'en') {
+function getStatusText(status: RallyeRow['status'], language: 'de' | 'en') {
   switch (status) {
     case 'preparing':
       return language === 'de' ? 'Noch nicht gestartet' : 'Not started';
@@ -31,15 +25,15 @@ function getStatusText(status: RallyeItem['status'], language: 'de' | 'en') {
 type Props = {
   visible: boolean;
   onClose: () => void;
-  activeRallyes: RallyeItem[];
-  onSelect: (r: RallyeItem) => void;
+  activeRallyes: RallyeRow[];
+  onSelect: (r: RallyeRow) => void;
 };
 
 export default function RallyeSelectionModal({ visible, onClose, activeRallyes, onSelect }: Props) {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
 
-  const renderItem: ListRenderItem<RallyeItem> = ({ item }) => (
+  const renderItem: ListRenderItem<RallyeRow> = ({ item }) => (
     <View
       style={[
         globalStyles.rallyeModal.rallyeCard,
@@ -84,7 +78,7 @@ export default function RallyeSelectionModal({ visible, onClose, activeRallyes, 
           {getStatusText(item.status, language)}
         </Text>
       </View>
-      <UIButton onPress={() => onSelect(item)} style={globalStyles.rallyeModal.selectButton as any}>
+      <UIButton onPress={() => onSelect(item)} style={globalStyles.rallyeModal.selectButton}>
         {language === 'de' ? 'Auswählen' : 'Select'}
       </UIButton>
     </View>
@@ -124,7 +118,7 @@ export default function RallyeSelectionModal({ visible, onClose, activeRallyes, 
                 : 'No active rallyes available'}
             </Text>
           )}
-          <UIButton onPress={onClose} style={globalStyles.rallyeModal.cancelButton as any}>
+          <UIButton onPress={onClose} style={globalStyles.rallyeModal.cancelButton}>
             {language === 'de' ? 'Abbrechen' : 'Cancel'}
           </UIButton>
         </View>
