@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { useSelector } from '@legendapp/state/react';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
@@ -8,7 +9,7 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { supabase } from '@/utils/Supabase';
 import { useKeyboard } from '@/utils/useKeyboard';
-import { saveAnswer } from '@/services/storage/answerStorage';
+import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
@@ -21,20 +22,22 @@ import VStack from '@/components/ui/VStack';
 export default function ImageQuestion({ question }: QuestionProps) {
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
   const [pictureUri, setPictureUri] = useState<string | null>(null);
   const s = useAppStyles();
   const { keyboardHeight, keyboardVisible } = useKeyboard();
 
   const team = store$.team.get();
-  const answers = store$.answers.get() as AnswerRow[];
+  const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
   const correct = useMemo(
     () =>
       (
         answers.find((a) => a.question_id === question.id && a.correct)?.text ||
         ''
-      ).toLowerCase(),
+      ).toLowerCase().trim(),
     [answers, question.id]
   );
+  const answerKeyReady = correct.length > 0;
 
   useEffect(() => {
     (async () => {
@@ -49,20 +52,30 @@ export default function ImageQuestion({ question }: QuestionProps) {
   }, [question.bucket_path]);
 
   const handlePersist = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     const trimmed = answer.trim();
     const isCorrect = trimmed.toLowerCase() === correct;
-    if (isCorrect) store$.points.set(store$.points.get() + question.points);
-    if (team) {
-      await saveAnswer(
-        team.id,
-        question.id,
-        isCorrect,
-        isCorrect ? question.points : 0,
-        trimmed
+    try {
+      await submitAnswerAndAdvance({
+        teamId: team?.id ?? null,
+        questionId: question.id,
+        answeredCorrectly: isCorrect,
+        pointsAwarded: isCorrect ? question.points : 0,
+        answerText: trimmed,
+      });
+      setAnswer('');
+    } catch (e) {
+      console.error('Error submitting answer:', e);
+      Alert.alert(
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Antwort konnte nicht gespeichert werden.'
+          : 'Answer could not be saved.'
       );
+    } finally {
+      setSubmitting(false);
     }
-    store$.gotoNextQuestion();
-    setAnswer('');
   };
 
   const handleSubmit = () => {
@@ -72,6 +85,15 @@ export default function ImageQuestion({ question }: QuestionProps) {
         language === 'de'
           ? 'Bitte gebe eine Antwort ein.'
           : 'Please enter an answer.'
+      );
+      return;
+    }
+    if (!answerKeyReady) {
+      Alert.alert(
+        language === 'de' ? 'Bitte warten' : 'Please wait',
+        language === 'de'
+          ? 'Die Antwortdaten werden noch geladen.'
+          : 'Answer data is still loading.'
       );
       return;
     }
@@ -137,8 +159,9 @@ export default function ImageQuestion({ question }: QuestionProps) {
 
           <InfoBox mb={0}>
             <UIButton
-              color={answer.trim() !== '' ? Colors.dhbwRed : Colors.dhbwGray}
-              disabled={answer.trim() === ''}
+              color={answer.trim() !== '' && answerKeyReady ? Colors.dhbwRed : Colors.dhbwGray}
+              disabled={answer.trim() === '' || !answerKeyReady || submitting}
+              loading={submitting}
               onPress={handleSubmit}
             >
               {language === 'de' ? 'Antwort senden' : 'Submit answer'}

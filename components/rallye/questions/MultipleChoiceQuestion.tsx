@@ -9,7 +9,7 @@ import { confirmAlert } from '@/utils/ConfirmAlert';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
-import { saveAnswer } from '@/services/storage/answerStorage';
+import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
@@ -22,6 +22,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
   const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
   const s = useAppStyles();
 
   const team = store$.team.get();
@@ -54,20 +55,30 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
   );
 
   const handlePersist = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     const trimmed = answer.trim();
     const isCorrect = trimmed.toLowerCase() === correctAnswer;
-    if (isCorrect) store$.points.set(store$.points.get() + question.points);
-    if (team) {
-      await saveAnswer(
-        team.id,
-        question.id,
-        isCorrect,
-        isCorrect ? question.points : 0,
-        trimmed
+    try {
+      await submitAnswerAndAdvance({
+        teamId: team?.id ?? null,
+        questionId: question.id,
+        answeredCorrectly: isCorrect,
+        pointsAwarded: isCorrect ? question.points : 0,
+        answerText: trimmed,
+      });
+      setAnswer('');
+    } catch (e) {
+      console.error('Error submitting answer:', e);
+      Alert.alert(
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Antwort konnte nicht gespeichert werden.'
+          : 'Answer could not be saved.'
       );
+    } finally {
+      setSubmitting(false);
     }
-    store$.gotoNextQuestion();
-    setAnswer('');
   };
 
   const handleSubmit = () => {
@@ -148,7 +159,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
         <InfoBox mb={0}>
           <UIButton
             color={answer ? Colors.dhbwRed : Colors.dhbwGray}
-            disabled={!answer}
+            disabled={!answer || submitting}
+            loading={submitting}
             onPress={handleSubmit}
           >
             {language === 'de' ? 'Antwort senden' : 'Submit answer'}

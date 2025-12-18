@@ -1,14 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { store$ } from '@/services/storage/Store';
+import { useSelector } from '@legendapp/state/react';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
 import Colors from '@/utils/Colors';
-import { saveAnswer } from '@/services/storage/answerStorage';
-import { useTheme } from '@/utils/ThemeContext';
+import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { useLanguage } from '@/utils/LanguageContext';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
@@ -21,20 +21,36 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const processingRef = useRef(false);
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const { isDarkMode } = useTheme();
   const { language } = useLanguage();
   const s = useAppStyles();
 
   const team = store$.team.get();
-  const answers = store$.answers.get() as AnswerRow[];
+  const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
   const correct = (
     answers.find((a) => a.question_id === question.id && a.correct)?.text || ''
-  ).toLowerCase();
+  )
+    .toLowerCase()
+    .trim();
+  const answerKeyReady = correct.length > 0;
 
   const submitSurrender = async () => {
     setScanMode(false);
-    if (team) await saveAnswer(team.id, question.id, false, 0);
-    store$.gotoNextQuestion();
+    try {
+      await submitAnswerAndAdvance({
+        teamId: team?.id ?? null,
+        questionId: question.id,
+        answeredCorrectly: false,
+        pointsAwarded: 0,
+      });
+    } catch (e) {
+      console.error('Error submitting surrender:', e);
+      Alert.alert(
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Antwort konnte nicht gespeichert werden.'
+          : 'Answer could not be saved.'
+      );
+    }
   };
 
   const handleSurrender = () => {
@@ -58,6 +74,15 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
 
   const handleQRCode = ({ data }: { data: string }) => {
     if (processingRef.current) return;
+    if (!answerKeyReady) {
+      Alert.alert(
+        language === 'de' ? 'Bitte warten' : 'Please wait',
+        language === 'de'
+          ? 'Die QR-Code Daten werden noch geladen.'
+          : 'QR code data is still loading.'
+      );
+      return;
+    }
     processingRef.current = true;
     setScanMode(false);
     try {
@@ -76,11 +101,25 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
           [
             {
               text: language === 'de' ? 'Weiter' : 'Next',
-              onPress: async () => {
-                store$.points.set(store$.points.get() + question.points);
-                if (team)
-                  await saveAnswer(team.id, question.id, true, question.points);
-                store$.gotoNextQuestion();
+              onPress: () => {
+                void (async () => {
+                  try {
+                    await submitAnswerAndAdvance({
+                      teamId: team?.id ?? null,
+                      questionId: question.id,
+                      answeredCorrectly: true,
+                      pointsAwarded: question.points,
+                    });
+                  } catch (e) {
+                    console.error('Error submitting QR answer:', e);
+                    Alert.alert(
+                      language === 'de' ? 'Fehler' : 'Error',
+                      language === 'de'
+                        ? 'Antwort konnte nicht gespeichert werden.'
+                        : 'Answer could not be saved.'
+                    );
+                  }
+                })();
               },
             },
           ]
@@ -113,7 +152,10 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   }
 
   return (
-    <ThemedView variant="background" style={[globalStyles.default.container, s.screen, { flex: 1 }] }>
+    <ThemedView
+      variant="background"
+      style={[globalStyles.default.container, s.screen, { flex: 1 }]}
+    >
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={0}>
           <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
@@ -133,14 +175,22 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
 
         <InfoBox mb={0}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
-            <UIButton icon={scanMode ? 'circle-stop' : 'qrcode'} onPress={() => setScanMode(!scanMode)}>
+            <UIButton
+              icon={scanMode ? 'circle-stop' : 'qrcode'}
+              disabled={!answerKeyReady}
+              onPress={() => setScanMode(!scanMode)}
+            >
               {scanMode
                 ? language === 'de'
                   ? 'Kamera ausblenden'
                   : 'Hide Camera'
                 : language === 'de'
-                ? 'QR-Code scannen'
-                : 'Scan QR Code'}
+                  ? answerKeyReady
+                    ? 'QR-Code scannen'
+                    : 'Lade…'
+                  : answerKeyReady
+                    ? 'Scan QR code'
+                    : 'Loading…'}
             </UIButton>
             <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
               {language === 'de' ? 'Aufgeben' : 'Surrender'}
