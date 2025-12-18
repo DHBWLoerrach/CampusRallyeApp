@@ -8,6 +8,7 @@ import {
   useSegments,
 } from 'expo-router';
 import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
@@ -16,9 +17,12 @@ import { LanguageProvider } from '@/utils/LanguageContext';
 import { createNavigationTheme } from '@/utils/navigationTheme';
 import { ThemeContext, themeStore$, ThemeMode } from '@/utils/ThemeContext';
 
+// Keep the native splash screen visible while we load fonts and initialize navigation.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 function RootNavigator() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
   const router = useRouter();
@@ -26,11 +30,20 @@ function RootNavigator() {
   const navState = useRootNavigationState(); // ready-check
   // Subscribe reactively to Legend state changes
   const enabled = useSelector(() => store$.enabled.get());
+  const hydrated = useSelector(() => store$.hydrated.get());
   const mode = useSelector(() => themeStore$.mode.get());
   const setMode = (next: ThemeMode) => themeStore$.mode.set(next);
   const isDark =
     mode === 'dark' || (mode === 'system' && colorScheme === 'dark');
   const palette = isDark ? Colors.darkMode : Colors.lightMode;
+
+  const isReady = hydrated && !!navState?.key && (fontsLoaded || !!fontError);
+
+  useEffect(() => {
+    if (isReady) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [isReady]);
 
   useEffect(() => {
     if (!navState?.key) return;
@@ -39,7 +52,7 @@ function RootNavigator() {
     if (!enabled && inTabs) router.replace('/');
   }, [enabled, segments, router, navState?.key]);
 
-  if (!loaded || !navState?.key) return null;
+  if (!isReady) return null;
 
   const navTheme = createNavigationTheme(isDark, palette);
   return (
