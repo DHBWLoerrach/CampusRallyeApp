@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text } from 'react-native';
+import { View } from 'react-native';
 import Animated, {
   interpolate,
   Extrapolation,
@@ -10,11 +10,15 @@ import Animated, {
 } from 'react-native-reanimated';
 import { globalStyles } from '@/utils/GlobalStyles';
 import ThemedView from '@/components/themed/ThemedView';
+import ThemedText from '@/components/themed/ThemedText';
 import SkillQuestion from '@/components/rallye/questions/SkillQuestion';
 import UploadPhotoQuestion from '@/components/rallye/questions/UploadPhotoQuestion';
 import QRCodeQuestion from '@/components/rallye/questions/QRCodeQuestion';
 import MultipleChoiceQuestion from '@/components/rallye/questions/MultipleChoiceQuestion';
 import ImageQuestion from '@/components/rallye/questions/ImageQuestion';
+import UIButton from '@/components/ui/UIButton';
+import { useLanguage } from '@/utils/LanguageContext';
+import { store$ } from '@/services/storage/Store';
 
 const components: Record<string, any> = {
   knowledge: SkillQuestion,
@@ -26,22 +30,10 @@ const components: Record<string, any> = {
 
 export default function QuestionRenderer({
   question,
-  onAnswer,
 }: {
   question: any;
-  onAnswer: (correct: boolean, points: number) => void;
 }) {
-  const type = question?.question_type;
-  const Cmp = components[type];
-  if (!Cmp) {
-    return (
-      <ThemedView variant="background" style={globalStyles.default.container}>
-        <Text style={{ color: 'red', textAlign: 'center' }}>
-          Unknown question type: {String(type)}
-        </Text>
-      </ThemedView>
-    );
-  }
+  const { language } = useLanguage();
   // Flip animation using two faces, based on components/ui/Card.tsx pattern
   const [isFlipped, setIsFlipped] = useState(false);
   const [frontQuestion, setFrontQuestion] = useState(question);
@@ -84,6 +76,13 @@ export default function QuestionRenderer({
     } as const;
   }, [isFlipped]);
 
+  const springConfig = {
+    stiffness: 180,
+    damping: 18,
+    mass: 1,
+    overshootClamping: false,
+  } as const;
+
   useEffect(() => {
     // Only act when question id changes
     const nextId = question?.id;
@@ -97,14 +96,7 @@ export default function QuestionRenderer({
       setBackQuestion(question);
       flip.value = withSpring(
         180,
-        {
-          stiffness: 180,
-          damping: 18,
-          mass: 1,
-          overshootClamping: false,
-          restDisplacementThreshold: 0.5,
-          restSpeedThreshold: 0.5,
-        },
+        springConfig,
         () => runOnJS(setIsFlipped)(true)
       );
     } else {
@@ -112,28 +104,68 @@ export default function QuestionRenderer({
       setFrontQuestion(question);
       flip.value = withSpring(
         0,
-        {
-          stiffness: 180,
-          damping: 18,
-          mass: 1,
-          overshootClamping: false,
-          restDisplacementThreshold: 0.5,
-          restSpeedThreshold: 0.5,
-        },
+        springConfig,
         () => runOnJS(setIsFlipped)(false)
       );
     }
   }, [question?.id]);
 
+  const renderQuestion = (q: any) => {
+    const type = q?.question_type;
+    const Cmp = type ? components[type] : undefined;
+
+    if (!Cmp) {
+      return (
+        <ThemedView variant="background" style={globalStyles.default.container}>
+          <View style={{ width: '100%' }}>
+            <ThemedText
+              variant="title"
+              style={{ textAlign: 'center', marginBottom: 10 }}
+            >
+              {language === 'de'
+                ? 'Unbekannter Fragetyp'
+                : 'Unknown question type'}
+            </ThemedText>
+            <ThemedText style={{ textAlign: 'center', marginBottom: 16 }}>
+              {language === 'de'
+                ? `Dieser Fragetyp wird aktuell nicht unterstützt: ${String(
+                    type
+                  )}`
+                : `This question type is not supported yet: ${String(type)}`}
+            </ThemedText>
+            <UIButton
+              onPress={() => {
+                console.error('Unknown question type:', {
+                  id: q?.id,
+                  type,
+                });
+                store$.gotoNextQuestion();
+              }}
+            >
+              {language === 'de' ? 'Frage überspringen' : 'Skip question'}
+            </UIButton>
+          </View>
+        </ThemedView>
+      );
+    }
+
+    return (
+      <Cmp
+        key={q?.id ? `${type}:${q.id}` : `${type}:unknown`}
+        question={q}
+      />
+    );
+  };
+
   return (
     <Animated.View style={{ flex: 1 }}>
       {/* Front face */}
       <Animated.View style={frontStyle}>
-        <Cmp onAnswer={onAnswer} question={frontQuestion} />
+        {renderQuestion(frontQuestion)}
       </Animated.View>
       {/* Back face */}
       <Animated.View style={backStyle}>
-        <Cmp onAnswer={onAnswer} question={backQuestion ?? frontQuestion} />
+        {renderQuestion(backQuestion ?? frontQuestion)}
       </Animated.View>
     </Animated.View>
   );
