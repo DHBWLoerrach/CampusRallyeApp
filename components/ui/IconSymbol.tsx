@@ -27,6 +27,7 @@ const MAPPING = {
   'info.circle': { name: 'info-outline', source: 'material' },
   'rectangle.portrait.and.arrow.right': { name: 'logout', source: 'material' },
   globe: { name: 'language', source: 'material' },
+  lock: { name: 'lock', source: 'material' },
   'person.3': { name: 'groups', source: 'material' },
   binoculars: { name: 'binoculars', source: 'community' },
   'mappin.and.ellipse': {
