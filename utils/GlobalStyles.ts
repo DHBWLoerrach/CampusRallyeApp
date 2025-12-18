@@ -167,7 +167,7 @@ export const globalStyles = createGroupedStyles({
   cardStyles: {
     card: {
       width: '100%',
-      height: SCREEN_HEIGHT * 0.22,
+      minHeight: SCREEN_HEIGHT * 0.22,
       // backgroundColor handled by themed style
       borderRadius: Constants.cornerRadius,
       padding: SCREEN_WIDTH * 0.04,
@@ -186,13 +186,11 @@ export const globalStyles = createGroupedStyles({
     cardTitle: {
       fontSize: normalizeFont(16),
       fontWeight: 'bold',
-      color: Colors.dhbwGray,
       marginTop: SCREEN_HEIGHT * 0.01,
       textAlign: 'center',
     },
     cardDescription: {
       fontSize: normalizeFont(14),
-      color: Colors.dhbwGray,
       textAlign: 'center',
       marginTop: SCREEN_HEIGHT * 0.01,
       paddingHorizontal: SCREEN_WIDTH * 0.02,
