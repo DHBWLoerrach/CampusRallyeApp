@@ -1,73 +1,19 @@
 import { observable } from '@legendapp/state';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
-import { getCurrentRallye } from './rallyeStorage';
+import { clearCurrentRallye, getCurrentRallye } from './rallyeStorage';
 import { getCurrentTeam, clearCurrentTeam, teamExists, setTimePlayed } from './teamStorage';
-import { supabase } from '@/utils/Supabase';
+import { startOutbox } from './offlineOutbox';
 
-const OFFLINE_QUEUE_KEY = 'offlineQueue';
-let syncInProgress = false;
-
-const getOfflineQueue = async () => {
-  try {
-    const queue = await AsyncStorage.getItem(OFFLINE_QUEUE_KEY);
-    return queue ? JSON.parse(queue) : [];
-  } catch (error) {
-    console.error('Error reading offline queue:', error);
-    return [];
-  }
-};
-
-const saveOfflineQueue = async (queue: any[]) => {
-  try {
-    await AsyncStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
-  } catch (error) {
-    console.error('Error saving offline queue:', error);
-  }
-};
-
-const processOfflineQueue = async () => {
-  if (syncInProgress) return;
-
-  try {
-    syncInProgress = true;
-    const queue = await getOfflineQueue();
-
-    if (queue.length === 0) return;
-
-    for (const action of queue) {
-      try {
-        const { error } = await supabase.from((action as any).table).insert((action as any).data).select();
-        if (error) throw error;
-      } catch (error: any) {
-        console.error('Error processing offline action:', {
-          message: error?.message,
-          code: error?.code,
-          details: error?.details,
-          hint: error?.hint,
-        });
-        return;
-      }
-    }
-
-    await AsyncStorage.removeItem(OFFLINE_QUEUE_KEY);
-  } catch (error) {
-    console.error('Error in processOfflineQueue:', error);
-  } finally {
-    syncInProgress = false;
-  }
-};
-
-NetInfo.addEventListener((state) => {
-  if (state.isConnected) {
-    processOfflineQueue();
-  }
-});
+// Start outbox processing once for the app lifecycle.
+startOutbox();
 
 export const store$ = observable({
   rallye: null as any,
   teamQuestions: [] as any[],
   enabled: false,
+  // When a previously joined team exists on this device, we show an explicit resume prompt.
+  resumeAvailable: false,
+  // Marks completion of async store initialization (used by the root layout / splash logic).
+  hydrated: false,
   questions: [] as any[],
   questionIndex: 0,
   // Total number of questions for the current rallye (not filtered)
@@ -141,7 +87,9 @@ export const store$ = observable({
         (store$ as any).answeredCount.set(next);
       }
     } catch {}
-    AsyncStorage.setItem('currentQuestionIndex', String(store$.questionIndex.get()));
+    // Note: We intentionally do not persist questionIndex. Question ordering is randomized
+    // on fetch; resuming by index is therefore not stable. Progress is derived from Supabase
+    // `team_questions` (team mode) and in-memory state (tour mode).
   },
 
   reset: () => {
@@ -160,38 +108,61 @@ export const store$ = observable({
     store$.answeredCount.set(0);
   },
 
-  initialize: async () => {
-    const rallye = await getCurrentRallye();
-    store$.rallye.set(rallye);
-    if (rallye) {
-      const loadTeam = await getCurrentTeam((rallye as any).id);
-      if (loadTeam) {
-        try {
-          const exists = await teamExists((rallye as any).id, (loadTeam as any).id);
-          if (exists) {
-            store$.team.set(loadTeam);
-            // Auto-resume into Rallye tabs on app start when actively participating
-            if (!rallye.tour_mode) {
-              store$.enabled.set(true);
-            }
-          } else {
-            await clearCurrentTeam((rallye as any).id);
-            store$.team.set(null as any);
-            store$.enabled.set(false);
-            store$.teamDeleted.set(true);
-          }
-        } catch (e) {
-          console.error('Error verifying team existence on init:', e);
-          store$.team.set(loadTeam);
-          if (!rallye.tour_mode) store$.enabled.set(true);
-        }
-      } else {
-        store$.team.set(null);
+  leaveRallye: async () => {
+    const rallye = store$.rallye.get() as any;
+    try {
+      if (rallye?.id) {
+        // Remove local device → team assignment for this rallye.
+        await clearCurrentTeam(rallye.id);
       }
+      // Clear persisted "current rallye" marker so we don't offer resume again.
+      await clearCurrentRallye();
+    } catch (e) {
+      console.error('Error leaving rallye:', e);
+    } finally {
+      store$.team.set(null);
+      store$.rallye.set(null);
+      store$.reset();
+      store$.resumeAvailable.set(false);
+      store$.enabled.set(false);
     }
-    const savedIndex = await AsyncStorage.getItem('currentQuestionIndex');
-    if (savedIndex !== null) {
-      store$.questionIndex.set(parseInt(savedIndex, 10));
+  },
+
+  initialize: async () => {
+    try {
+      const rallye = await getCurrentRallye();
+      store$.rallye.set(rallye);
+      store$.resumeAvailable.set(false);
+
+      if (rallye) {
+        const rallyeId = (rallye as any).id as number;
+        const loadTeam = await getCurrentTeam(rallyeId);
+
+        if (loadTeam) {
+          try {
+            const exists = await teamExists(rallyeId, (loadTeam as any).id);
+            if (exists) {
+              store$.team.set(loadTeam);
+              // Explicit resume prompt instead of auto-navigation
+              if (!rallye.tour_mode) {
+                store$.resumeAvailable.set(true);
+              }
+            } else {
+              await clearCurrentTeam(rallyeId);
+              store$.team.set(null as any);
+              store$.teamDeleted.set(true);
+            }
+          } catch (e) {
+            console.error('Error verifying team existence on init:', e);
+            store$.team.set(loadTeam);
+            if (!rallye.tour_mode) store$.resumeAvailable.set(true);
+          }
+        } else {
+          store$.team.set(null);
+        }
+      }
+    } finally {
+      store$.hydrated.set(true);
     }
   },
 });
