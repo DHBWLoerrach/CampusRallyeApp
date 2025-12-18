@@ -23,6 +23,4 @@ export interface AnswerRow {
 
 export interface QuestionProps {
   question: Question;
-  onAnswer?: (correct: boolean, points: number) => void;
 }
-
