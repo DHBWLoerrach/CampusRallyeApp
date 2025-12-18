@@ -9,6 +9,7 @@ import {
 export type RallyeRow = {
   id: number;
   name: string;
+  password?: string | null;
   status: string;
   tour_mode: boolean;
   studiengang?: string | null;
