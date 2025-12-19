@@ -315,7 +315,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 - [x] T14.3 Shadows im Dark Mode reduzieren, Borders konsistent nutzen.
 
 **Acceptance**
-- [ ] AC14.1 Dark Mode ist angenehm und lesbar; keine „hart schwarzen“ Flächen.
+- [x] AC14.1 Dark Mode ist angenehm und lesbar; keine „hart schwarzen“ Flächen.
 
 ---
 
