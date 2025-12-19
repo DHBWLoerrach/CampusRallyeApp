@@ -3,7 +3,7 @@ import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
-import ThemedScrollView from '@/components/themed/ThemedScrollView';
+import { ScreenScrollView } from '@/components/ui/Screen';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
@@ -21,8 +21,8 @@ export default function NoQuestions({
   // "No questions" message before the first batch of questions arrives.
   if (loading) {
     return (
-      <ThemedScrollView
-        variant="background"
+      <ScreenScrollView
+        padding="none"
         contentContainerStyle={[
           globalStyles.default.refreshContainer,
           globalStyles.rallyeStatesStyles.container,
@@ -33,12 +33,12 @@ export default function NoQuestions({
         }
       >
         <ActivityIndicator size="large" color={Colors.dhbwRed} />
-      </ThemedScrollView>
+      </ScreenScrollView>
     );
   }
   return (
-    <ThemedScrollView
-      variant="background"
+    <ScreenScrollView
+      padding="none"
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,
@@ -72,6 +72,6 @@ export default function NoQuestions({
           </Text>
         </InfoBox>
       </VStack>
-    </ThemedScrollView>
+    </ScreenScrollView>
   );
 }

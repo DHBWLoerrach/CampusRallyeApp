@@ -298,7 +298,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 **Tasks**
 - [x] T12.1 `Screen` Primitive (SafeArea + background + padding tokens).
 - [x] T12.2 Standardisierte Scroll-Container (keyboard insets).
-- [ ] T12.3 Migriere Welcome + Rallye State Screens zuerst (Welcome erledigt).
+- [x] T12.3 Migriere Welcome + Rallye State Screens zuerst.
 
 **Acceptance**
 - [ ] AC12.1 Keine Notch-Overlaps, konsistentes Spacing.

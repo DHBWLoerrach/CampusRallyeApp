@@ -1,8 +1,8 @@
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { RefreshControl, Text } from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
-import ThemedScrollView from '@/components/themed/ThemedScrollView';
+import { ScreenScrollView } from '@/components/ui/Screen';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import InfoBox from '@/components/ui/InfoBox';
@@ -12,9 +12,12 @@ export default function Preparation({ loading, onRefresh }: { loading: boolean; 
   const { language } = useLanguage();
   const s = useAppStyles();
   return (
-    <ThemedScrollView
-      variant="background"
-      contentContainerStyle={[globalStyles.default.refreshContainer, globalStyles.rallyeStatesStyles.container]}
+    <ScreenScrollView
+      padding="none"
+      contentContainerStyle={[
+        globalStyles.default.refreshContainer,
+        globalStyles.rallyeStatesStyles.container,
+      ]}
       refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
     >
       <VStack style={{ width: '100%' }} gap={2}>
@@ -33,6 +36,6 @@ export default function Preparation({ loading, onRefresh }: { loading: boolean; 
           </Text>
         </InfoBox>
       </VStack>
-    </ThemedScrollView>
+    </ScreenScrollView>
   );
 }
