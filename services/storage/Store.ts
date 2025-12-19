@@ -3,6 +3,27 @@ import { clearCurrentRallye, getCurrentRallye } from './rallyeStorage';
 import { getCurrentTeam, clearCurrentTeam, teamExists, setTimePlayed } from './teamStorage';
 import { startOutbox } from './offlineOutbox';
 
+export type SessionState = 'not_joined' | 'playing' | 'finished' | 'post_processing';
+
+type SessionInputs = {
+  enabled: boolean;
+  rallye: any | null;
+  allQuestionsAnswered: boolean;
+  timeExpired: boolean;
+};
+
+function deriveSessionState({
+  enabled,
+  rallye,
+  allQuestionsAnswered,
+  timeExpired,
+}: SessionInputs): SessionState {
+  if (!enabled || !rallye) return 'not_joined';
+  if (rallye.status === 'post_processing') return 'post_processing';
+  if (rallye.status === 'ended' || allQuestionsAnswered || timeExpired) return 'finished';
+  return 'playing';
+}
+
 // Start outbox processing once for the app lifecycle.
 startOutbox();
 
@@ -29,6 +50,15 @@ export const store$ = observable({
   timeExpired: false,
   teamDeleted: false,
   showTeamNameSheet: false,
+
+  // Derived session state for resume/flow decisions.
+  sessionState: () =>
+    deriveSessionState({
+      enabled: store$.enabled.get(),
+      rallye: store$.rallye.get(),
+      allQuestionsAnswered: store$.allQuestionsAnswered.get(),
+      timeExpired: store$.timeExpired.get(),
+    }),
 
   currentQuestion: () => (store$.questions.get() as any[])[store$.questionIndex.get()],
 

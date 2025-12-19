@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import { ThemeProvider } from '@react-navigation/native';
 import {
   Slot,
@@ -52,7 +52,20 @@ function RootNavigator() {
     if (!enabled && inTabs) router.replace('/');
   }, [enabled, segments, router, navState?.key]);
 
-  if (!isReady) return null;
+  if (!isReady) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: palette.background,
+        }}
+      >
+        <ActivityIndicator size="large" color={Colors.dhbwRed} />
+      </View>
+    );
+  }
 
   const navTheme = createNavigationTheme(isDark, palette);
   return (
