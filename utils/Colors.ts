@@ -3,9 +3,13 @@
 
 export type ThemePalette = {
   background: string;
+  surface0: string;
+  surface1: string;
+  surface2: string;
   tabBarText: string;
   tabBarIcon: string;
   text: string;
+  textMuted: string;
   icon: string;
   card: string;
   scheduleHeader: string;
@@ -16,6 +20,7 @@ export type ThemePalette = {
   lightGray: string;
   dhbwRedWebView: string;
   cellBorder: string;
+  borderSubtle: string;
 };
 
 const Colors = {
@@ -34,6 +39,10 @@ const Colors = {
   text: '#2c2c2c',
   tabHeader: '#ffffff',
   lightMode: {
+    surface0: '#fcfcfc',
+    surface1: '#ffffff',
+    surface2: '#f3f3f3',
+    borderSubtle: '#E7E7E7',
     cellBorder: '#EEEEEE',
     dhbwGray: '#5C6971',
     dhbwRed: '#E2001A',
@@ -42,30 +51,35 @@ const Colors = {
     dhbwRedWebView: 'rgb(226,0,26)', // FIXME: needed by WebView
     icon: '#484848',
     text: '#000',
-    card: '#fff',
-    scheduleHeader: '#ededed',
+    textMuted: '#777777',
+    card: '#ffffff',
+    scheduleHeader: '#f3f3f3',
     scheduleInfo: '#7F91A7',
     tabBarText: '#777777',
     tabBarIcon: '#777777',
     background: '#fcfcfc',
   } as ThemePalette,
   darkMode: {
-    background: '#000',
+    surface0: '#121214',
+    surface1: '#1c1c1f',
+    surface2: '#26262a',
+    borderSubtle: '#2a2a2e',
+    background: '#121214',
     tabBarText: '#fff',
     tabBarIcon: '#fff',
     text: '#fff',
+    textMuted: '#a1a1aa',
     icon: '#fff',
-    card: '#1e1e1e',
-    scheduleHeader: '#1e1e1e',
+    card: '#1c1c1f',
+    scheduleHeader: '#1c1c1f',
     scheduleInfo: '#9fdbf5',
     dhbwGray: '#5C6971',
     dhbwRed: '#E2001A',
     dhbwRedLight: '#E2001A80',
     lightGray: '#DADADA',
     dhbwRedWebView: 'rgb(226,0,26)', // FIXME: needed by WebView
-    cellBorder: '#1f1f1f',
+    cellBorder: '#2a2a2e',
   } as ThemePalette,
 };
 
 export default Colors;
-

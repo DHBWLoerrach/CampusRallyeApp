@@ -1,5 +1,4 @@
 import { makeStyles } from './makeStyles';
-import Colors from './Colors';
 import Constants from './Constants';
 
 export const useAppStyles = makeStyles((p) => ({
@@ -35,7 +34,7 @@ export const useAppStyles = makeStyles((p) => ({
     color: p.text,
   },
   muted: {
-    color: Colors.mediumGray,
+    color: p.textMuted,
   },
   title: {
     color: p.text,
