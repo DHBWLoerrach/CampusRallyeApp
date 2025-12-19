@@ -11,9 +11,8 @@ export function createNavigationTheme(isDark: boolean, palette: ThemePalette): T
       background: palette.background,
       card: palette.card,
       text: palette.text,
-      border: palette.cellBorder,
+      border: palette.borderSubtle,
       notification: Colors.dhbwRed,
     },
   };
 }
-

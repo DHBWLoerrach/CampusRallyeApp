@@ -5,29 +5,29 @@ export const useAppStyles = makeStyles((p) => ({
   // Generic screens and sections
   screen: {
     flex: 1,
-    backgroundColor: p.background,
+    backgroundColor: p.surface0,
   },
   section: {
-    backgroundColor: p.card,
+    backgroundColor: p.surface1,
     borderRadius: Constants.cornerRadius,
   },
   card: {
-    backgroundColor: p.card,
+    backgroundColor: p.surface1,
     borderRadius: Constants.cornerRadius,
   },
   infoBox: {
-    backgroundColor: p.card,
+    backgroundColor: p.surface1,
     borderRadius: Constants.cornerRadius,
     padding: 16,
   },
   listRow: {
-    backgroundColor: p.card,
+    backgroundColor: p.surface1,
     borderBottomWidth: 1,
-    borderBottomColor: p.cellBorder,
+    borderBottomColor: p.borderSubtle,
   },
   divider: {
     borderBottomWidth: 1,
-    borderBottomColor: p.cellBorder,
+    borderBottomColor: p.borderSubtle,
   },
   // Text helpers
   text: {

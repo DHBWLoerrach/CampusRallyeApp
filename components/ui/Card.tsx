@@ -23,7 +23,17 @@ export default function Card({
   children,
 }: PropsWithChildren<Props>) {
   const { isDarkMode } = useTheme();
-  const backgroundColor = isDarkMode ? Colors.darkMode.card : Colors.lightMode.card;
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const backgroundColor = palette.surface1;
+  const surfaceStyle = isDarkMode
+    ? {
+        borderWidth: 1,
+        borderColor: palette.borderSubtle,
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
+      }
+    : null;
 
   const content = (
     <>
@@ -40,7 +50,7 @@ export default function Card({
 
   if (!onPress) {
     return (
-      <View style={[globalStyles.cardStyles.card, { backgroundColor }]}>
+      <View style={[globalStyles.cardStyles.card, { backgroundColor }, surfaceStyle]}>
         {content}
       </View>
     );
@@ -54,6 +64,7 @@ export default function Card({
       style={({ pressed }) => [
         globalStyles.cardStyles.card,
         { backgroundColor },
+        surfaceStyle,
         pressed ? { opacity: 0.92, transform: [{ scale: 0.99 }] } : null,
       ]}
     >
