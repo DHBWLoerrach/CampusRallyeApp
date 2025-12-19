@@ -3,8 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  KeyboardAvoidingView,
-  Platform,
   Text,
   View,
   TouchableOpacity,
@@ -18,6 +16,7 @@ import Card from '@/components/ui/Card';
 import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
+import { ScreenScrollView } from '@/components/ui/Screen';
 import { store$ } from '@/services/storage/Store';
 import { useSelector } from '@legendapp/state/react';
 import {
@@ -254,20 +253,10 @@ export default function Welcome() {
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
+    <ScreenScrollView
+      padding="none"
+      contentContainerStyle={globalStyles.welcomeStyles.container}
     >
-      <View
-        style={[
-          globalStyles.welcomeStyles.container,
-          {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.background
-              : Colors.lightMode.background,
-          },
-        ]}
-      >
         <View style={{ position: 'relative' }}>
           <Image
             style={globalStyles.welcomeStyles.headerImage}
@@ -325,7 +314,6 @@ export default function Welcome() {
           {online && !loading && OnlineContent()}
           {!online && !loading && OfflineContent({ onRefresh, loading })}
         </View>
-      </View>
       <RallyeSelectionModal
         visible={showRallyeModal}
         onClose={() => setShowRallyeModal(false)}
@@ -333,6 +321,6 @@ export default function Welcome() {
         onJoin={joinRallye}
         joining={joining}
       />
-    </KeyboardAvoidingView>
+    </ScreenScrollView>
   );
 }

@@ -296,9 +296,9 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 **Dependencies:** B11 empfohlen
 
 **Tasks**
-- [ ] T12.1 `Screen` Primitive (SafeArea + background + padding tokens).
-- [ ] T12.2 Standardisierte Scroll-Container (keyboard insets).
-- [ ] T12.3 Migriere Welcome + Rallye State Screens zuerst.
+- [x] T12.1 `Screen` Primitive (SafeArea + background + padding tokens).
+- [x] T12.2 Standardisierte Scroll-Container (keyboard insets).
+- [ ] T12.3 Migriere Welcome + Rallye State Screens zuerst (Welcome erledigt).
 
 **Acceptance**
 - [ ] AC12.1 Keine Notch-Overlaps, konsistentes Spacing.
