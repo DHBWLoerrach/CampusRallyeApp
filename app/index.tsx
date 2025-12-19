@@ -19,6 +19,7 @@ import { useTheme } from '@/utils/ThemeContext';
 import { ScreenScrollView } from '@/components/ui/Screen';
 import { store$ } from '@/services/storage/Store';
 import { useSelector } from '@legendapp/state/react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   getActiveRallyes,
   setCurrentRallye,
@@ -47,6 +48,7 @@ const startTourMode = async () => {
 export default function Welcome() {
   const { isDarkMode } = useTheme();
   const { language, toggleLanguage } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
   const resumeRallye = useSelector(() => store$.rallye.get());
@@ -255,65 +257,65 @@ export default function Welcome() {
   return (
     <ScreenScrollView
       padding="none"
+      edges={['bottom']}
+      contentInsetAdjustmentBehavior="never"
       contentContainerStyle={globalStyles.welcomeStyles.container}
     >
-        <View style={{ position: 'relative' }}>
-          <Image
-            style={globalStyles.welcomeStyles.headerImage}
-            source={require('../assets/images/app/dhbw-campus-header.png')}
-          />
+      <View style={{ position: 'relative' }}>
+        <Image
+          style={globalStyles.welcomeStyles.headerImage}
+          source={require('../assets/images/app/dhbw-campus-header.png')}
+        />
 
-          <TouchableOpacity
-            style={{ position: 'absolute', top: 40, left: 13 }}
-            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-            onPress={toggleLanguage}
-          >
-            <IconSymbol
-              name="globe"
-              size={24}
-              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={globalStyles.welcomeStyles.header}>
-          <Text
-            style={[
-              globalStyles.welcomeStyles.text,
-              globalStyles.welcomeStyles.title,
-              {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-              },
-            ]}
-          >
-            {language === 'de'
-              ? 'DHBW Lörrach Campus Rallye'
-              : 'DHBW Lörrach Campus Rallye'}
-          </Text>
-          <Image
-            style={globalStyles.welcomeStyles.logo}
-            source={require('../assets/images/app/dhbw-logo.png')}
+        <TouchableOpacity
+          style={{ position: 'absolute', top: insets.top, left: 13 }}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          onPress={toggleLanguage}
+        >
+          <IconSymbol
+            name="globe"
+            size={24}
+            color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
           />
-        </View>
-        <View
+        </TouchableOpacity>
+      </View>
+      <View style={globalStyles.welcomeStyles.header}>
+        <Text
           style={[
-            globalStyles.welcomeStyles.content,
+            globalStyles.welcomeStyles.text,
+            globalStyles.welcomeStyles.title,
             {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.background
-                : Colors.lightMode.background,
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
             },
           ]}
         >
-          {loading && (
-            <View>
-              <ActivityIndicator size="large" color={Colors.dhbwRed} />
-            </View>
-          )}
-          {online && !loading && OnlineContent()}
-          {!online && !loading && OfflineContent({ onRefresh, loading })}
-        </View>
+          {language === 'de'
+            ? 'DHBW Lörrach Campus Rallye'
+            : 'DHBW Lörrach Campus Rallye'}
+        </Text>
+        <Image
+          style={globalStyles.welcomeStyles.logo}
+          source={require('../assets/images/app/dhbw-logo.png')}
+        />
+      </View>
+      <View
+        style={[
+          globalStyles.welcomeStyles.content,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.background
+              : Colors.lightMode.background,
+          },
+        ]}
+      >
+        {loading && (
+          <View>
+            <ActivityIndicator size="large" color={Colors.dhbwRed} />
+          </View>
+        )}
+        {online && !loading && OnlineContent()}
+        {!online && !loading && OfflineContent({ onRefresh, loading })}
+      </View>
       <RallyeSelectionModal
         visible={showRallyeModal}
         onClose={() => setShowRallyeModal(false)}
