@@ -17,6 +17,7 @@ import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
+import { Logger } from '@/utils/Logger';
 
 export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const [picture, setPicture] = useState<{ uri: string } | null>(null);
@@ -86,7 +87,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
                     const pic = await (cameraRef.current as any)?.takePictureAsync();
                     if (pic) setPicture(pic);
                   } catch (error) {
-                    console.log('error taking picture', error);
+                    Logger.error('UploadPhoto', 'Error taking picture', error);
                   }
                 }}
               >

@@ -41,6 +41,7 @@ import {
   clearCurrentTeam,
 } from '@/services/storage/teamStorage';
 import { Organization, Department, Rallye } from '@/types/rallye';
+import { Logger } from '@/utils/Logger';
 
 // Typen für die Auswahl-Phasen
 type SelectionStep = 'organization' | 'department' | 'rallye';
@@ -68,7 +69,7 @@ const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
           store$.team.set(null);
         }
       } catch (rehydrateErr) {
-        console.error('Error rehydrating team after password submit:', rehydrateErr);
+        Logger.error('Welcome', 'Error rehydrating team after password submit', rehydrateErr);
         // Fall back to no team; UI will handle setup if needed
         store$.team.set(null);
       }
@@ -81,7 +82,7 @@ const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
       );
     }
   } catch (error) {
-    console.error('Fehler beim Überprüfen des Passworts:', error);
+    Logger.error('Welcome', 'Fehler beim Überprüfen des Passworts', error);
     Alert.alert('Fehler', 'Es ist ein Fehler aufgetreten.');
   }
 };
@@ -181,7 +182,7 @@ export default function Welcome() {
         
         // Auto-Selection: Wenn nur eine Organisation verfügbar, automatisch auswählen
         if (orgs.length === 1) {
-          console.log('[Auto-Select] Nur eine Organisation verfügbar, wähle automatisch aus');
+          Logger.debug('AutoSelect', 'Nur eine Organisation verfügbar, wähle automatisch aus');
           const singleOrg = orgs[0];
           setSelectedOrganization(singleOrg);
           await storeSelectedOrganization(singleOrg);
@@ -194,7 +195,7 @@ export default function Welcome() {
           
           // Auto-Selection: Wenn nur ein Department verfügbar, automatisch auswählen
           if (depts.length === 1) {
-            console.log('[Auto-Select] Nur ein Department verfügbar, wähle automatisch aus');
+            Logger.debug('AutoSelect', 'Nur ein Department verfügbar, wähle automatisch aus');
             const singleDept = depts[0];
             setSelectedDepartment(singleDept);
             await storeSelectedDepartment(singleDept);
@@ -209,7 +210,7 @@ export default function Welcome() {
         }
       }
     } catch (error) {
-      console.error('Error initializing selection:', error);
+      Logger.error('Welcome', 'Error initializing selection', error);
       setOnline(false);
       setSelectionStep('organization');
     }
@@ -217,7 +218,7 @@ export default function Welcome() {
     
     // Markiere Initialisierung als abgeschlossen für Auto-Refresh
     isInitializedRef.current = true;
-    console.log('[Init] Initialisierung abgeschlossen, Auto-Refresh aktiviert');
+    Logger.debug('Init', 'Initialisierung abgeschlossen, Auto-Refresh aktiviert');
   };
 
   // Auto-Refresh: Aktualisiert Daten basierend auf aktuellem Schritt
@@ -225,7 +226,7 @@ export default function Welcome() {
     // Nicht refreshen während des Ladens oder vor Initialisierung
     if (loading || !isInitializedRef.current) return;
 
-    console.log('[Auto-Refresh] Aktualisiere Daten für Schritt:', selectionStep);
+    Logger.debug('AutoRefresh', `Aktualisiere Daten für Schritt: ${selectionStep}`);
 
     try {
       if (selectionStep === 'organization') {
@@ -246,7 +247,7 @@ export default function Welcome() {
           
           // Falls keine Departments mehr und kein Tour-Mode → zurück zur Org-Auswahl
           if (depts.length === 0 && !tourRallye) {
-            console.log('[Auto-Refresh] Organisation hat keine aktiven Inhalte mehr, zurück zur Auswahl');
+            Logger.debug('AutoRefresh', 'Organisation hat keine aktiven Inhalte mehr, zurück zur Auswahl');
             await clearSelectedOrganization();
             setSelectedOrganization(null);
             setOrganizations(orgs);
@@ -254,7 +255,7 @@ export default function Welcome() {
           }
         } else {
           // Organisation nicht mehr gültig
-          console.log('[Auto-Refresh] Organisation nicht mehr gültig, zurück zur Auswahl');
+          Logger.debug('AutoRefresh', 'Organisation nicht mehr gültig, zurück zur Auswahl');
           await clearSelectedOrganization();
           setSelectedOrganization(null);
           setOrganizations(orgs);
@@ -273,7 +274,7 @@ export default function Welcome() {
           
           // Falls keine Rallyes mehr und kein Tour-Mode → zurück zur Department-Auswahl
           if (rallyes.length === 0 && !tourRallye) {
-            console.log('[Auto-Refresh] Department hat keine aktiven Rallyes mehr, zurück zur Auswahl');
+            Logger.debug('AutoRefresh', 'Department hat keine aktiven Rallyes mehr, zurück zur Auswahl');
             await clearSelectedDepartment();
             setSelectedDepartment(null);
             setDepartments(depts);
@@ -281,7 +282,7 @@ export default function Welcome() {
           }
         } else {
           // Department nicht mehr gültig → zurück zur Department-Auswahl
-          console.log('[Auto-Refresh] Department nicht mehr gültig, zurück zur Auswahl');
+          Logger.debug('AutoRefresh', 'Department nicht mehr gültig, zurück zur Auswahl');
           await clearSelectedDepartment();
           setSelectedDepartment(null);
           setDepartments(depts);
@@ -289,7 +290,7 @@ export default function Welcome() {
         }
       }
     } catch (error) {
-      console.error('[Auto-Refresh] Fehler beim Aktualisieren:', error);
+      Logger.error('AutoRefresh', 'Fehler beim Aktualisieren', error);
     }
   }, [selectionStep, selectedOrganization, selectedDepartment, loading]);
 
@@ -298,7 +299,7 @@ export default function Welcome() {
     // Initialer Sync nach kurzer Verzögerung (nach Initialisierung)
     const initialSyncTimeout = setTimeout(() => {
       if (isInitializedRef.current) {
-        console.log('[Auto-Refresh] Initialer Sync nach App-Start');
+        Logger.debug('AutoRefresh', 'Initialer Sync nach App-Start');
         refreshCurrentData();
       }
     }, 2000); // 2 Sekunden nach Mount für initialen Sync
@@ -312,7 +313,7 @@ export default function Welcome() {
     const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
       if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
         // App kommt in den Vordergrund → sofort refreshen
-        console.log('[Auto-Refresh] App aus Hintergrund aktiviert, führe Sync durch');
+        Logger.debug('AutoRefresh', 'App aus Hintergrund aktiviert, führe Sync durch');
         refreshCurrentData();
       }
       appStateRef.current = nextAppState;
@@ -335,7 +336,7 @@ export default function Welcome() {
       setOrganizations(orgs);
       setOnline(orgs.length > 0 || true);
     } catch (error) {
-      console.error('Error loading organizations:', error);
+      Logger.error('Welcome', 'Error loading organizations', error);
       setOnline(false);
     }
     setLoading(false);
@@ -358,7 +359,7 @@ export default function Welcome() {
       
       // Auto-Selection: Wenn nur ein Department verfügbar, automatisch auswählen
       if (depts.length === 1) {
-        console.log('[Auto-Select] Nur ein Department verfügbar, wähle automatisch aus');
+        Logger.debug('AutoSelect', 'Nur ein Department verfügbar, wähle automatisch aus');
         const singleDept = depts[0];
         setSelectedDepartment(singleDept);
         await storeSelectedDepartment(singleDept);
@@ -369,7 +370,7 @@ export default function Welcome() {
         setSelectionStep('department');
       }
     } catch (error) {
-      console.error('Error loading departments:', error);
+      Logger.error('Welcome', 'Error loading departments', error);
       Alert.alert('Fehler', 'Departments konnten nicht geladen werden.');
     }
     setLoading(false);
@@ -387,7 +388,7 @@ export default function Welcome() {
       setActiveRallyes(rallyes);
       setSelectionStep('rallye');
     } catch (error) {
-      console.error('Error loading rallyes:', error);
+      Logger.error('Welcome', 'Error loading rallyes', error);
       Alert.alert('Fehler', 'Rallyes konnten nicht geladen werden.');
     }
     setLoading(false);
@@ -399,29 +400,36 @@ export default function Welcome() {
       // Prüfe ob nur ein Department vorhanden ist (Softlock-Vermeidung)
       // Wenn ja, springe direkt zur Organisations-Auswahl
       if (departments.length <= 1) {
-        console.log('[Navigation] Nur ein Department vorhanden, springe direkt zur Organisations-Auswahl');
+        Logger.debug('Navigation', 'Nur ein Department vorhanden, springe direkt zur Organisations-Auswahl');
         // Lösche Organisation-Auswahl aus Storage (löscht auch Department)
         await clearSelectedOrganization();
-        setSelectionStep('organization');
+        // Zuerst States zurücksetzen, dann Step ändern (verhindert Race Conditions)
         setSelectedOrganization(null);
         setSelectedDepartment(null);
         setDepartments([]);
         setActiveRallyes([]);
         setTourModeRallye(null);
+        setSelectionStep('organization');
       } else {
         // Normale Navigation: Zurück zur Department-Auswahl
+        Logger.debug('Navigation', 'Zurück zur Department-Auswahl');
         await clearSelectedDepartment();
-        setSelectionStep('department');
+        // Zuerst States zurücksetzen, dann Step ändern
         setSelectedDepartment(null);
         setActiveRallyes([]);
+        setSelectedRallye(null);
+        setSelectionStep('department');
       }
     } else if (selectionStep === 'department') {
+      Logger.debug('Navigation', 'Zurück zur Organisations-Auswahl');
       // Lösche Organisation-Auswahl aus Storage (löscht auch Department)
       await clearSelectedOrganization();
-      setSelectionStep('organization');
+      // Zuerst States zurücksetzen, dann Step ändern
       setSelectedOrganization(null);
+      setSelectedDepartment(null);
       setDepartments([]);
       setTourModeRallye(null);
+      setSelectionStep('organization');
     }
   };
 

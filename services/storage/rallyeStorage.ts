@@ -1,6 +1,7 @@
 import { supabase } from '@/utils/Supabase';
 import { StorageKeys, getStorageItem, setStorageItem, removeStorageItem } from './asyncStorage';
 import { Organization, Department, Rallye } from '@/types/rallye';
+import { Logger } from '@/utils/Logger';
 
 export async function getCurrentRallye() {
   return getStorageItem(StorageKeys.CURRENT_RALLYE);
@@ -47,7 +48,7 @@ export async function getActiveRallyes() {
     .not('status', 'in', '(inactive,ended)')
     .eq('tour_mode', false);
   if (error) {
-    console.error('Error fetching active rallyes:', error);
+    Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
     return [] as any[];
   }
   return data ?? [];
@@ -61,7 +62,7 @@ export async function getTourModeRallye() {
     .eq('status', 'running')
     .single();
   if (error) {
-    console.error('Error fetching tour mode rallye:', error);
+    Logger.error('RallyeStorage', 'Error fetching tour mode rallye', error);
     return null;
   }
   return data;
@@ -74,7 +75,7 @@ export async function getRallyeStatus(rallyeId: number) {
     .eq('id', rallyeId)
     .single();
   if (error) {
-    console.error('Error fetching rallye status:', error);
+    Logger.error('RallyeStorage', 'Error fetching rallye status', error);
     return null;
   }
   return data?.status ?? null;
@@ -88,7 +89,7 @@ export async function getRallyeStatus(rallyeId: number) {
  * b) Eine default_rallye_id (Tour-Mode) gesetzt haben.
  */
 export async function getOrganizationsWithActiveRallyes(): Promise<Organization[]> {
-  console.log('[DEBUG] getOrganizationsWithActiveRallyes called');
+  Logger.debug('RallyeStorage', 'getOrganizationsWithActiveRallyes called');
   
   // Schritt 1: Hole alle Joins mit Rallye-Daten
   const { data: allJoins, error: joinError } = await supabase
@@ -102,10 +103,10 @@ export async function getOrganizationsWithActiveRallyes(): Promise<Organization[
       )
     `);
 
-  console.log('[DEBUG] join_department_rallye result:', { allJoins, joinError });
+  Logger.debug('RallyeStorage', 'join_department_rallye result', { allJoins, joinError });
 
   if (joinError) {
-    console.error('Error fetching rallye joins:', joinError);
+    Logger.error('RallyeStorage', 'Error fetching rallye joins', joinError);
   }
 
   // Filtere auf aktive Rallyes (status != 'inactive' und != 'ended')
@@ -126,7 +127,7 @@ export async function getOrganizationsWithActiveRallyes(): Promise<Organization[
       .in('id', activeDepartmentIds);
 
     if (deptError) {
-      console.error('Error fetching departments:', deptError);
+      Logger.error('RallyeStorage', 'Error fetching departments', deptError);
     } else if (departments) {
       orgIdsWithActiveDepts = [...new Set(departments.map((d: any) => d.organization_id))];
     }
@@ -139,10 +140,10 @@ export async function getOrganizationsWithActiveRallyes(): Promise<Organization[
     .from('organization')
     .select('id, default_rallye_id');
 
-  console.log('[DEBUG] organization query result:', { allOrgs, allOrgsError });
+  Logger.debug('RallyeStorage', 'organization query result', { allOrgs, allOrgsError });
 
   if (allOrgsError) {
-    console.error('Error fetching all orgs:', allOrgsError);
+    Logger.error('RallyeStorage', 'Error fetching all orgs', allOrgsError);
   }
 
   const orgIdsWithTourMode = allOrgs 
@@ -162,10 +163,10 @@ export async function getOrganizationsWithActiveRallyes(): Promise<Organization[
     .select('*')
     .in('id', allOrgIds);
 
-  console.log('[DEBUG] Final organizations result:', { organizations, orgError });
+  Logger.debug('RallyeStorage', 'Final organizations result', { organizations, orgError });
 
   if (orgError) {
-    console.error('Error fetching organizations:', orgError);
+    Logger.error('RallyeStorage', 'Error fetching organizations', orgError);
     return [];
   }
 
@@ -189,7 +190,7 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
     `);
 
   if (joinError) {
-    console.error('Error fetching rallye joins:', joinError);
+    Logger.error('RallyeStorage', 'Error fetching rallye joins', joinError);
     return [];
   }
 
@@ -214,7 +215,7 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
     .in('id', activeDepartmentIds);
 
   if (deptError) {
-    console.error('Error fetching departments for organization:', deptError);
+    Logger.error('RallyeStorage', 'Error fetching departments for organization', deptError);
     return [];
   }
 
@@ -232,7 +233,7 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
     .eq('department_id', deptId);
 
   if (joinError) {
-    console.error('Error fetching rallye joins for department:', joinError);
+    Logger.error('RallyeStorage', 'Error fetching rallye joins for department', joinError);
     return [];
   }
 
@@ -249,7 +250,7 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
     .in('id', rallyeIds);
 
   if (rallyeError) {
-    console.error('Error fetching rallyes for department:', rallyeError);
+    Logger.error('RallyeStorage', 'Error fetching rallyes for department', rallyeError);
     return [];
   }
 
@@ -274,7 +275,7 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
     .single();
 
   if (orgError) {
-    console.error('Error fetching organization for tour mode:', orgError);
+    Logger.error('RallyeStorage', 'Error fetching organization for tour mode', orgError);
     return null;
   }
 
@@ -291,7 +292,7 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
     .single();
 
   if (rallyeError) {
-    console.error('Error fetching tour mode rallye:', rallyeError);
+    Logger.error('RallyeStorage', 'Error fetching tour mode rallye', rallyeError);
     return null;
   }
 

@@ -4,6 +4,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { getCurrentRallye } from './rallyeStorage';
 import { getCurrentTeam, clearCurrentTeam, teamExists, setTimePlayed } from './teamStorage';
 import { supabase } from '@/utils/Supabase';
+import { Logger } from '@/utils/Logger';
 
 const OFFLINE_QUEUE_KEY = 'offlineQueue';
 let syncInProgress = false;
@@ -121,10 +122,10 @@ export const store$ = observable({
         const team = store$.team.get() as any;
         if (rallye && team && !rallye.tour_mode) {
           await setTimePlayed(rallye.id, team.id);
-          console.log('Rallye finished, time_played set for team:', team.id);
+          Logger.info('Store', `Rallye finished, time_played set for team: ${team.id}`);
         }
       } catch (err) {
-        console.error('Error setting time_played:', err);
+        Logger.error('Store', 'Error setting time_played', err);
       }
 
 
