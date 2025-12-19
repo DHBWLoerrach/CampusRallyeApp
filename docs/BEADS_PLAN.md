@@ -109,7 +109,6 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 
 **Tasks**
 - [x] T00.1 Policy: „0 Lint-Errors“ als Blocker definieren.
-- [ ] T00.2 `npm run lint` in CI/Pre-Push (optional) – nur wenn Team das will.
 - [x] T00.3 Warnings in Kategorien clustern und auf Beads verlinken (z.B. Hook deps → B32a).
 
 **Acceptance**
@@ -190,7 +189,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 **Dependencies:** B00
 
 **Tasks**
-- [ ] T05.1 Session-Zustände definieren (not_joined / playing / finished / post_processing).
+- [x] T05.1 Session-Zustände definieren (not_joined / playing / finished / post_processing).
 - [x] T05.2 App-Start: Resume-Prompt statt stiller Teleportation.
 - [x] T05.3 Logout/Exit: konsistentes Cleanup (enabled/team mapping/question index pro rallye).
 - [x] T05.4 Decision: **kein** Persist von `questionIndex` (Fragen werden beim Fetch randomisiert); Fortschritt in Team-Mode über `team_questions`.
@@ -283,7 +282,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 
 **Tasks**
 - [x] T11.1 Splash bis Fonts + Navigation + Store init (statt „null“).
-- [ ] T11.2 Fallback Loading Screen (falls Splash nicht greift).
+- [x] T11.2 Fallback Loading Screen (falls Splash nicht greift).
 
 **Acceptance**
 - [x] AC11.1 Kaltstart zeigt nie längere „Leere“.
