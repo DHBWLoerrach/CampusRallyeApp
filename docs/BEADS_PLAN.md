@@ -310,9 +310,9 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 **Dependencies:** B12
 
 **Tasks**
-- [ ] T14.1 Palette um `surface0/1/2`, `textMuted`, `borderSubtle` ergänzen.
-- [ ] T14.2 Komponenten auf Semantik umstellen (InfoBox/Card/Tabbar).
-- [ ] T14.3 Shadows im Dark Mode reduzieren, Borders konsistent nutzen.
+- [x] T14.1 Palette um `surface0/1/2`, `textMuted`, `borderSubtle` ergänzen.
+- [x] T14.2 Komponenten auf Semantik umstellen (InfoBox/Card/Tabbar).
+- [x] T14.3 Shadows im Dark Mode reduzieren, Borders konsistent nutzen.
 
 **Acceptance**
 - [ ] AC14.1 Dark Mode ist angenehm und lesbar; keine „hart schwarzen“ Flächen.
