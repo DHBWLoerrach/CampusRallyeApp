@@ -147,16 +147,19 @@ export default function Scoreboard() {
               : Colors.veryLightGray,
           }}
         >
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellRank, s.text]}>
+          <ThemedText
+            style={[globalStyles.scoreboardStyles.headerCell, s.text]}
+          >
             {t('scoreboard.rank')}
           </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellTeam, s.text]}>
+          <ThemedText
+            style={[globalStyles.scoreboardStyles.headerCellWide, s.text]}
+          >
             {t('scoreboard.team')}
           </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellTime, s.text]}>
-            {t('scoreboard.time')}
-          </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellPoints, s.text]}>
+          <ThemedText
+            style={[globalStyles.scoreboardStyles.headerCell, s.text]}
+          >
             {t('scoreboard.points')}
           </ThemedText>
         </View>
@@ -190,25 +193,35 @@ export default function Scoreboard() {
                     globalStyles.scoreboardStyles.rowHighlighted,
                 ]}
               >
-              <ThemedText style={[globalStyles.scoreboardStyles.cellRank, s.text]}>
-                {team.rank}
-              </ThemedText>
-              <ThemedText
-                style={[
-                  globalStyles.scoreboardStyles.cellTeam,
-                  s.text,
-                  team.group_name === ourTeam?.name &&
-                    globalStyles.scoreboardStyles.cellHighlighted,
-                ]}
-              >
-                {team.group_name}
-              </ThemedText>
-              <ThemedText style={[globalStyles.scoreboardStyles.cellTime, s.text]}>
-                {formatDuration(team.time_spent)}
-              </ThemedText>
-              <ThemedText style={[globalStyles.scoreboardStyles.cellPoints, s.text]}>
-                {team.total_points}
-              </ThemedText>
+                <ThemedText
+                  style={[globalStyles.scoreboardStyles.cell, s.text]}
+                >
+                  {team.rank}
+                </ThemedText>
+                <ThemedText
+                  style={[
+                    globalStyles.scoreboardStyles.cellWide,
+                    s.text,
+                    team.group_name === ourTeam?.name &&
+                      globalStyles.scoreboardStyles.cellHighlighted,
+                    {
+                      color:
+                        team.group_name === ourTeam?.name
+                          ? Colors.dhbwRed
+                          : Colors.dhbwGray,
+                    },
+                  ]}
+                >
+                  {team.group_name}
+                  {'\n'}
+                  {formatDuration(team.time_spent)}
+                </ThemedText>
+
+                <ThemedText
+                  style={[globalStyles.scoreboardStyles.cell, s.text]}
+                >
+                  {team.total_points}
+                </ThemedText>
               </View>
             );
           })}
