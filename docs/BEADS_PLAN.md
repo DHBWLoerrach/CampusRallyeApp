@@ -2,15 +2,15 @@
 
 > Zweck: Dieses Dokument ist unser „Planungsraum“-Artefakt: ein selbstdokumentierender, fein granularer Backlog aus Arbeitspaketen („Beads“), der uns hilft, die App spürbar hochwertiger („premium“) und zuverlässiger („trustworthy“) zu machen – bevor wir Code schreiben.
 >
-> Stand: 2025-12-17  
+> Stand: 2025-12-18  
 > Branch-Empfehlung: Umsetzung auf Feature-Branches (aktuell: `codex-exp`)
 
 ## Produktentscheidungen (fixiert für diesen Plan)
 
 - **Offline-Foto-Uploads:** **NEIN**  
   Konsequenz: Foto-Aufgaben sind **online-only** mit klarer UX („Upload benötigt Internet“). Keine persistente Foto-Outbox.
-- **Passwort-Sicherheit / Join-Gating:** **NICHT wichtig**  
-  Konsequenz: Kein „Secure Join“-Projekt. Join ist **passwordless** (Rallye auswählen → Teilnahme bestätigen).
+- **Join-Schutz (Passwort):** **Soft-Barrier, bewusst „untrusted“**  
+  Konsequenz: Rallyes können **optional** ein Passwort haben – bei `NULL`/`''` joinen Nutzer:innen ohne Eingabe, sonst mit Passwort (clientseitige Prüfung). „Echter“ Join-Schutz (serverseitig per RPC/RLS + später QR-Join) ist **Roadmap** und steht separat in `docs/JOIN_SECURITY_PLAN.md`.
 
 Diese Entscheidungen schneiden bewusst Komplexität, Risiko und Implementationszeit weg, ohne die **wichtigsten Nutzerziele** (Rallye spielen, Antworten abgeben, Ergebnisse sehen) zu schwächen.
 
@@ -58,7 +58,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 | B00 | Quality Gates | H (T) | L | S | NOW |
 | B01 | Hook-Order + Unknown-Type Skip | H (T) | L | S | NOW |
 | B02 | UIButton Contract | H (T+P) | M | S–M | NOW |
-| B04 | Passwordless Join UX | H (P+T) | L–M | S–M | NOW |
+| B04 | Join UX (optional Passwort) | H (P+T) | L–M | S–M | NOW |
 | B05 | Session/Resume/Logout Semantik | H (T) | M | M | NOW |
 | B06 | Offline Outbox (SAVE_ANSWER only) | H (T) | M | M | NOW |
 | B07 | Outbox: SAVE_ANSWER idempotent | H (T) | M | M | NOW |
@@ -84,7 +84,6 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 | B29 | Scoreboard Polish | M–H (P) | M | M | LATER |
 | B30 | Tour End Summary | M (P) | L | S | LATER |
 | B32a | Targeted Data Correctness/Perf | M–H (T) | M | M | LATER |
-| B03a/B03b | Secure Join (Passwort) | – | – | – | CUT |
 | B08 | Offline Photo Outbox | – | – | – | CUT |
 | B16b | Themed ConfirmSheet | – | – | – | CUT |
 | B18 | Theme Mode UI | – | – | – | CUT |
@@ -160,26 +159,27 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 
 ---
 
-### B04 — Passwordless Join UX (Rallye wählen → Teilnahme bestätigen) (**NOW**, **P+T**)
-**Status (codex-exp):** DONE (2025-12-17)  
-**Outcome:** Der Einstieg ist gefühlt „geführt“ und fehlertolerant (kein Passwort-/Flip-Gimmick).  
+### B04 — Join UX (optional Passwort) (**NOW**, **P+T**)
+**Status (codex-exp):** DONE (2025-12-18)  
+**Outcome:** Der Einstieg ist gefühlt „geführt“ und fehlertolerant: Rallyes ohne Passwort joinen ohne Eingabe; Rallyes mit Passwort haben eine klare, keyboard-sichere Passworteingabe (inkl. Flip-Card).  
 **Why:** Der erste Screen definiert Vertrauen + Markenwirkung.  
 **Dependencies:** B02 (Button states), B17 (Strings) empfohlen
 
 **Scope**
-- Join ohne Passwort.
-- Klarer Confirm („Du trittst Rallye X bei“).
+- Join ohne Passwort **wenn** `password` leer ist.
+- Join mit Passwort **wenn** `password` gesetzt ist.
 - Keine accidental taps (Modal/Sheet blockt Hintergrund).
 
 **Tasks**
 - [x] T04.1 Join-Flow definieren: Auswahl → Confirm → Teilnahme.
-- [x] T04.2 Replace Card-Flip durch Sheet/Modal oder Inline-Step (stabil, einfach).
-- [x] T04.3 Fehlerfälle: Rallye nicht verfügbar / Status geändert → klare Meldung + Retry.
-- [x] T04.4 UX: „Rallye wählen“ zeigt Status/Studiengang prominent (Fehlwahl minimieren).
+- [x] T04.2 Optionales Passwort: UI zeigt Passwort-Step nur wenn nötig; leere Passwörter überspringen.
+- [x] T04.3 Passworteingabe polished: Fokus stabil, Keyboard überdeckt Feld nicht (KeyboardAvoiding).
+- [x] T04.4 Fehlerfälle: falsches Passwort / Rallye nicht verfügbar / Status geändert → klare Meldung + Retry.
+- [x] T04.5 UX: „Rallye wählen“ zeigt Status/Studiengang prominent (Fehlwahl minimieren).
 
 **Acceptance**
 - [x] AC04.1 Kein Kontextverlust; alle Fehler bleiben im Join-Kontext.
-- [x] AC04.2 Join ist in 2–3 klaren Schritten möglich.
+- [x] AC04.2 Join ist ohne Passwort in 2–3 klaren Schritten möglich; mit Passwort bleibt der Flow klar und „premium“.
 
 ---
 
@@ -501,7 +501,6 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 
 Diese Themen werden **nicht** umgesetzt, solange sich die Produktentscheidungen nicht ändern:
 
-- B03a/B03b Secure Join (Passwort/RLS/RPC)
 - B08 Offline Photo Outbox (persistente Datei, retries, cleanup)
 - B16b Themed ConfirmSheet (optischer Luxus ohne klaren Trust-Return)
 - B18 Theme Mode UI (nice-to-have)
@@ -514,6 +513,6 @@ Diese Themen werden **nicht** umgesetzt, solange sich die Produktentscheidungen 
 
 ## Appendix: „Warum diese Cuts?“ (Kurzbegründung)
 
-- **Keine Passwort-/Security-Arbeit**, weil das Produktziel nicht „Zugang schützen“, sondern „Rallye spielen“ ist.
+- **Kein „echter“ Join-Schutz in diesem Bead-Plan**: Das Produktziel ist primär „Rallye spielen“. Der aktuelle Passwort-Join bleibt eine pragmatische Soft-Barrier; die sichere Variante (RPC/RLS + QR-Join) ist separat geplant in `docs/JOIN_SECURITY_PLAN.md`.
 - **Keine Foto-Outbox**, weil „offline foto später senden“ zwar bequem, aber technisch riskant/aufwendig ist. Trust gewinnt man auch durch ehrliches Online-Gating.
 - **Kein ConfirmSheet-Overengineering**: konsistente Copy + zentrale API liefert 80% des Effekts bei 20% Aufwand.
