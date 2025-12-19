@@ -90,6 +90,16 @@ Dazu muss die App _Expo Go_ (https://expo.dev/go) auf dem Handy installiert sein
 
 Hinweis: Im DHBW-Wlan muss der Metro-Bundler mit „Tunnel“-Option gestartet werden:  `npx expo start -g --tunnel`
 
+### Tests
+
+Unit- und Component-Tests laufen mit Jest:
+
+`npm test`
+
+Für Linting:
+
+`npm run lint`
+
 ### Development Builds der App erstellen
 
 Dies setzt die Installation und Konfiguration des Android-SDKs (macOS/Windows/Linux) und XCode (nur auf macOS) voraus.
