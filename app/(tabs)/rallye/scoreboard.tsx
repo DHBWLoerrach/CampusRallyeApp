@@ -138,16 +138,13 @@ export default function Scoreboard() {
               : Colors.veryLightGray,
           }}
         >
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellRank]}>
+          <ThemedText style={[globalStyles.scoreboardStyles.headerCell]}>
             Platz
           </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellTeam]}>
+          <ThemedText style={[globalStyles.scoreboardStyles.headerCellWide]}>
             Team
           </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellTime]}>
-            Zeit
-          </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellPoints]}>
+          <ThemedText style={[globalStyles.scoreboardStyles.headerCell]}>
             Punkte
           </ThemedText>
         </View>
@@ -172,12 +169,12 @@ export default function Scoreboard() {
                   globalStyles.scoreboardStyles.rowHighlighted,
               ]}
             >
-              <ThemedText style={[globalStyles.scoreboardStyles.cellRank]}>
+              <ThemedText style={[globalStyles.scoreboardStyles.cell]}>
                 {team.rank}
               </ThemedText>
               <ThemedText
                 style={[
-                  globalStyles.scoreboardStyles.cellTeam,
+                  globalStyles.scoreboardStyles.cellWide,
                   team.group_name === ourTeam?.name &&
                     globalStyles.scoreboardStyles.cellHighlighted,
                   {
@@ -188,12 +185,11 @@ export default function Scoreboard() {
                   },
                 ]}
               >
-                {team.group_name}
-              </ThemedText>
-              <ThemedText style={[globalStyles.scoreboardStyles.cellTime]}>
+                {team.group_name}{'\n'}
                 {formatDuration(team.time_spent)}
               </ThemedText>
-              <ThemedText style={[globalStyles.scoreboardStyles.cellPoints]}>
+              
+              <ThemedText style={[globalStyles.scoreboardStyles.cell]}>
                 {team.total_points}
               </ThemedText>
             </View>
