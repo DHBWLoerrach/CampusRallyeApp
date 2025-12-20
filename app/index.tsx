@@ -116,6 +116,8 @@ export default function Welcome() {
 
   // Bestehende States
   const [showRallyeModal, setShowRallyeModal] = useState(false);
+  const [showOrgModal, setShowOrgModal] = useState(false);
+  const [showDeptModal, setShowDeptModal] = useState(false);
   const [activeRallyes, setActiveRallyes] = useState<Rallye[]>([]);
   const [selectedRallye, setSelectedRallye] = useState<Rallye | null>(null);
 
@@ -123,7 +125,8 @@ export default function Welcome() {
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isInitializedRef = useRef<boolean>(false);
-  const AUTO_REFRESH_INTERVAL = 20000; // 20 Sekunden
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const AUTO_REFRESH_INTERVAL = 60000; // 60 Sekunden (optimiert für Batterie/Datenverbrauch)
 
   // Initialisierung: Lade gespeicherte Auswahl und Organisationen beim Start
   useEffect(() => {
@@ -226,6 +229,30 @@ export default function Welcome() {
     // Nicht refreshen während des Ladens oder vor Initialisierung
     if (loading || !isInitializedRef.current) return;
 
+    // Nicht refreshen wenn eine Rallye aktiv ist (User ist in der Rallye)
+    if (store$.enabled.get()) {
+      Logger.debug('AutoRefresh', 'Übersprungen: Rallye ist aktiv');
+      return;
+    }
+
+    // Nicht refreshen wenn App im Hintergrund ist
+    if (appStateRef.current !== 'active') {
+      Logger.debug('AutoRefresh', 'Übersprungen: App nicht aktiv');
+      return;
+    }
+
+    // Nicht refreshen wenn ein Modal geöffnet ist
+    if (showRallyeModal || showOrgModal || showDeptModal) {
+      Logger.debug('AutoRefresh', 'Übersprungen: Modal ist geöffnet');
+      return;
+    }
+
+    // Vorherigen Request abbrechen falls noch laufend
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     Logger.debug('AutoRefresh', `Aktualisiere Daten für Schritt: ${selectionStep}`);
 
     try {
@@ -290,9 +317,14 @@ export default function Welcome() {
         }
       }
     } catch (error) {
+      // AbortError ignorieren (erwartetes Verhalten bei Abbruch)
+      if (error instanceof Error && error.name === 'AbortError') {
+        Logger.debug('AutoRefresh', 'Request wurde abgebrochen');
+        return;
+      }
       Logger.error('AutoRefresh', 'Fehler beim Aktualisieren', error);
     }
-  }, [selectionStep, selectedOrganization, selectedDepartment, loading]);
+  }, [selectionStep, selectedOrganization, selectedDepartment, loading, showRallyeModal, showOrgModal, showDeptModal]);
 
   // Auto-Refresh: Setup und Cleanup des Intervals
   useEffect(() => {
@@ -324,6 +356,10 @@ export default function Welcome() {
       clearTimeout(initialSyncTimeout);
       if (refreshIntervalRef.current) {
         clearInterval(refreshIntervalRef.current);
+      }
+      // Abbrechen laufender Requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
       appStateSubscription.remove();
     };
@@ -454,10 +490,6 @@ export default function Welcome() {
     await setCurrentRallye(tourModeRallye);
     store$.enabled.set(true);
   };
-
-  // Modal States für Organisations- und Department-Auswahl
-  const [showOrgModal, setShowOrgModal] = useState(false);
-  const [showDeptModal, setShowDeptModal] = useState(false);
 
   const handleRallyeSelect = async (rallye: any) => {
     setSelectedRallye(rallye as Rallye);
