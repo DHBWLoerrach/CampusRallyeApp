@@ -434,7 +434,8 @@ export const globalStyles = createGroupedStyles({
       alignItems: 'center',
       // backgroundColor handled by themed style
       paddingHorizontal: SCREEN_WIDTH * 0.04,
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
+      paddingTop: SCREEN_HEIGHT * 0.02,
     },
     headerImage: {
       width: SCREEN_WIDTH,

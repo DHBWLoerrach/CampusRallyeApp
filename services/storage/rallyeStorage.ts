@@ -107,16 +107,33 @@ export async function getOrganizationsWithActiveRallyes(): Promise<Organization[
 
   if (joinError) {
     Logger.error('RallyeStorage', 'Error fetching rallye joins', joinError);
+    return [];
+  }
+
+  // Debug: Zeige alle Status-Werte
+  if (allJoins && allJoins.length > 0) {
+    const statusValues = allJoins.map((j: any) => ({
+      dept: j.department_id,
+      rallye: j.rallye_id,
+      status: j.rallye?.status,
+      rallyeObj: j.rallye
+    }));
+    Logger.debug('RallyeStorage', 'All join status values:', statusValues);
   }
 
   // Filtere auf aktive Rallyes (status != 'inactive' und != 'ended')
   const activeJoins = allJoins?.filter((j: any) => {
     const status = j.rallye?.status;
-    return status && status !== 'inactive' && status !== 'ended';
+    const isActive = status && status !== 'inactive' && status !== 'ended';
+    Logger.debug('RallyeStorage', `Org filter - dept=${j.department_id}, rallye=${j.rallye_id}, status=${status}, isActive=${isActive}`);
+    return isActive;
   }) ?? [];
+
+  Logger.debug('RallyeStorage', `Active joins after filter: ${activeJoins.length}`);
 
   // Extrahiere eindeutige Department-IDs (falls vorhanden)
   const activeDepartmentIds = [...new Set(activeJoins.map((j: any) => j.department_id))];
+  Logger.debug('RallyeStorage', 'Active department IDs:', activeDepartmentIds);
 
   // Schritt 2: Hole die Departments und ihre Organization-IDs (falls vorhanden)
   let orgIdsWithActiveDepts: number[] = [];
@@ -177,6 +194,8 @@ export async function getOrganizationsWithActiveRallyes(): Promise<Organization[
  * Lädt alle Departments einer Organisation, die mindestens eine aktive Rallye haben.
  */
 export async function getDepartmentsForOrganization(orgId: number): Promise<Department[]> {
+  Logger.debug('RallyeStorage', `getDepartmentsForOrganization called with orgId: ${orgId}`);
+  
   // Schritt 1: Hole alle Joins mit Rallye-Daten
   const { data: allJoins, error: joinError } = await supabase
     .from('join_department_rallye')
@@ -189,6 +208,8 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
       )
     `);
 
+  Logger.debug('RallyeStorage', 'join_department_rallye for getDepartments', { allJoins, joinError });
+
   if (joinError) {
     Logger.error('RallyeStorage', 'Error fetching rallye joins', joinError);
     return [];
@@ -197,15 +218,21 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
   // Filtere auf aktive Rallyes
   const activeJoins = allJoins?.filter((j: any) => {
     const status = j.rallye?.status;
-    return status && status !== 'inactive' && status !== 'ended';
+    const isActive = status && status !== 'inactive' && status !== 'ended';
+    Logger.debug('RallyeStorage', `Join dept=${j.department_id} rallye=${j.rallye_id}: status=${status}, isActive=${isActive}`);
+    return isActive;
   }) ?? [];
 
+  Logger.debug('RallyeStorage', `Active joins count: ${activeJoins.length}`);
+
   if (activeJoins.length === 0) {
+    Logger.debug('RallyeStorage', 'No active joins found, returning empty departments');
     return [];
   }
 
   // Extrahiere eindeutige Department-IDs mit aktiven Rallyes
   const activeDepartmentIds = [...new Set(activeJoins.map((j: any) => j.department_id))];
+  Logger.debug('RallyeStorage', 'Active department IDs:', activeDepartmentIds);
 
   // Schritt 2: Hole die Departments dieser Organisation, die in der aktiven Liste sind
   const { data: departments, error: deptError } = await supabase
@@ -213,6 +240,8 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
     .select('*')
     .eq('organization_id', orgId)
     .in('id', activeDepartmentIds);
+
+  Logger.debug('RallyeStorage', `Departments for org ${orgId}:`, { departments, deptError });
 
   if (deptError) {
     Logger.error('RallyeStorage', 'Error fetching departments for organization', deptError);
@@ -226,11 +255,15 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
  * Lädt alle aktiven Rallyes für ein Department.
  */
 export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]> {
+  Logger.debug('RallyeStorage', `getRallyesForDepartment called with deptId: ${deptId}`);
+  
   // Hole alle Rallye-IDs, die diesem Department zugeordnet sind
   const { data: joins, error: joinError } = await supabase
     .from('join_department_rallye')
     .select('rallye_id')
     .eq('department_id', deptId);
+
+  Logger.debug('RallyeStorage', 'join_department_rallye result for dept', { deptId, joins, joinError });
 
   if (joinError) {
     Logger.error('RallyeStorage', 'Error fetching rallye joins for department', joinError);
@@ -238,16 +271,20 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
   }
 
   if (!joins || joins.length === 0) {
+    Logger.debug('RallyeStorage', `No rallye joins found for deptId: ${deptId}`);
     return [];
   }
 
   const rallyeIds = joins.map((j: any) => j.rallye_id);
+  Logger.debug('RallyeStorage', `Rallye IDs for dept ${deptId}:`, rallyeIds);
 
   // Hole die Rallyes
   const { data: allRallyes, error: rallyeError } = await supabase
     .from('rallye')
     .select('*')
     .in('id', rallyeIds);
+
+  Logger.debug('RallyeStorage', 'All rallyes fetched:', { allRallyes, rallyeError });
 
   if (rallyeError) {
     Logger.error('RallyeStorage', 'Error fetching rallyes for department', rallyeError);
@@ -256,8 +293,12 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
 
   // Filtere nach aktivem Status client-seitig
   const activeRallyes = allRallyes?.filter((r: any) => {
-    return r.status && r.status !== 'inactive' && r.status !== 'ended';
+    const isActive = r.status && r.status !== 'inactive' && r.status !== 'ended';
+    Logger.debug('RallyeStorage', `Rallye ${r.id} (${r.name}): status=${r.status}, isActive=${isActive}`);
+    return isActive;
   }) ?? [];
+
+  Logger.debug('RallyeStorage', `Active rallyes for dept ${deptId}:`, activeRallyes);
 
   return activeRallyes as Rallye[];
 }

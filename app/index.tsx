@@ -344,6 +344,7 @@ export default function Welcome() {
 
   // Handler für Organisation-Auswahl
   const handleOrganizationSelect = async (org: Organization) => {
+    Logger.debug('Welcome', `handleOrganizationSelect called for org: ${org.id} (${org.name})`);
     setSelectedOrganization(org);
     setLoading(true);
     try {
@@ -351,10 +352,13 @@ export default function Welcome() {
       await storeSelectedOrganization(org);
       
       const depts = await getDepartmentsForOrganization(org.id);
+      Logger.debug('Welcome', `Departments loaded for org ${org.id}:`, depts);
+      Logger.debug('Welcome', `Number of departments: ${depts.length}`);
       setDepartments(depts);
       
       // Lade Tour-Mode Rallye für diese Organisation
       const tourRallye = await getTourModeRallyeForOrganization(org.id);
+      Logger.debug('Welcome', `Tour mode rallye for org ${org.id}:`, tourRallye);
       setTourModeRallye(tourRallye);
       
       // Auto-Selection: Wenn nur ein Department verfügbar, automatisch auswählen
@@ -364,9 +368,11 @@ export default function Welcome() {
         setSelectedDepartment(singleDept);
         await storeSelectedDepartment(singleDept);
         const rallyes = await getRallyesForDepartment(singleDept.id);
+        Logger.debug('Welcome', `Rallyes for single dept ${singleDept.id}:`, rallyes);
         setActiveRallyes(rallyes);
         setSelectionStep('rallye');
       } else {
+        Logger.debug('Welcome', `Setting selection step to 'department' (depts.length=${depts.length})`);
         setSelectionStep('department');
       }
     } catch (error) {
@@ -378,6 +384,7 @@ export default function Welcome() {
 
   // Handler für Department-Auswahl
   const handleDepartmentSelect = async (dept: Department) => {
+    Logger.debug('Welcome', `handleDepartmentSelect called with dept: ${dept.id} (${dept.name})`);
     setSelectedDepartment(dept);
     setLoading(true);
     try {
@@ -385,6 +392,8 @@ export default function Welcome() {
       await storeSelectedDepartment(dept);
       
       const rallyes = await getRallyesForDepartment(dept.id);
+      Logger.debug('Welcome', `Rallyes loaded for dept ${dept.id}:`, rallyes);
+      Logger.debug('Welcome', `Number of rallyes: ${rallyes.length}`);
       setActiveRallyes(rallyes);
       setSelectionStep('rallye');
     } catch (error) {
@@ -535,6 +544,7 @@ export default function Welcome() {
   // Phase 2: Department-Auswahl
   // Department-Karte nur anzeigen wenn es Departments mit aktiven Rallyes gibt
   const hasDepartmentsWithRallyes = departments.length > 0;
+  const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye;
 
   const DepartmentContent = () => (
     <View
@@ -577,6 +587,25 @@ export default function Welcome() {
           onPasswordSubmit={() => {}}
         />
       )}
+      {hasNoContent && (
+        <View style={{ alignItems: 'center', padding: 20 }}>
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 16,
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+              marginBottom: 16,
+            }}
+          >
+            {language === 'de'
+              ? 'Derzeit sind keine aktiven Rallyes für diesen Standort verfügbar.'
+              : 'No active rallyes are currently available for this location.'}
+          </Text>
+          <UIButton icon="rotate" onPress={() => handleBack()}>
+            {language === 'de' ? 'Zurück' : 'Back'}
+          </UIButton>
+        </View>
+      )}
     </View>
   );
 
@@ -592,19 +621,46 @@ export default function Welcome() {
         },
       ]}
     >
-      {/* Department-Name Anzeige */}
+      {/* Department-Name Anzeige mit Trennlinien */}
       {selectedDepartment && (
-        <Text
+        <View
           style={{
-            textAlign: 'center',
-            fontSize: 16,
-            fontWeight: '500',
+            flexDirection: 'row',
+            alignItems: 'center',
+            width: '100%',
             marginBottom: 16,
-            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+            paddingHorizontal: 8,
           }}
         >
-          {selectedDepartment.name}
-        </Text>
+          <View
+            style={{
+              flex: 1,
+              height: 1,
+              backgroundColor: isDarkMode
+                ? 'rgba(255, 255, 255, 0.3)'
+                : 'rgba(92, 105, 113, 0.4)',
+            }}
+          />
+          <Text
+            style={{
+              paddingHorizontal: 12,
+              fontSize: 15,
+              fontWeight: '500',
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray,
+            }}
+          >
+            {selectedDepartment.name}
+          </Text>
+          <View
+            style={{
+              flex: 1,
+              height: 1,
+              backgroundColor: isDarkMode
+                ? 'rgba(255, 255, 255, 0.3)'
+                : 'rgba(92, 105, 113, 0.4)',
+            }}
+          />
+        </View>
       )}
       <Card
         title={
@@ -614,8 +670,8 @@ export default function Welcome() {
         }
         description={
           language === 'de'
-            ? 'Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team'
-            : 'Join a guided rally and explore the campus with your team'
+            ? 'Nimm an einer Rallye teil und entdecke den Campus mit deinem Team'
+            : 'Join a rally and explore the campus with your team'
         }
         icon="mappin.and.ellipse"
         onShowModal={() => {
@@ -654,9 +710,9 @@ export default function Welcome() {
   // Dynamischer Titel basierend auf ausgewählter Organisation
   const getHeaderTitle = () => {
     if (selectedOrganization) {
-      return `${selectedOrganization.name} Campus Rallye`;
+      return `${selectedOrganization.name} Campus Rallyes`;
     }
-    return language === 'de' ? 'Campus Rallye' : 'Campus Rallye';
+    return language === 'de' ? 'Campus Rallyes' : 'Campus Rallyes';
   };
 
   // Render des aktuellen Schritts
