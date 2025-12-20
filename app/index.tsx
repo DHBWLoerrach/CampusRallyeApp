@@ -752,28 +752,42 @@ export default function Welcome() {
 
           {/* Sprach-Toggle (Links) */}
           <TouchableOpacity
-            style={{ position: 'absolute', top: 40, left: 13 }}
-            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            style={{
+              position: 'absolute',
+              top: 40,
+              left: 13,
+              backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
+              borderRadius: 8,
+              padding: 8,
+            }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             onPress={toggleLanguage}
           >
             <IconSymbol
               name="globe"
               size={24}
-              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+              color={Colors.dhbwRed}
             />
           </TouchableOpacity>
 
           {/* Zurück-Button (Rechts) - nur sichtbar wenn nicht in Phase 1 */}
           {selectionStep !== 'organization' && (
             <TouchableOpacity
-              style={{ position: 'absolute', top: 40, right: 13 }}
-              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+              style={{
+                position: 'absolute',
+                top: 40,
+                right: 13,
+                backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
+                borderRadius: 8,
+                padding: 8,
+              }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               onPress={handleBack}
             >
               <IconSymbol
                 name="arrow.backward"
                 size={24}
-                color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
+                color={Colors.dhbwRed}
               />
             </TouchableOpacity>
           )}
