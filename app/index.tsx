@@ -6,7 +6,6 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -19,6 +18,7 @@ import { ScreenScrollView } from '@/components/ui/Screen';
 import { store$ } from '@/services/storage/Store';
 import { useSelector } from '@legendapp/state/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import NetInfo from '@react-native-community/netinfo';
 import ThemedText from '@/components/themed/ThemedText';
 import { confirm } from '@/utils/ConfirmAlert';
 import {
@@ -42,8 +42,9 @@ export default function Welcome() {
   const resumeRallye = useSelector(() => store$.rallye.get());
   const resumeTeam = useSelector(() => store$.team.get());
 
-  const [loading, setLoading] = useState(false);
-  const [online, setOnline] = useState(true);
+  const [fetchState, setFetchState] = useState<
+    'loading' | 'ready' | 'offline' | 'empty' | 'error'
+  >('loading');
   const [joining, setJoining] = useState(false);
 
   const [showRallyeModal, setShowRallyeModal] = useState(false);
@@ -62,32 +63,37 @@ export default function Welcome() {
     }
   };
 
-  useEffect(() => {
-    onRefresh();
-  }, []);
-
-  const onRefresh = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('rallye')
-      .select('*')
-      .not('status', 'in', '(inactive,ended)')
-      .eq('tour_mode', false);
-
-    if (data) {
-      setOnline(true);
-    } else {
-      setOnline(false);
+  const loadRallyes = async () => {
+    setFetchState('loading');
+    const netState = await NetInfo.fetch();
+    const isOffline =
+      netState.isConnected === false || netState.isInternetReachable === false;
+    if (isOffline) {
+      setActiveRallyes([]);
+      setFetchState('offline');
+      return;
     }
-    setLoading(false);
+
+    const { data, error } = await getActiveRallyes();
+    if (error) {
+      setActiveRallyes([]);
+      setFetchState('error');
+      return;
+    }
+
+    if (data.length === 0) {
+      setActiveRallyes([]);
+      setFetchState('empty');
+      return;
+    }
+
+    setActiveRallyes(data);
+    setFetchState('ready');
   };
 
   useEffect(() => {
-    (async () => {
-      const rallyes = await getActiveRallyes();
-      setActiveRallyes(rallyes);
-    })();
-  }, [showRallyeModal]);
+    void loadRallyes();
+  }, []);
 
   const joinRallye = async (rallye: RallyeRow): Promise<boolean> => {
     if (joining) return false;
@@ -126,20 +132,35 @@ export default function Welcome() {
     }
   };
 
-  const OfflineContent = ({
-    loading,
-    onRefresh,
-  }: {
-    loading: boolean;
-    onRefresh: () => void | Promise<void>;
-  }) => (
+  const stateBackground = isDarkMode
+    ? Colors.darkMode.background
+    : Colors.lightMode.background;
+
+  const LoadingContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.offline,
         {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
+          backgroundColor: stateBackground,
+        },
+      ]}
+    >
+      <ActivityIndicator size="large" color={Colors.dhbwRed} />
+      <ThemedText
+        variant="body"
+        style={[globalStyles.welcomeStyles.text, { marginTop: 16 }]}
+      >
+        {t('common.loading')}
+      </ThemedText>
+    </View>
+  );
+
+  const StateContent = ({ message }: { message: string }) => (
+    <View
+      style={[
+        globalStyles.welcomeStyles.offline,
+        {
+          backgroundColor: stateBackground,
         },
       ]}
     >
@@ -147,22 +168,20 @@ export default function Welcome() {
         variant="body"
         style={[globalStyles.welcomeStyles.text, { marginBottom: 20 }]}
       >
-        {t('welcome.offline')}
+        {message}
       </ThemedText>
-      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+      <UIButton icon="rotate" onPress={loadRallyes}>
         {t('common.refresh')}
       </UIButton>
     </View>
   );
 
-  const OnlineContent = () => (
+  const ReadyContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.container,
         {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
+          backgroundColor: stateBackground,
         },
       ]}
     >
@@ -273,13 +292,11 @@ export default function Welcome() {
           },
         ]}
       >
-        {loading && (
-          <View>
-            <ActivityIndicator size="large" color={Colors.dhbwRed} />
-          </View>
-        )}
-        {online && !loading && OnlineContent()}
-        {!online && !loading && OfflineContent({ onRefresh, loading })}
+        {fetchState === 'loading' && <LoadingContent />}
+        {fetchState === 'ready' && <ReadyContent />}
+        {fetchState === 'offline' && <StateContent message={t('welcome.offline')} />}
+        {fetchState === 'empty' && <StateContent message={t('welcome.empty')} />}
+        {fetchState === 'error' && <StateContent message={t('welcome.error')} />}
       </View>
       <RallyeSelectionModal
         visible={showRallyeModal}

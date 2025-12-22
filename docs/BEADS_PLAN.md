@@ -383,16 +383,17 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B19 — Welcome States (Loading/Offline/Empty/Error sauber) (**NEXT**, **P+T**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Einstieg ist klar und vertrauenswürdig (keine „data truthiness“ Online-Heuristik).  
 **Dependencies:** B12, B15, B17
 
 **Tasks**
-- [ ] T19.1 Fetch-Logik konsolidieren (ein Weg, klare error branches).
-- [ ] T19.2 Zustände trennen: loading vs offline vs empty vs error.
-- [ ] T19.3 Empty State: „Keine Rallyes verfügbar“ + Retry.
+- [x] T19.1 Fetch-Logik konsolidieren (ein Weg, klare error branches).
+- [x] T19.2 Zustände trennen: loading vs offline vs empty vs error.
+- [x] T19.3 Empty State: „Keine Rallyes verfügbar“ + Retry.
 
 **Acceptance**
-- [ ] AC19.1 Jede Lage hat klare UI und CTA.
+- [x] AC19.1 Jede Lage hat klare UI und CTA.
 
 ---
 

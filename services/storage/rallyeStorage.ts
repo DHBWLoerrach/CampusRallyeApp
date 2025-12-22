@@ -16,6 +16,11 @@ export type RallyeRow = {
   end_time?: string | null;
 };
 
+export type RallyeFetchResult = {
+  data: RallyeRow[];
+  error: unknown | null;
+};
+
 export async function getCurrentRallye(): Promise<RallyeRow | null> {
   return (await getStorageItem(StorageKeys.CURRENT_RALLYE)) as RallyeRow | null;
 }
@@ -28,17 +33,22 @@ export async function clearCurrentRallye() {
   return removeStorageItem(StorageKeys.CURRENT_RALLYE);
 }
 
-export async function getActiveRallyes(): Promise<RallyeRow[]> {
-  const { data, error } = await supabase
-    .from('rallye')
-    .select('*')
-    .not('status', 'in', '(inactive,ended)')
-    .eq('tour_mode', false);
-  if (error) {
+export async function getActiveRallyes(): Promise<RallyeFetchResult> {
+  try {
+    const { data, error } = await supabase
+      .from('rallye')
+      .select('*')
+      .not('status', 'in', '(inactive,ended)')
+      .eq('tour_mode', false);
+    if (error) {
+      console.error('Error fetching active rallyes:', error);
+      return { data: [], error };
+    }
+    return { data: (data ?? []) as RallyeRow[], error: null };
+  } catch (error) {
     console.error('Error fetching active rallyes:', error);
-    return [];
+    return { data: [], error };
   }
-  return (data ?? []) as RallyeRow[];
 }
 
 export async function getTourModeRallye(): Promise<RallyeRow | null> {
