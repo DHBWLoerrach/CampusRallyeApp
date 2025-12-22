@@ -236,7 +236,7 @@ const RallyeIndex = observer(function RallyeIndex() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         >
           <SyncStatusBadge />
-          <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
+          <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
             {(rallye?.name ? `${rallye.name} • ` : '') +
               (language === 'de'
                 ? `Frage ${
@@ -274,10 +274,13 @@ const RallyeIndex = observer(function RallyeIndex() {
         >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
-              <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+              <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
                 {language === 'de' ? 'Alle Fragen beantwortet.' : 'All questions answered.'}
               </ThemedText>
-              <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+              <ThemedText
+                variant="body"
+                style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+              >
                 {language === 'de' ? 'Erreichte Punkte: ' : 'Points achieved: '} {points}
               </ThemedText>
             </InfoBox>
@@ -317,22 +320,25 @@ const RallyeIndex = observer(function RallyeIndex() {
         >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
-              <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+              <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
                 {timeExpired
                   ? language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'
                   : language === 'de' ? 'Alle Fragen beantwortet' : 'All questions answered'}
               </ThemedText>
               {!timeExpired && team ? (
-                <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+                <ThemedText
+                  variant="body"
+                  style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+                >
                   {language === 'de' ? 'Team: ' : 'Team: '} {team?.name}
                 </ThemedText>
               ) : null}
-              <ThemedText style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+              <ThemedText variant="body" style={globalStyles.rallyeStatesStyles.infoSubtitle}>
                 {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
               </ThemedText>
             </InfoBox>
             <InfoBox>
-              <ThemedText style={globalStyles.rallyeStatesStyles.meetingPoint}>
+              <ThemedText variant="body" style={globalStyles.rallyeStatesStyles.meetingPoint}>
                 {language === 'de' ? 'Bitte kommt zum vereinbarten Treffpunkt' : 'Please come to the agreed meeting point.'}
               </ThemedText>
             </InfoBox>

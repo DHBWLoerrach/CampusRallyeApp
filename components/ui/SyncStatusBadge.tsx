@@ -54,8 +54,9 @@ export default function SyncStatusBadge() {
         marginBottom: 10,
       }}
     >
-      <ThemedText style={{ fontSize: 12, opacity: 0.9 }}>{text}</ThemedText>
+      <ThemedText variant="caption" style={{ opacity: 0.9 }}>
+        {text}
+      </ThemedText>
     </View>
   );
 }
-

@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Text,
   View,
   TouchableOpacity,
 } from 'react-native';
@@ -20,6 +19,7 @@ import { ScreenScrollView } from '@/components/ui/Screen';
 import { store$ } from '@/services/storage/Store';
 import { useSelector } from '@legendapp/state/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ThemedText from '@/components/themed/ThemedText';
 import {
   getActiveRallyes,
   setCurrentRallye,
@@ -147,17 +147,12 @@ export default function Welcome() {
         },
       ]}
     >
-      <Text
-        style={[
-          globalStyles.welcomeStyles.text,
-          { marginBottom: 20 },
-          {
-            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-          },
-        ]}
+      <ThemedText
+        variant="body"
+        style={[globalStyles.welcomeStyles.text, { marginBottom: 20 }]}
       >
         {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
-      </Text>
+      </ThemedText>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
         {language === 'de' ? 'Aktualisieren' : 'Refresh'}
       </UIButton>
@@ -280,19 +275,14 @@ export default function Welcome() {
         </TouchableOpacity>
       </View>
       <View style={globalStyles.welcomeStyles.header}>
-        <Text
-          style={[
-            globalStyles.welcomeStyles.text,
-            globalStyles.welcomeStyles.title,
-            {
-              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-            },
-          ]}
+        <ThemedText
+          variant="subtitle"
+          style={[globalStyles.welcomeStyles.text, globalStyles.welcomeStyles.title]}
         >
           {language === 'de'
             ? 'DHBW Lörrach Campus Rallye'
             : 'DHBW Lörrach Campus Rallye'}
-        </Text>
+        </ThemedText>
         <Image
           style={globalStyles.welcomeStyles.logo}
           source={require('../assets/images/app/dhbw-logo.png')}

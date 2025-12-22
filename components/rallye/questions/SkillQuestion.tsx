@@ -105,6 +105,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
         >
           <InfoBox mb={0}>
             <ThemedText
+              variant="title"
               style={[
                 globalStyles.rallyeStatesStyles.infoTitle,
                 s.text,

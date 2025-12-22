@@ -302,11 +302,11 @@ export default function RallyeSelectionModal({
                 {/* front face */}
                 <Animated.View style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}>
                   <IconSymbol name="mappin.and.ellipse" size={40} color={Colors.dhbwRed} />
-                  <ThemedText style={globalStyles.cardStyles.cardTitle} variant="title">
+                  <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
                     {selectedRallyeName}
                   </ThemedText>
                   {selectedRallyeStudiengang ? (
-                    <ThemedText style={globalStyles.cardStyles.cardDescription}>
+                    <ThemedText style={globalStyles.cardStyles.cardDescription} variant="bodySmall">
                       {selectedRallyeStudiengang}
                     </ThemedText>
                   ) : null}
@@ -320,7 +320,7 @@ export default function RallyeSelectionModal({
                     backAnimatedStyle,
                   ]}
                 >
-                  <ThemedText style={globalStyles.cardStyles.cardTitle} variant="title">
+                  <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
                     {language === 'de' ? 'Passwort eingeben' : 'Enter password'}
                   </ThemedText>
                   <ThemedTextInput

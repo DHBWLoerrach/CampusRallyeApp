@@ -104,11 +104,12 @@ export default function Scoreboard() {
       ]}
     >
       <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-        <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+        <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
           Punktestand
         </ThemedText>
         {ourTeam ? (
           <ThemedText
+            variant="body"
             style={[
               globalStyles.rallyeStatesStyles.infoSubtitle,
               { marginTop: 10 },

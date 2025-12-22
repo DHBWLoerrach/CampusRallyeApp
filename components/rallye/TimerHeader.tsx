@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { store$ } from '@/services/storage/Store';
 import { useTheme } from '@/utils/ThemeContext';
 import Colors from '@/utils/Colors';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import ThemedText from '@/components/themed/ThemedText';
 
 function calculateTimeRemaining(endTime?: string | Date | null) {
   if (!endTime) {
@@ -42,9 +43,9 @@ export default function TimerHeader({ endTime }: { endTime?: string | Date | nul
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <IconSymbol name="clock" size={16} color={palette.text} />
-      <Text style={{ color: palette.text, fontSize: 14, fontWeight: '500' }}>
+      <ThemedText variant="label">
         {two(t.h)}:{two(t.m)}:{two(t.s)}
-      </Text>
+      </ThemedText>
     </View>
   );
 }

@@ -322,16 +322,17 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B13 — Typo Tokens (MVP) (**NEXT**, **P**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Sichtbare Hierarchie (Title/Body/Caption/Button) ohne Inline-FontChaos.  
 **Dependencies:** B12
 
 **Tasks**
-- [ ] T13.1 Typo-Scale definieren (size/lineHeight/weight).
-- [ ] T13.2 `ThemedText` Variants erweitern.
-- [ ] T13.3 Wichtige Screens migrieren (Welcome, InfoBox titles, HUD).
+- [x] T13.1 Typo-Scale definieren (size/lineHeight/weight).
+- [x] T13.2 `ThemedText` Variants erweitern.
+- [x] T13.3 Wichtige Screens migrieren (Welcome, InfoBox titles, HUD).
 
 **Acceptance**
-- [ ] AC13.1 Typo wirkt überall konsistent und „intentional“.
+- [x] AC13.1 Typo wirkt überall konsistent und „intentional“.
 
 ---
 

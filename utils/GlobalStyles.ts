@@ -150,12 +150,10 @@ export const globalStyles = createGroupedStyles({
       maxHeight: SCREEN_HEIGHT * 0.33,
     },
     infoTitle: {
-      fontSize: normalizeFont(20),
       textAlign: 'center',
       color: Colors.dhbwGray,
     },
     infoSubtitle: {
-      fontSize: 16,
       textAlign: 'center',
       color: Colors.dhbwGray,
       marginTop: '3%',
@@ -184,13 +182,10 @@ export const globalStyles = createGroupedStyles({
       elevation: 5,
     },
     cardTitle: {
-      fontSize: normalizeFont(16),
-      fontWeight: 'bold',
       marginTop: SCREEN_HEIGHT * 0.01,
       textAlign: 'center',
     },
     cardDescription: {
-      fontSize: normalizeFont(14),
       textAlign: 'center',
       marginTop: SCREEN_HEIGHT * 0.01,
       paddingHorizontal: SCREEN_WIDTH * 0.02,
@@ -506,13 +501,10 @@ export const globalStyles = createGroupedStyles({
     },
     text: {
       color: Colors.dhbwGray,
-      fontSize: normalizeFont(16),
     },
     title: {
       flex: 1,
       color: Colors.dhbwRed,
-      fontWeight: '500',
-      fontSize: normalizeFont(18),
     },
     content: {
       flex: 1,

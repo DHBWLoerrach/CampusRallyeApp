@@ -38,10 +38,10 @@ export default function Card({
   const content = (
     <>
       <IconSymbol name={icon} size={40} color={Colors.dhbwRed} />
-      <ThemedText style={globalStyles.cardStyles.cardTitle} variant="title">
+      <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
         {title}
       </ThemedText>
-      <ThemedText style={globalStyles.cardStyles.cardDescription}>
+      <ThemedText style={globalStyles.cardStyles.cardDescription} variant="bodySmall">
         {description}
       </ThemedText>
       {children ? <View style={{ width: '100%', marginTop: 14 }}>{children}</View> : null}

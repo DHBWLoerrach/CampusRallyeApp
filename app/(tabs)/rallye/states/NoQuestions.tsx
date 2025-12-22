@@ -49,14 +49,12 @@ export default function NoQuestions({
     >
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={2}>
-          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+          <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
             {language === 'de' ? 'Keine Fragen' : 'No questions'}
           </ThemedText>
           <ThemedText
-            style={[
-              globalStyles.rallyeStatesStyles.infoSubtitle,
-              { marginTop: 10 },
-            ]}
+            variant="body"
+            style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
           >
             {language === 'de'
               ? 'Momentan sind keine Fragen verfügbar.'

@@ -22,10 +22,13 @@ export default function Preparation({ loading, onRefresh }: { loading: boolean; 
     >
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={2}>
-          <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+          <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
             {language === 'de' ? 'Die Rallye hat noch nicht begonnen' : 'The rally has not started yet'}
           </ThemedText>
-          <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
+          <ThemedText
+            variant="body"
+            style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+          >
             {language === 'de' ? 'Bitte warte auf den Start der Rallye' : 'Please wait for the rally to start'}
           </ThemedText>
         </InfoBox>

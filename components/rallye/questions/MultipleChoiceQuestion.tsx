@@ -101,7 +101,10 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
     >
       <VStack style={[globalStyles.default.container, { alignItems: 'stretch' }]} gap={2}>
         <InfoBox mb={0}>
-          <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
+          <ThemedText
+            variant="title"
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
             {question.question}
           </ThemedText>
         </InfoBox>
