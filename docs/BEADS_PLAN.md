@@ -337,16 +337,17 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B15 — Button/Link System (Variants, replace text-links) (**NEXT**, **P+T**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Keine „roten Textlinks“ als Haupt-CTA; klare CTA-Semantik.  
 **Dependencies:** B02, B13, B14
 
 **Tasks**
-- [ ] T15.1 Variants definieren: primary/secondary/ghost/destructive.
-- [ ] T15.2 Replace Refresh-Textlinks durch Buttons.
-- [ ] T15.3 Einheitliche Disabled-/Loading-Optik.
+- [x] T15.1 Variants definieren: primary/secondary/ghost/destructive.
+- [x] T15.2 Replace Refresh-Textlinks durch Buttons.
+- [x] T15.3 Einheitliche Disabled-/Loading-Optik.
 
 **Acceptance**
-- [ ] AC15.1 CTAs sind überall als Buttons erkennbar.
+- [x] AC15.1 CTAs sind überall als Buttons erkennbar.
 
 ---
 

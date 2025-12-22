@@ -1,5 +1,4 @@
-import { RefreshControl, Text } from 'react-native';
-import Colors from '@/utils/Colors';
+import { RefreshControl } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { ScreenScrollView } from '@/components/ui/Screen';
@@ -7,6 +6,7 @@ import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
+import UIButton from '@/components/ui/UIButton';
 
 export default function Preparation({ loading, onRefresh }: { loading: boolean; onRefresh: () => void }) {
   const { language } = useLanguage();
@@ -34,9 +34,14 @@ export default function Preparation({ loading, onRefresh }: { loading: boolean; 
         </InfoBox>
 
         <InfoBox mb={2}>
-          <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
+          <UIButton
+            variant="ghost"
+            icon="rotate"
+            disabled={loading}
+            onPress={onRefresh}
+          >
             {language === 'de' ? 'Aktualisieren' : 'Refresh'}
-          </Text>
+          </UIButton>
         </InfoBox>
       </VStack>
     </ScreenScrollView>

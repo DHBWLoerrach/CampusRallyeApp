@@ -1,4 +1,4 @@
-import { ActivityIndicator, RefreshControl, Text } from 'react-native';
+import { ActivityIndicator, RefreshControl } from 'react-native';
 import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
@@ -7,6 +7,7 @@ import { ScreenScrollView } from '@/components/ui/Screen';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
+import UIButton from '@/components/ui/UIButton';
 
 export default function NoQuestions({
   loading,
@@ -62,12 +63,14 @@ export default function NoQuestions({
           </ThemedText>
         </InfoBox>
         <InfoBox mb={2}>
-          <Text
-            style={{ color: Colors.dhbwRed, textAlign: 'center' }}
+          <UIButton
+            variant="ghost"
+            icon="rotate"
+            disabled={loading}
             onPress={onRefresh}
           >
             {language === 'de' ? 'Aktualisieren' : 'Refresh'}
-          </Text>
+          </UIButton>
         </InfoBox>
       </VStack>
     </ScreenScrollView>

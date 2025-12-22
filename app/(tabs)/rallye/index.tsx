@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, RefreshControl, Text } from 'react-native';
+import { Alert, RefreshControl } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
 import { store$ } from '@/services/storage/Store';
 import { supabase } from '@/utils/Supabase';
-import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import Preparation from '@/app/(tabs)/rallye/states/Preparation';
@@ -18,6 +17,7 @@ import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import TeamNameSheet from '@/components/ui/TeamNameSheet';
 import SyncStatusBadge from '@/components/ui/SyncStatusBadge';
+import UIButton from '@/components/ui/UIButton';
 import { ScreenScrollView } from '@/components/ui/Screen';
 
 function isPreparation(status?: string) {
@@ -285,15 +285,16 @@ const RallyeIndex = observer(function RallyeIndex() {
               </ThemedText>
             </InfoBox>
             <InfoBox mb={2}>
-              <Text
+              <UIButton
+                variant="ghost"
+                icon="arrow-left"
                 onPress={() => {
                   store$.reset();
                   store$.enabled.set(false);
                 }}
-                style={{ color: Colors.dhbwRed, fontWeight: '600', textAlign: 'center' }}
               >
                 {language === 'de' ? 'Zurück zum Start' : 'Back to start'}
-              </Text>
+              </UIButton>
             </InfoBox>
           </VStack>
         </ScreenScrollView>
@@ -343,9 +344,14 @@ const RallyeIndex = observer(function RallyeIndex() {
               </ThemedText>
             </InfoBox>
             <InfoBox mb={2}>
-              <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
+              <UIButton
+                variant="ghost"
+                icon="rotate"
+                disabled={loading}
+                onPress={onRefresh}
+              >
                 {language === 'de' ? 'Aktualisieren' : 'Refresh'}
-              </Text>
+              </UIButton>
             </InfoBox>
           </VStack>
         </ScreenScrollView>

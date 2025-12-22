@@ -11,8 +11,10 @@ import {
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
+import { useTheme } from '@/utils/ThemeContext';
 
 type Size = 'small' | 'medium' | 'dialog';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 
 type UIButtonProps = {
   accessibilityHint?: string;
@@ -25,6 +27,7 @@ type UIButtonProps = {
   outline?: boolean;
   onPress?: () => void;
   size?: Size;
+  variant?: Variant;
   style?: StyleProp<ViewStyle>;
   children?: ReactNode;
   textStyle?: StyleProp<TextStyle>;
@@ -41,17 +44,38 @@ export default function UIButton({
   outline = false,
   onPress,
   size = 'small',
+  variant = 'primary',
   style,
   children,
   textStyle: textStyleProp,
 }: UIButtonProps) {
   const isDisabled = disabled || loading;
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const resolvedVariant = outline ? 'outline' : variant;
+  const accentColor = color ?? Colors.dhbwRed;
 
-  const contentColor = outline ? color ?? Colors.dhbwRed : 'white';
+  let backgroundColor = accentColor;
+  let borderColor: string | undefined;
+  let textColor = 'white';
+
+  if (resolvedVariant === 'secondary') {
+    backgroundColor = palette.surface1;
+    textColor = palette.text;
+    borderColor = palette.borderSubtle;
+  } else if (resolvedVariant === 'ghost') {
+    backgroundColor = 'transparent';
+    textColor = accentColor;
+  } else if (resolvedVariant === 'outline') {
+    backgroundColor = 'transparent';
+    textColor = accentColor;
+    borderColor = accentColor;
+  }
+  const contentColor = textColor;
 
   let buttonStyle: ViewStyle = {
     ...(globalStyles.uiButtonStyles.button.sizes as any)[size],
-    backgroundColor: outline ? 'transparent' : (color ?? Colors.dhbwRed),
+    backgroundColor,
     flexDirection: iconRight ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -60,17 +84,17 @@ export default function UIButton({
   let textStyle: TextStyle = (globalStyles.uiButtonStyles.textSizes as any)[
     size
   ];
-  if (outline) {
+  if (borderColor) {
     buttonStyle = {
       ...buttonStyle,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: color ?? Colors.dhbwRed,
+      borderColor,
     };
-    textStyle = {
-      ...textStyle,
-      color: color ?? Colors.dhbwRed,
-    } as TextStyle;
   }
+  textStyle = {
+    ...textStyle,
+    color: textColor,
+  } as TextStyle;
 
   return (
     <Pressable
