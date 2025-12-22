@@ -261,7 +261,15 @@ export default function Welcome() {
         />
 
         <TouchableOpacity
-          style={{ position: 'absolute', top: insets.top, left: 13 }}
+          style={{
+            position: 'absolute',
+            top: insets.top,
+            left: 13,
+            width: 44,
+            height: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           accessibilityRole="button"
           accessibilityLabel={t('a11y.languageToggle')}

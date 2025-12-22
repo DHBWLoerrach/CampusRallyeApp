@@ -29,7 +29,13 @@ export default function LogoutButton() {
       accessibilityLabel={t('a11y.logoutButton')}
       accessibilityHint={t('a11y.logoutButtonHint')}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      style={{ paddingHorizontal: 8 }}
+      style={{
+        paddingHorizontal: 8,
+        minWidth: 44,
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
       <IconSymbol
         name="rectangle.portrait.and.arrow.right"
