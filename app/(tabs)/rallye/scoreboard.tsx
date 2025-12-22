@@ -7,9 +7,9 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
-import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
+import { ScreenScrollView } from '@/components/ui/Screen';
 
 type TeamRow = {
   id: string;
@@ -96,8 +96,8 @@ export default function Scoreboard() {
   }, [rallye?.id, rallye?.status]);
 
   return (
-    <ThemedScrollView
-      variant="background"
+    <ScreenScrollView
+      padding="none"
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,
@@ -223,6 +223,6 @@ export default function Scoreboard() {
           Teilnahme an Rallye beenden
         </UIButton>
       </View>
-    </ThemedScrollView>
+    </ScreenScrollView>
   );
 }

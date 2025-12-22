@@ -13,13 +13,12 @@ import TeamSetup from '@/app/(tabs)/rallye/team-setup';
 import Voting from '@/app/(tabs)/rallye/voting';
 import Scoreboard from '@/app/(tabs)/rallye/scoreboard';
 import QuestionRenderer from '@/app/(tabs)/rallye/question-renderer';
-import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
-import ThemedView from '@/components/themed/ThemedView';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import TeamNameSheet from '@/components/ui/TeamNameSheet';
 import SyncStatusBadge from '@/components/ui/SyncStatusBadge';
+import { ScreenScrollView } from '@/components/ui/Screen';
 
 function isPreparation(status?: string) {
   return status === 'preparation' || status === 'preparing';
@@ -228,30 +227,31 @@ const RallyeIndex = observer(function RallyeIndex() {
   if (questions.length > 0 && !allQuestionsAnswered) {
     return (
       <>
-        <ThemedScrollView
-          variant="background"
-          contentContainerStyle={[globalStyles.default.refreshContainer]}
+        <ScreenScrollView
+          padding="none"
+          contentContainerStyle={[
+            globalStyles.default.refreshContainer,
+            globalStyles.default.container,
+          ]}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         >
-          <ThemedView variant="background" style={globalStyles.default.container}>
-            <SyncStatusBadge />
-            <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
-              {(rallye?.name ? `${rallye.name} • ` : '') +
-                (language === 'de'
-                  ? `Frage ${
-                      (rallye?.tour_mode
-                        ? idx + 1
-                        : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
-                    } von ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`
-                  : `Question ${
-                      (rallye?.tour_mode
-                        ? idx + 1
-                        : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
-                    } of ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`)}
-            </ThemedText>
-            <QuestionRenderer question={currentQuestion} />
-          </ThemedView>
-        </ThemedScrollView>
+          <SyncStatusBadge />
+          <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
+            {(rallye?.name ? `${rallye.name} • ` : '') +
+              (language === 'de'
+                ? `Frage ${
+                    (rallye?.tour_mode
+                      ? idx + 1
+                      : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
+                  } von ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`
+                : `Question ${
+                    (rallye?.tour_mode
+                      ? idx + 1
+                      : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
+                  } of ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`)}
+          </ThemedText>
+          <QuestionRenderer question={currentQuestion} />
+        </ScreenScrollView>
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
@@ -265,7 +265,13 @@ const RallyeIndex = observer(function RallyeIndex() {
     // Exploration finished: show simple summary and back to welcome
     return (
       <>
-        <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
+        <ScreenScrollView
+          padding="none"
+          contentContainerStyle={[
+            globalStyles.default.refreshContainer,
+            globalStyles.rallyeStatesStyles.container,
+          ]}
+        >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
               <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
@@ -287,7 +293,7 @@ const RallyeIndex = observer(function RallyeIndex() {
               </Text>
             </InfoBox>
           </VStack>
-        </ThemedScrollView>
+        </ScreenScrollView>
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
@@ -301,9 +307,12 @@ const RallyeIndex = observer(function RallyeIndex() {
     // Time up vs finished before end
     return (
       <>
-        <ThemedScrollView
-          variant="background"
-          contentContainerStyle={[globalStyles.default.refreshContainer]}
+        <ScreenScrollView
+          padding="none"
+          contentContainerStyle={[
+            globalStyles.default.refreshContainer,
+            globalStyles.rallyeStatesStyles.container,
+          ]}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         >
           <VStack style={{ width: '100%' }} gap={2}>
@@ -333,7 +342,7 @@ const RallyeIndex = observer(function RallyeIndex() {
               </Text>
             </InfoBox>
           </VStack>
-        </ThemedScrollView>
+        </ScreenScrollView>
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}

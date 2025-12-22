@@ -292,6 +292,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ## NEXT Beads (UI-Fundament + Journey-Polish)
 
 ### B12 — Screen Scaffold (SafeArea/Layout/Keyboard) (**NEXT**, **P+T**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Konsistente Ränder, Safe-Area, Scroll-/Keyboard-Verhalten.  
 **Dependencies:** B11 empfohlen
 
@@ -301,7 +302,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 - [x] T12.3 Migriere Welcome + Rallye State Screens zuerst.
 
 **Acceptance**
-- [ ] AC12.1 Keine Notch-Overlaps, konsistentes Spacing.
+- [x] AC12.1 Keine Notch-Overlaps, konsistentes Spacing.
 
 ---
 

@@ -8,9 +8,9 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import generateTeamName from '@/utils/RandomTeamNames';
 import { setCurrentTeam } from '@/services/storage/teamStorage';
-import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
+import { Screen } from '@/components/ui/Screen';
 
 const TeamSetup = observer(function TeamSetup() {
   const [loading, setLoading] = useState(false);
@@ -45,7 +45,7 @@ const TeamSetup = observer(function TeamSetup() {
   };
 
   return (
-    <ThemedView variant="background" style={globalStyles.default.container}>
+    <Screen padding="none" contentStyle={globalStyles.default.container}>
       <ThemedText style={[globalStyles.teamStyles.title]}>
         {rallye?.name}
       </ThemedText>
@@ -59,7 +59,7 @@ const TeamSetup = observer(function TeamSetup() {
           </UIButton>
         </View>
       </View>
-    </ThemedView>
+    </Screen>
   );
 });
 

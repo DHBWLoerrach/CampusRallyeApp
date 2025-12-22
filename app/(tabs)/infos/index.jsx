@@ -1,11 +1,11 @@
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { globalStyles } from '@/utils/GlobalStyles';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
-import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
+import { Screen } from '@/components/ui/Screen';
 
 export default function Infos() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function Infos() {
   const { language } = useLanguage();
 
   return (
-    <ThemedView variant="background" style={globalStyles.settingsStyles.container}>
+    <Screen padding="none" contentStyle={globalStyles.settingsStyles.container}>
       <TouchableOpacity
         style={[
           globalStyles.settingsStyles.tile,
@@ -44,6 +44,6 @@ export default function Infos() {
           {language === 'de' ? 'Über diese App' : 'About this app'}
         </ThemedText>
       </TouchableOpacity>
-    </ThemedView>
+    </Screen>
   );
 }

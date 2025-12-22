@@ -7,11 +7,11 @@ import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useTheme } from '@/utils/ThemeContext';
-import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
+import { Screen } from '@/components/ui/Screen';
 
 export default function Voting({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
   const [voting, setVoting] = useState<any[]>([]);
@@ -112,7 +112,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
 
   if (!votingAllowed || teamCount < 2) {
     return (
-      <ThemedView variant="background" style={globalStyles.default.container}>
+      <Screen padding="none" contentStyle={globalStyles.default.container}>
         <VStack style={{ width: '100%' }} gap={2}>
           <InfoBox mb={2}>
             <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
@@ -128,12 +128,12 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
             </UIButton>
           </InfoBox>
         </VStack>
-      </ThemedView>
+      </Screen>
     );
   }
 
   return (
-    <ThemedView variant="background" style={[globalStyles.default.container, { flex: 1 }]}>
+    <Screen padding="none" contentStyle={[globalStyles.default.container, { flex: 1 }]}>
       <FlatList
         data={currentQuestion}
         keyExtractor={(item) => `${item.tq_team_id}`}
@@ -202,6 +202,6 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
           </UIButton>
         </InfoBox>
       </View>
-    </ThemedView>
+    </Screen>
   );
 }
