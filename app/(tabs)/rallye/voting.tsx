@@ -115,12 +115,19 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
       <Screen padding="none" contentStyle={globalStyles.default.container}>
         <VStack style={{ width: '100%' }} gap={2}>
           <InfoBox mb={2}>
-            <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
+            <ThemedText
+              variant="title"
+              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+            >
               Die Abstimmung wurde beendet.
             </ThemedText>
             <ThemedText
               variant="body"
-              style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+              style={[
+                globalStyles.rallyeStatesStyles.infoSubtitle,
+                s.muted,
+                { marginTop: 10 },
+              ]}
             >
               Wartet auf die Beendigung der Rallye.
             </ThemedText>
@@ -146,12 +153,19 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
           currentQuestion && currentQuestion.length > 0 ? (
             <View style={{ paddingTop: 10, paddingBottom: 30 }}>
               <InfoBox mb={2}>
-                <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
+                <ThemedText
+                  variant="title"
+                  style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+                >
                   {currentQuestion[0]?.question_content}
                 </ThemedText>
                 <ThemedText
                   variant="body"
-                  style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+                  style={[
+                    globalStyles.rallyeStatesStyles.infoSubtitle,
+                    s.muted,
+                    { marginTop: 10 },
+                  ]}
                 >
                   Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
                   die oben gestellte Aufgabe am besten gelöst hat.
@@ -177,7 +191,10 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
               }}
             >
               {item.question_type === 'knowledge' ? (
-                <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
+                <ThemedText
+                  variant="title"
+                  style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+                >
                   {item.tq_team_answer}
                 </ThemedText>
               ) : (
@@ -193,7 +210,10 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                   );
                 })()
               )}
-              <ThemedText variant="body" style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+              <ThemedText
+                variant="body"
+                style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
+              >
                 {item.rt_team_name}
               </ThemedText>
             </InfoBox>

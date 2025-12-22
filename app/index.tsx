@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NetInfo from '@react-native-community/netinfo';
 import ThemedText from '@/components/themed/ThemedText';
 import { confirm } from '@/utils/ConfirmAlert';
+import { useAppStyles } from '@/utils/AppStyles';
 import {
   getActiveRallyes,
   setCurrentRallye,
@@ -36,6 +37,7 @@ import {
 export default function Welcome() {
   const { isDarkMode } = useTheme();
   const { t, toggleLanguage } = useLanguage();
+  const s = useAppStyles();
   const insets = useSafeAreaInsets();
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
@@ -148,7 +150,7 @@ export default function Welcome() {
       <ActivityIndicator size="large" color={Colors.dhbwRed} />
       <ThemedText
         variant="body"
-        style={[globalStyles.welcomeStyles.text, { marginTop: 16 }]}
+        style={[globalStyles.welcomeStyles.text, s.muted, { marginTop: 16 }]}
       >
         {t('common.loading')}
       </ThemedText>
@@ -166,7 +168,7 @@ export default function Welcome() {
     >
       <ThemedText
         variant="body"
-        style={[globalStyles.welcomeStyles.text, { marginBottom: 20 }]}
+        style={[globalStyles.welcomeStyles.text, s.muted, { marginBottom: 20 }]}
       >
         {message}
       </ThemedText>

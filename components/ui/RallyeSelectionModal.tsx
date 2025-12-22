@@ -169,6 +169,7 @@ export default function RallyeSelectionModal({
     : Colors.lightMode.card;
 
   const headerTextColor = isDarkMode ? Colors.darkMode.text : Colors.lightMode.text;
+  const mutedTextColor = isDarkMode ? Colors.darkMode.textMuted : Colors.mediumGray;
 
   const selectedRallyeName = passwordRallye?.name ?? '';
   const selectedRallyeStudiengang = passwordRallye?.studiengang ?? '';
@@ -380,7 +381,9 @@ export default function RallyeSelectionModal({
                   accessibilityLabel={t('rallye.modal.activeTitle')}
                 />
               ) : (
-                <Text style={globalStyles.rallyeModal.noDataText}>
+                <Text
+                  style={[globalStyles.rallyeModal.noDataText, { color: mutedTextColor }]}
+                >
                   {t('rallye.modal.noActive')}
                 </Text>
               )}

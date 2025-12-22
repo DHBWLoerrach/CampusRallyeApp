@@ -50,12 +50,19 @@ export default function NoQuestions({
     >
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={2}>
-          <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
+          <ThemedText
+            variant="title"
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
             {t('rallye.noQuestions.title')}
           </ThemedText>
           <ThemedText
             variant="body"
-            style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+            style={[
+              globalStyles.rallyeStatesStyles.infoSubtitle,
+              s.muted,
+              { marginTop: 10 },
+            ]}
           >
             {t('rallye.noQuestions.message')}
           </ThemedText>

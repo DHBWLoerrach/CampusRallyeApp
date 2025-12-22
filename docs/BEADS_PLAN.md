@@ -454,16 +454,17 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B31a — Accessibility Minimum Pass (**NEXT**, **T+P**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Screenreader/Hit targets/Labels sind im Kernfluss sauber.  
 **Dependencies:** B12–B15
 
 **Tasks**
-- [ ] T31.1 Interactives: `accessibilityRole/Label/Hint` (Buttons, Cards, List rows).
-- [ ] T31.2 Hit targets ≥ 44×44 (Language toggle, Icon buttons).
-- [ ] T31.3 Kontrast check (muted text, dark mode).
+- [x] T31.1 Interactives: `accessibilityRole/Label/Hint` (Buttons, Cards, List rows).
+- [x] T31.2 Hit targets ≥ 44×44 (Language toggle, Icon buttons).
+- [x] T31.3 Kontrast check (muted text, dark mode).
 
 **Acceptance**
-- [ ] AC31.1 Kernfluss ist per Screenreader bedienbar (Join → Frage → Submit → Finish).
+- [x] AC31.1 Kernfluss ist per Screenreader bedienbar (Join → Frage → Submit → Finish).
 
 ---
 

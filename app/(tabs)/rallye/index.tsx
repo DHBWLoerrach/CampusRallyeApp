@@ -6,6 +6,7 @@ import { store$ } from '@/services/storage/Store';
 import { supabase } from '@/utils/Supabase';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useAppStyles } from '@/utils/AppStyles';
 import Preparation from '@/app/(tabs)/rallye/states/Preparation';
 import NoQuestions from '@/app/(tabs)/rallye/states/NoQuestions';
 import TeamSetup from '@/app/(tabs)/rallye/team-setup';
@@ -26,6 +27,7 @@ function isPreparation(status?: string) {
 const RallyeIndex = observer(function RallyeIndex() {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const s = useAppStyles();
 
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
@@ -257,12 +259,19 @@ const RallyeIndex = observer(function RallyeIndex() {
         >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
-              <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
+              <ThemedText
+                variant="title"
+                style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+              >
                 {t('rallye.allAnswered.title')}
               </ThemedText>
               <ThemedText
                 variant="body"
-                style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+                style={[
+                  globalStyles.rallyeStatesStyles.infoSubtitle,
+                  s.muted,
+                  { marginTop: 10 },
+                ]}
               >
                 {t('rallye.pointsAchieved', { points })}
               </ThemedText>
@@ -304,18 +313,28 @@ const RallyeIndex = observer(function RallyeIndex() {
         >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
-              <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
+              <ThemedText
+                variant="title"
+                style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+              >
                 {timeExpired ? t('rallye.timeUp') : t('rallye.allAnswered.simple')}
               </ThemedText>
               {!timeExpired && team ? (
                 <ThemedText
                   variant="body"
-                  style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
+                  style={[
+                    globalStyles.rallyeStatesStyles.infoSubtitle,
+                    s.muted,
+                    { marginTop: 10 },
+                  ]}
                 >
                   {t('rallye.teamLabel', { team: team?.name ?? '' })}
                 </ThemedText>
               ) : null}
-              <ThemedText variant="body" style={globalStyles.rallyeStatesStyles.infoSubtitle}>
+              <ThemedText
+                variant="body"
+                style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
+              >
                 {t('rallye.pointsLabel', { points })}
               </ThemedText>
             </InfoBox>
