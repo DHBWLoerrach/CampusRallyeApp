@@ -469,16 +469,17 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B34 — Error Boundary + Recovery UX (**NEXT**, **T**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Keine White Screens; Nutzer:innen können sich selbst „retten“ (Back to start).  
 **Dependencies:** B12–B17 empfohlen
 
 **Tasks**
-- [ ] T34.1 Root ErrorBoundary (um Router Slot) + fallback UI.
-- [ ] T34.2 Recovery: Reset store + zurück zum Start.
-- [ ] T34.3 Optional: Debug-Info (rallye/team/question id) im UI (nur dev).
+- [x] T34.1 Root ErrorBoundary (um Router Slot) + fallback UI.
+- [x] T34.2 Recovery: Reset store + zurück zum Start.
+- [x] T34.3 Optional: Debug-Info (rallye/team/question id) im UI (nur dev).
 
 **Acceptance**
-- [ ] AC34.1 Runtime-Fehler zeigen Recovery UI statt App-Abbruch.
+- [x] AC34.1 Runtime-Fehler zeigen Recovery UI statt App-Abbruch.
 
 ---
 
