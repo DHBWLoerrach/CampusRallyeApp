@@ -306,6 +306,7 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B14 — Semantic Colors/Surfaces (MVP) (**NEXT**, **P**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Dark Mode wirkt „premium“ (Surface-Stufen statt hartes #000).  
 **Dependencies:** B12
 
