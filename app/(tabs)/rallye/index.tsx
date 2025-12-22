@@ -16,7 +16,6 @@ import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import TeamNameSheet from '@/components/ui/TeamNameSheet';
-import SyncStatusBadge from '@/components/ui/SyncStatusBadge';
 import UIButton from '@/components/ui/UIButton';
 import { ScreenScrollView } from '@/components/ui/Screen';
 
@@ -235,7 +234,6 @@ const RallyeIndex = observer(function RallyeIndex() {
           ]}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         >
-          <SyncStatusBadge />
           <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
             {(rallye?.name ? `${rallye.name} • ` : '') +
               (language === 'de'
