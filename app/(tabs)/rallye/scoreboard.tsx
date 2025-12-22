@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import { supabase } from '@/utils/Supabase';
@@ -9,6 +9,7 @@ import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
+import { confirm } from '@/utils/ConfirmAlert';
 import { ScreenScrollView } from '@/components/ui/Screen';
 
 type TeamRow = {
@@ -204,21 +205,19 @@ export default function Scoreboard() {
       <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
         <UIButton
           icon="arrow-left"
-          onPress={async () => {
-            Alert.alert(
-              'Teilnahme an der Rallye beenden',
-              'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
-              [
-                { text: 'Abbrechen', style: 'cancel' },
-                {
-                  text: 'Beenden',
-                  style: 'destructive',
-                  onPress: async () => {
-                    void store$.leaveRallye();
-                  },
-                },
-              ]
-            );
+          onPress={() => {
+            void (async () => {
+              const confirmed = await confirm({
+                title: 'Teilnahme an der Rallye beenden',
+                message:
+                  'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
+                confirmText: 'Beenden',
+                cancelText: 'Abbrechen',
+                destructive: true,
+              });
+              if (!confirmed) return;
+              void store$.leaveRallye();
+            })();
           }}
         >
           Teilnahme an Rallye beenden

@@ -352,16 +352,17 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B16a — Confirm API zentral (Alert-basiert) (**NEXT**, **T+P**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Bestätigungen sind konsistent und leicht i18n-fähig, ohne Design-Risiko.  
 **Why:** OS-Alerts sind a11y-stark; das „Premium“ kommt hier primär durch Konsistenz + gute Copy.  
 **Dependencies:** B15, B17
 
 **Tasks**
-- [ ] T16.1 `confirm({title,message,confirmText,cancelText}) => Promise<boolean>`.
-- [ ] T16.2 Replace verstreute Confirm-Dialoge (Hint, Surrender, Exit) mit API.
+- [x] T16.1 `confirm({title,message,confirmText,cancelText}) => Promise<boolean>`.
+- [x] T16.2 Replace verstreute Confirm-Dialoge (Hint, Surrender, Exit) mit API.
 
 **Acceptance**
-- [ ] AC16.1 Confirm Copy ist konsistent und lokalisiert.
+- [x] AC16.1 Confirm Copy ist konsistent und lokalisiert.
 
 ---
 

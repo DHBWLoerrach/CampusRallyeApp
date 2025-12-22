@@ -20,6 +20,7 @@ import { store$ } from '@/services/storage/Store';
 import { useSelector } from '@legendapp/state/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ThemedText from '@/components/themed/ThemedText';
+import { confirm } from '@/utils/ConfirmAlert';
 import {
   getActiveRallyes,
   setCurrentRallye,
@@ -191,25 +192,23 @@ export default function Welcome() {
                 outline
                 color={Colors.dhbwRed}
                 onPress={() => {
-                  Alert.alert(
-                    language === 'de'
-                      ? 'Teilnahme löschen'
-                      : 'Clear participation',
-                    language === 'de'
-                      ? 'Möchtest du die gespeicherte Teilnahme wirklich löschen? Die Teamzuordnung auf diesem Gerät wird entfernt.'
-                      : 'Do you really want to clear the saved participation? The team assignment on this device will be removed.',
-                    [
-                      {
-                        text: language === 'de' ? 'Abbrechen' : 'Cancel',
-                        style: 'cancel',
-                      },
-                      {
-                        text: language === 'de' ? 'Löschen' : 'Clear',
-                        style: 'destructive',
-                        onPress: () => void store$.leaveRallye(),
-                      },
-                    ]
-                  );
+                  void (async () => {
+                    const confirmed = await confirm({
+                      title:
+                        language === 'de'
+                          ? 'Teilnahme löschen'
+                          : 'Clear participation',
+                      message:
+                        language === 'de'
+                          ? 'Möchtest du die gespeicherte Teilnahme wirklich löschen? Die Teamzuordnung auf diesem Gerät wird entfernt.'
+                          : 'Do you really want to clear the saved participation? The team assignment on this device will be removed.',
+                      confirmText: language === 'de' ? 'Löschen' : 'Clear',
+                      cancelText: language === 'de' ? 'Abbrechen' : 'Cancel',
+                      destructive: true,
+                    });
+                    if (!confirmed) return;
+                    void store$.leaveRallye();
+                  })();
                 }}
               >
                 {language === 'de' ? 'Neu starten' : 'Start over'}

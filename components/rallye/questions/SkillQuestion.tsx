@@ -4,7 +4,7 @@ import { useSelector } from '@legendapp/state/react';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
-import { confirmAlert } from '@/utils/ConfirmAlert';
+import { confirmAnswer } from '@/utils/ConfirmAlert';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useKeyboard } from '@/utils/useKeyboard';
@@ -60,8 +60,9 @@ export default function SkillQuestion({ question }: QuestionProps) {
     }
   };
 
-  const handleSubmit = () => {
-    if (!answer.trim()) {
+  const handleSubmit = async () => {
+    const trimmed = answer.trim();
+    if (!trimmed) {
       Alert.alert(
         language === 'de' ? 'Fehler' : 'Error',
         language === 'de'
@@ -79,7 +80,9 @@ export default function SkillQuestion({ question }: QuestionProps) {
       );
       return;
     }
-    confirmAlert(answer, handlePersist);
+    const confirmed = await confirmAnswer({ answer: trimmed, language });
+    if (!confirmed) return;
+    await handlePersist();
   };
 
   return (

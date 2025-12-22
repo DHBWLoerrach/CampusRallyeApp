@@ -10,6 +10,7 @@ import Hint from '@/components/ui/Hint';
 import Colors from '@/utils/Colors';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { useLanguage } from '@/utils/LanguageContext';
+import { confirm } from '@/utils/ConfirmAlert';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
@@ -53,23 +54,20 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     }
   };
 
-  const handleSurrender = () => {
-    Alert.alert(
-      language === 'de' ? 'Sicherheitsfrage' : 'Security question',
-      language === 'de'
-        ? 'Willst du diese Aufgabe wirklich aufgeben?'
-        : 'Do you really want to give up this task?',
-      [
-        { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
-        {
-          text:
-            language === 'de'
-              ? 'Ja, ich möchte aufgeben'
-              : 'Yes, I want to give up',
-          onPress: submitSurrender,
-        },
-      ]
-    );
+  const handleSurrender = async () => {
+    const confirmed = await confirm({
+      title: language === 'de' ? 'Sicherheitsfrage' : 'Security question',
+      message:
+        language === 'de'
+          ? 'Willst du diese Aufgabe wirklich aufgeben?'
+          : 'Do you really want to give up this task?',
+      confirmText:
+        language === 'de' ? 'Ja, ich möchte aufgeben' : 'Yes, I want to give up',
+      cancelText: language === 'de' ? 'Abbrechen' : 'Cancel',
+      destructive: true,
+    });
+    if (!confirmed) return;
+    await submitSurrender();
   };
 
   const handleQRCode = ({ data }: { data: string }) => {
