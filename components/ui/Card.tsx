@@ -12,6 +12,7 @@ type Props = {
   icon: IconSymbolName;
   onPress?: () => void;
   accessibilityLabel?: string;
+  accessibilityHint?: string;
 };
 
 export default function Card({
@@ -20,6 +21,7 @@ export default function Card({
   icon,
   onPress,
   accessibilityLabel,
+  accessibilityHint,
   children,
 }: PropsWithChildren<Props>) {
   const { isDarkMode } = useTheme();
@@ -60,6 +62,7 @@ export default function Card({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
       onPress={onPress}
       style={({ pressed }) => [
         globalStyles.cardStyles.card,

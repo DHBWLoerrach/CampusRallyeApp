@@ -165,16 +165,25 @@ export default function Scoreboard() {
             },
           ]}
         >
-          {rows.map((team) => (
-            <View
-              key={team.id}
-              style={[
-                globalStyles.scoreboardStyles.row,
-                s.listRow,
-                team.group_name === ourTeam?.name &&
-                  globalStyles.scoreboardStyles.rowHighlighted,
-              ]}
-            >
+          {rows.map((team) => {
+            const rowLabel = t('scoreboard.rowLabel', {
+              rank: team.rank ?? '-',
+              team: team.group_name ?? '-',
+              time: formatDuration(team.time_spent),
+              points: team.total_points ?? '-',
+            });
+            return (
+              <View
+                key={team.id}
+                accessible
+                accessibilityLabel={rowLabel}
+                style={[
+                  globalStyles.scoreboardStyles.row,
+                  s.listRow,
+                  team.group_name === ourTeam?.name &&
+                    globalStyles.scoreboardStyles.rowHighlighted,
+                ]}
+              >
               <ThemedText style={[globalStyles.scoreboardStyles.cellRank]}>
                 {team.rank}
               </ThemedText>
@@ -199,8 +208,9 @@ export default function Scoreboard() {
               <ThemedText style={[globalStyles.scoreboardStyles.cellPoints]}>
                 {team.total_points}
               </ThemedText>
-            </View>
-          ))}
+              </View>
+            );
+          })}
         </ScrollView>
       </View>
 

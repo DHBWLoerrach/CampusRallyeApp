@@ -108,45 +108,51 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
               {t('question.options.loading')}
             </ThemedText>
           ) : (
-            options.map((option, idx) => (
-              <Animated.View
-                key={String(option.id)}
-                entering={FadeInDown.duration(220).delay(idx * 70)}
-                layout={LinearTransition.springify()}
-              >
-                <TouchableOpacity
-                  style={[
-                    globalStyles.multipleChoiceStyles.squareButton,
-                    {
-                      borderColor:
-                        answer === (option.text ?? '')
+            options.map((option, idx) => {
+              const optionText = option.text ?? '';
+              const isSelected = answer === optionText;
+              return (
+                <Animated.View
+                  key={String(option.id)}
+                  entering={FadeInDown.duration(220).delay(idx * 70)}
+                  layout={LinearTransition.springify()}
+                >
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel={optionText}
+                    accessibilityHint={t('a11y.answerOptionHint')}
+                    accessibilityState={{ selected: isSelected }}
+                    style={[
+                      globalStyles.multipleChoiceStyles.squareButton,
+                      {
+                        borderColor: isSelected
                           ? Colors.dhbwRed
                           : isDarkMode
                           ? Colors.darkMode.text
                           : Colors.dhbwGray,
-                    },
-                  ]}
-                  onPress={() => setAnswer(option.text ?? '')}
-                >
-                  <View
-                    style={[
-                      globalStyles.multipleChoiceStyles.innerSquare,
-                      {
-                        backgroundColor:
-                          answer === (option.text ?? '')
+                      },
+                    ]}
+                    onPress={() => setAnswer(optionText)}
+                  >
+                    <View
+                      style={[
+                        globalStyles.multipleChoiceStyles.innerSquare,
+                        {
+                          backgroundColor: isSelected
                             ? Colors.dhbwRed
                             : isDarkMode
                             ? Colors.darkMode.card
                             : Colors.lightMode.card,
-                      },
-                    ]}
-                  />
-                  <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
-                    {option.text}
-                  </ThemedText>
-                </TouchableOpacity>
-              </Animated.View>
-            ))
+                        },
+                      ]}
+                    />
+                    <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
+                      {optionText}
+                    </ThemedText>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })
           )}
         </InfoBox>
 

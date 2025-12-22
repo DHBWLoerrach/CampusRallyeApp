@@ -241,6 +241,8 @@ export default function Welcome() {
         description={t('welcome.explore.description')}
         icon="binoculars"
         onPress={startTourMode}
+        accessibilityLabel={t('welcome.explore.title')}
+        accessibilityHint={t('welcome.explore.description')}
       />
     </View>
   );
@@ -261,6 +263,9 @@ export default function Welcome() {
         <TouchableOpacity
           style={{ position: 'absolute', top: insets.top, left: 13 }}
           hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          accessibilityRole="button"
+          accessibilityLabel={t('a11y.languageToggle')}
+          accessibilityHint={t('a11y.languageToggleHint')}
           onPress={toggleLanguage}
         >
           <IconSymbol

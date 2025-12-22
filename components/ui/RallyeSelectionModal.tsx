@@ -260,6 +260,12 @@ export default function RallyeSelectionModal({
         disabled={joining}
         onPress={() => void handleSelect(item)}
         style={globalStyles.rallyeModal.selectButton}
+        accessibilityLabel={t('a11y.selectRallye', { name: item.name })}
+        accessibilityHint={
+          isPasswordRequired(item)
+            ? t('a11y.selectRallyePasswordHint')
+            : t('a11y.selectRallyeHint')
+        }
       >
         {t('common.select')}
       </UIButton>
@@ -330,6 +336,7 @@ export default function RallyeSelectionModal({
                     value={password}
                     onChangeText={setPassword}
                     placeholder={t('rallye.password.placeholder')}
+                    accessibilityLabel={t('rallye.password.enter')}
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="done"
@@ -369,6 +376,8 @@ export default function RallyeSelectionModal({
                   data={activeRallyes}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={renderItem}
+                  accessibilityRole="list"
+                  accessibilityLabel={t('rallye.modal.activeTitle')}
                 />
               ) : (
                 <Text style={globalStyles.rallyeModal.noDataText}>

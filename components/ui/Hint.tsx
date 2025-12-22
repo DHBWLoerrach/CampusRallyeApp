@@ -29,7 +29,13 @@ export default function Hint({ hint }: { hint: string }) {
   };
 
   return (
-    <TouchableOpacity style={globalStyles.fab} onPress={handleHint}>
+    <TouchableOpacity
+      style={globalStyles.fab}
+      onPress={handleHint}
+      accessibilityRole="button"
+      accessibilityLabel={t('a11y.hintButton')}
+      accessibilityHint={t('a11y.hintButtonHint')}
+    >
       <MaterialIcons name="lightbulb-outline" size={24} color="white" />
     </TouchableOpacity>
   );
