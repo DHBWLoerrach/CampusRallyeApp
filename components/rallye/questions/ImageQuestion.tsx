@@ -20,7 +20,7 @@ import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 
 export default function ImageQuestion({ question }: QuestionProps) {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [pictureUri, setPictureUri] = useState<string | null>(null);
@@ -67,12 +67,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
       setAnswer('');
     } catch (e) {
       console.error('Error submitting answer:', e);
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Antwort konnte nicht gespeichert werden.'
-          : 'Answer could not be saved.'
-      );
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
     } finally {
       setSubmitting(false);
     }
@@ -81,24 +76,17 @@ export default function ImageQuestion({ question }: QuestionProps) {
   const handleSubmit = async () => {
     const trimmed = answer.trim();
     if (!trimmed) {
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Bitte gebe eine Antwort ein.'
-          : 'Please enter an answer.'
-      );
+      Alert.alert(t('common.errorTitle'), t('question.error.enterAnswer'));
       return;
     }
     if (!answerKeyReady) {
       Alert.alert(
-        language === 'de' ? 'Bitte warten' : 'Please wait',
-        language === 'de'
-          ? 'Die Antwortdaten werden noch geladen.'
-          : 'Answer data is still loading.'
+        t('question.error.pleaseWaitTitle'),
+        t('question.error.answerLoading')
       );
       return;
     }
-    const confirmed = await confirmAnswer({ answer: trimmed, language });
+    const confirmed = await confirmAnswer({ answer: trimmed, t });
     if (!confirmed) return;
     await handlePersist();
   };
@@ -153,7 +141,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
               value={answer}
               onChangeText={(text: string) => setAnswer(text)}
               placeholder={
-                language === 'de' ? 'Deine Antwort...' : 'Your answer...'
+                t('question.placeholder.answer')
               }
               returnKeyType="send"
               blurOnSubmit
@@ -168,7 +156,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
               loading={submitting}
               onPress={handleSubmit}
             >
-              {language === 'de' ? 'Antwort senden' : 'Submit answer'}
+              {t('question.submit')}
             </UIButton>
           </InfoBox>
 

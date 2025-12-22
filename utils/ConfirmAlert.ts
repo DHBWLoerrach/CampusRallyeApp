@@ -1,5 +1,6 @@
 import { Alert } from 'react-native';
 import { store$ } from '@/services/storage/Store';
+import type { Translator } from '@/utils/i18n';
 
 type ConfirmOptions = {
   title: string;
@@ -34,20 +35,17 @@ export const confirm = ({
 
 export const confirmAnswer = async ({
   answer,
-  language,
+  t,
 }: {
   answer: string;
-  language: 'de' | 'en';
+  t: Translator;
 }) => {
   const rallye = store$.rallye.get();
   if (rallye?.tour_mode) return true;
   return confirm({
-    title: language === 'de' ? 'Sicherheitsfrage' : 'Security question',
-    message:
-      language === 'de'
-        ? `Willst du wirklich "${answer}" als Antwort abschicken?`
-        : `Do you really want to submit "${answer}" as your answer?`,
-    confirmText: language === 'de' ? 'Antwort senden' : 'Submit answer',
-    cancelText: language === 'de' ? 'Abbrechen' : 'Cancel',
+    title: t('confirm.answer.title'),
+    message: t('confirm.answer.message', { answer }),
+    confirmText: t('confirm.answer.confirm'),
+    cancelText: t('common.cancel'),
   });
 };

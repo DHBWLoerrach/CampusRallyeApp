@@ -16,7 +16,7 @@ export default function NoQuestions({
   loading: boolean;
   onRefresh: () => void;
 }) {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const s = useAppStyles();
   // While loading we show only an ActivityIndicator to prevent a brief flash of the
   // "No questions" message before the first batch of questions arrives.
@@ -51,15 +51,13 @@ export default function NoQuestions({
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={2}>
           <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
-            {language === 'de' ? 'Keine Fragen' : 'No questions'}
+            {t('rallye.noQuestions.title')}
           </ThemedText>
           <ThemedText
             variant="body"
             style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
           >
-            {language === 'de'
-              ? 'Momentan sind keine Fragen verfügbar.'
-              : 'Currently no questions available.'}
+            {t('rallye.noQuestions.message')}
           </ThemedText>
         </InfoBox>
         <InfoBox mb={2}>
@@ -69,7 +67,7 @@ export default function NoQuestions({
             disabled={loading}
             onPress={onRefresh}
           >
-            {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+            {t('common.refresh')}
           </UIButton>
         </InfoBox>
       </VStack>

@@ -9,26 +9,22 @@ import { confirm } from '@/utils/ConfirmAlert';
 export default function Hint({ hint }: { hint: string }) {
   const [showHint, setShowHint] = useState(false);
   const currentQuestion = store$.currentQuestion.get() as any;
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   const handleHint = async () => {
     if (!showHint) {
       const confirmed = await confirm({
-        title: language === 'de' ? 'Sicherheitsfrage' : 'Security question',
-        message:
-          language === 'de'
-            ? 'Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.'
-            : 'Are you sure you want to receive a hint? This will cost you some points.',
-        confirmText:
-          language === 'de' ? 'Ja, ich möchte einen Tipp' : 'Yes, I want a hint',
-        cancelText: language === 'de' ? 'Abbrechen' : 'Cancel',
+        title: t('hint.confirm.title'),
+        message: t('hint.confirm.message'),
+        confirmText: t('hint.confirm.confirm'),
+        cancelText: t('common.cancel'),
       });
       if (!confirmed) return;
       setShowHint(true);
       if (currentQuestion) currentQuestion.points -= 1;
-      Alert.alert(language === 'de' ? 'Tipp' : 'Hint', hint);
+      Alert.alert(t('hint.title'), hint);
     } else {
-      Alert.alert(language === 'de' ? 'Tipp' : 'Hint', hint);
+      Alert.alert(t('hint.title'), hint);
     }
   };
 

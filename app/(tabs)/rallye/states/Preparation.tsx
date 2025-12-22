@@ -9,7 +9,7 @@ import VStack from '@/components/ui/VStack';
 import UIButton from '@/components/ui/UIButton';
 
 export default function Preparation({ loading, onRefresh }: { loading: boolean; onRefresh: () => void }) {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const s = useAppStyles();
   return (
     <ScreenScrollView
@@ -23,13 +23,13 @@ export default function Preparation({ loading, onRefresh }: { loading: boolean; 
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={2}>
           <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
-            {language === 'de' ? 'Die Rallye hat noch nicht begonnen' : 'The rally has not started yet'}
+            {t('rallye.preparing.title')}
           </ThemedText>
           <ThemedText
             variant="body"
             style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
           >
-            {language === 'de' ? 'Bitte warte auf den Start der Rallye' : 'Please wait for the rally to start'}
+            {t('rallye.preparing.message')}
           </ThemedText>
         </InfoBox>
 
@@ -40,7 +40,7 @@ export default function Preparation({ loading, onRefresh }: { loading: boolean; 
             disabled={loading}
             onPress={onRefresh}
           >
-            {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+            {t('common.refresh')}
           </UIButton>
         </InfoBox>
       </VStack>

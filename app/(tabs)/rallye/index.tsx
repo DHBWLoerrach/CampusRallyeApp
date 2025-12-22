@@ -24,7 +24,7 @@ function isPreparation(status?: string) {
 }
 
 const RallyeIndex = observer(function RallyeIndex() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
 
   const rallye = useSelector(() => store$.rallye.get());
@@ -124,12 +124,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       store$.questionIndex.set(0);
     } catch (err) {
       console.error('Fehler beim Laden der Fragen:', err);
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Die Fragen konnten nicht geladen werden.'
-          : 'The questions could not be loaded.'
-      );
+      Alert.alert(t('common.errorTitle'), t('rallye.error.loadQuestions'));
     } finally {
       setLoading(false);
     }
@@ -172,12 +167,7 @@ const RallyeIndex = observer(function RallyeIndex() {
   const onRefresh = async () => {
     const net = await NetInfo.fetch();
     if (!net.isConnected) {
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Keine Internetverbindung verfügbar'
-          : 'No internet connection available'
-      );
+      Alert.alert(t('common.errorTitle'), t('rallye.error.noInternet'));
       return;
     }
     if (rallye?.status === 'running') {
@@ -236,17 +226,12 @@ const RallyeIndex = observer(function RallyeIndex() {
         >
           <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
             {(rallye?.name ? `${rallye.name} • ` : '') +
-              (language === 'de'
-                ? `Frage ${
-                    (rallye?.tour_mode
-                      ? idx + 1
-                      : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
-                  } von ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`
-                : `Question ${
-                    (rallye?.tour_mode
-                      ? idx + 1
-                      : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
-                  } of ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`)}
+              t('rallye.progress', {
+                current: rallye?.tour_mode
+                  ? idx + 1
+                  : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
+                total: rallye?.tour_mode ? qsLen : totalQuestions || qsLen,
+              })}
           </ThemedText>
           <QuestionRenderer question={currentQuestion} />
         </ScreenScrollView>
@@ -273,13 +258,13 @@ const RallyeIndex = observer(function RallyeIndex() {
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
               <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
-                {language === 'de' ? 'Alle Fragen beantwortet.' : 'All questions answered.'}
+                {t('rallye.allAnswered.title')}
               </ThemedText>
               <ThemedText
                 variant="body"
                 style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
               >
-                {language === 'de' ? 'Erreichte Punkte: ' : 'Points achieved: '} {points}
+                {t('rallye.pointsAchieved', { points })}
               </ThemedText>
             </InfoBox>
             <InfoBox mb={2}>
@@ -291,7 +276,7 @@ const RallyeIndex = observer(function RallyeIndex() {
                   store$.enabled.set(false);
                 }}
               >
-                {language === 'de' ? 'Zurück zum Start' : 'Back to start'}
+                {t('rallye.backToStart')}
               </UIButton>
             </InfoBox>
           </VStack>
@@ -320,25 +305,23 @@ const RallyeIndex = observer(function RallyeIndex() {
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
               <ThemedText variant="title" style={globalStyles.rallyeStatesStyles.infoTitle}>
-                {timeExpired
-                  ? language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'
-                  : language === 'de' ? 'Alle Fragen beantwortet' : 'All questions answered'}
+                {timeExpired ? t('rallye.timeUp') : t('rallye.allAnswered.simple')}
               </ThemedText>
               {!timeExpired && team ? (
                 <ThemedText
                   variant="body"
                   style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}
                 >
-                  {language === 'de' ? 'Team: ' : 'Team: '} {team?.name}
+                  {t('rallye.teamLabel', { team: team?.name ?? '' })}
                 </ThemedText>
               ) : null}
               <ThemedText variant="body" style={globalStyles.rallyeStatesStyles.infoSubtitle}>
-                {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
+                {t('rallye.pointsLabel', { points })}
               </ThemedText>
             </InfoBox>
             <InfoBox>
               <ThemedText variant="body" style={globalStyles.rallyeStatesStyles.meetingPoint}>
-                {language === 'de' ? 'Bitte kommt zum vereinbarten Treffpunkt' : 'Please come to the agreed meeting point.'}
+                {t('rallye.meetingPoint')}
               </ThemedText>
             </InfoBox>
             <InfoBox mb={2}>
@@ -348,7 +331,7 @@ const RallyeIndex = observer(function RallyeIndex() {
                 disabled={loading}
                 onPress={onRefresh}
               >
-                {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+                {t('common.refresh')}
               </UIButton>
             </InfoBox>
           </VStack>

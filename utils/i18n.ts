@@ -1,0 +1,251 @@
+export type Language = 'de' | 'en';
+
+export const translations = {
+  de: {
+    'common.ok': 'OK',
+    'common.cancel': 'Abbrechen',
+    'common.confirm': 'Bestätigen',
+    'common.errorTitle': 'Fehler',
+    'common.refresh': 'Aktualisieren',
+    'common.resume': 'Fortsetzen',
+    'common.startOver': 'Neu starten',
+    'common.select': 'Auswählen',
+    'common.back': 'Zurück',
+    'common.next': 'Weiter',
+    'common.surrender': 'Aufgeben',
+    'common.loading': 'Lade…',
+    'common.offline': 'Offline',
+    'welcome.appTitle': 'DHBW Lörrach Campus Rallye',
+    'welcome.offline': 'Du bist offline…',
+    'welcome.resume.title': 'Rallye fortsetzen',
+    'welcome.resume.details': 'Rallye: {{rallye}}\nTeam: {{team}}',
+    'welcome.join.title': 'An Campus Rallye teilnehmen',
+    'welcome.join.description':
+      'Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team',
+    'welcome.join.select': 'Rallye auswählen',
+    'welcome.explore.title': 'Campus-Gelände erkunden',
+    'welcome.explore.description':
+      'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck',
+    'welcome.tourModeUnavailable': 'Kein Tour Mode Rallye verfügbar.',
+    'welcome.participationStartError': 'Teilnahme konnte nicht gestartet werden.',
+    'welcome.clearParticipation.title': 'Teilnahme löschen',
+    'welcome.clearParticipation.message':
+      'Möchtest du die gespeicherte Teilnahme wirklich löschen? Die Teamzuordnung auf diesem Gerät wird entfernt.',
+    'welcome.clearParticipation.confirm': 'Löschen',
+    'rallye.status.preparing': 'Noch nicht gestartet',
+    'rallye.status.running': 'Gestartet',
+    'rallye.status.post_processing': 'Abstimmung',
+    'rallye.status.ended': 'Beendet',
+    'rallye.password.required.title': 'Passwort erforderlich',
+    'rallye.password.missing.title': 'Passwort fehlt',
+    'rallye.password.missing.message': 'Bitte gib das Rallye-Passwort ein.',
+    'rallye.password.wrong.title': 'Falsches Passwort',
+    'rallye.password.wrong.message': 'Bitte gib das richtige Passwort ein.',
+    'rallye.password.enter': 'Passwort eingeben',
+    'rallye.password.placeholder': 'Passwort',
+    'rallye.modal.activeTitle': 'Aktive Rallyes',
+    'rallye.modal.noActive': 'Keine aktiven Rallyes verfügbar',
+    'rallye.progress': 'Frage {{current}} von {{total}}',
+    'rallye.allAnswered.title': 'Alle Fragen beantwortet.',
+    'rallye.allAnswered.simple': 'Alle Fragen beantwortet',
+    'rallye.pointsAchieved': 'Erreichte Punkte: {{points}}',
+    'rallye.backToStart': 'Zurück zum Start',
+    'rallye.timeUp': 'Zeit abgelaufen!',
+    'rallye.teamLabel': 'Team: {{team}}',
+    'rallye.pointsLabel': 'Punkte: {{points}}',
+    'rallye.meetingPoint': 'Bitte kommt zum vereinbarten Treffpunkt',
+    'rallye.noQuestions.title': 'Keine Fragen',
+    'rallye.noQuestions.message': 'Momentan sind keine Fragen verfügbar.',
+    'rallye.preparing.title': 'Die Rallye hat noch nicht begonnen',
+    'rallye.preparing.message': 'Bitte warte auf den Start der Rallye',
+    'rallye.error.loadQuestions': 'Die Fragen konnten nicht geladen werden.',
+    'rallye.error.noInternet': 'Keine Internetverbindung verfügbar',
+    'teamSetup.message': 'Bilde ein Team, um an der Rallye teilzunehmen.',
+    'teamSetup.button': 'Team bilden',
+    'teamSetup.error.message':
+      'Team konnte nicht erstellt werden. Bitte erneut versuchen.',
+    'team.sheetTitle': 'Euer Team',
+    'question.submit': 'Antwort senden',
+    'question.options.loading': 'Antwortoptionen werden geladen…',
+    'question.placeholder.answer': 'Deine Antwort...',
+    'question.error.selectAnswer': 'Bitte wähle eine Antwort aus.',
+    'question.error.enterAnswer': 'Bitte gebe eine Antwort ein.',
+    'question.error.pleaseWaitTitle': 'Bitte warten',
+    'question.error.answerLoading': 'Die Antwortdaten werden noch geladen.',
+    'question.error.qrLoading': 'Die QR-Code Daten werden noch geladen.',
+    'question.error.saveAnswer': 'Antwort konnte nicht gespeichert werden.',
+    'question.qr.incorrect':
+      'Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.',
+    'question.qr.correctMessage': 'Das ist der richtige QR-Code!',
+    'question.camera.needAccess': 'Wir brauchen Zugriff auf die Kamera',
+    'question.camera.allow': 'Zugriff auf Kamera erlauben',
+    'question.qr.hideCamera': 'Kamera ausblenden',
+    'question.qr.scan': 'QR-Code scannen',
+    'question.photo.take': 'Foto aufnehmen',
+    'question.photo.switch': 'Kamera wechseln',
+    'question.photo.new': 'Neues Foto',
+    'question.photo.send': 'Foto senden',
+    'question.photo.offlineMessage':
+      'Foto-Uploads benötigen eine Internetverbindung.',
+    'question.photo.offlineNotice':
+      'Offline: Foto-Uploads benötigen Internet.',
+    'question.error.submitPhoto': 'Foto konnte nicht gesendet werden.',
+    'question.error.surrender': 'Beim Aufgeben ist ein Fehler aufgetreten.',
+    'question.unknown.title': 'Unbekannter Fragetyp',
+    'question.unknown.message':
+      'Dieser Fragetyp wird aktuell nicht unterstützt: {{type}}',
+    'question.skip': 'Frage überspringen',
+    'hint.confirm.title': 'Sicherheitsfrage',
+    'hint.confirm.message':
+      'Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.',
+    'hint.confirm.confirm': 'Ja, ich möchte einen Tipp',
+    'hint.title': 'Tipp',
+    'confirm.answer.title': 'Sicherheitsfrage',
+    'confirm.answer.message': 'Willst du wirklich "{{answer}}" als Antwort abschicken?',
+    'confirm.answer.confirm': 'Antwort senden',
+    'confirm.surrender.title': 'Sicherheitsfrage',
+    'confirm.surrender.message': 'Willst du diese Aufgabe wirklich aufgeben?',
+    'confirm.surrender.confirm': 'Ja, ich möchte aufgeben',
+    'confirm.exit.title': 'Teilnahme an der Rallye beenden',
+    'confirm.exit.message':
+      'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
+    'confirm.exit.confirm': 'Beenden',
+  },
+  en: {
+    'common.ok': 'OK',
+    'common.cancel': 'Cancel',
+    'common.confirm': 'Confirm',
+    'common.errorTitle': 'Error',
+    'common.refresh': 'Refresh',
+    'common.resume': 'Resume',
+    'common.startOver': 'Start over',
+    'common.select': 'Select',
+    'common.back': 'Back',
+    'common.next': 'Next',
+    'common.surrender': 'Surrender',
+    'common.loading': 'Loading…',
+    'common.offline': 'Offline',
+    'welcome.appTitle': 'DHBW Lörrach Campus Rallye',
+    'welcome.offline': 'You are offline…',
+    'welcome.resume.title': 'Resume rallye',
+    'welcome.resume.details': 'Rallye: {{rallye}}\nTeam: {{team}}',
+    'welcome.join.title': 'Join Campus Rallye',
+    'welcome.join.description':
+      'Join a guided rally and explore the campus with your team',
+    'welcome.join.select': 'Select rallye',
+    'welcome.explore.title': 'Explore Campus',
+    'welcome.explore.description':
+      'Explore the campus at your own pace without time pressure',
+    'welcome.tourModeUnavailable': 'No tour mode rallye available.',
+    'welcome.participationStartError': 'Could not start participation.',
+    'welcome.clearParticipation.title': 'Clear participation',
+    'welcome.clearParticipation.message':
+      'Do you really want to clear the saved participation? The team assignment on this device will be removed.',
+    'welcome.clearParticipation.confirm': 'Clear',
+    'rallye.status.preparing': 'Not started',
+    'rallye.status.running': 'Started',
+    'rallye.status.post_processing': 'Voting',
+    'rallye.status.ended': 'Ended',
+    'rallye.password.required.title': 'Password required',
+    'rallye.password.missing.title': 'Password required',
+    'rallye.password.missing.message': 'Please enter the rallye password.',
+    'rallye.password.wrong.title': 'Wrong password',
+    'rallye.password.wrong.message': 'Please enter the correct password.',
+    'rallye.password.enter': 'Enter password',
+    'rallye.password.placeholder': 'Password',
+    'rallye.modal.activeTitle': 'Active Rallyes',
+    'rallye.modal.noActive': 'No active rallyes available',
+    'rallye.progress': 'Question {{current}} of {{total}}',
+    'rallye.allAnswered.title': 'All questions answered.',
+    'rallye.allAnswered.simple': 'All questions answered',
+    'rallye.pointsAchieved': 'Points achieved: {{points}}',
+    'rallye.backToStart': 'Back to start',
+    'rallye.timeUp': 'Time up!',
+    'rallye.teamLabel': 'Team: {{team}}',
+    'rallye.pointsLabel': 'Points: {{points}}',
+    'rallye.meetingPoint': 'Please come to the agreed meeting point.',
+    'rallye.noQuestions.title': 'No questions',
+    'rallye.noQuestions.message': 'Currently no questions available.',
+    'rallye.preparing.title': 'The rally has not started yet',
+    'rallye.preparing.message': 'Please wait for the rally to start',
+    'rallye.error.loadQuestions': 'The questions could not be loaded.',
+    'rallye.error.noInternet': 'No internet connection available',
+    'teamSetup.message': 'Create a team to participate in the rally.',
+    'teamSetup.button': 'Create team',
+    'teamSetup.error.message': 'Team could not be created. Please try again.',
+    'team.sheetTitle': 'Your Team',
+    'question.submit': 'Submit answer',
+    'question.options.loading': 'Loading answer options…',
+    'question.placeholder.answer': 'Your answer...',
+    'question.error.selectAnswer': 'Please select an answer.',
+    'question.error.enterAnswer': 'Please enter an answer.',
+    'question.error.pleaseWaitTitle': 'Please wait',
+    'question.error.answerLoading': 'Answer data is still loading.',
+    'question.error.qrLoading': 'QR code data is still loading.',
+    'question.error.saveAnswer': 'Answer could not be saved.',
+    'question.qr.incorrect':
+      'The QR code is incorrect! You are probably not at the right place.',
+    'question.qr.correctMessage': 'This is the correct QR code!',
+    'question.camera.needAccess': 'We need access to the camera',
+    'question.camera.allow': 'Allow access to camera',
+    'question.qr.hideCamera': 'Hide Camera',
+    'question.qr.scan': 'Scan QR code',
+    'question.photo.take': 'Take photo',
+    'question.photo.switch': 'Switch camera',
+    'question.photo.new': 'New photo',
+    'question.photo.send': 'Send photo',
+    'question.photo.offlineMessage':
+      'Photo uploads require an internet connection.',
+    'question.photo.offlineNotice':
+      'Offline: photo uploads require internet.',
+    'question.error.submitPhoto': 'Photo could not be sent.',
+    'question.error.surrender': 'An error occurred while surrendering.',
+    'question.unknown.title': 'Unknown question type',
+    'question.unknown.message':
+      'This question type is not supported yet: {{type}}',
+    'question.skip': 'Skip question',
+    'hint.confirm.title': 'Security question',
+    'hint.confirm.message':
+      'Are you sure you want to receive a hint? This will cost you some points.',
+    'hint.confirm.confirm': 'Yes, I want a hint',
+    'hint.title': 'Hint',
+    'confirm.answer.title': 'Security question',
+    'confirm.answer.message': 'Do you really want to submit "{{answer}}" as your answer?',
+    'confirm.answer.confirm': 'Submit answer',
+    'confirm.surrender.title': 'Security question',
+    'confirm.surrender.message': 'Do you really want to give up this task?',
+    'confirm.surrender.confirm': 'Yes, I want to give up',
+    'confirm.exit.title': 'End participation',
+    'confirm.exit.message':
+      'Do you really want to end participation? The team assignment on this device will be removed.',
+    'confirm.exit.confirm': 'End',
+  },
+} as const;
+
+export type TranslationKey = keyof typeof translations.en;
+export type TranslationParams = Record<string, string | number>;
+export type Translator = (key: TranslationKey, params?: TranslationParams) => string;
+
+export const translate = (
+  language: Language,
+  key: TranslationKey,
+  params?: TranslationParams
+) => {
+  const template =
+    translations[language][key] ?? translations.en[key] ?? String(key);
+  if (!params) return template;
+  return template.replace(/\{\{(\w+)\}\}/g, (match, name) => {
+    const value = params[name];
+    return value === undefined ? match : String(value);
+  });
+};
+
+export const resolveDeviceLanguage = (): Language => {
+  try {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    if (locale?.toLowerCase().startsWith('de')) return 'de';
+  } catch {
+    // Ignore and fall back to German.
+  }
+  return 'en';
+};

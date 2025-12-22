@@ -27,7 +27,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const cameraRef = useRef<CameraView | null>(null);
   const mountedRef = useRef(true);
   const [permission, requestPermission] = useCameraPermissions();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const s = useAppStyles();
   const online = useSelector(() => outbox$.online.get());
 
@@ -49,29 +49,17 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
         pointsAwarded: 0,
       });
     } catch (error) {
-      console.error(
-        language === 'de' ? 'Fehler beim Aufgeben:' : 'Error surrendering:',
-        error
-      );
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Beim Aufgeben ist ein Fehler aufgetreten.'
-          : 'An error occurred while surrendering.'
-      );
+      console.error('Error surrendering:', error);
+      Alert.alert(t('common.errorTitle'), t('question.error.surrender'));
     }
   };
 
   const handleSurrender = async () => {
     const confirmed = await confirm({
-      title: language === 'de' ? 'Sicherheitsfrage' : 'Security question',
-      message:
-        language === 'de'
-          ? 'Willst du diese Aufgabe wirklich aufgeben?'
-          : 'Do you really want to give up this task?',
-      confirmText:
-        language === 'de' ? 'Ja, ich möchte aufgeben' : 'Yes, I want to give up',
-      cancelText: language === 'de' ? 'Abbrechen' : 'Cancel',
+      title: t('confirm.surrender.title'),
+      message: t('confirm.surrender.message'),
+      confirmText: t('confirm.surrender.confirm'),
+      cancelText: t('common.cancel'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -97,14 +85,10 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
           </InfoBox>
           <InfoBox mb={0}>
             <ThemedText style={[{ textAlign: 'center', marginBottom: 10 }, s.text]}>
-              {language === 'de'
-                ? 'Wir brauchen Zugriff auf die Kamera'
-                : 'We need access to the camera'}
+              {t('question.camera.needAccess')}
             </ThemedText>
             <UIButton onPress={requestPermission}>
-              {language === 'de'
-                ? 'Zugriff auf Kamera erlauben'
-                : 'Allow access to camera'}
+              {t('question.camera.allow')}
             </UIButton>
             <View style={{ marginTop: 10 }}>
               <UIButton
@@ -112,7 +96,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
                 color={Colors.dhbwGray}
                 onPress={handleSurrender}
               >
-                {language === 'de' ? 'Aufgeben' : 'Surrender'}
+                {t('common.surrender')}
               </UIButton>
             </View>
           </InfoBox>
@@ -148,17 +132,17 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
                   }
                 }}
               >
-                {language === 'de' ? 'Foto aufnehmen' : 'Take photo'}
+                {t('question.photo.take')}
               </UIButton>
               <UIButton
                 icon="camera-rotate"
                 color={Colors.dhbwGray}
                 onPress={() => setFacing((c) => (c === 'back' ? 'front' : 'back'))}
               >
-                {language === 'de' ? 'Kamera wechseln' : 'Switch camera'}
+                {t('question.photo.switch')}
               </UIButton>
               <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
-                {language === 'de' ? 'Aufgeben' : 'Surrender'}
+                {t('common.surrender')}
               </UIButton>
             </View>
           </InfoBox>
@@ -185,7 +169,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
           <InfoBox mb={0}>
             <View style={globalStyles.qrCodeStyles.buttonRow}>
               <UIButton icon="recycle" color={Colors.dhbwGray} onPress={() => setPicture(null)}>
-                {language === 'de' ? 'Neues Foto' : 'New photo'}
+                {t('question.photo.new')}
               </UIButton>
               <UIButton
                 icon="envelope"
@@ -213,29 +197,25 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
                     });
                     if (result.status === 'requires_online') {
                       Alert.alert(
-                        language === 'de' ? 'Offline' : 'Offline',
-                        language === 'de'
-                          ? 'Foto-Uploads benötigen eine Internetverbindung.'
-                          : 'Photo uploads require an internet connection.'
+                        t('common.offline'),
+                        t('question.photo.offlineMessage')
                       );
                     }
                   } catch (e) {
                     console.error('Error submitting photo answer:', e);
                     Alert.alert(
-                      language === 'de' ? 'Fehler' : 'Error',
-                      language === 'de'
-                        ? 'Foto konnte nicht gesendet werden.'
-                        : 'Photo could not be sent.'
+                      t('common.errorTitle'),
+                      t('question.error.submitPhoto')
                     );
                   } finally {
                     if (mountedRef.current) setSending(false);
                   }
                 }}
               >
-                {language === 'de' ? 'Foto senden' : 'Send photo'}
+                {t('question.photo.send')}
               </UIButton>
               <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
-                {language === 'de' ? 'Aufgeben' : 'Surrender'}
+                {t('common.surrender')}
               </UIButton>
             </View>
             {showOfflineNotice ? (
@@ -245,9 +225,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
                   s.text,
                 ]}
               >
-                {language === 'de'
-                  ? 'Offline: Foto-Uploads benötigen Internet.'
-                  : 'Offline: photo uploads require internet.'}
+                {t('question.photo.offlineNotice')}
               </ThemedText>
             ) : null}
             {question.hint ? <Hint hint={question.hint} /> : null}

@@ -367,17 +367,18 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B17 — i18n minimal + Persistenz + Default Locale (**NEXT**, **P+T**)
+**Status (codex-exp):** DONE (2025-12-18)  
 **Outcome:** Strings zentral, konsistent, persistent; neue Strings sind „leicht“.  
 **Dependencies:** B12
 
 **Tasks**
-- [ ] T17.1 `t(key)` + Dictionary (de/en) + persist language in AsyncStorage.
-- [ ] T17.2 Default language via Device Locale (falls sinnvoll).
-- [ ] T17.3 Migriere Kernflows (Join, Submit, Offline, Exit, Hint).
+- [x] T17.1 `t(key)` + Dictionary (de/en) + persist language in AsyncStorage.
+- [x] T17.2 Default language via Device Locale (falls sinnvoll).
+- [x] T17.3 Migriere Kernflows (Join, Submit, Offline, Exit, Hint).
 
 **Acceptance**
-- [ ] AC17.1 Sprache bleibt über App-Restart erhalten.
-- [ ] AC17.2 Keine neuen hardcoded DE/EN Strings im Kernfluss.
+- [x] AC17.1 Sprache bleibt über App-Restart erhalten.
+- [x] AC17.2 Keine neuen hardcoded DE/EN Strings im Kernfluss.
 
 ---
 

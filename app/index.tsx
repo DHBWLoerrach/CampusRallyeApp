@@ -33,22 +33,9 @@ import {
   clearCurrentTeam,
 } from '@/services/storage/teamStorage';
 
-const startTourMode = async () => {
-  const tourRallye = await getTourModeRallye();
-  if (tourRallye) {
-    store$.team.set(null);
-    store$.reset();
-    store$.rallye.set(tourRallye);
-    await setCurrentRallye(tourRallye);
-    store$.enabled.set(true);
-  } else {
-    Alert.alert('Fehler', 'Kein Tour Mode Rallye verfügbar.');
-  }
-};
-
 export default function Welcome() {
   const { isDarkMode } = useTheme();
-  const { language, toggleLanguage } = useLanguage();
+  const { t, toggleLanguage } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
@@ -61,6 +48,19 @@ export default function Welcome() {
 
   const [showRallyeModal, setShowRallyeModal] = useState(false);
   const [activeRallyes, setActiveRallyes] = useState<RallyeRow[]>([]);
+
+  const startTourMode = async () => {
+    const tourRallye = await getTourModeRallye();
+    if (tourRallye) {
+      store$.team.set(null);
+      store$.reset();
+      store$.rallye.set(tourRallye);
+      await setCurrentRallye(tourRallye);
+      store$.enabled.set(true);
+    } else {
+      Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
+    }
+  };
 
   useEffect(() => {
     onRefresh();
@@ -119,12 +119,7 @@ export default function Welcome() {
       return true;
     } catch (e) {
       console.error('Error joining rallye:', e);
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Teilnahme konnte nicht gestartet werden.'
-          : 'Could not start participation.'
-      );
+      Alert.alert(t('common.errorTitle'), t('welcome.participationStartError'));
       return false;
     } finally {
       setJoining(false);
@@ -152,10 +147,10 @@ export default function Welcome() {
         variant="body"
         style={[globalStyles.welcomeStyles.text, { marginBottom: 20 }]}
       >
-        {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
+        {t('welcome.offline')}
       </ThemedText>
       <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+        {t('common.refresh')}
       </UIButton>
     </View>
   );
@@ -173,18 +168,19 @@ export default function Welcome() {
     >
       {resumeAvailable && resumeRallye && resumeTeam ? (
         <Card
-          title={language === 'de' ? 'Rallye fortsetzen' : 'Resume rallye'}
-          description={
-            language === 'de'
-              ? `Rallye: ${resumeRallye.name}\nTeam: ${resumeTeam.name}`
-              : `Rallye: ${resumeRallye.name}\nTeam: ${resumeTeam.name}`
-          }
-          icon="clock"
+        title={t('welcome.resume.title')}
+        description={
+          t('welcome.resume.details', {
+            rallye: resumeRallye.name,
+            team: resumeTeam.name,
+          })
+        }
+        icon="clock"
         >
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1 }}>
               <UIButton onPress={() => store$.enabled.set(true)}>
-                {language === 'de' ? 'Fortsetzen' : 'Resume'}
+                {t('common.resume')}
               </UIButton>
             </View>
             <View style={{ flex: 1 }}>
@@ -194,16 +190,10 @@ export default function Welcome() {
                 onPress={() => {
                   void (async () => {
                     const confirmed = await confirm({
-                      title:
-                        language === 'de'
-                          ? 'Teilnahme löschen'
-                          : 'Clear participation',
-                      message:
-                        language === 'de'
-                          ? 'Möchtest du die gespeicherte Teilnahme wirklich löschen? Die Teamzuordnung auf diesem Gerät wird entfernt.'
-                          : 'Do you really want to clear the saved participation? The team assignment on this device will be removed.',
-                      confirmText: language === 'de' ? 'Löschen' : 'Clear',
-                      cancelText: language === 'de' ? 'Abbrechen' : 'Cancel',
+                      title: t('welcome.clearParticipation.title'),
+                      message: t('welcome.clearParticipation.message'),
+                      confirmText: t('welcome.clearParticipation.confirm'),
+                      cancelText: t('common.cancel'),
                       destructive: true,
                     });
                     if (!confirmed) return;
@@ -211,7 +201,7 @@ export default function Welcome() {
                   })();
                 }}
               >
-                {language === 'de' ? 'Neu starten' : 'Start over'}
+                {t('common.startOver')}
               </UIButton>
             </View>
           </View>
@@ -219,29 +209,17 @@ export default function Welcome() {
       ) : null}
 
       <Card
-        title={
-          language === 'de'
-            ? 'An Campus Rallye teilnehmen'
-            : 'Join Campus Rallye'
-        }
-        description={
-          language === 'de'
-            ? 'Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team'
-            : 'Join a guided rally and explore the campus with your team'
-        }
+        title={t('welcome.join.title')}
+        description={t('welcome.join.description')}
         icon="mappin.and.ellipse"
       >
         <UIButton disabled={joining} onPress={() => setShowRallyeModal(true)}>
-          {language === 'de' ? 'Rallye auswählen' : 'Select rallye'}
+          {t('welcome.join.select')}
         </UIButton>
       </Card>
       <Card
-        title={language === 'de' ? 'Campus-Gelände erkunden' : 'Explore Campus'}
-        description={
-          language === 'de'
-            ? 'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck'
-            : 'Explore the campus at your own pace without time pressure'
-        }
+        title={t('welcome.explore.title')}
+        description={t('welcome.explore.description')}
         icon="binoculars"
         onPress={startTourMode}
       />
@@ -278,9 +256,7 @@ export default function Welcome() {
           variant="subtitle"
           style={[globalStyles.welcomeStyles.text, globalStyles.welcomeStyles.title]}
         >
-          {language === 'de'
-            ? 'DHBW Lörrach Campus Rallye'
-            : 'DHBW Lörrach Campus Rallye'}
+          {t('welcome.appTitle')}
         </ThemedText>
         <Image
           style={globalStyles.welcomeStyles.logo}

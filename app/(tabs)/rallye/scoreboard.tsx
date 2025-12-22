@@ -10,6 +10,7 @@ import { useTheme } from '@/utils/ThemeContext';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import { confirm } from '@/utils/ConfirmAlert';
+import { useLanguage } from '@/utils/LanguageContext';
 import { ScreenScrollView } from '@/components/ui/Screen';
 
 type TeamRow = {
@@ -47,6 +48,7 @@ export default function Scoreboard() {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const s = useAppStyles();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!rallye || rallye.status !== 'ended') return;
@@ -208,11 +210,10 @@ export default function Scoreboard() {
           onPress={() => {
             void (async () => {
               const confirmed = await confirm({
-                title: 'Teilnahme an der Rallye beenden',
-                message:
-                  'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
-                confirmText: 'Beenden',
-                cancelText: 'Abbrechen',
+                title: t('confirm.exit.title'),
+                message: t('confirm.exit.message'),
+                confirmText: t('confirm.exit.confirm'),
+                cancelText: t('common.cancel'),
                 destructive: true,
               });
               if (!confirmed) return;
@@ -220,7 +221,7 @@ export default function Scoreboard() {
             })();
           }}
         >
-          Teilnahme an Rallye beenden
+          {t('confirm.exit.title')}
         </UIButton>
       </View>
     </ScreenScrollView>

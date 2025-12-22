@@ -22,7 +22,7 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const processingRef = useRef(false);
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const s = useAppStyles();
 
   const team = store$.team.get();
@@ -45,25 +45,16 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
       });
     } catch (e) {
       console.error('Error submitting surrender:', e);
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Antwort konnte nicht gespeichert werden.'
-          : 'Answer could not be saved.'
-      );
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
     }
   };
 
   const handleSurrender = async () => {
     const confirmed = await confirm({
-      title: language === 'de' ? 'Sicherheitsfrage' : 'Security question',
-      message:
-        language === 'de'
-          ? 'Willst du diese Aufgabe wirklich aufgeben?'
-          : 'Do you really want to give up this task?',
-      confirmText:
-        language === 'de' ? 'Ja, ich möchte aufgeben' : 'Yes, I want to give up',
-      cancelText: language === 'de' ? 'Abbrechen' : 'Cancel',
+      title: t('confirm.surrender.title'),
+      message: t('confirm.surrender.message'),
+      confirmText: t('confirm.surrender.confirm'),
+      cancelText: t('common.cancel'),
       destructive: true,
     });
     if (!confirmed) return;
@@ -74,10 +65,8 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     if (processingRef.current) return;
     if (!answerKeyReady) {
       Alert.alert(
-        language === 'de' ? 'Bitte warten' : 'Please wait',
-        language === 'de'
-          ? 'Die QR-Code Daten werden noch geladen.'
-          : 'QR code data is still loading.'
+        t('question.error.pleaseWaitTitle'),
+        t('question.error.qrLoading')
       );
       return;
     }
@@ -85,20 +74,14 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     setScanMode(false);
     try {
       if (correct !== data.toLowerCase()) {
-        Alert.alert(
-          language === 'de'
-            ? 'Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.'
-            : 'The QR code is incorrect! You are probably not at the right place.'
-        );
+        Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
       } else {
         Alert.alert(
-          'OK',
-          language === 'de'
-            ? 'Das ist der richtige QR-Code!'
-            : 'This is the correct QR code!',
+          t('common.ok'),
+          t('question.qr.correctMessage'),
           [
             {
-              text: language === 'de' ? 'Weiter' : 'Next',
+              text: t('common.next'),
               onPress: () => {
                 void (async () => {
                   try {
@@ -111,10 +94,8 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
                   } catch (e) {
                     console.error('Error submitting QR answer:', e);
                     Alert.alert(
-                      language === 'de' ? 'Fehler' : 'Error',
-                      language === 'de'
-                        ? 'Antwort konnte nicht gespeichert werden.'
-                        : 'Answer could not be saved.'
+                      t('common.errorTitle'),
+                      t('question.error.saveAnswer')
                     );
                   }
                 })();
@@ -136,14 +117,10 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     return (
       <ThemedView variant="background" style={globalStyles.default.container}>
         <ThemedText style={{ textAlign: 'center', marginBottom: 10 }}>
-          {language === 'de'
-            ? 'Wir brauchen Zugriff auf die Kamera'
-            : 'We need access to the camera'}
+          {t('question.camera.needAccess')}
         </ThemedText>
         <UIButton onPress={requestPermission}>
-          {language === 'de'
-            ? 'Zugriff auf Kamera erlauben'
-            : 'Allow access to camera'}
+          {t('question.camera.allow')}
         </UIButton>
       </ThemedView>
     );
@@ -182,19 +159,13 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
               onPress={() => setScanMode(!scanMode)}
             >
               {scanMode
-                ? language === 'de'
-                  ? 'Kamera ausblenden'
-                  : 'Hide Camera'
-                : language === 'de'
-                  ? answerKeyReady
-                    ? 'QR-Code scannen'
-                    : 'Lade…'
-                  : answerKeyReady
-                    ? 'Scan QR code'
-                    : 'Loading…'}
+                ? t('question.qr.hideCamera')
+                : answerKeyReady
+                  ? t('question.qr.scan')
+                  : t('common.loading')}
             </UIButton>
             <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
-              {language === 'de' ? 'Aufgeben' : 'Surrender'}
+              {t('common.surrender')}
             </UIButton>
           </View>
         </InfoBox>

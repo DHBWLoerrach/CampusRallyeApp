@@ -20,7 +20,7 @@ import VStack from '@/components/ui/VStack';
 
 function MultipleChoiceQuestion({ question }: QuestionProps) {
   const { isDarkMode } = useTheme();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const s = useAppStyles();
@@ -70,12 +70,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
       setAnswer('');
     } catch (e) {
       console.error('Error submitting answer:', e);
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Antwort konnte nicht gespeichert werden.'
-          : 'Answer could not be saved.'
-      );
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
     } finally {
       setSubmitting(false);
     }
@@ -84,15 +79,10 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
   const handleSubmit = async () => {
     const trimmed = answer.trim();
     if (!trimmed) {
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Bitte wähle eine Antwort aus.'
-          : 'Please select an answer.'
-      );
+      Alert.alert(t('common.errorTitle'), t('question.error.selectAnswer'));
       return;
     }
-    const confirmed = await confirmAnswer({ answer: trimmed, language });
+    const confirmed = await confirmAnswer({ answer: trimmed, t });
     if (!confirmed) return;
     await handlePersist();
   };
@@ -115,9 +105,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
         <InfoBox mb={0}>
           {options.length === 0 ? (
             <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
-              {language === 'de'
-                ? 'Antwortoptionen werden geladen…'
-                : 'Loading answer options…'}
+              {t('question.options.loading')}
             </ThemedText>
           ) : (
             options.map((option, idx) => (
@@ -169,7 +157,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
             loading={submitting}
             onPress={handleSubmit}
           >
-            {language === 'de' ? 'Antwort senden' : 'Submit answer'}
+            {t('question.submit')}
           </UIButton>
         </InfoBox>
         {question.hint ? <Hint hint={question.hint} /> : null}

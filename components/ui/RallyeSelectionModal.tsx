@@ -23,20 +23,21 @@ import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import type { RallyeRow } from '@/services/storage/rallyeStorage';
+import type { Translator } from '@/utils/i18n';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
-function getStatusText(status: RallyeRow['status'], language: 'de' | 'en') {
+function getStatusText(status: RallyeRow['status'], t: Translator) {
   switch (status) {
     case 'preparing':
-      return language === 'de' ? 'Noch nicht gestartet' : 'Not started';
+      return t('rallye.status.preparing');
     case 'running':
-      return language === 'de' ? 'Gestartet' : 'Started';
+      return t('rallye.status.running');
     case 'post_processing':
-      return language === 'de' ? 'Abstimmung' : 'Voting';
+      return t('rallye.status.post_processing');
     case 'ended':
-      return language === 'de' ? 'Beendet' : 'Ended';
+      return t('rallye.status.ended');
     default:
       return String(status);
   }
@@ -61,7 +62,7 @@ export default function RallyeSelectionModal({
   onJoin,
   joining = false,
 }: Props) {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const { isDarkMode } = useTheme();
 
   const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
@@ -188,19 +189,15 @@ export default function RallyeSelectionModal({
     const passwordAttempt = password.trim();
     if (!passwordAttempt) {
       Alert.alert(
-        language === 'de' ? 'Passwort fehlt' : 'Password required',
-        language === 'de'
-          ? 'Bitte gib das Rallye-Passwort ein.'
-          : 'Please enter the rallye password.'
+        t('rallye.password.missing.title'),
+        t('rallye.password.missing.message')
       );
       return;
     }
     if (passwordAttempt !== requiredPassword) {
       Alert.alert(
-        language === 'de' ? 'Falsches Passwort' : 'Wrong password',
-        language === 'de'
-          ? 'Bitte gib das richtige Passwort ein.'
-          : 'Please enter the correct password.'
+        t('rallye.password.wrong.title'),
+        t('rallye.password.wrong.message')
       );
       return;
     }
@@ -251,7 +248,7 @@ export default function RallyeSelectionModal({
             },
           ]}
         >
-          {getStatusText(item.status, language)}
+          {getStatusText(item.status, t)}
         </Text>
       </View>
       {isPasswordRequired(item) ? (
@@ -264,7 +261,7 @@ export default function RallyeSelectionModal({
         onPress={() => void handleSelect(item)}
         style={globalStyles.rallyeModal.selectButton}
       >
-        {language === 'de' ? 'Auswählen' : 'Select'}
+        {t('common.select')}
       </UIButton>
     </View>
   );
@@ -286,7 +283,7 @@ export default function RallyeSelectionModal({
           {passwordRallye ? (
             <>
               <Text style={[globalStyles.rallyeModal.modalTitle, { color: headerTextColor }]}>
-                {language === 'de' ? 'Passwort erforderlich' : 'Password required'}
+                {t('rallye.password.required.title')}
               </Text>
               <View
                 style={[
@@ -321,7 +318,7 @@ export default function RallyeSelectionModal({
                   ]}
                 >
                   <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
-                    {language === 'de' ? 'Passwort eingeben' : 'Enter password'}
+                    {t('rallye.password.enter')}
                   </ThemedText>
                   <ThemedTextInput
                     autoFocus
@@ -332,7 +329,7 @@ export default function RallyeSelectionModal({
                     secureTextEntry
                     value={password}
                     onChangeText={setPassword}
-                    placeholder={language === 'de' ? 'Passwort' : 'Password'}
+                    placeholder={t('rallye.password.placeholder')}
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="done"
@@ -345,7 +342,7 @@ export default function RallyeSelectionModal({
                       color={Colors.dhbwRedLight}
                       disabled={joining}
                     >
-                      {language === 'de' ? 'Zurück' : 'Back'}
+                      {t('common.back')}
                     </UIButton>
                     <UIButton
                       onPress={() => void confirmPasswordAndJoin()}
@@ -353,19 +350,19 @@ export default function RallyeSelectionModal({
                       color={Colors.dhbwRed}
                       loading={joining}
                     >
-                      {language === 'de' ? 'Bestätigen' : 'Confirm'}
+                      {t('common.confirm')}
                     </UIButton>
                   </View>
                 </Animated.View>
               </View>
               <UIButton onPress={onClose} outline style={globalStyles.rallyeModal.cancelButton}>
-                {language === 'de' ? 'Abbrechen' : 'Cancel'}
+                {t('common.cancel')}
               </UIButton>
             </>
           ) : (
             <>
               <Text style={[globalStyles.rallyeModal.modalTitle, { color: headerTextColor }]}>
-                {language === 'de' ? 'Aktive Rallyes' : 'Active Rallyes'}
+                {t('rallye.modal.activeTitle')}
               </Text>
               {activeRallyes.length > 0 ? (
                 <FlatList
@@ -375,16 +372,14 @@ export default function RallyeSelectionModal({
                 />
               ) : (
                 <Text style={globalStyles.rallyeModal.noDataText}>
-                  {language === 'de'
-                    ? 'Keine aktiven Rallyes verfügbar'
-                    : 'No active rallyes available'}
+                  {t('rallye.modal.noActive')}
                 </Text>
               )}
               <UIButton
                 onPress={onClose}
                 style={globalStyles.rallyeModal.cancelButton}
               >
-                {language === 'de' ? 'Abbrechen' : 'Cancel'}
+                {t('common.cancel')}
               </UIButton>
             </>
           )}

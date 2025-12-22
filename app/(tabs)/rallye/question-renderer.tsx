@@ -33,7 +33,7 @@ export default function QuestionRenderer({
 }: {
   question: any;
 }) {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   // Flip animation using two faces, based on components/ui/Card.tsx pattern
   const [isFlipped, setIsFlipped] = useState(false);
   const [frontQuestion, setFrontQuestion] = useState(question);
@@ -122,16 +122,10 @@ export default function QuestionRenderer({
               variant="title"
               style={{ textAlign: 'center', marginBottom: 10 }}
             >
-              {language === 'de'
-                ? 'Unbekannter Fragetyp'
-                : 'Unknown question type'}
+              {t('question.unknown.title')}
             </ThemedText>
             <ThemedText style={{ textAlign: 'center', marginBottom: 16 }}>
-              {language === 'de'
-                ? `Dieser Fragetyp wird aktuell nicht unterstützt: ${String(
-                    type
-                  )}`
-                : `This question type is not supported yet: ${String(type)}`}
+              {t('question.unknown.message', { type: String(type) })}
             </ThemedText>
             <UIButton
               onPress={() => {
@@ -142,7 +136,7 @@ export default function QuestionRenderer({
                 store$.gotoNextQuestion();
               }}
             >
-              {language === 'de' ? 'Frage überspringen' : 'Skip question'}
+              {t('question.skip')}
             </UIButton>
           </View>
         </ThemedView>
