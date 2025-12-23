@@ -6,6 +6,7 @@ import UIButton from '@/components/ui/UIButton';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
+import { useLanguage } from '@/utils/LanguageContext';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
@@ -25,6 +26,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   const team = useSelector(() => store$.team.get());
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
   const s = useAppStyles();
+  const { t } = useLanguage();
   const rallyeId = rallye?.id;
   const teamId = team?.id;
 
@@ -118,7 +120,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
               variant="title"
               style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
             >
-              Die Abstimmung wurde beendet.
+              {t('voting.ended.title')}
             </ThemedText>
             <ThemedText
               variant="body"
@@ -128,12 +130,12 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                 { marginTop: 10 },
               ]}
             >
-              Wartet auf die Beendigung der Rallye.
+              {t('voting.ended.message')}
             </ThemedText>
           </InfoBox>
           <InfoBox mb={2}>
             <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-              Aktualisieren
+              {t('common.refresh')}
             </UIButton>
           </InfoBox>
         </VStack>
@@ -166,8 +168,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                     { marginTop: 10 },
                   ]}
                 >
-                  Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
-                  die oben gestellte Aufgabe am besten gelöst hat.
+                  {t('voting.instruction')}
                 </ThemedText>
               </InfoBox>
             </View>
@@ -223,7 +224,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
       <View style={{ padding: 10 }}>
         <InfoBox mb={2}>
           <UIButton disabled={!selectedTeam || sendingResult} onPress={handleNextQuestion}>
-            Nächste Abstimmung
+            {t('voting.next')}
           </UIButton>
         </InfoBox>
       </View>

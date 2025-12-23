@@ -113,7 +113,7 @@ export default function Scoreboard() {
           variant="title"
           style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
         >
-          Punktestand
+          {t('scoreboard.title')}
         </ThemedText>
         {ourTeam ? (
           <ThemedText
@@ -124,7 +124,7 @@ export default function Scoreboard() {
               { marginTop: 10 },
             ]}
           >
-            Dein Team: {ourTeam.name}
+            {t('scoreboard.yourTeam', { team: ourTeam.name })}
           </ThemedText>
         ) : null}
       </View>
@@ -148,16 +148,16 @@ export default function Scoreboard() {
           }}
         >
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellRank, s.text]}>
-            Platz
+            {t('scoreboard.rank')}
           </ThemedText>
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellTeam, s.text]}>
-            Team
+            {t('scoreboard.team')}
           </ThemedText>
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellTime, s.text]}>
-            Zeit
+            {t('scoreboard.time')}
           </ThemedText>
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellPoints, s.text]}>
-            Punkte
+            {t('scoreboard.points')}
           </ThemedText>
         </View>
 
