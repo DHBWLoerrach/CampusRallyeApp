@@ -109,7 +109,7 @@ export const translations = {
     'question.skip': 'Frage überspringen',
     'hint.confirm.title': 'Sicherheitsfrage',
     'hint.confirm.message':
-      'Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch ein paar Punkte.',
+      'Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch {{cost}} Punkt(e).',
     'hint.confirm.confirm': 'Ja, ich möchte einen Tipp',
     'hint.title': 'Tipp',
     'confirm.answer.title': 'Sicherheitsfrage',
@@ -241,7 +241,7 @@ export const translations = {
     'question.skip': 'Skip question',
     'hint.confirm.title': 'Security question',
     'hint.confirm.message':
-      'Are you sure you want to receive a hint? This will cost you some points.',
+      'Are you sure you want to receive a hint? This will cost you {{cost}} point(s).',
     'hint.confirm.confirm': 'Yes, I want a hint',
     'hint.title': 'Hint',
     'confirm.answer.title': 'Security question',

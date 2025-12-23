@@ -36,6 +36,8 @@ export const store$ = observable({
   hydrated: false,
   questions: [] as any[],
   questionIndex: 0,
+  // Tracks which question IDs have had their hint used (prevents double deduction)
+  usedHints: {} as Record<number, boolean>,
   // Total number of questions for the current rallye (not filtered)
   totalQuestions: 0,
   // Number of questions already answered by the team (non-tour mode)
@@ -130,6 +132,7 @@ export const store$ = observable({
     store$.votingAllowed.set(true);
     store$.totalQuestions.set(0);
     store$.answeredCount.set(0);
+    store$.usedHints.set({});
   },
 
   leaveRallye: async () => {

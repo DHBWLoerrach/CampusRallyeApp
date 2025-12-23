@@ -425,16 +425,17 @@ Die App fühlt sich so zuverlässig und souverän an, dass Nutzer:innen niemals 
 ---
 
 ### B24 — Hint Scoring Model (klar, nicht mutierend) (**NEXT**, **T**)
+**Status (codex-exp):** DONE (2025-12-23)  
 **Outcome:** Hint-Kosten sind fair, transparent und technisch korrekt.  
 **Dependencies:** B10, B17, B16a
 
 **Tasks**
-- [ ] T24.1 Scoring-Entscheidung fixieren: „Hint kostet X Punkte“ (exakt, nicht „ein paar“).
-- [ ] T24.2 Implementiere Hint-State (per question id) im Store (keine Objektmutation).
-- [ ] T24.3 UI/Copy zeigt Kosten vor Nutzung.
+- [x] T24.1 Scoring-Entscheidung fixieren: „Hint kostet 1 Punkt" (exakt, nicht „ein paar").
+- [x] T24.2 Implementiere Hint-State (`usedHints` per question id) im Store (keine Objektmutation).
+- [x] T24.3 UI/Copy zeigt Kosten vor Nutzung.
 
 **Acceptance**
-- [ ] AC24.1 Hint kann keine negativen/inkonsistenten Punkte verursachen.
+- [x] AC24.1 Hint kann keine negativen/inkonsistenten Punkte verursachen.
 
 ---
 

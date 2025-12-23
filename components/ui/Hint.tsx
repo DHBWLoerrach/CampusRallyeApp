@@ -1,35 +1,49 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Alert, TouchableOpacity } from 'react-native';
+import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import { MaterialIcons } from '@expo/vector-icons';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { confirm } from '@/utils/ConfirmAlert';
 
+/** Cost of using a hint in points */
+const HINT_COST = 1;
+
 export default function Hint({ hint }: { hint: string }) {
-  const [showHint, setShowHint] = useState(false);
-  const currentQuestion = store$.currentQuestion.get() as any;
   const { t } = useLanguage();
+  const currentQuestion = useSelector(() => store$.currentQuestion.get()) as any;
+  const questionId = currentQuestion?.id as number | undefined;
+  const alreadyUsed = useSelector(() =>
+    questionId != null ? store$.usedHints[questionId].get() === true : false
+  );
 
   const handleHint = async () => {
-    if (!showHint) {
-      const confirmed = await confirm({
-        title: t('hint.confirm.title'),
-        message: t('hint.confirm.message'),
-        confirmText: t('hint.confirm.confirm'),
-        cancelText: t('common.cancel'),
-      });
-      if (!confirmed) return;
-      setShowHint(true);
-      if (currentQuestion) {
-        const idx = store$.questionIndex.get();
-        const currentPoints = store$.questions[idx].points.get() ?? 0;
-        store$.questions[idx].points.set(Math.max(0, currentPoints - 1));
-      }
+    if (!questionId) return;
+
+    // If hint was already used for this question, just show it again
+    if (alreadyUsed) {
       Alert.alert(t('hint.title'), hint);
-    } else {
-      Alert.alert(t('hint.title'), hint);
+      return;
     }
+
+    // Confirm before first use (costs points)
+    const confirmed = await confirm({
+      title: t('hint.confirm.title'),
+      message: t('hint.confirm.message', { cost: HINT_COST }),
+      confirmText: t('hint.confirm.confirm'),
+      cancelText: t('common.cancel'),
+    });
+    if (!confirmed) return;
+
+    // Mark hint as used for this question
+    store$.usedHints[questionId].set(true);
+
+    // Deduct points from accumulated total (not per-question object mutation)
+    const currentPoints = store$.points.get();
+    store$.points.set(Math.max(0, currentPoints - HINT_COST));
+
+    Alert.alert(t('hint.title'), hint);
   };
 
   return (
