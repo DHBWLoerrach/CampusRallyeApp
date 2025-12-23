@@ -43,6 +43,8 @@ function formatDuration(ms?: number) {
 
 export default function Scoreboard() {
   const rallye = useSelector(() => store$.rallye.get());
+  const rallyeId = rallye?.id;
+  const rallyeStatus = rallye?.status;
   const ourTeam = useSelector(() => store$.team.get());
   const [rows, setRows] = useState<TeamRow[]>([]);
   const { isDarkMode } = useTheme();
@@ -51,13 +53,13 @@ export default function Scoreboard() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    if (!rallye || rallye.status !== 'ended') return;
+    if (!rallyeId || rallyeStatus !== 'ended') return;
     (async () => {
       try {
         let { data } = await supabase
           .from('rallye_team')
           .select('id, name, created_at, time_played')
-          .eq('rallye_id', rallye.id);
+          .eq('rallye_id', rallyeId);
         const teamRows = (data || []) as TeamRow[];
 
         const { data: teamPoints, error } = await supabase
@@ -96,7 +98,7 @@ export default function Scoreboard() {
         console.error('Error loading scoreboard:', e);
       }
     })();
-  }, [rallye?.id, rallye?.status]);
+  }, [rallyeId, rallyeStatus]);
 
   return (
     <ScreenScrollView

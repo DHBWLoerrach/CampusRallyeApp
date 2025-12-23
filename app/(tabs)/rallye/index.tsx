@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, RefreshControl } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
@@ -42,7 +42,7 @@ const RallyeIndex = observer(function RallyeIndex() {
   const allQuestionsAnswered = useSelector(() => store$.allQuestionsAnswered.get());
   const timeExpired = useSelector(() => store$.timeExpired.get());
 
-  const loadAnswers = async () => {
+  const loadAnswers = useCallback(async () => {
     try {
       const { data: joinData, error: joinError } = await supabase
         .from('join_rallye_questions')
@@ -59,9 +59,9 @@ const RallyeIndex = observer(function RallyeIndex() {
     } catch (error) {
       console.error('Error fetching rallye answers:', error);
     }
-  };
+  }, [rallye]);
 
-  const loadQuestions = async () => {
+  const loadQuestions = useCallback(async () => {
     if (!rallye) return;
     setLoading(true);
     try {
@@ -130,9 +130,9 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rallye, t, team]);
 
-  const refreshStatus = async () => {
+  const refreshStatus = useCallback(async () => {
     if (!rallye) return;
     setLoading(true);
     // slight delay to avoid flicker
@@ -154,7 +154,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rallye]);
 
   useEffect(() => {
     if (!rallye) return;
@@ -164,7 +164,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       // Ensure we refresh dynamic rallye fields like name/status
       await refreshStatus();
     })();
-  }, [rallye?.id, team?.id]);
+  }, [loadAnswers, loadQuestions, rallye, refreshStatus]);
 
   const onRefresh = async () => {
     const net = await NetInfo.fetch();

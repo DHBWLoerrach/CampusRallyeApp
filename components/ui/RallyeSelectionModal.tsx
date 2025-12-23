@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -69,6 +69,7 @@ export default function RallyeSelectionModal({
   const [password, setPassword] = useState('');
   const [isFlipped, setIsFlipped] = useState(false);
   const flip = useSharedValue(0);
+  const passwordRallyeId = passwordRallye?.id;
 
   useEffect(() => {
     if (visible) return;
@@ -78,7 +79,7 @@ export default function RallyeSelectionModal({
     flip.value = 0;
   }, [visible, flip]);
 
-  const flipToPassword = () => {
+  const flipToPassword = useCallback(() => {
     flip.value = withSpring(180, {
       stiffness: 180,
       damping: 18,
@@ -86,7 +87,7 @@ export default function RallyeSelectionModal({
       overshootClamping: false,
     });
     setIsFlipped(true);
-  };
+  }, [flip]);
 
   const flipBackAndReturnToList = () => {
     const springConfig = {
@@ -103,7 +104,7 @@ export default function RallyeSelectionModal({
   };
 
   useEffect(() => {
-    if (!passwordRallye) return;
+    if (!passwordRallyeId) return;
     setPassword('');
     setIsFlipped(false);
     flip.value = 0;
@@ -111,7 +112,7 @@ export default function RallyeSelectionModal({
       flipToPassword();
     }, 80);
     return () => clearTimeout(timeout);
-  }, [passwordRallye?.id]);
+  }, [flip, flipToPassword, passwordRallyeId]);
 
   const frontAnimatedStyle = useAnimatedStyle(() => {
     const rotateY = `${interpolate(

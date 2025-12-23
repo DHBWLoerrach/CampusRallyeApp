@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
-import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { FlatList, Image, TouchableOpacity, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import UIButton from '@/components/ui/UIButton';
 import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import { useTheme } from '@/utils/ThemeContext';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
@@ -19,56 +18,57 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   const [counter, setCounter] = useState(0);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
-  const [sortedContent, setSortedContent] = useState<any[][]>([]);
   const [currentVotingIdx, setCurrentVotingIdx] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState<any[]>([]);
   const [sendingResult, setSendingResult] = useState(false);
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
-  const { isDarkMode } = useTheme();
-  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const s = useAppStyles();
+  const rallyeId = rallye?.id;
+  const teamId = team?.id;
 
-  const getVotingData = async () => {
+  const getVotingData = useCallback(async () => {
+    if (!rallyeId || !teamId) return;
     try {
       const { data, error } = await supabase.rpc('get_voting_content', {
-        rallye_id_param: rallye.id,
-        own_team_id_param: team.id,
+        rallye_id_param: rallyeId,
+        own_team_id_param: teamId,
       });
       if (error) throw error;
       setVoting(data || []);
     } catch (e) {
       console.error('Error fetching voting questions:', e);
     }
-  };
+  }, [rallyeId, teamId]);
 
-  const getCount = async () => {
+  const getCount = useCallback(async () => {
+    if (!rallyeId) return;
     try {
       const { data: count, error: countError } = await supabase
         .from('voting')
         .select('question_id')
-        .eq('rallye_id', rallye.id);
+        .eq('rallye_id', rallyeId);
       if (countError) throw countError;
       setCounter((count || []).length);
 
       const { data, error } = await supabase
         .from('rallye_team')
         .select('id')
-        .eq('rallye_id', rallye.id);
+        .eq('rallye_id', rallyeId);
       if (error) throw error;
       setTeamCount((data || []).length);
     } catch (e) {
       console.error('Error fetching team count:', e);
     }
-  };
+  }, [rallyeId]);
 
   useEffect(() => {
     (async () => {
       await getVotingData();
       await getCount();
     })();
-  }, []);
+  }, [getCount, getVotingData]);
 
   useEffect(() => {
     const sorted = [...voting].sort((a, b) => a.tq_question_id - b.tq_question_id);
@@ -81,7 +81,6 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
       }
       grouped[grouped.length - 1].push(sorted[i]);
     }
-    setSortedContent(grouped);
 
     if (counter > currentVotingIdx) {
       store$.votingAllowed.set(true);

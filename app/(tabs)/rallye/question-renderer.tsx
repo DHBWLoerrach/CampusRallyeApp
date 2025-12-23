@@ -28,6 +28,13 @@ const components: Record<string, any> = {
   picture: ImageQuestion,
 };
 
+const SPRING_CONFIG = {
+  stiffness: 180,
+  damping: 18,
+  mass: 1,
+  overshootClamping: false,
+} as const;
+
 export default function QuestionRenderer({
   question,
 }: {
@@ -76,13 +83,6 @@ export default function QuestionRenderer({
     } as const;
   }, [isFlipped]);
 
-  const springConfig = {
-    stiffness: 180,
-    damping: 18,
-    mass: 1,
-    overshootClamping: false,
-  } as const;
-
   useEffect(() => {
     // Only act when question id changes
     const nextId = question?.id;
@@ -96,7 +96,7 @@ export default function QuestionRenderer({
       setBackQuestion(question);
       flip.value = withSpring(
         180,
-        springConfig,
+        SPRING_CONFIG,
         () => runOnJS(setIsFlipped)(true)
       );
     } else {
@@ -104,11 +104,11 @@ export default function QuestionRenderer({
       setFrontQuestion(question);
       flip.value = withSpring(
         0,
-        springConfig,
+        SPRING_CONFIG,
         () => runOnJS(setIsFlipped)(false)
       );
     }
-  }, [question?.id]);
+  }, [backQuestion?.id, flip, frontQuestion?.id, isFlipped, question]);
 
   const renderQuestion = (q: any) => {
     const type = q?.question_type;
