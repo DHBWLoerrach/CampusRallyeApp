@@ -21,7 +21,11 @@ export default function Hint({ hint }: { hint: string }) {
       });
       if (!confirmed) return;
       setShowHint(true);
-      if (currentQuestion) currentQuestion.points -= 1;
+      if (currentQuestion) {
+        const idx = store$.questionIndex.get();
+        const currentPoints = store$.questions[idx].points.get() ?? 0;
+        store$.questions[idx].points.set(Math.max(0, currentPoints - 1));
+      }
       Alert.alert(t('hint.title'), hint);
     } else {
       Alert.alert(t('hint.title'), hint);
