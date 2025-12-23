@@ -67,10 +67,17 @@ export default function Welcome() {
 
   const loadRallyes = async () => {
     setFetchState('loading');
-    const netState = await NetInfo.fetch();
-    const isOffline =
-      netState.isConnected === false || netState.isInternetReachable === false;
-    if (isOffline) {
+    try {
+      const netState = await NetInfo.fetch();
+      const isOffline =
+        netState.isConnected === false || netState.isInternetReachable === false;
+      if (isOffline) {
+        setActiveRallyes([]);
+        setFetchState('offline');
+        return;
+      }
+    } catch (e) {
+      console.error('Error checking network status:', e);
       setActiveRallyes([]);
       setFetchState('offline');
       return;

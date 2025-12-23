@@ -29,7 +29,6 @@ startOutbox();
 
 export const store$ = observable({
   rallye: null as any,
-  teamQuestions: [] as any[],
   enabled: false,
   // When a previously joined team exists on this device, we show an explicit resume prompt.
   resumeAvailable: false,
@@ -44,7 +43,6 @@ export const store$ = observable({
   points: 0,
   allQuestionsAnswered: false,
   answers: [] as any[],
-  multipleChoiceAnswers: [] as any[],
   team: null as any,
   votingAllowed: true,
   timeExpired: false,
@@ -126,13 +124,9 @@ export const store$ = observable({
     store$.questionIndex.set(0);
     store$.points.set(0);
     store$.allQuestionsAnswered.set(false);
-    store$.teamQuestions.set([]);
     store$.questions.set([]);
-    store$.questionIndex.set(0);
-    store$.points.set(0);
     store$.answers.set([]);
     store$.timeExpired.set(false);
-    store$.multipleChoiceAnswers.set([]);
     store$.votingAllowed.set(true);
     store$.totalQuestions.set(0);
     store$.answeredCount.set(0);

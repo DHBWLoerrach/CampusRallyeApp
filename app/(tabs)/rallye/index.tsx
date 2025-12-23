@@ -43,6 +43,7 @@ const RallyeIndex = observer(function RallyeIndex() {
   const timeExpired = useSelector(() => store$.timeExpired.get());
 
   const loadAnswers = useCallback(async () => {
+    if (!rallye?.id) return;
     try {
       const { data: joinData, error: joinError } = await supabase
         .from('join_rallye_questions')
