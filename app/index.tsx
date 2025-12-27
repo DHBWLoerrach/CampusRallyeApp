@@ -31,7 +31,11 @@ import {
 } from '@/services/storage/teamStorage';
 
 // TODO: Fix types
-const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
+const handlePasswordSubmit = async (
+  password: string,
+  selectedRallye: any,
+  language: 'de' | 'en'
+) => {
   try {
     if (password === selectedRallye.password) {
       // Set selected rallye and enable tabs
@@ -61,17 +65,24 @@ const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
       store$.enabled.set(true);
     } else {
       Alert.alert(
-        'Falsches Passwort',
-        'Bitte geben Sie das richtige Passwort ein.'
+        language === 'de' ? 'Falsches Passwort' : 'Wrong Password',
+        language === 'de'
+          ? 'Bitte geben Sie das richtige Passwort ein.'
+          : 'Please enter the correct password.'
       );
     }
   } catch (error) {
     console.error('Fehler beim Überprüfen des Passworts:', error);
-    Alert.alert('Fehler', 'Es ist ein Fehler aufgetreten.');
+    Alert.alert(
+      language === 'de' ? 'Fehler' : 'Error',
+      language === 'de'
+        ? 'Es ist ein Fehler aufgetreten.'
+        : 'An error has occurred.'
+    );
   }
 };
 
-const handleNoPasswordSubmit = async () => {
+const handleNoPasswordSubmit = async (language: 'de' | 'en') => {
   const tourRallye = await getTourModeRallye();
   if (tourRallye) {
     store$.team.set(null);
@@ -80,7 +91,12 @@ const handleNoPasswordSubmit = async () => {
     await setCurrentRallye(tourRallye);
     store$.enabled.set(true);
   } else {
-    Alert.alert('Fehler', 'Kein Tour Mode Rallye verfügbar.');
+    Alert.alert(
+      language === 'de' ? 'Fehler' : 'Error',
+      language === 'de'
+        ? 'Keine Erkundungstour verfügbar.'
+        : 'No exploration tour available.'
+    );
   }
 };
 
@@ -193,7 +209,7 @@ export default function Welcome() {
             );
             return;
           }
-          handlePasswordSubmit(password, selectedRallye);
+          handlePasswordSubmit(password, selectedRallye, language);
         }}
       />
       <Card
@@ -204,7 +220,7 @@ export default function Welcome() {
             : 'Explore the campus at your own pace without time pressure'
         }
         icon="binoculars"
-        onPress={handleNoPasswordSubmit}
+        onPress={() => handleNoPasswordSubmit(language)}
       />
     </View>
   );

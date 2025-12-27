@@ -11,10 +11,12 @@ import { setCurrentTeam } from '@/services/storage/teamStorage';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
+import { useLanguage } from '@/utils/LanguageContext';
 
 const TeamSetup = observer(function TeamSetup() {
   const [loading, setLoading] = useState(false);
   const s = useAppStyles();
+  const { language } = useLanguage();
   const rallye = useSelector(() => store$.rallye.get());
   const createTeam = async () => {
     setLoading(true);
@@ -36,8 +38,10 @@ const TeamSetup = observer(function TeamSetup() {
     } catch (e) {
       console.error('Error creating team:', e);
       Alert.alert(
-        'Fehler',
-        'Team konnte nicht erstellt werden. Bitte erneut versuchen.'
+        language === 'de' ? 'Fehler' : 'Error',
+        language === 'de'
+          ? 'Team konnte nicht erstellt werden. Bitte erneut versuchen.'
+          : 'Team could not be created. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -52,10 +56,12 @@ const TeamSetup = observer(function TeamSetup() {
       <View style={[globalStyles.teamStyles.container]}>
         <View style={[globalStyles.teamStyles.infoBox, s.infoBox]}>
           <ThemedText style={globalStyles.teamStyles.message}>
-            {'Bilde ein Team, um an der Rallye teilzunehmen.'}
+            {language === 'de'
+              ? 'Bilde ein Team, um an der Rallye teilzunehmen.'
+              : 'Form a team to participate in the rally.'}
           </ThemedText>
           <UIButton disabled={loading} onPress={createTeam}>
-            Team bilden
+            {language === 'de' ? 'Team bilden' : 'Form team'}
           </UIButton>
         </View>
       </View>

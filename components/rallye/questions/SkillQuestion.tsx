@@ -57,7 +57,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
       );
       return;
     }
-    confirmAlert(answer, handlePersist);
+    confirmAlert(answer, handlePersist, language);
   };
 
   return (

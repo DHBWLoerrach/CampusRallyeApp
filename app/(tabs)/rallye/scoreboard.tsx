@@ -7,6 +7,7 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
+import { useLanguage } from '@/utils/LanguageContext';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
@@ -45,6 +46,7 @@ export default function Scoreboard() {
   const ourTeam = useSelector(() => store$.team.get());
   const [rows, setRows] = useState<TeamRow[]>([]);
   const { isDarkMode } = useTheme();
+  const { language } = useLanguage();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const s = useAppStyles();
 
@@ -106,7 +108,7 @@ export default function Scoreboard() {
     >
       <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
         <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
-          Punktestand
+          {language === 'de' ? 'Punktestand' : 'Scoreboard'}
         </ThemedText>
         {ourTeam ? (
           <ThemedText
@@ -115,7 +117,7 @@ export default function Scoreboard() {
               { marginTop: 10 },
             ]}
           >
-            Dein Team: {ourTeam.name}
+            {language === 'de' ? 'Dein Team: ' : 'Your Team: '}{ourTeam.name}
           </ThemedText>
         ) : null}
       </View>
@@ -139,16 +141,16 @@ export default function Scoreboard() {
           }}
         >
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellRank]}>
-            Platz
+            {language === 'de' ? 'Platz' : 'Rank'}
           </ThemedText>
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellTeam]}>
-            Team
+            {language === 'de' ? 'Team' : 'Team'}
           </ThemedText>
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellTime]}>
-            Zeit
+            {language === 'de' ? 'Zeit' : 'Time'}
           </ThemedText>
           <ThemedText style={[globalStyles.scoreboardStyles.headerCellPoints]}>
-            Punkte
+            {language === 'de' ? 'Punkte' : 'Points'}
           </ThemedText>
         </View>
 
@@ -210,12 +212,16 @@ export default function Scoreboard() {
               return;
             }
             Alert.alert(
-              'Teilnahme an der Rallye beenden',
-              'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
+              language === 'de'
+                ? 'Teilnahme an der Rallye beenden'
+                : 'End rally participation',
+              language === 'de'
+                ? 'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.'
+                : 'Do you really want to end your participation in the rally? The team assignment on this device will be deleted.',
               [
-                { text: 'Abbrechen', style: 'cancel' },
+                { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
                 {
-                  text: 'Beenden',
+                  text: language === 'de' ? 'Beenden' : 'End',
                   style: 'destructive',
                   onPress: async () => {
                     try {
@@ -234,7 +240,7 @@ export default function Scoreboard() {
             );
           }}
         >
-          Teilnahme an Rallye beenden
+          {language === 'de' ? 'Teilnahme an Rallye beenden' : 'End rally participation'}
         </UIButton>
       </View>
     </ThemedScrollView>

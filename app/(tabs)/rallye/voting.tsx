@@ -7,6 +7,7 @@ import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useTheme } from '@/utils/ThemeContext';
+import { useLanguage } from '@/utils/LanguageContext';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
@@ -27,6 +28,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   const team = useSelector(() => store$.team.get());
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
   const { isDarkMode } = useTheme();
+  const { language } = useLanguage();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const s = useAppStyles();
 
@@ -116,15 +118,15 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
         <VStack style={{ width: '100%' }} gap={2}>
           <InfoBox mb={2}>
             <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
-              Die Abstimmung wurde beendet.
+              {language === 'de' ? 'Die Abstimmung wurde beendet.' : 'The voting has ended.'}
             </ThemedText>
             <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
-              Wartet auf die Beendigung der Rallye.
+              {language === 'de' ? 'Wartet auf die Beendigung der Rallye.' : 'Waiting for the rally to end.'}
             </ThemedText>
           </InfoBox>
           <InfoBox mb={2}>
             <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-              Aktualisieren
+              {language === 'de' ? 'Aktualisieren' : 'Refresh'}
             </UIButton>
           </InfoBox>
         </VStack>
@@ -147,8 +149,9 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                   {currentQuestion[0]?.question_content}
                 </ThemedText>
                 <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
-                  Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach
-                  die oben gestellte Aufgabe am besten gelöst hat.
+                  {language === 'de'
+                    ? 'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.'
+                    : 'Give an extra point to the team that you think solved the task above the best.'}
                 </ThemedText>
               </InfoBox>
             </View>
@@ -198,7 +201,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
       <View style={{ padding: 10 }}>
         <InfoBox mb={2}>
           <UIButton disabled={!selectedTeam || sendingResult} onPress={handleNextQuestion}>
-            Nächste Abstimmung
+            {language === 'de' ? 'Nächste Abstimmung' : 'Next vote'}
           </UIButton>
         </InfoBox>
       </View>
