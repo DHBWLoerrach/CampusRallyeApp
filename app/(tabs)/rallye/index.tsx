@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, RefreshControl } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
@@ -26,6 +26,7 @@ function isPreparation(status?: string) {
 
 const RallyeIndex = observer(function RallyeIndex() {
   const { t } = useLanguage();
+  const tRef = useRef(t);
   const [loading, setLoading] = useState(false);
   const s = useAppStyles();
 
@@ -41,6 +42,10 @@ const RallyeIndex = observer(function RallyeIndex() {
   const points = useSelector(() => store$.points.get());
   const allQuestionsAnswered = useSelector(() => store$.allQuestionsAnswered.get());
   const timeExpired = useSelector(() => store$.timeExpired.get());
+
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   const loadAnswers = useCallback(async () => {
     if (!rallye?.id) return;
@@ -127,11 +132,14 @@ const RallyeIndex = observer(function RallyeIndex() {
       store$.questionIndex.set(0);
     } catch (err) {
       console.error('Fehler beim Laden der Fragen:', err);
-      Alert.alert(t('common.errorTitle'), t('rallye.error.loadQuestions'));
+      Alert.alert(
+        tRef.current('common.errorTitle'),
+        tRef.current('rallye.error.loadQuestions')
+      );
     } finally {
       setLoading(false);
     }
-  }, [rallye, t, team]);
+  }, [rallye, team]);
 
   const refreshStatus = useCallback(async () => {
     if (!rallye) return;
