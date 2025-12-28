@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
@@ -23,7 +23,13 @@ export default function ImageQuestion({ question }: QuestionProps) {
   const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
-  const [pictureUri, setPictureUri] = useState<string | null>(null);
+  const pictureUri = useMemo(() => {
+    if (!question.bucket_path) return null;
+    const result = supabase.storage
+      .from('question-media')
+      .getPublicUrl(question.bucket_path);
+    return result?.data?.publicUrl ?? null;
+  }, [question.bucket_path]);
   const s = useAppStyles();
   const { keyboardHeight, keyboardVisible } = useKeyboard();
 
@@ -38,18 +44,6 @@ export default function ImageQuestion({ question }: QuestionProps) {
     [answers, question.id]
   );
   const answerKeyReady = correct.length > 0;
-
-  useEffect(() => {
-    (async () => {
-      if (!question.bucket_path) return;
-      const result = supabase.storage
-        .from('question-media')
-        .getPublicUrl(question.bucket_path);
-      if (!('error' in result) || !result.error) {
-        setPictureUri(result.data.publicUrl);
-      }
-    })();
-  }, [question.bucket_path]);
 
   const handlePersist = async () => {
     if (submitting) return;
