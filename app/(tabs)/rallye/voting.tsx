@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Image, TouchableOpacity, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
@@ -20,7 +20,6 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
   const [currentVotingIdx, setCurrentVotingIdx] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState<any[]>([]);
   const [sendingResult, setSendingResult] = useState(false);
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
@@ -72,7 +71,7 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
     })();
   }, [getCount, getVotingData]);
 
-  useEffect(() => {
+  const groupedQuestions = useMemo(() => {
     const sorted = [...voting].sort((a, b) => a.tq_question_id - b.tq_question_id);
     const grouped: any[][] = [];
     let current: number | null = null;
@@ -83,15 +82,17 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
       }
       grouped[grouped.length - 1].push(sorted[i]);
     }
+    return grouped;
+  }, [voting]);
 
-    if (counter > currentVotingIdx) {
-      store$.votingAllowed.set(true);
-      const currentQ = grouped[currentVotingIdx];
-      setCurrentQuestion(currentQ || []);
-    } else {
-      store$.votingAllowed.set(false);
-    }
-  }, [currentVotingIdx, counter, voting]);
+  const currentQuestion = useMemo(
+    () => groupedQuestions[currentVotingIdx] || [],
+    [currentVotingIdx, groupedQuestions]
+  );
+
+  useEffect(() => {
+    store$.votingAllowed.set(counter > currentVotingIdx);
+  }, [counter, currentVotingIdx]);
 
   const handleNextQuestion = async () => {
     try {
