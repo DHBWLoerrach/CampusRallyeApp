@@ -17,7 +17,6 @@ import { useTheme } from '@/utils/ThemeContext';
 import { ScreenScrollView } from '@/components/ui/Screen';
 import { store$ } from '@/services/storage/Store';
 import { useSelector } from '@legendapp/state/react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import NetInfo from '@react-native-community/netinfo';
 import ThemedText from '@/components/themed/ThemedText';
 import { confirm } from '@/utils/ConfirmAlert';
@@ -38,7 +37,6 @@ export default function Welcome() {
   const { isDarkMode } = useTheme();
   const { t, toggleLanguage } = useLanguage();
   const s = useAppStyles();
-  const insets = useSafeAreaInsets();
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
   const resumeRallye = useSelector(() => store$.rallye.get());
@@ -70,7 +68,8 @@ export default function Welcome() {
     try {
       const netState = await NetInfo.fetch();
       const isOffline =
-        netState.isConnected === false || netState.isInternetReachable === false;
+        netState.isConnected === false ||
+        netState.isInternetReachable === false;
       if (isOffline) {
         setActiveRallyes([]);
         setFetchState('offline');
@@ -196,14 +195,12 @@ export default function Welcome() {
     >
       {resumeAvailable && resumeRallye && resumeTeam ? (
         <Card
-        title={t('welcome.resume.title')}
-        description={
-          t('welcome.resume.details', {
+          title={t('welcome.resume.title')}
+          description={t('welcome.resume.details', {
             rallye: resumeRallye.name,
             team: resumeTeam.name,
-          })
-        }
-        icon="clock"
+          })}
+          icon="clock"
         >
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1 }}>
@@ -272,8 +269,8 @@ export default function Welcome() {
         <TouchableOpacity
           style={{
             position: 'absolute',
-            top: insets.top,
-            left: 13,
+            top: 30,
+            left: 10,
             width: 44,
             height: 44,
             alignItems: 'center',
@@ -295,7 +292,10 @@ export default function Welcome() {
       <View style={globalStyles.welcomeStyles.header}>
         <ThemedText
           variant="subtitle"
-          style={[globalStyles.welcomeStyles.text, globalStyles.welcomeStyles.title]}
+          style={[
+            globalStyles.welcomeStyles.text,
+            globalStyles.welcomeStyles.title,
+          ]}
         >
           {t('welcome.appTitle')}
         </ThemedText>
@@ -316,9 +316,15 @@ export default function Welcome() {
       >
         {fetchState === 'loading' && <LoadingContent />}
         {fetchState === 'ready' && <ReadyContent />}
-        {fetchState === 'offline' && <StateContent message={t('welcome.offline')} />}
-        {fetchState === 'empty' && <StateContent message={t('welcome.empty')} />}
-        {fetchState === 'error' && <StateContent message={t('welcome.error')} />}
+        {fetchState === 'offline' && (
+          <StateContent message={t('welcome.offline')} />
+        )}
+        {fetchState === 'empty' && (
+          <StateContent message={t('welcome.empty')} />
+        )}
+        {fetchState === 'error' && (
+          <StateContent message={t('welcome.error')} />
+        )}
       </View>
       <RallyeSelectionModal
         visible={showRallyeModal}
