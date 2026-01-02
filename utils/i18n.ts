@@ -17,6 +17,10 @@ export const translations = {
     'common.offline': 'Offline',
     'a11y.languageToggle': 'Sprache wechseln',
     'a11y.languageToggleHint': 'Wechselt zwischen Deutsch und Englisch.',
+    'a11y.languageToggleCurrent': 'Sprache wechseln, aktuell {{language}}',
+    'a11y.languageToggleHintTarget': 'Wechselt zu {{language}}.',
+    'a11y.languageName.de': 'Deutsch',
+    'a11y.languageName.en': 'Englisch',
     'a11y.hintButton': 'Tipp anzeigen',
     'a11y.hintButtonHint': 'Öffnet den Tipp.',
     'a11y.logoutButton': 'Rallye beenden',
@@ -39,7 +43,8 @@ export const translations = {
     'welcome.explore.description':
       'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck',
     'welcome.tourModeUnavailable': 'Kein Tour Mode Rallye verfügbar.',
-    'welcome.participationStartError': 'Teilnahme konnte nicht gestartet werden.',
+    'welcome.participationStartError':
+      'Teilnahme konnte nicht gestartet werden.',
     'welcome.clearParticipation.title': 'Teilnahme löschen',
     'welcome.clearParticipation.message':
       'Möchtest du die gespeicherte Teilnahme wirklich löschen? Die Teamzuordnung auf diesem Gerät wird entfernt.',
@@ -99,8 +104,7 @@ export const translations = {
     'question.photo.send': 'Foto senden',
     'question.photo.offlineMessage':
       'Foto-Uploads benötigen eine Internetverbindung.',
-    'question.photo.offlineNotice':
-      'Offline: Foto-Uploads benötigen Internet.',
+    'question.photo.offlineNotice': 'Offline: Foto-Uploads benötigen Internet.',
     'question.error.submitPhoto': 'Foto konnte nicht gesendet werden.',
     'question.error.surrender': 'Beim Aufgeben ist ein Fehler aufgetreten.',
     'question.unknown.title': 'Unbekannter Fragetyp',
@@ -113,7 +117,8 @@ export const translations = {
     'hint.confirm.confirm': 'Ja, ich möchte einen Tipp',
     'hint.title': 'Tipp',
     'confirm.answer.title': 'Sicherheitsfrage',
-    'confirm.answer.message': 'Willst du wirklich "{{answer}}" als Antwort abschicken?',
+    'confirm.answer.message':
+      'Willst du wirklich "{{answer}}" als Antwort abschicken?',
     'confirm.answer.confirm': 'Antwort senden',
     'confirm.surrender.title': 'Sicherheitsfrage',
     'confirm.surrender.message': 'Willst du diese Aufgabe wirklich aufgeben?',
@@ -122,10 +127,12 @@ export const translations = {
     'confirm.exit.message':
       'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
     'confirm.exit.confirm': 'Beenden',
-    'scoreboard.rowLabel': 'Platz {{rank}}, Team {{team}}, Zeit {{time}}, Punkte {{points}}',
+    'scoreboard.rowLabel':
+      'Platz {{rank}}, Team {{team}}, Zeit {{time}}, Punkte {{points}}',
     'voting.ended.title': 'Die Abstimmung wurde beendet.',
     'voting.ended.message': 'Wartet auf die Beendigung der Rallye.',
-    'voting.instruction': 'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.',
+    'voting.instruction':
+      'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.',
     'voting.next': 'Nächste Abstimmung',
     'scoreboard.title': 'Punktestand',
     'scoreboard.yourTeam': 'Dein Team: {{team}}',
@@ -150,6 +157,10 @@ export const translations = {
     'common.offline': 'Offline',
     'a11y.languageToggle': 'Switch language',
     'a11y.languageToggleHint': 'Switches between German and English.',
+    'a11y.languageToggleCurrent': 'Switch language, currently {{language}}',
+    'a11y.languageToggleHintTarget': 'Switches to {{language}}.',
+    'a11y.languageName.de': 'German',
+    'a11y.languageName.en': 'English',
     'a11y.hintButton': 'Show hint',
     'a11y.hintButtonHint': 'Opens the hint.',
     'a11y.logoutButton': 'End rallye',
@@ -231,8 +242,7 @@ export const translations = {
     'question.photo.send': 'Send photo',
     'question.photo.offlineMessage':
       'Photo uploads require an internet connection.',
-    'question.photo.offlineNotice':
-      'Offline: photo uploads require internet.',
+    'question.photo.offlineNotice': 'Offline: photo uploads require internet.',
     'question.error.submitPhoto': 'Photo could not be sent.',
     'question.error.surrender': 'An error occurred while surrendering.',
     'question.unknown.title': 'Unknown question type',
@@ -245,7 +255,8 @@ export const translations = {
     'hint.confirm.confirm': 'Yes, I want a hint',
     'hint.title': 'Hint',
     'confirm.answer.title': 'Security question',
-    'confirm.answer.message': 'Do you really want to submit "{{answer}}" as your answer?',
+    'confirm.answer.message':
+      'Do you really want to submit "{{answer}}" as your answer?',
     'confirm.answer.confirm': 'Submit answer',
     'confirm.surrender.title': 'Security question',
     'confirm.surrender.message': 'Do you really want to give up this task?',
@@ -254,10 +265,12 @@ export const translations = {
     'confirm.exit.message':
       'Do you really want to end participation? The team assignment on this device will be removed.',
     'confirm.exit.confirm': 'End',
-    'scoreboard.rowLabel': 'Rank {{rank}}, Team {{team}}, Time {{time}}, Points {{points}}',
+    'scoreboard.rowLabel':
+      'Rank {{rank}}, Team {{team}}, Time {{time}}, Points {{points}}',
     'voting.ended.title': 'Voting has ended.',
     'voting.ended.message': 'Wait for the rallye to finish.',
-    'voting.instruction': 'Give an extra point to the team that you think solved the task above the best.',
+    'voting.instruction':
+      'Give an extra point to the team that you think solved the task above the best.',
     'voting.next': 'Next vote',
     'scoreboard.title': 'Scoreboard',
     'scoreboard.yourTeam': 'Your team: {{team}}',
@@ -270,7 +283,10 @@ export const translations = {
 
 export type TranslationKey = keyof typeof translations.en;
 export type TranslationParams = Record<string, string | number>;
-export type Translator = (key: TranslationKey, params?: TranslationParams) => string;
+export type Translator = (
+  key: TranslationKey,
+  params?: TranslationParams
+) => string;
 
 export const translate = (
   language: Language,

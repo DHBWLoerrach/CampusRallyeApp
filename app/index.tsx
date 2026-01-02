@@ -273,7 +273,7 @@ export default function Welcome() {
             right: 16,
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
             borderRadius: 20,
             paddingHorizontal: 12,
             paddingVertical: 8,
@@ -281,8 +281,12 @@ export default function Welcome() {
           }}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityRole="button"
-          accessibilityLabel={t('a11y.languageToggle')}
-          accessibilityHint={t('a11y.languageToggleHint')}
+          accessibilityLabel={t('a11y.languageToggleCurrent', {
+            language: t(`a11y.languageName.${language}`),
+          })}
+          accessibilityHint={t('a11y.languageToggleHintTarget', {
+            language: t(`a11y.languageName.${language === 'de' ? 'en' : 'de'}`),
+          })}
           onPress={toggleLanguage}
         >
           <IconSymbol name="globe" size={18} color="#FFFFFF" />
