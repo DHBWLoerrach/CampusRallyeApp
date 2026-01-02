@@ -5,7 +5,7 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
 import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
-import CollapsibleHeroHeader from '@/components/ui/CollapsibleHeroHeader';
+import { CollapsibleHeroHeader } from '@/components/ui/CollapsibleHeroHeader';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import { store$ } from '@/services/storage/Store';
@@ -42,6 +42,7 @@ export default function Welcome() {
 
   const [showRallyeModal, setShowRallyeModal] = useState(false);
   const [activeRallyes, setActiveRallyes] = useState<RallyeRow[]>([]);
+  const hasActiveRallyes = activeRallyes.length > 0;
 
   const startTourMode = async () => {
     const tourRallye = await getTourModeRallye();
@@ -82,13 +83,13 @@ export default function Welcome() {
       return;
     }
 
+    setActiveRallyes(data);
     if (data.length === 0) {
-      setActiveRallyes([]);
-      setFetchState('empty');
+      const tourModeRallye = await getTourModeRallye();
+      setFetchState(tourModeRallye ? 'ready' : 'empty');
       return;
     }
 
-    setActiveRallyes(data);
     setFetchState('ready');
   };
 
@@ -226,15 +227,17 @@ export default function Welcome() {
         </Card>
       ) : null}
 
-      <Card
-        title={t('welcome.join.title')}
-        description={t('welcome.join.description')}
-        icon="mappin.and.ellipse"
-      >
-        <UIButton disabled={joining} onPress={() => setShowRallyeModal(true)}>
-          {t('welcome.join.select')}
-        </UIButton>
-      </Card>
+      {hasActiveRallyes ? (
+        <Card
+          title={t('welcome.join.title')}
+          description={t('welcome.join.description')}
+          icon="mappin.and.ellipse"
+        >
+          <UIButton disabled={joining} onPress={() => setShowRallyeModal(true)}>
+            {t('welcome.join.select')}
+          </UIButton>
+        </Card>
+      ) : null}
       <Card
         title={t('welcome.explore.title')}
         description={t('welcome.explore.description')}
