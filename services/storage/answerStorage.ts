@@ -1,6 +1,5 @@
 import { supabase } from '@/utils/Supabase';
-import { Buffer } from 'buffer';
-import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system/next';
 import { enqueueSaveAnswer } from './offlineOutbox';
 
 export type SaveAnswerResult = { status: 'sent' | 'queued' };
@@ -49,17 +48,22 @@ export async function uploadPhotoAnswer({
   teamId: number;
   questionId: number;
 }): Promise<{ filePath: string }> {
-  const base64 = await FileSystem.readAsStringAsync(imageUri, {
-    encoding: 'base64',
-  });
-  const buffer = Buffer.from(base64, 'base64');
+  // Use the new expo-file-system File API (SDK 54+)
+  const file = new File(imageUri);
+  const base64 = await file.base64();
+  // Convert base64 to Uint8Array for Supabase upload
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
 
   // Deterministic path for idempotent retries (one photo per team/question).
   const filePath = `${teamId}_${questionId}.jpg`;
 
   const { error: uploadError } = await supabase.storage
     .from('upload_photo_answers')
-    .upload(filePath, buffer, { upsert: true, contentType: 'image/*' });
+    .upload(filePath, bytes, { upsert: true, contentType: 'image/jpeg' });
   if (uploadError) throw uploadError;
 
   return { filePath };
