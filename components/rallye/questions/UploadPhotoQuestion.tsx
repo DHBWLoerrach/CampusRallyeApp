@@ -84,7 +84,9 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
             </ThemedText>
           </InfoBox>
           <InfoBox mb={0}>
-            <ThemedText style={[{ textAlign: 'center', marginBottom: 10 }, s.text]}>
+            <ThemedText
+              style={[{ textAlign: 'center', marginBottom: 10 }, s.text]}
+            >
               {t('question.camera.needAccess')}
             </ThemedText>
             <UIButton onPress={requestPermission}>
@@ -109,15 +111,25 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   function PhotoCamera() {
     const [facing, setFacing] = useState<'back' | 'front'>('back');
     return (
-      <ThemedView variant="background" style={[globalStyles.default.container, s.screen]}>
+      <ThemedView
+        variant="background"
+        style={[globalStyles.default.container, s.screen]}
+      >
         <VStack style={{ width: '100%' }} gap={2}>
           <InfoBox mb={0}>
-            <ThemedText variant="title" style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
+            <ThemedText
+              variant="title"
+              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+            >
               {question.question}
             </ThemedText>
           </InfoBox>
           <InfoBox mb={0} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
-            <CameraView ref={cameraRef} style={globalStyles.uploadStyles.camera} facing={facing} />
+            <CameraView
+              ref={cameraRef}
+              style={globalStyles.uploadStyles.camera}
+              facing={facing}
+            />
           </InfoBox>
           <InfoBox mb={0}>
             <View style={globalStyles.qrCodeStyles.buttonRow}>
@@ -125,7 +137,9 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
                 icon="camera"
                 onPress={async () => {
                   try {
-                    const pic = await (cameraRef.current as any)?.takePictureAsync();
+                    const pic = await (
+                      cameraRef.current as any
+                    )?.takePictureAsync();
                     if (pic) setPicture(pic);
                   } catch (error) {
                     console.error('Error taking picture', error);
@@ -137,11 +151,17 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
               <UIButton
                 icon="camera-rotate"
                 color={Colors.dhbwGray}
-                onPress={() => setFacing((c) => (c === 'back' ? 'front' : 'back'))}
+                onPress={() =>
+                  setFacing((c) => (c === 'back' ? 'front' : 'back'))
+                }
               >
                 {t('question.photo.switch')}
               </UIButton>
-              <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+              <UIButton
+                icon="face-frown-open"
+                color={Colors.dhbwGray}
+                onPress={handleSurrender}
+              >
                 {t('common.surrender')}
               </UIButton>
             </View>
@@ -156,19 +176,33 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
     const showOfflineNotice = !!team?.id && !online;
 
     return (
-      <ThemedView variant="background" style={[globalStyles.default.container, s.screen]}>
+      <ThemedView
+        variant="background"
+        style={[globalStyles.default.container, s.screen]}
+      >
         <VStack style={{ width: '100%' }} gap={2}>
           <InfoBox mb={0}>
-            <ThemedText variant="title" style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
+            <ThemedText
+              variant="title"
+              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+            >
               {question.question}
             </ThemedText>
           </InfoBox>
           <InfoBox mb={0} style={globalStyles.rallyeStatesStyles.infoCameraBox}>
-            <Image source={{ uri: picture?.uri }} style={globalStyles.uploadStyles.image} resizeMode="contain" />
+            <Image
+              source={{ uri: picture?.uri }}
+              style={globalStyles.uploadStyles.image}
+              resizeMode="contain"
+            />
           </InfoBox>
           <InfoBox mb={0}>
             <View style={globalStyles.qrCodeStyles.buttonRow}>
-              <UIButton icon="recycle" color={Colors.dhbwGray} onPress={() => setPicture(null)}>
+              <UIButton
+                icon="recycle"
+                color={Colors.dhbwGray}
+                onPress={() => setPicture(null)}
+              >
                 {t('question.photo.new')}
               </UIButton>
               <UIButton
@@ -214,7 +248,11 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
               >
                 {t('question.photo.send')}
               </UIButton>
-              <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+              <UIButton
+                icon="face-frown-open"
+                color={Colors.dhbwGray}
+                onPress={handleSurrender}
+              >
                 {t('common.surrender')}
               </UIButton>
             </View>

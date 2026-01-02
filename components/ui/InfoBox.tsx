@@ -16,7 +16,13 @@ type Props = ViewProps & {
 
 // Theme-aware card-like container that applies structural layout
 // from GlobalStyles and themed colors from AppStyles/ThemedView.
-export default function InfoBox({ mb = 2, maxHeight, style, children, ...rest }: PropsWithChildren<Props>) {
+export default function InfoBox({
+  mb = 2,
+  maxHeight,
+  style,
+  children,
+  ...rest
+}: PropsWithChildren<Props>) {
   const s = useAppStyles();
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;

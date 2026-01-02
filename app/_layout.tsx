@@ -15,7 +15,12 @@ import { store$ } from '@/services/storage/Store';
 import Colors from '@/utils/Colors';
 import { LanguageProvider, useLanguage } from '@/utils/LanguageContext';
 import { createNavigationTheme } from '@/utils/navigationTheme';
-import { ThemeContext, themeStore$, ThemeMode, useTheme } from '@/utils/ThemeContext';
+import {
+  ThemeContext,
+  themeStore$,
+  ThemeMode,
+  useTheme,
+} from '@/utils/ThemeContext';
 import { useAppStyles } from '@/utils/AppStyles';
 import ThemedText from '@/components/themed/ThemedText';
 import UIButton from '@/components/ui/UIButton';
@@ -81,7 +86,10 @@ function RootErrorFallback({
       </ThemedText>
       <ThemedText
         variant="body"
-        style={[s.muted, { textAlign: 'center', marginTop: 8, marginBottom: 20 }]}
+        style={[
+          s.muted,
+          { textAlign: 'center', marginTop: 8, marginBottom: 20 },
+        ]}
       >
         {t('welcome.error')}
       </ThemedText>
@@ -96,11 +104,17 @@ function RootErrorFallback({
       {__DEV__ ? (
         <View style={{ marginTop: 16, width: '100%' }}>
           {debugInfo ? (
-            <ThemedText variant="bodySmall" style={[s.muted, { textAlign: 'left' }]}>
+            <ThemedText
+              variant="bodySmall"
+              style={[s.muted, { textAlign: 'left' }]}
+            >
               {debugInfo}
             </ThemedText>
           ) : null}
-          <ThemedText variant="bodySmall" style={[s.muted, { textAlign: 'left' }]}>
+          <ThemedText
+            variant="bodySmall"
+            style={[s.muted, { textAlign: 'left' }]}
+          >
             {error.name}: {error.message}
           </ThemedText>
           {error.stack ? (

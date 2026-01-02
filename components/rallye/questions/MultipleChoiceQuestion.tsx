@@ -1,6 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
 import { Alert, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  LinearTransition,
+} from 'react-native-reanimated';
 import { observer, useSelector } from '@legendapp/state/react';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
@@ -92,7 +95,10 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
       variant="background"
       contentContainerStyle={globalStyles.default.refreshContainer}
     >
-      <VStack style={[globalStyles.default.container, { alignItems: 'stretch' }]} gap={2}>
+      <VStack
+        style={[globalStyles.default.container, { alignItems: 'stretch' }]}
+        gap={2}
+      >
         <InfoBox mb={0}>
           <ThemedText
             variant="title"
@@ -128,8 +134,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                         borderColor: isSelected
                           ? Colors.dhbwRed
                           : isDarkMode
-                          ? Colors.darkMode.text
-                          : Colors.dhbwGray,
+                            ? Colors.darkMode.text
+                            : Colors.dhbwGray,
                       },
                     ]}
                     onPress={() => setAnswer(optionText)}
@@ -141,12 +147,14 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                           backgroundColor: isSelected
                             ? Colors.dhbwRed
                             : isDarkMode
-                            ? Colors.darkMode.card
-                            : Colors.lightMode.card,
+                              ? Colors.darkMode.card
+                              : Colors.lightMode.card,
                         },
                       ]}
                     />
-                    <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
+                    <ThemedText
+                      style={globalStyles.multipleChoiceStyles.answerText}
+                    >
                       {optionText}
                     </ThemedText>
                   </TouchableOpacity>

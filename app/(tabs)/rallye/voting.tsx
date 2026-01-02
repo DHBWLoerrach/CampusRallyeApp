@@ -13,7 +13,13 @@ import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 import { Screen } from '@/components/ui/Screen';
 
-export default function Voting({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
+export default function Voting({
+  onRefresh,
+  loading,
+}: {
+  onRefresh: () => void;
+  loading: boolean;
+}) {
   const [voting, setVoting] = useState<any[]>([]);
   const [teamCount, setTeamCount] = useState(0);
   const [counter, setCounter] = useState(0);
@@ -72,7 +78,9 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   }, [getCount, getVotingData]);
 
   const groupedQuestions = useMemo(() => {
-    const sorted = [...voting].sort((a, b) => a.tq_question_id - b.tq_question_id);
+    const sorted = [...voting].sort(
+      (a, b) => a.tq_question_id - b.tq_question_id
+    );
     const grouped: any[][] = [];
     let current: number | null = null;
     for (let i = 0; i < sorted.length; i++) {
@@ -145,7 +153,10 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
   }
 
   return (
-    <Screen padding="none" contentStyle={[globalStyles.default.container, { flex: 1 }]}>
+    <Screen
+      padding="none"
+      contentStyle={[globalStyles.default.container, { flex: 1 }]}
+    >
       <FlatList
         data={currentQuestion}
         keyExtractor={(item) => `${item.tq_team_id}`}
@@ -187,7 +198,8 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
             <InfoBox
               mb={2}
               style={{
-                borderColor: selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
+                borderColor:
+                  selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
                 borderWidth: selectedTeam === item.rt_id ? 2 : 0,
               }}
             >
@@ -200,13 +212,18 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
                 </ThemedText>
               ) : (
                 (() => {
-                  const imageUri = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${
-                    (item?.tq_team_answer || '').trim()
-                  }`;
+                  const imageUri = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${(
+                    item?.tq_team_answer || ''
+                  ).trim()}`;
                   return (
                     <Image
                       source={{ uri: imageUri }}
-                      style={{ width: '100%', height: 200, resizeMode: 'contain', marginBottom: 10 }}
+                      style={{
+                        width: '100%',
+                        height: 200,
+                        resizeMode: 'contain',
+                        marginBottom: 10,
+                      }}
                     />
                   );
                 })()
@@ -224,7 +241,10 @@ export default function Voting({ onRefresh, loading }: { onRefresh: () => void; 
       />
       <View style={{ padding: 10 }}>
         <InfoBox mb={2}>
-          <UIButton disabled={!selectedTeam || sendingResult} onPress={handleNextQuestion}>
+          <UIButton
+            disabled={!selectedTeam || sendingResult}
+            onPress={handleNextQuestion}
+          >
             {t('voting.next')}
           </UIButton>
         </InfoBox>

@@ -5,7 +5,11 @@ import { useTheme } from '@/utils/ThemeContext';
 
 type Variant = 'background' | 'card' | 'transparent';
 
-export default function ThemedScrollView({ variant = 'background', style, ...rest }: ScrollViewProps & { variant?: Variant }) {
+export default function ThemedScrollView({
+  variant = 'background',
+  style,
+  ...rest
+}: ScrollViewProps & { variant?: Variant }) {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const backgroundColor =

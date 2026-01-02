@@ -35,11 +35,7 @@ const SPRING_CONFIG = {
   overshootClamping: false,
 } as const;
 
-export default function QuestionRenderer({
-  question,
-}: {
-  question: any;
-}) {
+export default function QuestionRenderer({ question }: { question: any }) {
   const { t } = useLanguage();
   // Flip animation using two faces, based on components/ui/Card.tsx pattern
   const [isFlipped, setIsFlipped] = useState(false);
@@ -94,18 +90,14 @@ export default function QuestionRenderer({
     if (!isFlipped) {
       // Prepare back with next question and flip to back (180)
       setBackQuestion(question);
-      flip.value = withSpring(
-        180,
-        SPRING_CONFIG,
-        () => runOnJS(setIsFlipped)(true)
+      flip.value = withSpring(180, SPRING_CONFIG, () =>
+        runOnJS(setIsFlipped)(true)
       );
     } else {
       // Prepare front with next question and flip to front (0)
       setFrontQuestion(question);
-      flip.value = withSpring(
-        0,
-        SPRING_CONFIG,
-        () => runOnJS(setIsFlipped)(false)
+      flip.value = withSpring(0, SPRING_CONFIG, () =>
+        runOnJS(setIsFlipped)(false)
       );
     }
   }, [backQuestion?.id, flip, frontQuestion?.id, isFlipped, question]);
@@ -144,10 +136,7 @@ export default function QuestionRenderer({
     }
 
     return (
-      <Cmp
-        key={q?.id ? `${type}:${q.id}` : `${type}:unknown`}
-        question={q}
-      />
+      <Cmp key={q?.id ? `${type}:${q.id}` : `${type}:unknown`} question={q} />
     );
   };
 

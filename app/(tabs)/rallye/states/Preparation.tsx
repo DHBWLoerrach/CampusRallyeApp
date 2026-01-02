@@ -8,7 +8,13 @@ import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import UIButton from '@/components/ui/UIButton';
 
-export default function Preparation({ loading, onRefresh }: { loading: boolean; onRefresh: () => void }) {
+export default function Preparation({
+  loading,
+  onRefresh,
+}: {
+  loading: boolean;
+  onRefresh: () => void;
+}) {
   const { t } = useLanguage();
   const s = useAppStyles();
   return (
@@ -18,7 +24,9 @@ export default function Preparation({ loading, onRefresh }: { loading: boolean; 
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,
       ]}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+      }
     >
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={2}>

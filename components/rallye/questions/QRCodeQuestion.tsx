@@ -76,33 +76,29 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
       if (correct !== data.toLowerCase()) {
         Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
       } else {
-        Alert.alert(
-          t('common.ok'),
-          t('question.qr.correctMessage'),
-          [
-            {
-              text: t('common.next'),
-              onPress: () => {
-                void (async () => {
-                  try {
-                    await submitAnswerAndAdvance({
-                      teamId: team?.id ?? null,
-                      questionId: question.id,
-                      answeredCorrectly: true,
-                      pointsAwarded: question.points,
-                    });
-                  } catch (e) {
-                    console.error('Error submitting QR answer:', e);
-                    Alert.alert(
-                      t('common.errorTitle'),
-                      t('question.error.saveAnswer')
-                    );
-                  }
-                })();
-              },
+        Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
+          {
+            text: t('common.next'),
+            onPress: () => {
+              void (async () => {
+                try {
+                  await submitAnswerAndAdvance({
+                    teamId: team?.id ?? null,
+                    questionId: question.id,
+                    answeredCorrectly: true,
+                    pointsAwarded: question.points,
+                  });
+                } catch (e) {
+                  console.error('Error submitting QR answer:', e);
+                  Alert.alert(
+                    t('common.errorTitle'),
+                    t('question.error.saveAnswer')
+                  );
+                }
+              })();
             },
-          ]
-        );
+          },
+        ]);
       }
     } finally {
       setTimeout(() => {
@@ -164,7 +160,11 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
                   ? t('question.qr.scan')
                   : t('common.loading')}
             </UIButton>
-            <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
+            <UIButton
+              icon="face-frown-open"
+              color={Colors.dhbwGray}
+              onPress={handleSurrender}
+            >
               {t('common.surrender')}
             </UIButton>
           </View>

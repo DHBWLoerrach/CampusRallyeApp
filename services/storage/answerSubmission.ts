@@ -1,6 +1,9 @@
 import NetInfo from '@react-native-community/netinfo';
 import { store$ } from '@/services/storage/Store';
-import { saveAnswer, uploadPhotoAnswer } from '@/services/storage/answerStorage';
+import {
+  saveAnswer,
+  uploadPhotoAnswer,
+} from '@/services/storage/answerStorage';
 
 export type SubmitOutcome =
   | { status: 'local' }

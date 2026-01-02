@@ -5,7 +5,11 @@ import { useTheme } from '@/utils/ThemeContext';
 
 type Variant = 'background' | 'card' | 'transparent';
 
-export default function ThemedView({ variant = 'background', style, ...rest }: ViewProps & { variant?: Variant }) {
+export default function ThemedView({
+  variant = 'background',
+  style,
+  ...rest
+}: ViewProps & { variant?: Variant }) {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const backgroundColor =

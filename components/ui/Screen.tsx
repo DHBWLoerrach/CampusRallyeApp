@@ -8,7 +8,11 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import { SafeAreaView, type Edge, type SafeAreaViewProps } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+  type Edge,
+  type SafeAreaViewProps,
+} from 'react-native-safe-area-context';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
 

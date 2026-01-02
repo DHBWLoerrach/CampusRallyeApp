@@ -40,7 +40,9 @@ export default function ImageQuestion({ question }: QuestionProps) {
       (
         answers.find((a) => a.question_id === question.id && a.correct)?.text ||
         ''
-      ).toLowerCase().trim(),
+      )
+        .toLowerCase()
+        .trim(),
     [answers, question.id]
   );
   const answerKeyReady = correct.length > 0;
@@ -134,9 +136,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
               style={[globalStyles.skillStyles.input]}
               value={answer}
               onChangeText={(text: string) => setAnswer(text)}
-              placeholder={
-                t('question.placeholder.answer')
-              }
+              placeholder={t('question.placeholder.answer')}
               returnKeyType="send"
               blurOnSubmit
               onSubmitEditing={handleSubmit}
@@ -145,7 +145,11 @@ export default function ImageQuestion({ question }: QuestionProps) {
 
           <InfoBox mb={0}>
             <UIButton
-              color={answer.trim() !== '' && answerKeyReady ? Colors.dhbwRed : Colors.dhbwGray}
+              color={
+                answer.trim() !== '' && answerKeyReady
+                  ? Colors.dhbwRed
+                  : Colors.dhbwGray
+              }
               disabled={answer.trim() === '' || !answerKeyReady || submitting}
               loading={submitting}
               onPress={handleSubmit}

@@ -112,9 +112,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
               style={[globalStyles.skillStyles.input]}
               value={answer}
               onChangeText={(text) => setAnswer(text)}
-              placeholder={
-                t('question.placeholder.answer')
-              }
+              placeholder={t('question.placeholder.answer')}
               returnKeyType="send"
               blurOnSubmit
               onSubmitEditing={handleSubmit}
@@ -123,7 +121,11 @@ export default function SkillQuestion({ question }: QuestionProps) {
 
           <InfoBox mb={0}>
             <UIButton
-              color={answer.trim() && answerKeyReady ? Colors.dhbwRed : Colors.dhbwGray}
+              color={
+                answer.trim() && answerKeyReady
+                  ? Colors.dhbwRed
+                  : Colors.dhbwGray
+              }
               disabled={!answer.trim() || !answerKeyReady || submitting}
               loading={submitting}
               onPress={handleSubmit}

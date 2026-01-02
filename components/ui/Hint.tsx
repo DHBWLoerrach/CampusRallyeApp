@@ -12,7 +12,9 @@ const HINT_COST = 1;
 
 export default function Hint({ hint }: { hint: string }) {
   const { t } = useLanguage();
-  const currentQuestion = useSelector(() => store$.currentQuestion.get()) as any;
+  const currentQuestion = useSelector(() =>
+    store$.currentQuestion.get()
+  ) as any;
   const questionId = currentQuestion?.id as number | undefined;
   const alreadyUsed = useSelector(() =>
     questionId != null ? store$.usedHints[questionId].get() === true : false

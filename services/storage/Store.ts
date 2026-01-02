@@ -1,9 +1,18 @@
 import { observable } from '@legendapp/state';
 import { clearCurrentRallye, getCurrentRallye } from './rallyeStorage';
-import { getCurrentTeam, clearCurrentTeam, teamExists, setTimePlayed } from './teamStorage';
+import {
+  getCurrentTeam,
+  clearCurrentTeam,
+  teamExists,
+  setTimePlayed,
+} from './teamStorage';
 import { startOutbox } from './offlineOutbox';
 
-export type SessionState = 'not_joined' | 'playing' | 'finished' | 'post_processing';
+export type SessionState =
+  | 'not_joined'
+  | 'playing'
+  | 'finished'
+  | 'post_processing';
 
 type SessionInputs = {
   enabled: boolean;
@@ -20,7 +29,8 @@ function deriveSessionState({
 }: SessionInputs): SessionState {
   if (!enabled || !rallye) return 'not_joined';
   if (rallye.status === 'post_processing') return 'post_processing';
-  if (rallye.status === 'ended' || allQuestionsAnswered || timeExpired) return 'finished';
+  if (rallye.status === 'ended' || allQuestionsAnswered || timeExpired)
+    return 'finished';
   return 'playing';
 }
 
@@ -60,13 +70,16 @@ export const store$ = observable({
       timeExpired: store$.timeExpired.get(),
     }),
 
-  currentQuestion: () => (store$.questions.get() as any[])[store$.questionIndex.get()],
+  currentQuestion: () =>
+    (store$.questions.get() as any[])[store$.questionIndex.get()],
 
   currentAnswer: () => {
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get() as any[];
-    return answers.filter((a) => a.question_id === current.id && a.correct === true)[0];
+    return answers.filter(
+      (a) => a.question_id === current.id && a.correct === true
+    )[0];
   },
 
   currentMultipleChoiceAnswers: () => {
@@ -84,7 +97,7 @@ export const store$ = observable({
     return shuffleArray(filtered);
   },
 
-  gotoNextQuestion: async() => {
+  gotoNextQuestion: async () => {
     if ((store$.questions.get() as any[]).length === 0) return;
     let nextIndex = store$.questionIndex.get() + 1;
     if (nextIndex === (store$.questions.get() as any[]).length) {
@@ -102,8 +115,6 @@ export const store$ = observable({
       } catch (err) {
         console.error('Error setting time_played:', err);
       }
-
-
     } else {
       store$.questionIndex.set(nextIndex);
     }

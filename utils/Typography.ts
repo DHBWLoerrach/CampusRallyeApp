@@ -3,7 +3,8 @@ import { Dimensions, type TextStyle } from 'react-native';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BASE_WIDTH = 375;
 
-const scaleFont = (size: number) => Math.round(size * (SCREEN_WIDTH / BASE_WIDTH));
+const scaleFont = (size: number) =>
+  Math.round(size * (SCREEN_WIDTH / BASE_WIDTH));
 const scaleLineHeight = (size: number, ratio: number) =>
   Math.round(scaleFont(size) * ratio);
 

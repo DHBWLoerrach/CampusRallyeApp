@@ -23,7 +23,11 @@ function calculateTimeRemaining(endTime?: string | Date | null) {
 
 const two = (n: number) => n.toString().padStart(2, '0');
 
-export default function TimerHeader({ endTime }: { endTime?: string | Date | null }) {
+export default function TimerHeader({
+  endTime,
+}: {
+  endTime?: string | Date | null;
+}) {
   const [t, setT] = useState(() => calculateTimeRemaining(endTime));
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;

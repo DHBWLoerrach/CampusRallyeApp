@@ -32,9 +32,7 @@ export default function RallyeHeader() {
           }}
         >
           <IconSymbol name="person.3" size={16} color={palette.text} />
-          <ThemedText variant="label">
-            {team.name}
-          </ThemedText>
+          <ThemedText variant="label">{team.name}</ThemedText>
         </View>
       )}
       <View>{showTimer && <TimerHeader endTime={rallye?.end_time} />}</View>

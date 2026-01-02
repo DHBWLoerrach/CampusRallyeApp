@@ -120,7 +120,9 @@ export default function Imprint() {
           </ThemedText>
           <ThemedText
             style={{ color: Colors.dhbwRed }}
-            onPress={() => Linking.openURL('https://github.com/DHBWLoerrach/CampusRallyeApp')}
+            onPress={() =>
+              Linking.openURL('https://github.com/DHBWLoerrach/CampusRallyeApp')
+            }
           >
             https://github.com/DHBWLoerrach/CampusRallyeApp
           </ThemedText>

@@ -169,8 +169,12 @@ export default function RallyeSelectionModal({
     ? Colors.darkMode.card
     : Colors.lightMode.card;
 
-  const headerTextColor = isDarkMode ? Colors.darkMode.text : Colors.lightMode.text;
-  const mutedTextColor = isDarkMode ? Colors.darkMode.textMuted : Colors.mediumGray;
+  const headerTextColor = isDarkMode
+    ? Colors.darkMode.text
+    : Colors.lightMode.text;
+  const mutedTextColor = isDarkMode
+    ? Colors.darkMode.textMuted
+    : Colors.mediumGray;
 
   const selectedRallyeName = passwordRallye?.name ?? '';
   const selectedRallyeStudiengang = passwordRallye?.studiengang ?? '';
@@ -223,7 +227,9 @@ export default function RallyeSelectionModal({
         <Text
           style={[
             globalStyles.rallyeModal.rallyeName,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+            {
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+            },
           ]}
         >
           {item.name}
@@ -275,7 +281,12 @@ export default function RallyeSelectionModal({
   );
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={globalStyles.rallyeModal.modalContainer}
@@ -290,7 +301,12 @@ export default function RallyeSelectionModal({
         >
           {passwordRallye ? (
             <>
-              <Text style={[globalStyles.rallyeModal.modalTitle, { color: headerTextColor }]}>
+              <Text
+                style={[
+                  globalStyles.rallyeModal.modalTitle,
+                  { color: headerTextColor },
+                ]}
+              >
                 {t('rallye.password.required.title')}
               </Text>
               <View
@@ -305,13 +321,25 @@ export default function RallyeSelectionModal({
                 ]}
               >
                 {/* front face */}
-                <Animated.View style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}>
-                  <IconSymbol name="mappin.and.ellipse" size={40} color={Colors.dhbwRed} />
-                  <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
+                <Animated.View
+                  style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}
+                >
+                  <IconSymbol
+                    name="mappin.and.ellipse"
+                    size={40}
+                    color={Colors.dhbwRed}
+                  />
+                  <ThemedText
+                    style={globalStyles.cardStyles.cardTitle}
+                    variant="bodyStrong"
+                  >
                     {selectedRallyeName}
                   </ThemedText>
                   {selectedRallyeStudiengang ? (
-                    <ThemedText style={globalStyles.cardStyles.cardDescription} variant="bodySmall">
+                    <ThemedText
+                      style={globalStyles.cardStyles.cardDescription}
+                      variant="bodySmall"
+                    >
                       {selectedRallyeStudiengang}
                     </ThemedText>
                   ) : null}
@@ -325,7 +353,10 @@ export default function RallyeSelectionModal({
                     backAnimatedStyle,
                   ]}
                 >
-                  <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
+                  <ThemedText
+                    style={globalStyles.cardStyles.cardTitle}
+                    variant="bodyStrong"
+                  >
                     {t('rallye.password.enter')}
                   </ThemedText>
                   <ThemedTextInput
@@ -364,13 +395,22 @@ export default function RallyeSelectionModal({
                   </View>
                 </Animated.View>
               </View>
-              <UIButton onPress={onClose} outline style={globalStyles.rallyeModal.cancelButton}>
+              <UIButton
+                onPress={onClose}
+                outline
+                style={globalStyles.rallyeModal.cancelButton}
+              >
                 {t('common.cancel')}
               </UIButton>
             </>
           ) : (
             <>
-              <Text style={[globalStyles.rallyeModal.modalTitle, { color: headerTextColor }]}>
+              <Text
+                style={[
+                  globalStyles.rallyeModal.modalTitle,
+                  { color: headerTextColor },
+                ]}
+              >
                 {t('rallye.modal.activeTitle')}
               </Text>
               {activeRallyes.length > 0 ? (
@@ -383,7 +423,10 @@ export default function RallyeSelectionModal({
                 />
               ) : (
                 <Text
-                  style={[globalStyles.rallyeModal.noDataText, { color: mutedTextColor }]}
+                  style={[
+                    globalStyles.rallyeModal.noDataText,
+                    { color: mutedTextColor },
+                  ]}
                 >
                   {t('rallye.modal.noActive')}
                 </Text>

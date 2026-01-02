@@ -31,14 +31,10 @@ export default function SyncStatusBadge() {
     text = language === 'de' ? 'Synchronisiere…' : 'Syncing…';
   } else if (lastError) {
     text =
-      language === 'de'
-        ? 'Synchronisierung fehlgeschlagen'
-        : 'Sync failed';
+      language === 'de' ? 'Synchronisierung fehlgeschlagen' : 'Sync failed';
   } else {
     text =
-      language === 'de'
-        ? `${queueCount} ausstehend`
-        : `${queueCount} pending`;
+      language === 'de' ? `${queueCount} ausstehend` : `${queueCount} pending`;
   }
 
   return (

@@ -4,7 +4,9 @@ import UIButton from '../UIButton';
 import { ThemeContext } from '@/utils/ThemeContext';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <ThemeContext.Provider value={{ isDarkMode: false, mode: 'light', setMode: jest.fn() }}>
+  <ThemeContext.Provider
+    value={{ isDarkMode: false, mode: 'light', setMode: jest.fn() }}
+  >
     {children}
   </ThemeContext.Provider>
 );

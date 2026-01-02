@@ -119,7 +119,9 @@ function normalizeQueueItem(raw: any): OfflineActionV1 | null {
 
 async function readQueue(): Promise<OfflineActionV1[]> {
   const raw = (await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE)) || [];
-  const normalized = raw.map(normalizeQueueItem).filter(Boolean) as OfflineActionV1[];
+  const normalized = raw
+    .map(normalizeQueueItem)
+    .filter(Boolean) as OfflineActionV1[];
 
   // If we dropped or transformed items, persist the normalized queue to prevent stuck states.
   const changed = normalized.length !== raw.length;

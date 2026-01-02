@@ -40,7 +40,9 @@ const RallyeIndex = observer(function RallyeIndex() {
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
   const points = useSelector(() => store$.points.get());
-  const allQuestionsAnswered = useSelector(() => store$.allQuestionsAnswered.get());
+  const allQuestionsAnswered = useSelector(() =>
+    store$.allQuestionsAnswered.get()
+  );
   const timeExpired = useSelector(() => store$.timeExpired.get());
 
   useEffect(() => {
@@ -233,7 +235,9 @@ const RallyeIndex = observer(function RallyeIndex() {
             globalStyles.default.refreshContainer,
             globalStyles.default.container,
           ]}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          }
         >
           <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
             {(rallye?.name ? `${rallye.name} • ` : '') +
@@ -318,7 +322,9 @@ const RallyeIndex = observer(function RallyeIndex() {
             globalStyles.default.refreshContainer,
             globalStyles.rallyeStatesStyles.container,
           ]}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          }
         >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
@@ -326,7 +332,9 @@ const RallyeIndex = observer(function RallyeIndex() {
                 variant="title"
                 style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
               >
-                {timeExpired ? t('rallye.timeUp') : t('rallye.allAnswered.simple')}
+                {timeExpired
+                  ? t('rallye.timeUp')
+                  : t('rallye.allAnswered.simple')}
               </ThemedText>
               {!timeExpired && team ? (
                 <ThemedText
@@ -348,7 +356,10 @@ const RallyeIndex = observer(function RallyeIndex() {
               </ThemedText>
             </InfoBox>
             <InfoBox>
-              <ThemedText variant="body" style={globalStyles.rallyeStatesStyles.meetingPoint}>
+              <ThemedText
+                variant="body"
+                style={globalStyles.rallyeStatesStyles.meetingPoint}
+              >
                 {t('rallye.meetingPoint')}
               </ThemedText>
             </InfoBox>
