@@ -1,10 +1,14 @@
 import React, { PropsWithChildren } from 'react';
-import { Pressable, View } from 'react-native';
+import { Dimensions, Pressable, View } from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useTheme } from '@/utils/ThemeContext';
 import { IconSymbol, IconSymbolName } from '@/components/ui/IconSymbol';
 import ThemedText from '@/components/themed/ThemedText';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
+const ICON_SIZE = IS_SMALL_SCREEN ? 32 : 40;
 
 type Props = {
   title: string;
@@ -39,14 +43,14 @@ export default function Card({
 
   const content = (
     <>
-      <IconSymbol name={icon} size={40} color={Colors.dhbwRed} />
+      <IconSymbol name={icon} size={ICON_SIZE} color={Colors.dhbwRed} />
       <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
         {title}
       </ThemedText>
       <ThemedText style={globalStyles.cardStyles.cardDescription} variant="bodySmall">
         {description}
       </ThemedText>
-      {children ? <View style={{ width: '100%', marginTop: 14 }}>{children}</View> : null}
+      {children ? <View style={{ width: '100%', marginTop: IS_SMALL_SCREEN ? 10 : 14 }}>{children}</View> : null}
     </>
   );
 

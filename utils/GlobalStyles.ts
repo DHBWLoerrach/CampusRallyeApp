@@ -5,6 +5,9 @@ import Constants from './Constants';
 // Display dimensions for dynamic calculations
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// Small screen detection (iPhone SE, older devices)
+const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
+
 // Helper function for responsive font sizes
 const normalizeFont = (size: number) => {
   const scale = SCREEN_WIDTH / 375; // Basis: iPhone X width
@@ -165,11 +168,11 @@ export const globalStyles = createGroupedStyles({
   cardStyles: {
     card: {
       width: '100%',
-      minHeight: SCREEN_HEIGHT * 0.22,
+      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.16 : 0.22),
       // backgroundColor handled by themed style
       borderRadius: Constants.cornerRadius,
-      padding: SCREEN_WIDTH * 0.04,
-      marginVertical: SCREEN_HEIGHT * 0.015,
+      padding: SCREEN_WIDTH * (IS_SMALL_SCREEN ? 0.03 : 0.04),
+      marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.015),
       alignItems: 'center',
       justifyContent: 'center',
       shadowColor: '#000',

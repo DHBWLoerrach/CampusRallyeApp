@@ -24,9 +24,10 @@ import ThemedText from '@/components/themed/ThemedText';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Header dimensions
-const HEADER_MAX_HEIGHT = SCREEN_HEIGHT * 0.28;
-const HEADER_MIN_HEIGHT = 100;
+// Responsive header dimensions based on screen size
+const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
+const HEADER_MAX_HEIGHT = SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.22 : 0.28);
+const HEADER_MIN_HEIGHT = IS_SMALL_SCREEN ? 80 : 100;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 type CollapsibleHeroHeaderProps = {
@@ -252,15 +253,15 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: IS_SMALL_SCREEN ? 16 : 18,
     fontWeight: '700',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   logo: {
-    width: 36,
-    height: 36,
+    width: IS_SMALL_SCREEN ? 30 : 36,
+    height: IS_SMALL_SCREEN ? 30 : 36,
     marginLeft: 12,
   },
   scrollView: {
@@ -274,8 +275,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     marginTop: -20, // Overlap the header slightly
-    paddingTop: 24,
-    paddingHorizontal: 16,
+    paddingTop: IS_SMALL_SCREEN ? 16 : 24,
+    paddingHorizontal: IS_SMALL_SCREEN ? 12 : 16,
     minHeight: SCREEN_HEIGHT - HEADER_MIN_HEIGHT,
   },
 });
