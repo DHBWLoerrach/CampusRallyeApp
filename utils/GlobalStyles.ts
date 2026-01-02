@@ -189,9 +189,10 @@ export const globalStyles = createGroupedStyles({
       textAlign: 'center',
     },
     cardDescription: {
-      textAlign: 'center',
+      textAlign: 'left',
       marginTop: SCREEN_HEIGHT * 0.01,
       paddingHorizontal: SCREEN_WIDTH * 0.02,
+      width: '100%',
     },
     cardFace: {
       width: '100%',
@@ -232,7 +233,7 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwGray,
       textAlign: 'center',
     },
-    
+
     row: {
       flexDirection: 'row',
       padding: 15,
@@ -260,8 +261,6 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwRed,
       fontWeight: 'bold',
     },
-
-
   },
   settingsStyles: {
     container: {

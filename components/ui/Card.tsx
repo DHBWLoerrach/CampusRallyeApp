@@ -44,19 +44,35 @@ export default function Card({
   const content = (
     <>
       <IconSymbol name={icon} size={ICON_SIZE} color={Colors.dhbwRed} />
-      <ThemedText style={globalStyles.cardStyles.cardTitle} variant="bodyStrong">
+      <ThemedText
+        style={globalStyles.cardStyles.cardTitle}
+        variant="bodyStrong"
+      >
         {title}
       </ThemedText>
-      <ThemedText style={globalStyles.cardStyles.cardDescription} variant="bodySmall">
+      <ThemedText
+        style={globalStyles.cardStyles.cardDescription}
+        variant="bodySmall"
+      >
         {description}
       </ThemedText>
-      {children ? <View style={{ width: '100%', marginTop: IS_SMALL_SCREEN ? 10 : 14 }}>{children}</View> : null}
+      {children ? (
+        <View style={{ width: '100%', marginTop: IS_SMALL_SCREEN ? 10 : 14 }}>
+          {children}
+        </View>
+      ) : null}
     </>
   );
 
   if (!onPress) {
     return (
-      <View style={[globalStyles.cardStyles.card, { backgroundColor }, surfaceStyle]}>
+      <View
+        style={[
+          globalStyles.cardStyles.card,
+          { backgroundColor },
+          surfaceStyle,
+        ]}
+      >
         {content}
       </View>
     );
