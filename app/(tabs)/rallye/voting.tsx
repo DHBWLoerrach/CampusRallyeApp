@@ -122,7 +122,7 @@ export default function Voting({
 
   if (!votingAllowed || teamCount < 2) {
     return (
-      <Screen padding="none" edges={['bottom']} contentStyle={globalStyles.default.container}>
+      <Screen padding="none" contentStyle={globalStyles.default.container}>
         <VStack style={{ width: '100%' }} gap={2}>
           <InfoBox mb={2}>
             <ThemedText
@@ -213,7 +213,9 @@ export default function Voting({
                 </ThemedText>
               ) : (
                 (() => {
-                  const imageUri = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/object/public/upload_photo_answers/${(
+                  const imageUri = `${
+                    process.env.EXPO_PUBLIC_SUPABASE_URL
+                  }/storage/v1/object/public/upload_photo_answers/${(
                     item?.tq_team_answer || ''
                   ).trim()}`;
                   return (

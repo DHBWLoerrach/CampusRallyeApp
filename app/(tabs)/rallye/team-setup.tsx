@@ -43,7 +43,7 @@ const TeamSetup = observer(function TeamSetup() {
   };
 
   return (
-    <Screen padding="none" edges={['bottom']} contentStyle={globalStyles.default.container}>
+    <Screen padding="none" contentStyle={globalStyles.default.container}>
       <ThemedText style={[globalStyles.teamStyles.title]}>
         {rallye?.name}
       </ThemedText>
