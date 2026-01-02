@@ -1,20 +1,13 @@
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  View,
-  TouchableOpacity,
-} from 'react-native';
+import { ActivityIndicator, Alert, View } from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
 import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
+import CollapsibleHeroHeader from '@/components/ui/CollapsibleHeroHeader';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
-import { ScreenScrollView } from '@/components/ui/Screen';
 import { store$ } from '@/services/storage/Store';
 import { useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
@@ -35,7 +28,7 @@ import {
 
 export default function Welcome() {
   const { isDarkMode } = useTheme();
-  const { t, toggleLanguage, language } = useLanguage();
+  const { t } = useLanguage();
   const s = useAppStyles();
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
@@ -254,86 +247,18 @@ export default function Welcome() {
   );
 
   return (
-    <ScreenScrollView
-      padding="none"
-      edges={['bottom']}
-      contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={globalStyles.welcomeStyles.container}
+    <CollapsibleHeroHeader
+      heroImage={require('../assets/images/app/dhbw-campus-header.png')}
+      logoImage={require('../assets/images/app/dhbw-logo.png')}
+      title={t('welcome.appTitle')}
     >
-      <View style={{ position: 'relative' }}>
-        <Image
-          style={globalStyles.welcomeStyles.headerImage}
-          source={require('../assets/images/app/dhbw-campus-header.png')}
-        />
-
-        <TouchableOpacity
-          style={{
-            position: 'absolute',
-            top: 50,
-            right: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            borderRadius: 20,
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-            gap: 6,
-          }}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          accessibilityRole="button"
-          accessibilityLabel={t('a11y.languageToggleCurrent', {
-            language: t(`a11y.languageName.${language}`),
-          })}
-          accessibilityHint={t('a11y.languageToggleHintTarget', {
-            language: t(`a11y.languageName.${language === 'de' ? 'en' : 'de'}`),
-          })}
-          onPress={toggleLanguage}
-        >
-          <IconSymbol name="globe" size={18} color="#FFFFFF" />
-          <ThemedText
-            style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '600' }}
-          >
-            {language.toUpperCase()}
-          </ThemedText>
-        </TouchableOpacity>
-      </View>
-      <View style={globalStyles.welcomeStyles.header}>
-        <ThemedText
-          variant="subtitle"
-          style={[
-            globalStyles.welcomeStyles.text,
-            globalStyles.welcomeStyles.title,
-          ]}
-        >
-          {t('welcome.appTitle')}
-        </ThemedText>
-        <Image
-          style={globalStyles.welcomeStyles.logo}
-          source={require('../assets/images/app/dhbw-logo.png')}
-        />
-      </View>
-      <View
-        style={[
-          globalStyles.welcomeStyles.content,
-          {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.background
-              : Colors.lightMode.background,
-          },
-        ]}
-      >
-        {fetchState === 'loading' && <LoadingContent />}
-        {fetchState === 'ready' && <ReadyContent />}
-        {fetchState === 'offline' && (
-          <StateContent message={t('welcome.offline')} />
-        )}
-        {fetchState === 'empty' && (
-          <StateContent message={t('welcome.empty')} />
-        )}
-        {fetchState === 'error' && (
-          <StateContent message={t('welcome.error')} />
-        )}
-      </View>
+      {fetchState === 'loading' && <LoadingContent />}
+      {fetchState === 'ready' && <ReadyContent />}
+      {fetchState === 'offline' && (
+        <StateContent message={t('welcome.offline')} />
+      )}
+      {fetchState === 'empty' && <StateContent message={t('welcome.empty')} />}
+      {fetchState === 'error' && <StateContent message={t('welcome.error')} />}
       <RallyeSelectionModal
         visible={showRallyeModal}
         onClose={() => setShowRallyeModal(false)}
@@ -341,6 +266,6 @@ export default function Welcome() {
         onJoin={joinRallye}
         joining={joining}
       />
-    </ScreenScrollView>
+    </CollapsibleHeroHeader>
   );
 }
