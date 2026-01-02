@@ -239,10 +239,11 @@ export default function Welcome() {
         title={t('welcome.explore.title')}
         description={t('welcome.explore.description')}
         icon="binoculars"
-        onPress={startTourMode}
-        accessibilityLabel={t('welcome.explore.title')}
-        accessibilityHint={t('welcome.explore.description')}
-      />
+      >
+        <UIButton outline onPress={startTourMode}>
+          {t('welcome.explore.start')}
+        </UIButton>
+      </Card>
     </View>
   );
 

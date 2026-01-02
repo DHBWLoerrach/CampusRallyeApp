@@ -68,8 +68,8 @@ export default function UIButton({
     textColor = accentColor;
   } else if (resolvedVariant === 'outline') {
     backgroundColor = 'transparent';
-    textColor = accentColor;
-    borderColor = accentColor;
+    textColor = Colors.dhbwGray;
+    borderColor = Colors.dhbwGray;
   }
   const contentColor = textColor;
 
@@ -87,7 +87,7 @@ export default function UIButton({
   if (borderColor) {
     buttonStyle = {
       ...buttonStyle,
-      borderWidth: StyleSheet.hairlineWidth,
+      borderWidth: resolvedVariant === 'outline' ? 1 : StyleSheet.hairlineWidth,
       borderColor,
     };
   }
@@ -106,7 +106,9 @@ export default function UIButton({
         (globalStyles.uiButtonStyles.button as any).container,
         buttonStyle,
         isDisabled ? { opacity: 0.55 } : null,
-        pressed && !isDisabled ? { opacity: 0.9, transform: [{ scale: 0.99 }] } : null,
+        pressed && !isDisabled
+          ? { opacity: 0.9, transform: [{ scale: 0.99 }] }
+          : null,
         style,
       ]}
       onPress={onPress}
@@ -117,11 +119,13 @@ export default function UIButton({
       ) : icon ? (
         <FontAwesome6 name={icon} size={20} color={contentColor} />
       ) : null}
-      <Text style={[
-        (globalStyles.uiButtonStyles.button as any).text,
-        textStyle,
-        textStyleProp,
-      ]}>
+      <Text
+        style={[
+          (globalStyles.uiButtonStyles.button as any).text,
+          textStyle,
+          textStyleProp,
+        ]}
+      >
         {children as any}
       </Text>
     </Pressable>

@@ -42,6 +42,7 @@ export const translations = {
     'welcome.explore.title': 'Campus-Gelände erkunden',
     'welcome.explore.description':
       'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck',
+    'welcome.explore.start': 'Erkundung starten',
     'welcome.tourModeUnavailable': 'Kein Tour Mode Rallye verfügbar.',
     'welcome.participationStartError':
       'Teilnahme konnte nicht gestartet werden.',
@@ -182,6 +183,7 @@ export const translations = {
     'welcome.explore.title': 'Explore Campus',
     'welcome.explore.description':
       'Explore the campus at your own pace without time pressure',
+    'welcome.explore.start': 'Start exploring',
     'welcome.tourModeUnavailable': 'No tour mode rallye available.',
     'welcome.participationStartError': 'Could not start participation.',
     'welcome.clearParticipation.title': 'Clear participation',
