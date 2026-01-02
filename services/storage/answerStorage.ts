@@ -63,8 +63,12 @@ export async function uploadPhotoAnswer({
 
   const { error: uploadError } = await supabase.storage
     .from('upload_photo_answers')
-    .upload(filePath, bytes, { upsert: true, contentType: 'image/jpeg' });
-  if (uploadError) throw uploadError;
+    .upload(filePath, bytes, { upsert: false, contentType: 'image/jpeg' });
+
+  // Treat "already exists" as success (idempotent retry without SELECT policy)
+  if (uploadError && uploadError.message !== 'The resource already exists') {
+    throw uploadError;
+  }
 
   return { filePath };
 }
