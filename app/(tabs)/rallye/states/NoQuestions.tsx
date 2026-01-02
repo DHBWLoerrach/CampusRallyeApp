@@ -24,6 +24,7 @@ export default function NoQuestions({
     return (
       <ScreenScrollView
         padding="none"
+        edges={['bottom']}
         contentContainerStyle={[
           globalStyles.default.refreshContainer,
           globalStyles.rallyeStatesStyles.container,
@@ -40,6 +41,7 @@ export default function NoQuestions({
   return (
     <ScreenScrollView
       padding="none"
+      edges={['bottom']}
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,

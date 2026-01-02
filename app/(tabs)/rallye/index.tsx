@@ -231,6 +231,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       <>
         <ScreenScrollView
           padding="none"
+          edges={['bottom']}
           contentContainerStyle={[
             globalStyles.default.refreshContainer,
             globalStyles.default.container,
@@ -265,6 +266,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       <>
         <ScreenScrollView
           padding="none"
+          edges={['bottom']}
           contentContainerStyle={[
             globalStyles.default.refreshContainer,
             globalStyles.rallyeStatesStyles.container,
@@ -318,6 +320,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       <>
         <ScreenScrollView
           padding="none"
+          edges={['bottom']}
           contentContainerStyle={[
             globalStyles.default.refreshContainer,
             globalStyles.rallyeStatesStyles.container,

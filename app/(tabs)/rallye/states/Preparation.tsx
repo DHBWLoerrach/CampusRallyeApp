@@ -20,6 +20,7 @@ export default function Preparation({
   return (
     <ScreenScrollView
       padding="none"
+      edges={['bottom']}
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,

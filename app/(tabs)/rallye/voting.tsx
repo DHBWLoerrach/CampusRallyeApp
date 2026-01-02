@@ -122,7 +122,7 @@ export default function Voting({
 
   if (!votingAllowed || teamCount < 2) {
     return (
-      <Screen padding="none" contentStyle={globalStyles.default.container}>
+      <Screen padding="none" edges={['bottom']} contentStyle={globalStyles.default.container}>
         <VStack style={{ width: '100%' }} gap={2}>
           <InfoBox mb={2}>
             <ThemedText
@@ -155,6 +155,7 @@ export default function Voting({
   return (
     <Screen
       padding="none"
+      edges={['bottom']}
       contentStyle={[globalStyles.default.container, { flex: 1 }]}
     >
       <FlatList

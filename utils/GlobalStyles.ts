@@ -32,9 +32,9 @@ export const globalStyles = createGroupedStyles({
       flexDirection: 'column',
       flexGrow: 1,
       alignItems: 'center',
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
       // backgroundColor intentionally left out to allow themed container (s.screen) to control it
-      paddingVertical: SCREEN_HEIGHT * 0.02,
+      paddingVertical: SCREEN_HEIGHT * 0.01,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       maxWidth: SCREEN_WIDTH,
     },
