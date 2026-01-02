@@ -35,7 +35,7 @@ import {
 
 export default function Welcome() {
   const { isDarkMode } = useTheme();
-  const { t, toggleLanguage } = useLanguage();
+  const { t, toggleLanguage, language } = useLanguage();
   const s = useAppStyles();
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
@@ -269,24 +269,28 @@ export default function Welcome() {
         <TouchableOpacity
           style={{
             position: 'absolute',
-            top: 30,
-            left: 10,
-            width: 44,
-            height: 44,
+            top: 50,
+            right: 16,
+            flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            borderRadius: 20,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            gap: 6,
           }}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityRole="button"
           accessibilityLabel={t('a11y.languageToggle')}
           accessibilityHint={t('a11y.languageToggleHint')}
           onPress={toggleLanguage}
         >
-          <IconSymbol
-            name="globe"
-            size={24}
-            color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
-          />
+          <IconSymbol name="globe" size={18} color="#FFFFFF" />
+          <ThemedText
+            style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '600' }}
+          >
+            {language.toUpperCase()}
+          </ThemedText>
         </TouchableOpacity>
       </View>
       <View style={globalStyles.welcomeStyles.header}>
