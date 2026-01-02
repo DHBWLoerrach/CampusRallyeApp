@@ -13,7 +13,9 @@
 - `npm run start`: start Expo Go with cache clear.
 - `npm run android` / `npm run ios`: run dev builds on device or simulator.
 - `npm run web`: run the web target.
+- `npm test`: execute test suite
 - `npm run lint`: run ESLint via Expo.
+- `npx tsc --noEmit`: compile TypeScript files
 
 ## Working on features
 
@@ -28,11 +30,9 @@ For each step:
    - If behavior changes / bugfix: implement tests in the same step (ideally write the test first, then the fix).
    - If it’s a pure refactor: no new tests required, but all existing tests must pass.
    - If test setup is needed: do a separate setup-only step first, then a following step for tests + code.
-5. After each step, run `npm run lint` and `npm test`. Report briefly:
-   - Status: PASS/FAIL for each command
-   - If FAIL: only the relevant error output and your concrete fix proposal
+5. After each step, run `npm run lint`, `npx tsc --noEmit` and `npm test`.
 
-Hard rule: If `npm run lint` or `npm test` FAIL, do not commit and do not proceed to the next step until they pass.
+Hard rule: If `npm run lint`, `npx tsc --noEmit` or `npm test` FAIL, do not commit and do not proceed to the next step until they pass.
 
 IMPORTANT: Stop after each step and wait for my “OK” before committing or moving on to the next step. Make any assumptions/uncertainties explicit and ask me to clarify when needed.
 
@@ -42,12 +42,16 @@ IMPORTANT: Stop after each step and wait for my “OK” before committing or mo
 - Components: PascalCase `*.tsx` (e.g., `ThemedText.tsx`). Hooks: `useX.ts`.
 - Constants: PascalCase files; exported constants in UPPER_SNAKE_CASE where appropriate.
 - Path alias `@/*` is available (see `tsconfig.json`).
-- Lint before pushing: `npm run lint` (fix issues or justify with comments).
 - Code comments always in English
 
 ## Testing Guidelines
 
-No automated test framework is configured. Validate changes by running `npm run lint` and exercising affected flows in Expo Go or a dev build. If you add tests, document the command and keep tests near the feature or in a dedicated `__tests__` folder.
+Testing is supported with Jest (via `jest-expo`) and `@testing-library/react-native`.
+- Place tests alongside source (`*.test.ts` / `*.test.tsx`) or in `__tests__/`.
+- Prefer user-facing tests with Testing Library and avoid implementation details.
+- Use `npm test` for single runs and `npm run test:watch` for watch mode.
+- Mock native or Expo modules and side effects to keep tests deterministic.
+- For UI or behavior changes, add or update tests when feasible and document manual coverage gaps.
 
 ## Commit & Pull Request Guidelines
 
