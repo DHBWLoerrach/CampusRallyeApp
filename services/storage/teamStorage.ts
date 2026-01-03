@@ -6,6 +6,8 @@ import {
   removeStorageItem,
 } from './asyncStorage';
 
+export type TeamExistsResult = 'exists' | 'missing' | 'unknown';
+
 export async function getCurrentTeam(rallyeId: number) {
   if (!rallyeId) return null;
   return getStorageItem(`${StorageKeys.TEAM}_${rallyeId}`);
@@ -50,8 +52,11 @@ export async function getTeamsByRallye(rallyeId: number) {
   return data ?? [];
 }
 
-export async function teamExists(rallyeId: number, teamId: number) {
-  if (!rallyeId || !teamId) return false;
+export async function teamExists(
+  rallyeId: number,
+  teamId: number
+): Promise<TeamExistsResult> {
+  if (!rallyeId || !teamId) return 'missing';
   const { data, error } = await supabase
     .from('rallye_team')
     .select('id')
@@ -60,7 +65,7 @@ export async function teamExists(rallyeId: number, teamId: number) {
     .maybeSingle();
   if (error) {
     console.error('Error checking team existence:', error);
-    return false;
+    return 'unknown';
   }
-  return !!data;
+  return data ? 'exists' : 'missing';
 }

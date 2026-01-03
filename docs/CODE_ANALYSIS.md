@@ -10,7 +10,7 @@
 
 | Schweregrad | Anzahl |
 |-------------|--------|
-| Kritisch    | 3      |
+| Kritisch    | 2      |
 | Hoch        | 6      |
 | Mittel      | 23+    |
 | Niedrig     | 12+    |
@@ -23,7 +23,7 @@
 
 - [x] **CRIT-01:** Inner-Components in `UploadPhotoQuestion.tsx` extrahieren
 - [ ] **CRIT-02:** Silent storage failures in `asyncStorage.ts` fixen
-- [ ] **CRIT-03:** `teamExists` Network-Error-Handling in `teamStorage.ts`
+- [x] **CRIT-03:** `teamExists` Network-Error-Handling in `teamStorage.ts`
 - [x] **CRIT-04:** Offline-Queue Race Condition in `offlineOutbox.ts` mit Mutex + Idempotency/Dedupe fixen
 - [ ] **CRIT-05:** Voting-Error-Handling in `voting.tsx` implementieren
 
@@ -142,16 +142,16 @@ export async function teamExists(rallyeId: number, teamId: number) {
   const { data, error } = await supabase...
   if (error) {
     console.error('Error checking team existence:', error);
-    return false;  // Netzwerkfehler = "Team existiert nicht"!
+    return 'unknown';  // Netzwerkfehler = Zustand unklar
   }
-  return !!data;
+  return data ? 'exists' : 'missing';
 }
 ```
 
 **In Store.ts:180-191:**
 ```typescript
 const exists = await teamExists(rallyeId, (loadTeam as any).id);
-if (!exists) {
+if (exists === 'missing') {
   await clearCurrentTeam(rallyeId);  // LÖSCHT LOKALE TEAM-DATEN!
   store$.teamDeleted.set(true);
 }
@@ -159,7 +159,9 @@ if (!exists) {
 
 **Auswirkung:** Bei Netzwerk-Glitch während App-Start wird Team-Zuweisung gelöscht und User sieht "Team wurde gelöscht" obwohl Team existiert.
 
-**Lösung:** Zwischen "nicht gefunden" und "Netzwerkfehler" unterscheiden.
+**Lösung:** Zwischen "nicht gefunden" und "Netzwerkfehler" unterscheiden und nur bei `missing` löschen.
+
+**Status:** Fix umgesetzt (teamExists liefert `unknown`, Call-Sites löschen nur bei `missing`).
 
 ---
 
@@ -557,6 +559,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 
 | Datum | Änderung |
 |-------|----------|
+| 03.01.2026 | CRIT-03 Fix umgesetzt (teamExists mit Unknown-Status, keine Löschung bei Netzfehler) |
 | 03.01.2026 | CRIT-04 Fix umgesetzt (Sync-Lock + Queue-Merge in offlineOutbox) |
 | 03.01.2026 | CRIT-01 Fix umgesetzt (UploadPhotoQuestion Komponenten ausgelagert) |
 | 03.01.2026 | Initiale Analyse erstellt |
@@ -573,6 +576,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 - **Aktualisiert:** Zusammenfassung entsprechend der Repriorisierung angepasst.
 - **Erledigt:** CRIT-01 durch Auslagern der Inner-Components in `UploadPhotoQuestion.tsx`.
 - **Erledigt:** CRIT-04 durch Sync-Lock und Queue-Merge in `offlineOutbox.ts`.
+- **Erledigt:** CRIT-03 durch Unknown-Status in `teamExists` und angepasstes Löschen in Call-Sites.
 
 ## Review (Claude, 03.01.2026)
 

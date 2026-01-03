@@ -179,16 +179,19 @@ export const store$ = observable({
         if (loadTeam) {
           try {
             const exists = await teamExists(rallyeId, (loadTeam as any).id);
-            if (exists) {
+            if (exists === 'exists') {
               store$.team.set(loadTeam);
               // Explicit resume prompt instead of auto-navigation
               if (!rallye.tour_mode) {
                 store$.resumeAvailable.set(true);
               }
-            } else {
+            } else if (exists === 'missing') {
               await clearCurrentTeam(rallyeId);
               store$.team.set(null as any);
               store$.teamDeleted.set(true);
+            } else {
+              store$.team.set(loadTeam);
+              if (!rallye.tour_mode) store$.resumeAvailable.set(true);
             }
           } catch (e) {
             console.error('Error verifying team existence on init:', e);

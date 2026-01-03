@@ -118,11 +118,13 @@ export default function Welcome() {
         const existingTeam = await getCurrentTeam(rallye.id);
         if (existingTeam) {
           const exists = await teamExists(rallye.id, existingTeam.id);
-          if (exists) {
+          if (exists === 'exists') {
             store$.team.set(existingTeam);
-          } else {
+          } else if (exists === 'missing') {
             await clearCurrentTeam(rallye.id);
             store$.team.set(null);
+          } else {
+            store$.team.set(existingTeam);
           }
         }
       } catch (rehydrateErr) {
