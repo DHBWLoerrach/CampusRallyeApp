@@ -46,15 +46,20 @@ export default function Welcome() {
   const hasActiveRallyes = activeRallyes.length > 0;
 
   const startTourMode = async () => {
-    const tourRallye = await getTourModeRallye();
-    if (tourRallye) {
-      store$.team.set(null);
-      store$.reset();
-      store$.rallye.set(tourRallye);
-      await setCurrentRallye(tourRallye);
-      store$.enabled.set(true);
-    } else {
-      Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
+    try {
+      const tourRallye = await getTourModeRallye();
+      if (tourRallye) {
+        store$.team.set(null);
+        store$.reset();
+        store$.rallye.set(tourRallye);
+        await setCurrentRallye(tourRallye);
+        store$.enabled.set(true);
+      } else {
+        Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
+      }
+    } catch (e) {
+      console.error('Error starting tour mode:', e);
+      Alert.alert(t('common.errorTitle'), t('welcome.participationStartError'));
     }
   };
 

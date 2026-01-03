@@ -168,13 +168,23 @@ export const store$ = observable({
 
   initialize: async () => {
     try {
-      const rallye = await getCurrentRallye();
+      let rallye: any = null;
+      try {
+        rallye = await getCurrentRallye();
+      } catch (e) {
+        console.error('Error loading stored rallye:', e);
+      }
       store$.rallye.set(rallye);
       store$.resumeAvailable.set(false);
 
       if (rallye) {
         const rallyeId = (rallye as any).id as number;
-        const loadTeam = await getCurrentTeam(rallyeId);
+        let loadTeam: any = null;
+        try {
+          loadTeam = await getCurrentTeam(rallyeId);
+        } catch (e) {
+          console.error('Error loading stored team:', e);
+        }
 
         if (loadTeam) {
           try {

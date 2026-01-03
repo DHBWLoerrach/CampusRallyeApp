@@ -12,7 +12,7 @@ export async function getStorageItem<T = any>(key: string): Promise<T | null> {
     return jsonValue != null ? (JSON.parse(jsonValue) as T) : null;
   } catch (e) {
     console.error('Error getting storage item', e);
-    return null;
+    throw e;
   }
 }
 
@@ -21,6 +21,7 @@ export async function setStorageItem(key: string, value: any): Promise<void> {
     await AsyncStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
     console.error('Error setting storage item', e);
+    throw e;
   }
 }
 
@@ -29,5 +30,6 @@ export async function removeStorageItem(key: string): Promise<void> {
     await AsyncStorage.removeItem(key);
   } catch (e) {
     console.error('Error removing storage item', e);
+    throw e;
   }
 }

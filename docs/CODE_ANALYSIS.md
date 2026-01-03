@@ -10,7 +10,7 @@
 
 | Schweregrad | Anzahl |
 |-------------|--------|
-| Kritisch    | 1      |
+| Kritisch    | 0      |
 | Hoch        | 6      |
 | Mittel      | 23+    |
 | Niedrig     | 12+    |
@@ -22,7 +22,7 @@
 ### Phase 1: Kritisch (Datenverlust/Crashes)
 
 - [x] **CRIT-01:** Inner-Components in `UploadPhotoQuestion.tsx` extrahieren
-- [ ] **CRIT-02:** Silent storage failures in `asyncStorage.ts` fixen
+- [x] **CRIT-02:** Silent storage failures in `asyncStorage.ts` fixen
 - [x] **CRIT-03:** `teamExists` Network-Error-Handling in `teamStorage.ts`
 - [x] **CRIT-04:** Offline-Queue Race Condition in `offlineOutbox.ts` mit Mutex + Idempotency/Dedupe fixen
 - [x] **CRIT-05:** Voting-Error-Handling in `voting.tsx` implementieren
@@ -130,6 +130,8 @@ export async function setStorageItem(key: string, value: any): Promise<void> {
 - Rallye-Status nicht gespeichert
 
 **Lösung:** Fehler werfen oder Erfolgs-Status zurückgeben.
+
+**Status:** Fix umgesetzt (Storage-Wrapper werfen Fehler; Call-Sites fangen ab).
 
 ---
 
@@ -561,6 +563,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 
 | Datum | Änderung |
 |-------|----------|
+| 03.01.2026 | CRIT-02 Fix umgesetzt (Storage-Wrapper werfen Fehler) |
 | 03.01.2026 | CRIT-05 Fix umgesetzt (Voting zeigt Fehler-Alert, bleibt auf Frage) |
 | 03.01.2026 | CRIT-03 Fix umgesetzt (teamExists mit Unknown-Status, keine Löschung bei Netzfehler) |
 | 03.01.2026 | CRIT-04 Fix umgesetzt (Sync-Lock + Queue-Merge in offlineOutbox) |
@@ -581,6 +584,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 - **Erledigt:** CRIT-04 durch Sync-Lock und Queue-Merge in `offlineOutbox.ts`.
 - **Erledigt:** CRIT-03 durch Unknown-Status in `teamExists` und angepasstes Löschen in Call-Sites.
 - **Erledigt:** CRIT-05 durch Alert bei Voting-Submit-Fehlern.
+- **Erledigt:** CRIT-02 durch Throwing in `asyncStorage.ts` und abgesicherte Call-Sites.
 
 ## Review (Claude, 03.01.2026)
 
