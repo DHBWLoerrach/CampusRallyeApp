@@ -154,7 +154,7 @@ export default function RallyeSelectionModal({
 
   const modalBackgroundColor = isDarkMode
     ? Colors.darkMode.card
-    : Colors.lightMode.background;
+    : Colors.lightMode.card;
 
   const passwordCardBackgroundColor = isDarkMode
     ? Colors.darkMode.card
