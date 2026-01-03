@@ -111,12 +111,18 @@ export const globalStyles = createGroupedStyles({
       alignSelf: 'stretch',
     },
     cancelButton: {
-      marginTop: 20,
+      marginTop: 24,
       alignSelf: 'center',
       paddingVertical: 12,
       paddingHorizontal: 24,
       minHeight: 44,
       justifyContent: 'center',
+    },
+    cancelButtonSeparator: {
+      height: 1,
+      backgroundColor: Colors.veryLightGray,
+      marginTop: 16,
+      marginHorizontal: -20,
     },
     cancelButtonText: {
       textDecorationLine: 'none',

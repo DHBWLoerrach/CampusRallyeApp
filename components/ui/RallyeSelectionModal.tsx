@@ -431,6 +431,16 @@ export default function RallyeSelectionModal({
                   {t('rallye.modal.noActive')}
                 </Text>
               )}
+              <View
+                style={[
+                  globalStyles.rallyeModal.cancelButtonSeparator,
+                  {
+                    backgroundColor: isDarkMode
+                      ? Colors.darkMode.borderSubtle
+                      : Colors.veryLightGray,
+                  },
+                ]}
+              />
               <UIButton
                 onPress={onClose}
                 variant="ghost"
