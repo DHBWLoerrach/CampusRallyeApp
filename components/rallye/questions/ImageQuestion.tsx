@@ -125,7 +125,12 @@ export default function ImageQuestion({ question }: QuestionProps) {
             <InfoBox mb={0}>
               <Image
                 source={{ uri: pictureUri }}
-                style={{ width: '100%', height: 250, borderRadius: 10 }}
+                style={{
+                  width: '100%',
+                  aspectRatio: 4 / 3,
+                  maxHeight: 250,
+                  borderRadius: 8,
+                }}
                 resizeMode="contain"
               />
             </InfoBox>
