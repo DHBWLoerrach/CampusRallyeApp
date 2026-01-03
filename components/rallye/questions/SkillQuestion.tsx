@@ -74,7 +74,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <KeyboardAvoidingView>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
       <ThemedScrollView
         variant="background"
         keyboardShouldPersistTaps="always"
@@ -134,8 +134,8 @@ export default function SkillQuestion({ question }: QuestionProps) {
             </UIButton>
           </InfoBox>
         </VStack>
-        {question.hint ? <Hint hint={question.hint} /> : null}
       </ThemedScrollView>
+      {question.hint ? <Hint hint={question.hint} /> : null}
     </KeyboardAvoidingView>
   );
 }

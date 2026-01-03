@@ -157,8 +157,8 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
               {scanMode
                 ? t('question.qr.hideCamera')
                 : answerKeyReady
-                  ? t('question.qr.scan')
-                  : t('common.loading')}
+                ? t('question.qr.scan')
+                : t('common.loading')}
             </UIButton>
             <UIButton
               icon="face-frown-open"
@@ -169,9 +169,8 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
             </UIButton>
           </View>
         </InfoBox>
-
-        {question.hint ? <Hint hint={question.hint} /> : null}
       </VStack>
+      {question.hint ? <Hint hint={question.hint} /> : null}
     </ThemedView>
   );
 }

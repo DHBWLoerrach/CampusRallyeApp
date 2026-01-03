@@ -134,8 +134,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                         borderColor: isSelected
                           ? Colors.dhbwRed
                           : isDarkMode
-                            ? Colors.darkMode.text
-                            : Colors.dhbwGray,
+                          ? Colors.darkMode.text
+                          : Colors.dhbwGray,
                       },
                     ]}
                     onPress={() => setAnswer(optionText)}
@@ -147,8 +147,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                           backgroundColor: isSelected
                             ? Colors.dhbwRed
                             : isDarkMode
-                              ? Colors.darkMode.card
-                              : Colors.lightMode.card,
+                            ? Colors.darkMode.card
+                            : Colors.lightMode.card,
                         },
                       ]}
                     />
@@ -174,8 +174,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
             {t('question.submit')}
           </UIButton>
         </InfoBox>
-        {question.hint ? <Hint hint={question.hint} /> : null}
       </VStack>
+      {question.hint ? <Hint hint={question.hint} /> : null}
     </ThemedScrollView>
   );
 }

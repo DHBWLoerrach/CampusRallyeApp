@@ -88,7 +88,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
   };
 
   return (
-    <KeyboardAvoidingView>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
       <ThemedScrollView
         variant="background"
         keyboardShouldPersistTaps="handled"
@@ -157,10 +157,9 @@ export default function ImageQuestion({ question }: QuestionProps) {
               {t('question.submit')}
             </UIButton>
           </InfoBox>
-
-          {question.hint ? <Hint hint={question.hint} /> : null}
         </VStack>
       </ThemedScrollView>
+      {question.hint ? <Hint hint={question.hint} /> : null}
     </KeyboardAvoidingView>
   );
 }

@@ -102,8 +102,8 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
               </UIButton>
             </View>
           </InfoBox>
-          {question.hint ? <Hint hint={question.hint} /> : null}
         </VStack>
+        {question.hint ? <Hint hint={question.hint} /> : null}
       </ThemedView>
     );
   }
@@ -166,8 +166,8 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
               </UIButton>
             </View>
           </InfoBox>
-          {question.hint ? <Hint hint={question.hint} /> : null}
         </VStack>
+        {question.hint ? <Hint hint={question.hint} /> : null}
       </ThemedView>
     );
   }
@@ -266,9 +266,9 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
                 {t('question.photo.offlineNotice')}
               </ThemedText>
             ) : null}
-            {question.hint ? <Hint hint={question.hint} /> : null}
           </InfoBox>
         </VStack>
+        {question.hint ? <Hint hint={question.hint} /> : null}
       </ThemedView>
     );
   }
