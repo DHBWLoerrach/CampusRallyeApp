@@ -147,6 +147,41 @@ export const globalStyles = createGroupedStyles({
       paddingHorizontal: 16,
       lineHeight: 22,
     },
+    slideView: {
+      width: '100%',
+    },
+    passwordSlideView: {
+      position: 'absolute',
+      top: 20,
+      left: 20,
+      right: 20,
+      bottom: 20,
+    },
+    passwordSubtitle: {
+      fontSize: 16,
+      marginBottom: 16,
+      marginTop: -8,
+    },
+    passwordInput: {
+      width: '100%',
+      height: 44,
+      borderWidth: 1,
+      borderColor: Colors.dhbwGray,
+      borderRadius: Constants.cornerRadius,
+      paddingHorizontal: 12,
+      marginBottom: 12,
+    },
+    passwordHelper: {
+      textAlign: 'center',
+      marginBottom: 8,
+      fontSize: 13,
+    },
+    passwordButtonRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 8,
+    },
   },
   rallyeStatesStyles: {
     container: {

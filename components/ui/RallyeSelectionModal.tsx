@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -9,15 +9,9 @@ import {
   Text,
   View,
   ListRenderItem,
+  Animated,
+  Dimensions,
 } from 'react-native';
-import Animated, {
-  Extrapolation,
-  interpolate,
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
@@ -27,6 +21,8 @@ import type { RallyeRow } from '@/services/storage/rallyeStorage';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 type Props = {
   visible: boolean;
@@ -60,102 +56,45 @@ export default function RallyeSelectionModal({
 
   const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
   const [password, setPassword] = useState('');
-  const [isFlipped, setIsFlipped] = useState(false);
-  const flip = useSharedValue(0);
-  const passwordRallyeId = passwordRallye?.id;
+
+  // Slide animation
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (visible) return;
-    setPasswordRallye(null);
-    setPassword('');
-    setIsFlipped(false);
-    flip.value = 0;
-  }, [visible, flip]);
+    if (!visible) {
+      setPasswordRallye(null);
+      setPassword('');
+      slideAnim.setValue(0);
+    }
+  }, [visible, slideAnim]);
 
-  const flipToPassword = useCallback(() => {
-    flip.value = withSpring(180, {
-      stiffness: 180,
-      damping: 18,
-      mass: 1,
-      overshootClamping: false,
-    });
-    setIsFlipped(true);
-  }, [flip]);
+  const slideToPassword = React.useCallback(() => {
+    Animated.timing(slideAnim, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  }, [slideAnim]);
 
-  const flipBackAndReturnToList = () => {
-    const springConfig = {
-      stiffness: 180,
-      damping: 18,
-      mass: 1,
-      overshootClamping: false,
-    } as const;
-    flip.value = withSpring(0, springConfig, () => {
-      runOnJS(setIsFlipped)(false);
-      runOnJS(setPassword)('');
-      runOnJS(setPasswordRallye)(null);
+  const slideBackToList = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      setPassword('');
+      setPasswordRallye(null);
     });
   };
 
   useEffect(() => {
-    if (!passwordRallyeId) return;
-    setPassword('');
-    setIsFlipped(false);
-    flip.value = 0;
-    const timeout = setTimeout(() => {
-      flipToPassword();
-    }, 80);
-    return () => clearTimeout(timeout);
-  }, [flip, flipToPassword, passwordRallyeId]);
-
-  const frontAnimatedStyle = useAnimatedStyle(() => {
-    const rotateY = `${interpolate(
-      flip.value,
-      [0, 180],
-      [0, 180],
-      Extrapolation.CLAMP
-    )}deg`;
-    const scale = interpolate(
-      flip.value,
-      [0, 90, 180],
-      [1, 1.02, 1],
-      Extrapolation.CLAMP
-    );
-    return {
-      transform: [{ perspective: 800 }, { rotateY }, { scale }],
-      zIndex: isFlipped ? 0 : 1,
-      pointerEvents: isFlipped ? 'none' : 'auto',
-      backfaceVisibility: 'hidden',
-    } as const;
-  }, [isFlipped]);
-
-  const backAnimatedStyle = useAnimatedStyle(() => {
-    const rotateY = `${interpolate(
-      flip.value,
-      [0, 180],
-      [180, 360],
-      Extrapolation.CLAMP
-    )}deg`;
-    const scale = interpolate(
-      flip.value,
-      [0, 90, 180],
-      [1, 1.02, 1],
-      Extrapolation.CLAMP
-    );
-    return {
-      transform: [{ perspective: 800 }, { rotateY }, { scale }],
-      zIndex: isFlipped ? 1 : 0,
-      pointerEvents: isFlipped ? 'auto' : 'none',
-      backfaceVisibility: 'hidden',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-    } as const;
-  }, [isFlipped]);
+    if (passwordRallye) {
+      setPassword('');
+      slideToPassword();
+    }
+  }, [passwordRallye, slideToPassword]);
 
   const modalBackgroundColor = palette.card;
-  const passwordCardBackgroundColor = palette.card;
   const headerTextColor = palette.text;
   const mutedTextColor = palette.textMuted ?? Colors.mediumGray;
   const cardBackgroundColor = palette.surface1;
@@ -282,6 +221,17 @@ export default function RallyeSelectionModal({
     );
   };
 
+  // Animation transforms
+  const listTranslateX = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -SCREEN_WIDTH],
+  });
+
+  const passwordTranslateX = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [SCREEN_WIDTH, 0],
+  });
+
   return (
     <Modal
       visible={visible}
@@ -298,164 +248,154 @@ export default function RallyeSelectionModal({
             globalStyles.rallyeModal.modalContent,
             {
               backgroundColor: modalBackgroundColor,
+              overflow: 'hidden',
             },
           ]}
         >
-          {passwordRallye ? (
-            <>
-              <Text
-                style={[
-                  globalStyles.rallyeModal.modalTitle,
-                  { color: headerTextColor },
-                ]}
-              >
-                {t('rallye.password.required.title')}
-              </Text>
-              <View
-                style={[
-                  globalStyles.cardStyles.card,
-                  {
-                    minHeight: 220,
-                    backgroundColor: passwordCardBackgroundColor,
-                    position: 'relative',
-                    overflow: 'hidden',
-                  },
-                ]}
-              >
-                {/* front face */}
-                <Animated.View
-                  style={[globalStyles.cardStyles.cardFace, frontAnimatedStyle]}
-                >
-                  <IconSymbol
-                    name="mappin.and.ellipse"
-                    size={40}
-                    color={Colors.dhbwRed}
-                  />
-                  <ThemedText
-                    style={globalStyles.cardStyles.cardTitle}
-                    variant="bodyStrong"
-                  >
-                    {selectedRallyeName}
-                  </ThemedText>
-                  {selectedRallyeStudiengang ? (
-                    <ThemedText
-                      style={globalStyles.cardStyles.cardDescription}
-                      variant="bodySmall"
-                    >
-                      {selectedRallyeStudiengang}
-                    </ThemedText>
-                  ) : null}
-                </Animated.View>
-
-                {/* back face */}
-                <Animated.View
-                  style={[
-                    globalStyles.cardStyles.cardFace,
-                    globalStyles.cardStyles.cardBack,
-                    backAnimatedStyle,
-                  ]}
-                >
-                  <ThemedText
-                    style={globalStyles.cardStyles.cardTitle}
-                    variant="bodyStrong"
-                  >
-                    {t('rallye.password.label')}
-                  </ThemedText>
-                  <ThemedTextInput
-                    autoFocus
-                    style={[
-                      globalStyles.cardStyles.passwordInput,
-                      { width: '100%', marginVertical: 14 },
-                    ]}
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder={t('rallye.password.placeholder')}
-                    accessibilityLabel={t('rallye.password.label')}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    onSubmitEditing={() => void confirmPasswordAndJoin()}
-                  />
-                  <ThemedText
-                    style={globalStyles.cardStyles.passwordHelper}
-                    variant="muted"
-                  >
-                    {t('rallye.password.helper')}
-                  </ThemedText>
-                  <View style={globalStyles.cardStyles.buttonRow}>
-                    <UIButton
-                      onPress={flipBackAndReturnToList}
-                      size="dialog"
-                      color={Colors.dhbwRedLight}
-                      disabled={joining}
-                    >
-                      {t('common.back')}
-                    </UIButton>
-                    <UIButton
-                      onPress={() => void confirmPasswordAndJoin()}
-                      size="dialog"
-                      color={Colors.dhbwRed}
-                      loading={joining}
-                    >
-                      {t('rallye.password.join')}
-                    </UIButton>
-                  </View>
-                </Animated.View>
-              </View>
-            </>
-          ) : (
-            <>
-              <Text
-                style={[
-                  globalStyles.rallyeModal.modalTitle,
-                  { color: headerTextColor },
-                ]}
-              >
-                {t('rallye.modal.activeTitle')}
-              </Text>
-              {activeRallyes.length > 0 ? (
-                <FlatList
-                  data={activeRallyes}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={renderItem}
-                  accessibilityRole="list"
-                  accessibilityLabel={t('rallye.modal.activeTitle')}
-                  showsVerticalScrollIndicator={true}
-                  fadingEdgeLength={50}
-                  contentContainerStyle={{ paddingBottom: 4 }}
-                />
-              ) : (
-                <Text
-                  style={[
-                    globalStyles.rallyeModal.noDataText,
-                    { color: mutedTextColor },
-                  ]}
-                >
-                  {t('rallye.modal.noActive')}
-                </Text>
-              )}
-              <View
-                style={[
-                  globalStyles.rallyeModal.cancelButtonSeparator,
-                  {
-                    backgroundColor: isDarkMode
-                      ? Colors.darkMode.borderSubtle
-                      : Colors.veryLightGray,
-                  },
-                ]}
+          {/* List View */}
+          <Animated.View
+            style={[
+              globalStyles.rallyeModal.slideView,
+              { transform: [{ translateX: listTranslateX }] },
+            ]}
+          >
+            <Text
+              style={[
+                globalStyles.rallyeModal.modalTitle,
+                { color: headerTextColor },
+              ]}
+            >
+              {t('rallye.modal.activeTitle')}
+            </Text>
+            {activeRallyes.length > 0 ? (
+              <FlatList
+                data={activeRallyes}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderItem}
+                accessibilityRole="list"
+                accessibilityLabel={t('rallye.modal.activeTitle')}
+                showsVerticalScrollIndicator={true}
+                fadingEdgeLength={50}
+                contentContainerStyle={{ paddingBottom: 4 }}
               />
+            ) : (
+              <Text
+                style={[
+                  globalStyles.rallyeModal.noDataText,
+                  { color: mutedTextColor },
+                ]}
+              >
+                {t('rallye.modal.noActive')}
+              </Text>
+            )}
+            <View
+              style={[
+                globalStyles.rallyeModal.cancelButtonSeparator,
+                {
+                  backgroundColor: isDarkMode
+                    ? Colors.darkMode.borderSubtle
+                    : Colors.veryLightGray,
+                },
+              ]}
+            />
+            <UIButton
+              onPress={onClose}
+              variant="ghost"
+              style={globalStyles.rallyeModal.cancelButton}
+              textStyle={globalStyles.rallyeModal.cancelButtonText}
+              color={cancelTextColor}
+            >
+              {t('common.cancel')}
+            </UIButton>
+          </Animated.View>
+
+          {/* Password View */}
+          <Animated.View
+            style={[
+              globalStyles.rallyeModal.slideView,
+              globalStyles.rallyeModal.passwordSlideView,
+              { transform: [{ translateX: passwordTranslateX }] },
+            ]}
+          >
+            {/* Rallye name as title */}
+            <Text
+              style={[
+                globalStyles.rallyeModal.modalTitle,
+                { color: headerTextColor },
+              ]}
+            >
+              {selectedRallyeName}
+            </Text>
+
+            {/* Studiengang if valid */}
+            {hasValidStudiengang(selectedRallyeStudiengang) ? (
+              <Text
+                style={[
+                  globalStyles.rallyeModal.passwordSubtitle,
+                  { color: mutedTextColor },
+                ]}
+              >
+                {selectedRallyeStudiengang}
+              </Text>
+            ) : null}
+
+            {/* Password input - no label, just placeholder */}
+            <ThemedTextInput
+              autoFocus={!!passwordRallye}
+              style={globalStyles.rallyeModal.passwordInput}
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              placeholder={t('rallye.password.placeholder')}
+              accessibilityLabel={t('rallye.password.label')}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={() => void confirmPasswordAndJoin()}
+            />
+
+            {/* Helper text */}
+            <ThemedText
+              style={globalStyles.rallyeModal.passwordHelper}
+              variant="muted"
+            >
+              {t('rallye.password.helper')}
+            </ThemedText>
+
+            {/* Separator */}
+            <View
+              style={[
+                globalStyles.rallyeModal.cancelButtonSeparator,
+                {
+                  backgroundColor: isDarkMode
+                    ? Colors.darkMode.borderSubtle
+                    : Colors.veryLightGray,
+                },
+              ]}
+            />
+
+            {/* Buttons */}
+            <View style={globalStyles.rallyeModal.passwordButtonRow}>
               <UIButton
-                onPress={onClose}
+                onPress={slideBackToList}
                 variant="ghost"
                 style={globalStyles.rallyeModal.cancelButton}
                 textStyle={globalStyles.rallyeModal.cancelButtonText}
                 color={cancelTextColor}
+                disabled={joining}
               >
-                {t('common.cancel')}
+                {t('common.back')}
               </UIButton>
-            </>
-          )}
+              <UIButton
+                onPress={() => void confirmPasswordAndJoin()}
+                size="dialog"
+                color={Colors.dhbwRed}
+                loading={joining}
+              >
+                {t('rallye.password.join')}
+              </UIButton>
+            </View>
+          </Animated.View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
