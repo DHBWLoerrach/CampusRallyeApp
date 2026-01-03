@@ -105,36 +105,42 @@ export default function Scoreboard() {
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
         globalStyles.rallyeStatesStyles.container,
+        { justifyContent: 'flex-start' },
       ]}
     >
-      <View style={[globalStyles.rallyeStatesStyles.infoBox, s.infoBox]}>
-        <ThemedText
-          variant="title"
-          style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-        >
-          {t('scoreboard.title')}
-        </ThemedText>
-        {ourTeam ? (
-          <ThemedText
-            variant="body"
-            style={[
-              globalStyles.rallyeStatesStyles.infoSubtitle,
-              s.muted,
-              { marginTop: 10 },
-            ]}
-          >
-            {t('scoreboard.yourTeam', { team: ourTeam.name })}
-          </ThemedText>
-        ) : null}
-      </View>
-
       <View
         style={[
           globalStyles.rallyeStatesStyles.infoBox,
-          { padding: 0 },
+          { padding: 0, maxHeight: '100%' },
           s.infoBox,
         ]}
       >
+        <View
+          style={{
+            padding: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: palette.cellBorder,
+          }}
+        >
+          <ThemedText
+            variant="title"
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
+            {t('scoreboard.title')}
+          </ThemedText>
+          {ourTeam ? (
+            <ThemedText
+              variant="body"
+              style={[
+                globalStyles.rallyeStatesStyles.infoSubtitle,
+                s.muted,
+                { marginTop: 10 },
+              ]}
+            >
+              {t('scoreboard.yourTeam', { team: ourTeam.name })}
+            </ThemedText>
+          ) : null}
+        </View>
         <View
           style={{
             flexDirection: 'row',
@@ -161,14 +167,7 @@ export default function Scoreboard() {
           </ThemedText>
         </View>
 
-        <ScrollView
-          style={[
-            { maxHeight: 300 },
-            {
-              backgroundColor: palette.surface1,
-            },
-          ]}
-        >
+        <ScrollView style={{ backgroundColor: palette.surface1 }}>
           {rows.map((team) => {
             const rowLabel = t('scoreboard.rowLabel', {
               rank: team.rank ?? '-',
@@ -176,6 +175,7 @@ export default function Scoreboard() {
               time: formatDuration(team.time_spent),
               points: team.total_points ?? '-',
             });
+            const isOurTeam = team.id === String(ourTeam?.id);
             return (
               <View
                 key={team.id}
@@ -184,8 +184,11 @@ export default function Scoreboard() {
                 style={[
                   globalStyles.scoreboardStyles.row,
                   s.listRow,
-                  team.id === String(ourTeam?.id) && {
+                  isOurTeam && {
                     backgroundColor: palette.surface2,
+                    borderWidth: 1,
+                    borderColor: palette.dhbwRed,
+                    borderBottomColor: palette.dhbwRed,
                   },
                 ]}
               >
@@ -194,22 +197,51 @@ export default function Scoreboard() {
                 >
                   {team.rank}
                 </ThemedText>
-                <ThemedText
+                <View
                   style={[
                     globalStyles.scoreboardStyles.cellWide,
-                    s.text,
-                    team.id === String(ourTeam?.id) &&
-                      globalStyles.scoreboardStyles.cellHighlighted,
                     {
-                      color:
-                        team.id === String(ourTeam?.id)
-                          ? Colors.dhbwRed
-                          : Colors.dhbwGray,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     },
                   ]}
                 >
-                  {team.group_name}
-                </ThemedText>
+                  <ThemedText
+                    style={[
+                      s.text,
+                      isOurTeam && globalStyles.scoreboardStyles.cellHighlighted,
+                      {
+                        color: isOurTeam ? Colors.dhbwRed : Colors.dhbwGray,
+                      },
+                    ]}
+                  >
+                    {team.group_name}
+                  </ThemedText>
+                  {isOurTeam ? (
+                    <View
+                      style={{
+                        marginLeft: 8,
+                        paddingHorizontal: 8,
+                        paddingVertical: 2,
+                        borderRadius: 999,
+                        borderWidth: 1,
+                        borderColor: palette.dhbwRed,
+                        backgroundColor: palette.dhbwRedLight,
+                      }}
+                    >
+                      <ThemedText
+                        style={{
+                          color: palette.dhbwRed,
+                          fontSize: 12,
+                          fontWeight: '600',
+                        }}
+                      >
+                        {t('scoreboard.badge')}
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                </View>
 
                 <ThemedText
                   style={[globalStyles.scoreboardStyles.cell, s.text]}
