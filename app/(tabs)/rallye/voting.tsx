@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, Image, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, TouchableOpacity, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import UIButton from '@/components/ui/UIButton';
@@ -115,6 +115,7 @@ export default function Voting({
       setSelectedTeam(null);
     } catch (e) {
       console.error('Error updating team question:', e);
+      Alert.alert(t('common.errorTitle'), t('voting.error.submit'));
     } finally {
       setSendingResult(false);
     }
@@ -189,6 +190,7 @@ export default function Voting({
         }
         renderItem={({ item }) => (
           <TouchableOpacity
+            testID={`vote-option-${item.tq_id}`}
             onPress={() => {
               setSelectedTeam(item.rt_id);
               setSelectedUpdateId(item.tq_id);

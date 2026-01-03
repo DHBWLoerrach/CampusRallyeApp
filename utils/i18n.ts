@@ -138,6 +138,7 @@ export const translations = {
     'voting.instruction':
       'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.',
     'voting.next': 'Nächste Abstimmung',
+    'voting.error.submit': 'Abstimmung konnte nicht gespeichert werden.',
     'scoreboard.title': 'Punktestand',
     'scoreboard.yourTeam': 'Dein Team: {{team}}',
     'scoreboard.rank': 'Platz',
@@ -280,6 +281,7 @@ export const translations = {
     'voting.instruction':
       'Give an extra point to the team that you think solved the task above the best.',
     'voting.next': 'Next vote',
+    'voting.error.submit': 'Vote could not be saved.',
     'scoreboard.title': 'Scoreboard',
     'scoreboard.yourTeam': 'Your team: {{team}}',
     'scoreboard.rank': 'Rank',
