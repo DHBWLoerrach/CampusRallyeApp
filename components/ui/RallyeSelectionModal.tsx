@@ -212,73 +212,106 @@ export default function RallyeSelectionModal({
     if (ok) onClose();
   };
 
-  const renderItem: ListRenderItem<RallyeRow> = ({ item }) => (
-    <View
-      style={[
-        globalStyles.rallyeModal.rallyeCard,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.dhbwGray
-            : (globalStyles.rallyeModal.rallyeCard as any).backgroundColor,
-        },
-      ]}
-    >
-      <View style={globalStyles.rallyeModal.rallyeInfo}>
-        <Text
-          style={[
-            globalStyles.rallyeModal.rallyeName,
-            {
-              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-            },
-          ]}
-        >
-          {item.name}
-        </Text>
-        <Text
-          style={[
-            globalStyles.rallyeModal.rallyeStudiengang,
-            {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : (globalStyles.rallyeModal.rallyeStudiengang as any).color,
-            },
-          ]}
-        >
-          {item.studiengang}
-        </Text>
-        <Text
-          style={[
-            globalStyles.rallyeModal.rallyeStatus,
-            {
-              color: isDarkMode
-                ? Colors.darkMode.text
-                : (globalStyles.rallyeModal.rallyeStatus as any).color,
-            },
-          ]}
-        >
-          {getStatusText(item.status, t)}
-        </Text>
-      </View>
-      {isPasswordRequired(item) ? (
-        <View style={{ marginRight: 10 }}>
-          <IconSymbol name="lock" size={18} color={Colors.dhbwRed} />
-        </View>
-      ) : null}
-      <UIButton
-        disabled={joining}
-        onPress={() => void handleSelect(item)}
-        style={globalStyles.rallyeModal.selectButton}
-        accessibilityLabel={t('a11y.selectRallye', { name: item.name })}
-        accessibilityHint={
-          isPasswordRequired(item)
-            ? t('a11y.selectRallyePasswordHint')
-            : t('a11y.selectRallyeHint')
-        }
+  const renderItem: ListRenderItem<RallyeRow> = ({ item }) => {
+    const passwordRequired = isPasswordRequired(item);
+    return (
+      <View
+        style={[
+          globalStyles.rallyeModal.rallyeCard,
+          passwordRequired ? globalStyles.rallyeModal.rallyeCardStacked : null,
+          {
+            backgroundColor: isDarkMode
+              ? Colors.darkMode.dhbwGray
+              : (globalStyles.rallyeModal.rallyeCard as any).backgroundColor,
+          },
+        ]}
       >
-        {t('common.select')}
-      </UIButton>
-    </View>
-  );
+        <View
+          style={[
+            globalStyles.rallyeModal.rallyeInfo,
+            passwordRequired ? globalStyles.rallyeModal.rallyeInfoStacked : null,
+          ]}
+        >
+          <Text
+            style={[
+              globalStyles.rallyeModal.rallyeName,
+              {
+                color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+              },
+            ]}
+          >
+            {item.name}
+          </Text>
+          {passwordRequired ? (
+            <View style={globalStyles.rallyeModal.passwordBadge}>
+              <IconSymbol name="lock" size={14} color={Colors.dhbwRed} />
+              <Text style={globalStyles.rallyeModal.passwordBadgeText}>
+                {t('rallye.password.required.badge')}
+              </Text>
+            </View>
+          ) : null}
+          {item.studiengang ? (
+            <Text
+              style={[
+                globalStyles.rallyeModal.rallyeStudiengang,
+                {
+                  color: isDarkMode
+                    ? Colors.darkMode.text
+                    : (globalStyles.rallyeModal.rallyeStudiengang as any).color,
+                },
+              ]}
+            >
+              {item.studiengang}
+            </Text>
+          ) : null}
+          <Text
+            style={[
+              globalStyles.rallyeModal.rallyeStatus,
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : (globalStyles.rallyeModal.rallyeStatus as any).color,
+              },
+            ]}
+          >
+            {getStatusText(item.status, t)}
+          </Text>
+          {passwordRequired ? (
+            <Text
+              style={[
+                globalStyles.rallyeModal.passwordHint,
+                { color: mutedTextColor },
+              ]}
+            >
+              {t('rallye.password.required.hint')}
+            </Text>
+          ) : null}
+        </View>
+        <UIButton
+          disabled={joining}
+          onPress={() => void handleSelect(item)}
+          style={[
+            globalStyles.rallyeModal.selectButton,
+            passwordRequired
+              ? globalStyles.rallyeModal.selectButtonStacked
+              : null,
+          ]}
+          accessibilityLabel={
+            passwordRequired
+              ? t('a11y.selectRallyeWithPassword', { name: item.name })
+              : t('a11y.selectRallye', { name: item.name })
+          }
+          accessibilityHint={
+            passwordRequired
+              ? t('a11y.selectRallyePasswordHint')
+              : t('a11y.selectRallyeHint')
+          }
+        >
+          {passwordRequired ? t('rallye.password.enter') : t('common.select')}
+        </UIButton>
+      </View>
+    );
+  };
 
   return (
     <Modal
@@ -357,7 +390,7 @@ export default function RallyeSelectionModal({
                     style={globalStyles.cardStyles.cardTitle}
                     variant="bodyStrong"
                   >
-                    {t('rallye.password.enter')}
+                    {t('rallye.password.label')}
                   </ThemedText>
                   <ThemedTextInput
                     autoFocus
@@ -369,12 +402,18 @@ export default function RallyeSelectionModal({
                     value={password}
                     onChangeText={setPassword}
                     placeholder={t('rallye.password.placeholder')}
-                    accessibilityLabel={t('rallye.password.enter')}
+                    accessibilityLabel={t('rallye.password.label')}
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="done"
                     onSubmitEditing={() => void confirmPasswordAndJoin()}
                   />
+                  <ThemedText
+                    style={globalStyles.cardStyles.passwordHelper}
+                    variant="muted"
+                  >
+                    {t('rallye.password.helper')}
+                  </ThemedText>
                   <View style={globalStyles.cardStyles.buttonRow}>
                     <UIButton
                       onPress={flipBackAndReturnToList}
@@ -390,18 +429,11 @@ export default function RallyeSelectionModal({
                       color={Colors.dhbwRed}
                       loading={joining}
                     >
-                      {t('common.confirm')}
+                      {t('rallye.password.join')}
                     </UIButton>
                   </View>
                 </Animated.View>
               </View>
-              <UIButton
-                onPress={onClose}
-                outline
-                style={globalStyles.rallyeModal.cancelButton}
-              >
-                {t('common.cancel')}
-              </UIButton>
             </>
           ) : (
             <>

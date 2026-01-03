@@ -76,9 +76,19 @@ export const globalStyles = createGroupedStyles({
       alignItems: 'center',
       justifyContent: 'space-between',
     },
+    rallyeCardStacked: {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      justifyContent: 'flex-start',
+      gap: 10,
+    },
     rallyeInfo: {
       flex: 1,
       paddingRight: 10,
+    },
+    rallyeInfoStacked: {
+      width: '100%',
+      paddingRight: 0,
     },
     rallyeName: {
       fontSize: 18,
@@ -94,9 +104,36 @@ export const globalStyles = createGroupedStyles({
       fontSize: 14,
       color: Colors.mediumGray,
     },
+    passwordBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      backgroundColor: Colors.dhbwRedLight,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: Constants.cornerRadius,
+      marginBottom: 6,
+      gap: 6,
+      flexWrap: 'wrap',
+      maxWidth: '100%',
+    },
+    passwordBadgeText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: Colors.dhbwRed,
+      flexShrink: 1,
+    },
+    passwordHint: {
+      fontSize: 12,
+      marginTop: 4,
+    },
     selectButton: {
       paddingVertical: 8,
       paddingHorizontal: 12,
+    },
+    selectButtonStacked: {
+      alignSelf: 'flex-end',
+      marginTop: 6,
     },
     cancelButton: {
       marginTop: 20,
@@ -213,6 +250,10 @@ export const globalStyles = createGroupedStyles({
       borderRadius: Constants.cornerRadius,
       paddingHorizontal: 10,
       marginVertical: 20,
+    },
+    passwordHelper: {
+      textAlign: 'center',
+      marginBottom: 12,
     },
     buttonRow: {
       flexDirection: 'row',
