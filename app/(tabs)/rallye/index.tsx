@@ -7,6 +7,7 @@ import { supabase } from '@/utils/Supabase';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useAppStyles } from '@/utils/AppStyles';
+import { orderQuestionsWithUploadsLast } from '@/utils/orderQuestions';
 import Preparation from '@/app/(tabs)/rallye/states/Preparation';
 import NoQuestions from '@/app/(tabs)/rallye/states/NoQuestions';
 import TeamSetup from '@/app/(tabs)/rallye/team-setup';
@@ -124,13 +125,10 @@ const RallyeIndex = observer(function RallyeIndex() {
         question_type: q.type,
       }));
 
-      for (let i = mapped.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [mapped[i], mapped[j]] = [mapped[j], mapped[i]];
-      }
+      const ordered = orderQuestionsWithUploadsLast(mapped);
 
-      store$.questions.set(mapped);
-      store$.currentQuestion.set(mapped[0] || null);
+      store$.questions.set(ordered);
+      store$.currentQuestion.set(ordered[0] || null);
       store$.questionIndex.set(0);
     } catch (err) {
       console.error('Fehler beim Laden der Fragen:', err);
