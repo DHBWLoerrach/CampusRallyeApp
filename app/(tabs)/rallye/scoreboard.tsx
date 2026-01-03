@@ -143,9 +143,7 @@ export default function Scoreboard() {
             padding: 15,
             borderBottomWidth: 1,
             borderBottomColor: palette.cellBorder,
-            backgroundColor: isDarkMode
-              ? palette.scheduleHeader
-              : Colors.veryLightGray,
+            backgroundColor: palette.surface2,
           }}
         >
           <ThemedText
@@ -169,9 +167,7 @@ export default function Scoreboard() {
           style={[
             { maxHeight: 300 },
             {
-              backgroundColor: isDarkMode
-                ? palette.scheduleHeader
-                : Colors.veryLightGray,
+              backgroundColor: palette.surface1,
             },
           ]}
         >
@@ -190,8 +186,9 @@ export default function Scoreboard() {
                 style={[
                   globalStyles.scoreboardStyles.row,
                   s.listRow,
-                  team.group_name === ourTeam?.name &&
-                    globalStyles.scoreboardStyles.rowHighlighted,
+                  team.id === String(ourTeam?.id) && {
+                    backgroundColor: palette.surface2,
+                  },
                 ]}
               >
                 <ThemedText
@@ -203,25 +200,27 @@ export default function Scoreboard() {
                   style={[
                     globalStyles.scoreboardStyles.cellWide,
                     s.text,
-                    team.group_name === ourTeam?.name &&
+                    team.id === String(ourTeam?.id) &&
                       globalStyles.scoreboardStyles.cellHighlighted,
                     {
                       color:
-                        team.group_name === ourTeam?.name
+                        team.id === String(ourTeam?.id)
                           ? Colors.dhbwRed
                           : Colors.dhbwGray,
                     },
                   ]}
                 >
                   {team.group_name}
-                  {'\n'}
-                  {formatDuration(team.time_spent)}
                 </ThemedText>
 
                 <ThemedText
                   style={[globalStyles.scoreboardStyles.cell, s.text]}
                 >
                   {team.total_points}
+                  {'\n'}
+                  <ThemedText style={[s.muted, { fontSize: 12 }]}>
+                    {formatDuration(team.time_spent)}
+                  </ThemedText>
                 </ThemedText>
               </View>
             );
