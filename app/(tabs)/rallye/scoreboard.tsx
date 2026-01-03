@@ -178,6 +178,12 @@ export default function Scoreboard() {
             const isOurTeam =
               ourTeam?.id !== undefined &&
               String(team.id) === String(ourTeam.id);
+            const highlightAccent = isDarkMode
+              ? 'rgba(226, 0, 26, 0.35)'
+              : Colors.dhbwRed;
+            const highlightBackground = isDarkMode
+              ? 'rgba(226, 0, 26, 0.06)'
+              : 'rgba(226, 0, 26, 0.04)';
             return (
               <View
                 key={team.id}
@@ -187,10 +193,10 @@ export default function Scoreboard() {
                   globalStyles.scoreboardStyles.row,
                   s.listRow,
                   isOurTeam && {
-                    backgroundColor: palette.surface2,
-                    borderLeftWidth: 4,
-                    borderLeftColor: palette.dhbwRed,
-                    paddingLeft: 11,
+                    backgroundColor: highlightBackground,
+                    borderLeftWidth: 3,
+                    borderLeftColor: highlightAccent,
+                    paddingLeft: 12,
                   },
                 ]}
               >
@@ -208,9 +214,6 @@ export default function Scoreboard() {
                     globalStyles.scoreboardStyles.cellWide,
                     s.text,
                     isOurTeam && globalStyles.scoreboardStyles.cellHighlighted,
-                    {
-                      color: isOurTeam ? Colors.dhbwRed : Colors.dhbwGray,
-                    },
                   ]}
                 >
                   {team.group_name}
