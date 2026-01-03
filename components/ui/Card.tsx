@@ -1,5 +1,11 @@
 import React, { PropsWithChildren } from 'react';
-import { Dimensions, Pressable, View } from 'react-native';
+import {
+  Dimensions,
+  Pressable,
+  type StyleProp,
+  type ViewStyle,
+  View,
+} from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useTheme } from '@/utils/ThemeContext';
@@ -17,6 +23,7 @@ type Props = {
   onPress?: () => void;
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  containerStyle?: StyleProp<ViewStyle>;
 };
 
 export default function Card({
@@ -26,6 +33,7 @@ export default function Card({
   onPress,
   accessibilityLabel,
   accessibilityHint,
+  containerStyle,
   children,
 }: PropsWithChildren<Props>) {
   const { isDarkMode } = useTheme();
@@ -71,6 +79,7 @@ export default function Card({
           globalStyles.cardStyles.card,
           { backgroundColor },
           surfaceStyle,
+          containerStyle,
         ]}
       >
         {content}
@@ -88,6 +97,7 @@ export default function Card({
         globalStyles.cardStyles.card,
         { backgroundColor },
         surfaceStyle,
+        containerStyle,
         pressed ? { opacity: 0.92, transform: [{ scale: 0.99 }] } : null,
       ]}
     >

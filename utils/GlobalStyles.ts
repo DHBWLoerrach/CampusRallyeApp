@@ -429,7 +429,13 @@ export const globalStyles = createGroupedStyles({
       alignItems: 'center',
       // backgroundColor handled by themed style
       paddingHorizontal: SCREEN_WIDTH * 0.04,
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
+      paddingTop: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.02 : 0.025),
+      paddingBottom: SCREEN_HEIGHT * 0.015,
+    },
+    compactCard: {
+      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.145 : 0.185),
+      marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.013),
     },
     headerImage: {
       width: SCREEN_WIDTH,

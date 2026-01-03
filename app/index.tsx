@@ -144,6 +144,7 @@ export default function Welcome() {
   const stateBackground = isDarkMode
     ? Colors.darkMode.background
     : Colors.lightMode.background;
+  const compactCardStyle = globalStyles.welcomeStyles.compactCard;
 
   const LoadingContent = () => (
     <View
@@ -196,6 +197,7 @@ export default function Welcome() {
     >
       {!hasActiveRallyes && hasTourMode ? (
         <Card
+          containerStyle={compactCardStyle}
           title={t('welcome.noRallyes.title')}
           description={t('welcome.noRallyes.description')}
           icon="info.circle"
@@ -203,6 +205,7 @@ export default function Welcome() {
       ) : null}
       {resumeAvailable && resumeRallye && resumeTeam ? (
         <Card
+          containerStyle={compactCardStyle}
           title={t('welcome.resume.title')}
           description={t('welcome.resume.details', {
             rallye: resumeRallye.name,
@@ -243,6 +246,7 @@ export default function Welcome() {
 
       {hasActiveRallyes ? (
         <Card
+          containerStyle={compactCardStyle}
           title={t('welcome.join.title')}
           description={t('welcome.join.description')}
           icon="mappin.and.ellipse"
@@ -253,6 +257,7 @@ export default function Welcome() {
         </Card>
       ) : null}
       <Card
+        containerStyle={compactCardStyle}
         title={t('welcome.explore.title')}
         description={t('welcome.explore.description')}
         icon="binoculars"
