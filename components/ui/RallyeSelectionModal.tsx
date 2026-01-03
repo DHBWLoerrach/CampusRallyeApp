@@ -39,6 +39,13 @@ function isPasswordRequired(r: RallyeRow) {
   return !!(r.password ?? '').trim().length;
 }
 
+function hasValidStudiengang(studiengang: string | null | undefined): boolean {
+  if (!studiengang) return false;
+  const normalized = studiengang.trim().toLowerCase();
+  // Filter out placeholder values
+  return normalized.length > 0 && normalized !== 'kein studiengang';
+}
+
 export default function RallyeSelectionModal({
   visible,
   onClose,
@@ -220,7 +227,7 @@ export default function RallyeSelectionModal({
           >
             {item.name}
           </Text>
-          {item.studiengang ? (
+          {hasValidStudiengang(item.studiengang) ? (
             <Text
               style={[
                 globalStyles.rallyeModal.rallyeStudiengang,
