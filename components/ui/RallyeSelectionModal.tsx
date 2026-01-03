@@ -23,25 +23,9 @@ import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import type { RallyeRow } from '@/services/storage/rallyeStorage';
-import type { Translator } from '@/utils/i18n';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-
-function getStatusText(status: RallyeRow['status'], t: Translator) {
-  switch (status) {
-    case 'preparing':
-      return t('rallye.status.preparing');
-    case 'running':
-      return t('rallye.status.running');
-    case 'post_processing':
-      return t('rallye.status.post_processing');
-    case 'ended':
-      return t('rallye.status.ended');
-    default:
-      return String(status);
-  }
-}
 
 type Props = {
   visible: boolean;
@@ -256,18 +240,6 @@ export default function RallyeSelectionModal({
               {item.studiengang}
             </Text>
           ) : null}
-          <Text
-            style={[
-              globalStyles.rallyeModal.rallyeStatus,
-              {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : (globalStyles.rallyeModal.rallyeStatus as any).color,
-              },
-            ]}
-          >
-            {getStatusText(item.status, t)}
-          </Text>
           {passwordRequired ? (
             <Text
               style={[
