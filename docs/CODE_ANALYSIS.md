@@ -10,7 +10,7 @@
 
 | Schweregrad | Anzahl |
 |-------------|--------|
-| Kritisch    | 5      |
+| Kritisch    | 4      |
 | Hoch        | 6      |
 | Mittel      | 23+    |
 | Niedrig     | 12+    |
@@ -21,7 +21,7 @@
 
 ### Phase 1: Kritisch (Datenverlust/Crashes)
 
-- [ ] **CRIT-01:** Inner-Components in `UploadPhotoQuestion.tsx` extrahieren
+- [x] **CRIT-01:** Inner-Components in `UploadPhotoQuestion.tsx` extrahieren
 - [ ] **CRIT-02:** Silent storage failures in `asyncStorage.ts` fixen
 - [ ] **CRIT-03:** `teamExists` Network-Error-Handling in `teamStorage.ts`
 - [ ] **CRIT-04:** Offline-Queue Race Condition in `offlineOutbox.ts` mit Mutex + Idempotency/Dedupe fixen
@@ -104,6 +104,8 @@ export default function UploadPhotoQuestion(...) {
 - User verliert möglicherweise aufgenommenes Foto
 
 **Lösung:** Komponenten außerhalb definieren oder Conditional Rendering nutzen.
+
+**Status:** Fix umgesetzt (PhotoCamera/ImagePreview ausgelagert).
 
 ---
 
@@ -551,6 +553,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 
 | Datum | Änderung |
 |-------|----------|
+| 03.01.2026 | CRIT-01 Fix umgesetzt (UploadPhotoQuestion Komponenten ausgelagert) |
 | 03.01.2026 | Initiale Analyse erstellt |
 | 03.01.2026 | Revision durch Codex: CRIT-06→MED-22, HIGH-07→MED-23, CRIT-04 erweitert |
 | 03.01.2026 | Review durch Claude: MED-22 Beschreibung präzisiert (Bug: keine Persistenz) |
@@ -563,6 +566,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 - **Reklassifiziert:** HIGH-07 → MED-23, da Icon-Namen nicht aus dem Backend kommen; bleibt als defensive Absicherung.
 - **Ergänzt:** CRIT-04 Lösung um Idempotency/Dedupe erweitert, um Duplicate-Submissions trotz Multi-Trigger zu verhindern.
 - **Aktualisiert:** Zusammenfassung entsprechend der Repriorisierung angepasst.
+- **Erledigt:** CRIT-01 durch Auslagern der Inner-Components in `UploadPhotoQuestion.tsx`.
 
 ## Review (Claude, 03.01.2026)
 
