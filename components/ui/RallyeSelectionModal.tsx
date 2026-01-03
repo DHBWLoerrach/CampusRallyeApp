@@ -202,7 +202,6 @@ export default function RallyeSelectionModal({
       <View
         style={[
           globalStyles.rallyeModal.rallyeCard,
-          passwordRequired ? globalStyles.rallyeModal.rallyeCardStacked : null,
           {
             backgroundColor: isDarkMode
               ? Colors.darkMode.dhbwGray
@@ -210,12 +209,7 @@ export default function RallyeSelectionModal({
           },
         ]}
       >
-        <View
-          style={[
-            globalStyles.rallyeModal.rallyeInfo,
-            passwordRequired ? globalStyles.rallyeModal.rallyeInfoStacked : null,
-          ]}
-        >
+        <View style={globalStyles.rallyeModal.rallyeInfo}>
           <Text
             style={[
               globalStyles.rallyeModal.rallyeName,
@@ -232,8 +226,8 @@ export default function RallyeSelectionModal({
                 globalStyles.rallyeModal.rallyeStudiengang,
                 {
                   color: isDarkMode
-                    ? Colors.darkMode.text
-                    : (globalStyles.rallyeModal.rallyeStudiengang as any).color,
+                    ? Colors.darkMode.textMuted
+                    : Colors.mediumGray,
                 },
               ]}
             >
@@ -254,12 +248,7 @@ export default function RallyeSelectionModal({
         <UIButton
           disabled={joining}
           onPress={() => void handleSelect(item)}
-          style={[
-            globalStyles.rallyeModal.selectButton,
-            passwordRequired
-              ? globalStyles.rallyeModal.selectButtonStacked
-              : null,
-          ]}
+          style={globalStyles.rallyeModal.selectButton}
           accessibilityLabel={
             passwordRequired
               ? t('a11y.selectRallyeWithPassword', { name: item.name })
@@ -418,6 +407,9 @@ export default function RallyeSelectionModal({
                   renderItem={renderItem}
                   accessibilityRole="list"
                   accessibilityLabel={t('rallye.modal.activeTitle')}
+                  showsVerticalScrollIndicator={true}
+                  fadingEdgeLength={50}
+                  contentContainerStyle={{ paddingBottom: 4 }}
                 />
               ) : (
                 <Text

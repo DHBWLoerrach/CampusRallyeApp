@@ -59,6 +59,7 @@ export const globalStyles = createGroupedStyles({
       padding: 20,
       borderRadius: Constants.cornerRadius,
       width: '85%',
+      maxWidth: 400,
       maxHeight: '80%',
     },
     modalTitle: {
@@ -72,23 +73,13 @@ export const globalStyles = createGroupedStyles({
       borderRadius: Constants.cornerRadius,
       padding: 15,
       marginVertical: 8,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    rallyeCardStacked: {
       flexDirection: 'column',
       alignItems: 'stretch',
       justifyContent: 'flex-start',
-      gap: 10,
+      gap: 12,
     },
     rallyeInfo: {
-      flex: 1,
-      paddingRight: 10,
-    },
-    rallyeInfoStacked: {
       width: '100%',
-      paddingRight: 0,
     },
     rallyeName: {
       fontSize: 18,
@@ -109,27 +100,28 @@ export const globalStyles = createGroupedStyles({
       marginTop: 4,
     },
     selectButton: {
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-    },
-    selectButtonStacked: {
-      alignSelf: 'flex-end',
-      marginTop: 6,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      alignSelf: 'stretch',
     },
     cancelButton: {
       marginTop: 20,
       alignSelf: 'center',
-      paddingVertical: 4,
-      paddingHorizontal: 0,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+      minHeight: 44,
+      justifyContent: 'center',
     },
     cancelButtonText: {
       textDecorationLine: 'none',
     },
     noDataText: {
       textAlign: 'center',
-      fontSize: 16,
+      fontSize: 15,
       color: Colors.mediumGray,
-      marginVertical: 10,
+      marginVertical: 24,
+      paddingHorizontal: 16,
+      lineHeight: 22,
     },
   },
   rallyeStatesStyles: {

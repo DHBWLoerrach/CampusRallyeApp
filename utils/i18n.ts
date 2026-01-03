@@ -73,7 +73,8 @@ export const translations = {
     'rallye.join': 'Teilnehmen',
     'rallye.joinWithPassword': 'Mit Passwort beitreten',
     'rallye.modal.activeTitle': 'Aktive Rallyes',
-    'rallye.modal.noActive': 'Keine aktiven Rallyes verfügbar',
+    'rallye.modal.noActive':
+      'Keine aktiven Rallyes verfügbar. Bitte warte, bis eine Rallye gestartet wird.',
     'rallye.progress': 'Frage {{current}} von {{total}}',
     'rallye.allAnswered.title': 'Alle Fragen beantwortet.',
     'rallye.allAnswered.simple': 'Alle Fragen beantwortet',
@@ -225,7 +226,8 @@ export const translations = {
     'rallye.join': 'Join',
     'rallye.joinWithPassword': 'Join with password',
     'rallye.modal.activeTitle': 'Active Rallyes',
-    'rallye.modal.noActive': 'No active rallyes available',
+    'rallye.modal.noActive':
+      'No active rallyes available. Please wait until a rallye starts.',
     'rallye.progress': 'Question {{current}} of {{total}}',
     'rallye.allAnswered.title': 'All questions answered.',
     'rallye.allAnswered.simple': 'All questions answered',
