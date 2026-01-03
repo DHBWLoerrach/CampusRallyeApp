@@ -174,6 +174,7 @@ describe('UploadPhotoQuestion', () => {
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
+      expect(getByTestId('upload-photo-scroll')).toBeTruthy();
       expect(getByTestId('camera-view')).toBeTruthy();
       expect(getByText('Take a photo of the library')).toBeTruthy();
       expect(getByText('question.photo.take')).toBeTruthy();
