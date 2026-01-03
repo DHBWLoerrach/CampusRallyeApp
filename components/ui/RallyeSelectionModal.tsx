@@ -243,7 +243,12 @@ export default function RallyeSelectionModal({
           ) : null}
           {passwordRequired ? (
             <View style={globalStyles.rallyeModal.passwordHintContainer}>
-              <IconSymbol name="lock.fill" size={12} color={mutedTextColor} />
+              <IconSymbol
+                name="lock.fill"
+                size={11}
+                color={mutedTextColor}
+                style={globalStyles.rallyeModal.passwordHintIcon}
+              />
               <Text
                 style={[
                   globalStyles.rallyeModal.passwordHint,

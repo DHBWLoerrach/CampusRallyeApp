@@ -103,7 +103,10 @@ export const globalStyles = createGroupedStyles({
       flexDirection: 'row',
       alignItems: 'center',
       marginTop: 6,
-      gap: 4,
+      gap: 5,
+    },
+    passwordHintIcon: {
+      marginTop: 1,
     },
     selectButton: {
       paddingVertical: 10,
@@ -111,7 +114,7 @@ export const globalStyles = createGroupedStyles({
       alignSelf: 'stretch',
     },
     cancelButton: {
-      marginTop: 24,
+      marginTop: 8,
       alignSelf: 'center',
       paddingVertical: 12,
       paddingHorizontal: 24,
@@ -121,7 +124,7 @@ export const globalStyles = createGroupedStyles({
     cancelButtonSeparator: {
       height: 1,
       backgroundColor: Colors.veryLightGray,
-      marginTop: 16,
+      marginTop: 8,
       marginHorizontal: -20,
     },
     cancelButtonText: {
