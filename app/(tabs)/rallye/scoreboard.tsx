@@ -182,8 +182,8 @@ export default function Scoreboard() {
               ? 'rgba(226, 0, 26, 0.35)'
               : Colors.dhbwRed;
             const highlightBackground = isDarkMode
-              ? 'rgba(226, 0, 26, 0.06)'
-              : 'rgba(226, 0, 26, 0.04)';
+              ? 'rgba(226, 0, 26, 0.03)'
+              : 'rgba(226, 0, 26, 0.025)';
             return (
               <View
                 key={team.id}
@@ -223,6 +223,7 @@ export default function Scoreboard() {
                   style={[
                     globalStyles.scoreboardStyles.cell,
                     s.text,
+                    isOurTeam && globalStyles.scoreboardStyles.cellHighlighted,
                     isOurTeam && { fontWeight: '700' },
                   ]}
                 >
