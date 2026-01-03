@@ -465,7 +465,9 @@ export default function RallyeSelectionModal({
               )}
               <UIButton
                 onPress={onClose}
+                variant="ghost"
                 style={globalStyles.rallyeModal.cancelButton}
+                textStyle={globalStyles.rallyeModal.cancelButtonText}
               >
                 {t('common.cancel')}
               </UIButton>

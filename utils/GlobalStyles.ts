@@ -138,8 +138,11 @@ export const globalStyles = createGroupedStyles({
     cancelButton: {
       marginTop: 20,
       alignSelf: 'center',
-      paddingVertical: 8,
-      paddingHorizontal: 20,
+      paddingVertical: 4,
+      paddingHorizontal: 0,
+    },
+    cancelButtonText: {
+      textDecorationLine: 'none',
     },
     noDataText: {
       textAlign: 'center',
