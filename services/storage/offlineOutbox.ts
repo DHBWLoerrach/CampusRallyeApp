@@ -154,78 +154,93 @@ export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
   return action;
 }
 
-let syncInProgress = false;
+let syncPromise: Promise<void> | null = null;
 
-export async function processOutbox() {
-  if (syncInProgress) return;
-  if (!outbox$.online.get()) return;
+export function processOutbox() {
+  if (!outbox$.online.get()) return Promise.resolve();
+  if (syncPromise) return syncPromise;
 
-  syncInProgress = true;
-  outbox$.syncing.set(true);
-  outbox$.lastError.set(null);
+  syncPromise = (async () => {
+    outbox$.syncing.set(true);
+    outbox$.lastError.set(null);
 
-  try {
-    const queue = await readQueue();
-    if (queue.length === 0) return;
+    try {
+      const queue = await readQueue();
+      if (queue.length === 0) return;
 
-    const remaining: OfflineActionV1[] = [];
-    for (const action of queue) {
-      if (action.nextRetryAt && Date.now() < action.nextRetryAt) {
-        remaining.push(action);
-        continue;
-      }
-
-      try {
-        if (action.type !== 'SAVE_ANSWER') {
-          // Unknown action types are discarded to prevent a stuck queue.
+      const remaining: OfflineActionV1[] = [];
+      const processedIds = new Set<string>();
+      for (const action of queue) {
+        if (action.nextRetryAt && Date.now() < action.nextRetryAt) {
+          remaining.push(action);
           continue;
         }
 
-        const p = action.payload;
-        // Idempotency: treat "already exists" as success.
-        const { data: existing, error: existingError } = await supabase
-          .from('team_questions')
-          .select('id')
-          .eq('team_id', p.team_id)
-          .eq('question_id', p.question_id)
-          .maybeSingle();
-        if (existingError) throw existingError;
-        if (existing) {
-          continue;
+        try {
+          if (action.type !== 'SAVE_ANSWER') {
+            processedIds.add(action.id);
+            // Unknown action types are discarded to prevent a stuck queue.
+            continue;
+          }
+
+          const p = action.payload;
+          // Idempotency: treat "already exists" as success.
+          const { data: existing, error: existingError } = await supabase
+            .from('team_questions')
+            .select('id')
+            .eq('team_id', p.team_id)
+            .eq('question_id', p.question_id)
+            .maybeSingle();
+          if (existingError) throw existingError;
+          if (existing) {
+            processedIds.add(action.id);
+            continue;
+          }
+
+          const { error } = await supabase.from('team_questions').insert({
+            team_id: p.team_id,
+            question_id: p.question_id,
+            correct: p.correct,
+            points: p.points,
+            team_answer: p.team_answer,
+          });
+          if (error) throw error;
+          processedIds.add(action.id);
+        } catch (error: any) {
+          const attempts = (action.attempts || 0) + 1;
+          const nextRetryAt = Date.now() + backoffMs(attempts);
+          const lastError = String(error?.message ?? error ?? 'Unknown error');
+          remaining.push({
+            ...action,
+            attempts,
+            nextRetryAt,
+            lastError,
+          });
+          outbox$.lastError.set(lastError);
+          // Stop processing on first failure to avoid thrashing.
+          break;
         }
-
-        const { error } = await supabase.from('team_questions').insert({
-          team_id: p.team_id,
-          question_id: p.question_id,
-          correct: p.correct,
-          points: p.points,
-          team_answer: p.team_answer,
-        });
-        if (error) throw error;
-      } catch (error: any) {
-        const attempts = (action.attempts || 0) + 1;
-        const nextRetryAt = Date.now() + backoffMs(attempts);
-        const lastError = String(error?.message ?? error ?? 'Unknown error');
-        remaining.push({
-          ...action,
-          attempts,
-          nextRetryAt,
-          lastError,
-        });
-        outbox$.lastError.set(lastError);
-        // Stop processing on first failure to avoid thrashing.
-        break;
       }
-    }
 
-    await writeQueue(remaining);
-    if (remaining.length === 0) {
-      outbox$.lastSyncedAt.set(Date.now());
+      const latestQueue = await readQueue();
+      const mergedById = new Map(remaining.map((item) => [item.id, item]));
+      for (const item of latestQueue) {
+        if (processedIds.has(item.id) || mergedById.has(item.id)) continue;
+        mergedById.set(item.id, item);
+      }
+      const merged = Array.from(mergedById.values());
+
+      await writeQueue(merged);
+      if (merged.length === 0) {
+        outbox$.lastSyncedAt.set(Date.now());
+      }
+    } finally {
+      outbox$.syncing.set(false);
+      syncPromise = null;
     }
-  } finally {
-    outbox$.syncing.set(false);
-    syncInProgress = false;
-  }
+  })();
+
+  return syncPromise;
 }
 
 let started = false;

@@ -10,7 +10,7 @@
 
 | Schweregrad | Anzahl |
 |-------------|--------|
-| Kritisch    | 4      |
+| Kritisch    | 3      |
 | Hoch        | 6      |
 | Mittel      | 23+    |
 | Niedrig     | 12+    |
@@ -24,7 +24,7 @@
 - [x] **CRIT-01:** Inner-Components in `UploadPhotoQuestion.tsx` extrahieren
 - [ ] **CRIT-02:** Silent storage failures in `asyncStorage.ts` fixen
 - [ ] **CRIT-03:** `teamExists` Network-Error-Handling in `teamStorage.ts`
-- [ ] **CRIT-04:** Offline-Queue Race Condition in `offlineOutbox.ts` mit Mutex + Idempotency/Dedupe fixen
+- [x] **CRIT-04:** Offline-Queue Race Condition in `offlineOutbox.ts` mit Mutex + Idempotency/Dedupe fixen
 - [ ] **CRIT-05:** Voting-Error-Handling in `voting.tsx` implementieren
 
 ### Phase 2: Hoch (UX-Blocker)
@@ -165,17 +165,19 @@ if (!exists) {
 
 ### CRIT-04: Race Condition in Offline-Queue
 
-**Datei:** `services/storage/offlineOutbox.ts:159-163`
+**Datei:** `services/storage/offlineOutbox.ts:159-230`
 
 ```typescript
-export async function processOutbox() {
-  if (syncInProgress) return;  // Check passiert zuerst
-  if (!outbox$.online.get()) return;
-  
-  syncInProgress = true;  // Flag wird NACH dem Check gesetzt
+export function processOutbox() {
+  if (!outbox$.online.get()) return Promise.resolve();
+  if (syncPromise) return syncPromise;
+
+  syncPromise = (async () => {
+    // ...
+  })();
 ```
 
-**Problem:** Zwischen Check und Flag-Setzen können mehrere Aufrufe passieren (z.B. wenn App in Vordergrund kommt + Netzwerk wechselt gleichzeitig).
+**Problem:** Parallel aufgerufene Syncs konnten sich überlappen; zudem konnte ein laufender Sync neu enqueued Items überschreiben.
 
 **Auswirkung:**
 - Doppelte Answer-Submissions
@@ -183,6 +185,8 @@ export async function processOutbox() {
 - Inkonsistente Daten
 
 **Lösung:** Mutex/Lock implementieren oder atomare Operation nutzen; zusätzlich Idempotency-Key/Dedupe, um doppelte Submissions trotz Mehrfach-Trigger zu verhindern.
+
+**Status:** Fix umgesetzt (shared syncPromise + Merge der aktuellen Queue, um neue Items nicht zu verlieren).
 
 ---
 
@@ -553,6 +557,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 
 | Datum | Änderung |
 |-------|----------|
+| 03.01.2026 | CRIT-04 Fix umgesetzt (Sync-Lock + Queue-Merge in offlineOutbox) |
 | 03.01.2026 | CRIT-01 Fix umgesetzt (UploadPhotoQuestion Komponenten ausgelagert) |
 | 03.01.2026 | Initiale Analyse erstellt |
 | 03.01.2026 | Revision durch Codex: CRIT-06→MED-22, HIGH-07→MED-23, CRIT-04 erweitert |
@@ -567,6 +572,7 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 - **Ergänzt:** CRIT-04 Lösung um Idempotency/Dedupe erweitert, um Duplicate-Submissions trotz Multi-Trigger zu verhindern.
 - **Aktualisiert:** Zusammenfassung entsprechend der Repriorisierung angepasst.
 - **Erledigt:** CRIT-01 durch Auslagern der Inner-Components in `UploadPhotoQuestion.tsx`.
+- **Erledigt:** CRIT-04 durch Sync-Lock und Queue-Merge in `offlineOutbox.ts`.
 
 ## Review (Claude, 03.01.2026)
 
