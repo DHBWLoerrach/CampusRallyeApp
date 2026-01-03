@@ -271,7 +271,9 @@ export default function RallyeSelectionModal({
               : t('a11y.selectRallyeHint')
           }
         >
-          {passwordRequired ? t('rallye.password.enter') : t('common.select')}
+          {passwordRequired
+            ? t('rallye.joinWithPassword')
+            : t('rallye.join')}
         </UIButton>
       </View>
     );
