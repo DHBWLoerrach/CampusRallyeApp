@@ -59,7 +59,7 @@
 - [ ] **MED-19:** Alt-Text für Bild-Preview in `UploadPhotoQuestion.tsx`
 - [ ] **MED-20:** QR-Scan Debounce verbessern in `QRCodeQuestion.tsx`
 - [ ] **MED-21:** Empty-State für Scoreboard in `scoreboard.tsx`
-- [ ] **MED-22:** Hint-Nutzung lokal persistieren (Server optional)
+- [ ] **MED-22:** `usedHints` und `points` in AsyncStorage persistieren (Bug: aktuell nur In-Memory)
 - [ ] **MED-23:** IconSymbol Fallback/Null-Check in `IconSymbol.tsx`
 
 ### Phase 4: Niedrig (Nice-to-have)
@@ -385,21 +385,27 @@ if (!allQuestionsAnswered && questions.length === 0) {
 
 ---
 
-### MED-22: Hint-Nutzung nur im lokalen Store (Server optional)
+### MED-22: Hint-Nutzung wird nicht persistiert (Bug)
 
-**Datei:** `components/ui/Hint.tsx:42-46`
+**Datei:** `components/ui/Hint.tsx:42-46`, `services/storage/Store.ts:50`
 
 ```typescript
+// Store.ts:50 - Nur In-Memory, keine Persistenz!
+usedHints: {} as Record<number, boolean>,
+
+// Hint.tsx:42-46
 store$.usedHints[questionId].set(true);
 store$.points.set(Math.max(0, currentPoints - HINT_COST));
-// Local state only
 ```
 
-**Problem:** Hint-Nutzung wird nur im lokalen Store gesetzt; Persistenz über App-Neustart hängt von lokaler Speicherung ab.
+**Problem:** `usedHints` ist ein reines In-Memory-Objekt im Store. Es wird **nirgends** in AsyncStorage persistiert. Bei `store$.reset()` wird es zurückgesetzt.
 
-**Auswirkung:** Bei Daten-Reset/Reinstall oder fehlender Persistenz können Hints/Points zurückgesetzt werden; kein Cross-Device-Requirement.
+**Auswirkung:** 
+- App schließen → Hints zurückgesetzt, aber Punkte wurden bereits abgezogen
+- App-Crash → User kann Hints "kostenlos" wiederverwenden
+- Inkonsistenter Zustand zwischen `usedHints` und `points`
 
-**Lösung:** Lokale Persistenz explizit sicherstellen (z.B. in `teamStorage`/AsyncStorage). Server-Sync optional für spätere Multi-Device-Use-Cases.
+**Lösung:** `usedHints` zusammen mit `points` in AsyncStorage persistieren (z.B. unter `HINT_STATE_{rallyeId}_{teamId}`). Server-Sync ist für Single-Device-Szenario nicht erforderlich.
 
 ---
 
@@ -546,6 +552,8 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 | Datum | Änderung |
 |-------|----------|
 | 03.01.2026 | Initiale Analyse erstellt |
+| 03.01.2026 | Revision durch Codex: CRIT-06→MED-22, HIGH-07→MED-23, CRIT-04 erweitert |
+| 03.01.2026 | Review durch Claude: MED-22 Beschreibung präzisiert (Bug: keine Persistenz) |
 
 ---
 
@@ -555,3 +563,10 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 - **Reklassifiziert:** HIGH-07 → MED-23, da Icon-Namen nicht aus dem Backend kommen; bleibt als defensive Absicherung.
 - **Ergänzt:** CRIT-04 Lösung um Idempotency/Dedupe erweitert, um Duplicate-Submissions trotz Multi-Trigger zu verhindern.
 - **Aktualisiert:** Zusammenfassung entsprechend der Repriorisierung angepasst.
+
+## Review (Claude, 03.01.2026)
+
+- **MED-22 korrigiert:** Codex' Repriorisierung ist vertretbar, aber die Beschreibung war ungenau. `usedHints` wird aktuell **gar nicht** persistiert - das ist ein Bug, nicht "optional". Task und Beschreibung präzisiert.
+- **MED-23 bestätigt:** TypeScript's `keyof typeof MAPPING` bietet Compile-Zeit-Schutz. Null-Check ist defensive Absicherung, kein kritischer Bug.
+- **CRIT-04 Idempotency bestätigt:** Mutex allein schützt nicht vor App-Crash oder Netzwerk-Timeout-Szenarien. Idempotency-Key ist wichtige Ergänzung.
+- **Zahlen bestätigt:** Codex hat die Zusammenfassung korrekt auf die tatsächlichen Task-Anzahlen aktualisiert.
