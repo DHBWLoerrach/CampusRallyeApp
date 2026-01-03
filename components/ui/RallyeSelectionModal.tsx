@@ -242,14 +242,6 @@ export default function RallyeSelectionModal({
           >
             {item.name}
           </Text>
-          {passwordRequired ? (
-            <View style={globalStyles.rallyeModal.passwordBadge}>
-              <IconSymbol name="lock" size={14} color={Colors.dhbwRed} />
-              <Text style={globalStyles.rallyeModal.passwordBadgeText}>
-                {t('rallye.password.required.badge')}
-              </Text>
-            </View>
-          ) : null}
           {item.studiengang ? (
             <Text
               style={[
