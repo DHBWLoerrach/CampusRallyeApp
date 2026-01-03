@@ -34,6 +34,7 @@ const MAPPING = {
     name: 'map-marker-radius',
     source: 'community',
   },
+  'chevron.right': { name: 'chevron-right', source: 'material' },
   clock: { name: 'schedule', source: 'material' },
 } as Record<string, IconConfig>;
 

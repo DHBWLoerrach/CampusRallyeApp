@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
+  Pressable,
   Text,
   View,
   ListRenderItem,
@@ -55,6 +56,7 @@ export default function RallyeSelectionModal({
 }: Props) {
   const { t } = useLanguage();
   const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
   const [password, setPassword] = useState('');
@@ -152,20 +154,13 @@ export default function RallyeSelectionModal({
     } as const;
   }, [isFlipped]);
 
-  const modalBackgroundColor = isDarkMode
-    ? Colors.darkMode.card
-    : Colors.lightMode.card;
-
-  const passwordCardBackgroundColor = isDarkMode
-    ? Colors.darkMode.card
-    : Colors.lightMode.card;
-
-  const headerTextColor = isDarkMode
-    ? Colors.darkMode.text
-    : Colors.lightMode.text;
-  const mutedTextColor = isDarkMode
-    ? Colors.darkMode.textMuted
-    : Colors.mediumGray;
+  const modalBackgroundColor = palette.card;
+  const passwordCardBackgroundColor = palette.card;
+  const headerTextColor = palette.text;
+  const mutedTextColor = palette.textMuted ?? Colors.mediumGray;
+  const cardBackgroundColor = palette.surface1;
+  const cardBorderColor = palette.borderSubtle;
+  const cancelTextColor = palette.textMuted ?? Colors.mediumGray;
 
   const selectedRallyeName = passwordRallye?.name ?? '';
   const selectedRallyeStudiengang = passwordRallye?.studiengang ?? '';
@@ -206,14 +201,30 @@ export default function RallyeSelectionModal({
   const renderItem: ListRenderItem<RallyeRow> = ({ item }) => {
     const passwordRequired = isPasswordRequired(item);
     return (
-      <View
-        style={[
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          passwordRequired
+            ? t('a11y.selectRallyeWithPassword', { name: item.name })
+            : t('a11y.selectRallye', { name: item.name })
+        }
+        accessibilityHint={
+          passwordRequired
+            ? t('a11y.selectRallyePasswordHint')
+            : t('a11y.selectRallyeHint')
+        }
+        accessibilityState={{ disabled: joining }}
+        disabled={joining}
+        onPress={() => void handleSelect(item)}
+        style={({ pressed }) => [
           globalStyles.rallyeModal.rallyeCard,
           {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.dhbwGray
-              : (globalStyles.rallyeModal.rallyeCard as any).backgroundColor,
+            backgroundColor: cardBackgroundColor,
+            borderColor: cardBorderColor,
           },
+          pressed && !joining
+            ? { opacity: 0.9, transform: [{ scale: 0.99 }] }
+            : null,
         ]}
       >
         <View style={globalStyles.rallyeModal.rallyeInfo}>
@@ -244,7 +255,7 @@ export default function RallyeSelectionModal({
           {passwordRequired ? (
             <View style={globalStyles.rallyeModal.passwordHintContainer}>
               <IconSymbol
-                name="lock.fill"
+                name="lock"
                 size={11}
                 color={mutedTextColor}
                 style={globalStyles.rallyeModal.passwordHintIcon}
@@ -260,26 +271,14 @@ export default function RallyeSelectionModal({
             </View>
           ) : null}
         </View>
-        <UIButton
-          disabled={joining}
-          onPress={() => void handleSelect(item)}
-          style={globalStyles.rallyeModal.selectButton}
-          accessibilityLabel={
-            passwordRequired
-              ? t('a11y.selectRallyeWithPassword', { name: item.name })
-              : t('a11y.selectRallye', { name: item.name })
-          }
-          accessibilityHint={
-            passwordRequired
-              ? t('a11y.selectRallyePasswordHint')
-              : t('a11y.selectRallyeHint')
-          }
-        >
-          {passwordRequired
-            ? t('rallye.joinWithPassword')
-            : t('rallye.join')}
-        </UIButton>
-      </View>
+        <View style={globalStyles.rallyeModal.rallyeAction}>
+          <IconSymbol
+            name="chevron.right"
+            size={18}
+            color={mutedTextColor}
+          />
+        </View>
+      </Pressable>
     );
   };
 
@@ -451,6 +450,7 @@ export default function RallyeSelectionModal({
                 variant="ghost"
                 style={globalStyles.rallyeModal.cancelButton}
                 textStyle={globalStyles.rallyeModal.cancelButtonText}
+                color={cancelTextColor}
               >
                 {t('common.cancel')}
               </UIButton>

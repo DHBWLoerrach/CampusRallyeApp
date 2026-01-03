@@ -66,20 +66,24 @@ export const globalStyles = createGroupedStyles({
       fontSize: 22,
       fontWeight: 'bold',
       marginBottom: 15,
-      textAlign: 'center',
+      textAlign: 'left',
+      alignSelf: 'stretch',
     },
     rallyeCard: {
       backgroundColor: Colors.veryLightGray,
       borderRadius: Constants.cornerRadius,
-      padding: 15,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
       marginVertical: 8,
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      justifyContent: 'flex-start',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       gap: 12,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: Colors.lightMode.borderSubtle,
     },
     rallyeInfo: {
-      width: '100%',
+      flex: 1,
     },
     rallyeName: {
       fontSize: 18,
@@ -107,6 +111,11 @@ export const globalStyles = createGroupedStyles({
     },
     passwordHintIcon: {
       marginTop: 1,
+    },
+    rallyeAction: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 24,
     },
     selectButton: {
       paddingVertical: 10,
