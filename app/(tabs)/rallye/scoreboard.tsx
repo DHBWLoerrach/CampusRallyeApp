@@ -175,7 +175,9 @@ export default function Scoreboard() {
               time: formatDuration(team.time_spent),
               points: team.total_points ?? '-',
             });
-            const isOurTeam = team.id === String(ourTeam?.id);
+            const isOurTeam =
+              ourTeam?.id !== undefined &&
+              String(team.id) === String(ourTeam.id);
             return (
               <View
                 key={team.id}
@@ -186,65 +188,40 @@ export default function Scoreboard() {
                   s.listRow,
                   isOurTeam && {
                     backgroundColor: palette.surface2,
-                    borderWidth: 1,
-                    borderColor: palette.dhbwRed,
-                    borderBottomColor: palette.dhbwRed,
+                    borderLeftWidth: 4,
+                    borderLeftColor: palette.dhbwRed,
+                    paddingLeft: 11,
                   },
                 ]}
               >
                 <ThemedText
-                  style={[globalStyles.scoreboardStyles.cell, s.text]}
+                  style={[
+                    globalStyles.scoreboardStyles.cell,
+                    s.text,
+                    isOurTeam && { fontWeight: '700' },
+                  ]}
                 >
                   {team.rank}
                 </ThemedText>
-                <View
+                <ThemedText
                   style={[
                     globalStyles.scoreboardStyles.cellWide,
+                    s.text,
+                    isOurTeam && globalStyles.scoreboardStyles.cellHighlighted,
                     {
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      color: isOurTeam ? Colors.dhbwRed : Colors.dhbwGray,
                     },
                   ]}
                 >
-                  <ThemedText
-                    style={[
-                      s.text,
-                      isOurTeam && globalStyles.scoreboardStyles.cellHighlighted,
-                      {
-                        color: isOurTeam ? Colors.dhbwRed : Colors.dhbwGray,
-                      },
-                    ]}
-                  >
-                    {team.group_name}
-                  </ThemedText>
-                  {isOurTeam ? (
-                    <View
-                      style={{
-                        marginLeft: 8,
-                        paddingHorizontal: 8,
-                        paddingVertical: 2,
-                        borderRadius: 999,
-                        borderWidth: 1,
-                        borderColor: palette.dhbwRed,
-                        backgroundColor: palette.dhbwRedLight,
-                      }}
-                    >
-                      <ThemedText
-                        style={{
-                          color: palette.dhbwRed,
-                          fontSize: 12,
-                          fontWeight: '600',
-                        }}
-                      >
-                        {t('scoreboard.badge')}
-                      </ThemedText>
-                    </View>
-                  ) : null}
-                </View>
+                  {team.group_name}
+                </ThemedText>
 
                 <ThemedText
-                  style={[globalStyles.scoreboardStyles.cell, s.text]}
+                  style={[
+                    globalStyles.scoreboardStyles.cell,
+                    s.text,
+                    isOurTeam && { fontWeight: '700' },
+                  ]}
                 >
                   {team.total_points}
                   {'\n'}
