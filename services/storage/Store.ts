@@ -1,5 +1,5 @@
 import { observable } from '@legendapp/state';
-import { clearCurrentRallye, getCurrentRallye } from './rallyeStorage';
+import { clearCurrentRallye, getCurrentRallye, RallyeRow } from './rallyeStorage';
 import {
   getCurrentTeam,
   clearCurrentTeam,
@@ -7,6 +7,7 @@ import {
   setTimePlayed,
 } from './teamStorage';
 import { startOutbox } from './offlineOutbox';
+import { AnswerRow, Question, Team } from '@/types/rallye';
 
 export type SessionState =
   | 'not_joined'
@@ -16,7 +17,7 @@ export type SessionState =
 
 type SessionInputs = {
   enabled: boolean;
-  rallye: any | null;
+  rallye: RallyeRow | null;
   allQuestionsAnswered: boolean;
   timeExpired: boolean;
 };
@@ -38,13 +39,13 @@ function deriveSessionState({
 startOutbox();
 
 export const store$ = observable({
-  rallye: null as any,
+  rallye: null as RallyeRow | null,
   enabled: false,
   // When a previously joined team exists on this device, we show an explicit resume prompt.
   resumeAvailable: false,
   // Marks completion of async store initialization (used by the root layout / splash logic).
   hydrated: false,
-  questions: [] as any[],
+  questions: [] as Question[],
   questionIndex: 0,
   // Tracks which question IDs have had their hint used (prevents double deduction)
   usedHints: {} as Record<number, boolean>,
@@ -54,8 +55,8 @@ export const store$ = observable({
   answeredCount: 0,
   points: 0,
   allQuestionsAnswered: false,
-  answers: [] as any[],
-  team: null as any,
+  answers: [] as AnswerRow[],
+  team: null as Team | null,
   votingAllowed: true,
   timeExpired: false,
   teamDeleted: false,
@@ -71,12 +72,12 @@ export const store$ = observable({
     }),
 
   currentQuestion: () =>
-    (store$.questions.get() as any[])[store$.questionIndex.get()],
+    store$.questions.get()[store$.questionIndex.get()],
 
   currentAnswer: () => {
     const current = store$.currentQuestion();
     if (!current) return null;
-    const answers = store$.answers.get() as any[];
+    const answers = store$.answers.get();
     return answers.filter(
       (a) => a.question_id === current.id && a.correct === true
     )[0];
@@ -85,9 +86,9 @@ export const store$ = observable({
   currentMultipleChoiceAnswers: () => {
     const current = store$.currentQuestion();
     if (!current) return null;
-    const answers = store$.answers.get() as any[];
+    const answers = store$.answers.get();
     const filtered = answers.filter((a) => a.question_id === current.id);
-    const shuffleArray = (array: any[]) => {
+    const shuffleArray = <T,>(array: T[]): T[] => {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
@@ -98,16 +99,16 @@ export const store$ = observable({
   },
 
   gotoNextQuestion: async () => {
-    if ((store$.questions.get() as any[]).length === 0) return;
+    if (store$.questions.get().length === 0) return;
     let nextIndex = store$.questionIndex.get() + 1;
-    if (nextIndex === (store$.questions.get() as any[]).length) {
+    if (nextIndex === store$.questions.get().length) {
       store$.allQuestionsAnswered.set(true);
       store$.questionIndex.set(0);
 
       // Rallye beendet: Zeit speichern
       try {
-        const rallye = store$.rallye.get() as any;
-        const team = store$.team.get() as any;
+        const rallye = store$.rallye.get();
+        const team = store$.team.get();
         if (rallye && team && !rallye.tour_mode) {
           await setTimePlayed(rallye.id, team.id);
           console.log('Rallye finished, time_played set for team:', team.id);
@@ -120,12 +121,12 @@ export const store$ = observable({
     }
     // In team mode, advance the answered counter so the header reflects progress
     try {
-      const rallye = store$.rallye.get() as any;
+      const rallye = store$.rallye.get();
       if (rallye && !rallye.tour_mode) {
-        const current = (store$.answeredCount.get() as number) || 0;
-        const total = ((store$ as any).totalQuestions?.get?.() ?? 0) as number;
+        const current = store$.answeredCount.get() || 0;
+        const total = store$.totalQuestions.get() ?? 0;
         const next = total > 0 ? Math.min(current + 1, total) : current + 1;
-        (store$ as any).answeredCount.set(next);
+        store$.answeredCount.set(next);
       }
     } catch {}
     // Note: We intentionally do not persist questionIndex. Question ordering is randomized
@@ -147,7 +148,7 @@ export const store$ = observable({
   },
 
   leaveRallye: async () => {
-    const rallye = store$.rallye.get() as any;
+    const rallye = store$.rallye.get();
     try {
       if (rallye?.id) {
         // Remove local device → team assignment for this rallye.
@@ -168,7 +169,7 @@ export const store$ = observable({
 
   initialize: async () => {
     try {
-      let rallye: any = null;
+      let rallye: RallyeRow | null = null;
       try {
         rallye = await getCurrentRallye();
       } catch (e) {
@@ -178,17 +179,17 @@ export const store$ = observable({
       store$.resumeAvailable.set(false);
 
       if (rallye) {
-        const rallyeId = (rallye as any).id as number;
-        let loadTeam: any = null;
+        const rallyeId = rallye.id;
+        let loadTeam: Team | null = null;
         try {
-          loadTeam = await getCurrentTeam(rallyeId);
+          loadTeam = await getCurrentTeam(rallyeId) as Team | null;
         } catch (e) {
           console.error('Error loading stored team:', e);
         }
 
         if (loadTeam) {
           try {
-            const exists = await teamExists(rallyeId, (loadTeam as any).id);
+            const exists = await teamExists(rallyeId, loadTeam.id);
             if (exists === 'exists') {
               store$.team.set(loadTeam);
               // Explicit resume prompt instead of auto-navigation
@@ -197,7 +198,7 @@ export const store$ = observable({
               }
             } else if (exists === 'missing') {
               await clearCurrentTeam(rallyeId);
-              store$.team.set(null as any);
+              store$.team.set(null);
               store$.teamDeleted.set(true);
             } else {
               store$.team.set(loadTeam);

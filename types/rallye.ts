@@ -24,3 +24,11 @@ export interface AnswerRow {
 export interface QuestionProps {
   question: Question;
 }
+
+export interface Team {
+  id: number;
+  name: string;
+  rallye_id?: number;
+  points?: number;
+  time_played?: string | null;
+}

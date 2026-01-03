@@ -84,7 +84,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       store$.totalQuestions.set(questionIds.length);
       if (questionIds.length === 0) {
         store$.questions.set([]);
-        store$.currentQuestion.set(null);
+        store$.questionIndex.set(0);
         store$.answeredCount.set(0);
         return;
       }

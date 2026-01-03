@@ -18,6 +18,7 @@ const TeamSetup = observer(function TeamSetup() {
   const { t } = useLanguage();
   const rallye = useSelector(() => store$.rallye.get());
   const createTeam = async () => {
+    if (!rallye) return;
     setLoading(true);
     const teamName = generateTeamName();
     try {
@@ -32,7 +33,7 @@ const TeamSetup = observer(function TeamSetup() {
         store$.team.set(data);
         await setCurrentTeam(rallye.id, data);
         // Kurze Bestätigung via Bottom Sheet im Rallye-Screen
-        (store$ as any).showTeamNameSheet.set(true);
+        store$.showTeamNameSheet.set(true);
       }
     } catch (e) {
       console.error('Error creating team:', e);
