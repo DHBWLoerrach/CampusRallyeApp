@@ -131,6 +131,7 @@ describe('Welcome', () => {
       expect(getByText('welcome.explore.title')).toBeTruthy();
     });
 
+    expect(getByText('welcome.noRallyes.title')).toBeTruthy();
     expect(queryByText('welcome.empty')).toBeNull();
     expect(queryByText('welcome.join.title')).toBeNull();
   });

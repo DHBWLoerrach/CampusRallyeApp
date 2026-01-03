@@ -42,6 +42,7 @@ export default function Welcome() {
 
   const [showRallyeModal, setShowRallyeModal] = useState(false);
   const [activeRallyes, setActiveRallyes] = useState<RallyeRow[]>([]);
+  const [hasTourMode, setHasTourMode] = useState(false);
   const hasActiveRallyes = activeRallyes.length > 0;
 
   const startTourMode = async () => {
@@ -66,12 +67,14 @@ export default function Welcome() {
         netState.isInternetReachable === false;
       if (isOffline) {
         setActiveRallyes([]);
+        setHasTourMode(false);
         setFetchState('offline');
         return;
       }
     } catch (e) {
       console.error('Error checking network status:', e);
       setActiveRallyes([]);
+      setHasTourMode(false);
       setFetchState('offline');
       return;
     }
@@ -79,6 +82,7 @@ export default function Welcome() {
     const { data, error } = await getActiveRallyes();
     if (error) {
       setActiveRallyes([]);
+      setHasTourMode(false);
       setFetchState('error');
       return;
     }
@@ -86,10 +90,13 @@ export default function Welcome() {
     setActiveRallyes(data);
     if (data.length === 0) {
       const tourModeRallye = await getTourModeRallye();
-      setFetchState(tourModeRallye ? 'ready' : 'empty');
+      const tourModeAvailable = !!tourModeRallye;
+      setHasTourMode(tourModeAvailable);
+      setFetchState(tourModeAvailable ? 'ready' : 'empty');
       return;
     }
 
+    setHasTourMode(false);
     setFetchState('ready');
   };
 
@@ -187,6 +194,13 @@ export default function Welcome() {
         },
       ]}
     >
+      {!hasActiveRallyes && hasTourMode ? (
+        <Card
+          title={t('welcome.noRallyes.title')}
+          description={t('welcome.noRallyes.description')}
+          icon="info.circle"
+        />
+      ) : null}
       {resumeAvailable && resumeRallye && resumeTeam ? (
         <Card
           title={t('welcome.resume.title')}

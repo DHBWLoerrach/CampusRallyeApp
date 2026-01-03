@@ -32,6 +32,9 @@ export const translations = {
     'welcome.appTitle': 'DHBW Lörrach Campus Rallye',
     'welcome.offline': 'Du bist offline…',
     'welcome.empty': 'Keine Rallyes verfügbar.',
+    'welcome.noRallyes.title': 'Aktuell keine Rallyes',
+    'welcome.noRallyes.description':
+      'Du kannst den Campus im Tour-Modus erkunden.',
     'welcome.error': 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.',
     'welcome.resume.title': 'Rallye fortsetzen',
     'welcome.resume.details': 'Rallye: {{rallye}}\nTeam: {{team}}',
@@ -173,6 +176,9 @@ export const translations = {
     'welcome.appTitle': 'DHBW Lörrach Campus Rallye',
     'welcome.offline': 'You are offline…',
     'welcome.empty': 'No rallyes available.',
+    'welcome.noRallyes.title': 'No rallyes right now',
+    'welcome.noRallyes.description':
+      'You can explore the campus in tour mode.',
     'welcome.error': 'Something went wrong. Please try again.',
     'welcome.resume.title': 'Resume rallye',
     'welcome.resume.details': 'Rallye: {{rallye}}\nTeam: {{team}}',
