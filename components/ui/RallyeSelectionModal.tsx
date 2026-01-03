@@ -242,14 +242,17 @@ export default function RallyeSelectionModal({
             </Text>
           ) : null}
           {passwordRequired ? (
-            <Text
-              style={[
-                globalStyles.rallyeModal.passwordHint,
-                { color: mutedTextColor },
-              ]}
-            >
-              {t('rallye.password.required.hint')}
-            </Text>
+            <View style={globalStyles.rallyeModal.passwordHintContainer}>
+              <IconSymbol name="lock.fill" size={12} color={mutedTextColor} />
+              <Text
+                style={[
+                  globalStyles.rallyeModal.passwordHint,
+                  { color: mutedTextColor },
+                ]}
+              >
+                {t('rallye.password.required.hint')}
+              </Text>
+            </View>
           ) : null}
         </View>
         <UIButton

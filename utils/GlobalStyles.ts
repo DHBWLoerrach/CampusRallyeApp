@@ -99,6 +99,12 @@ export const globalStyles = createGroupedStyles({
       fontSize: 12,
       marginTop: 4,
     },
+    passwordHintContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 6,
+      gap: 4,
+    },
     selectButton: {
       paddingVertical: 10,
       paddingHorizontal: 16,
