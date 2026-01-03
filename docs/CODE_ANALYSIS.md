@@ -10,10 +10,10 @@
 
 | Schweregrad | Anzahl |
 |-------------|--------|
-| Kritisch    | 6      |
-| Hoch        | 7      |
-| Mittel      | 25+    |
-| Niedrig     | 30+    |
+| Kritisch    | 5      |
+| Hoch        | 6      |
+| Mittel      | 23+    |
+| Niedrig     | 12+    |
 
 ---
 
@@ -24,9 +24,8 @@
 - [ ] **CRIT-01:** Inner-Components in `UploadPhotoQuestion.tsx` extrahieren
 - [ ] **CRIT-02:** Silent storage failures in `asyncStorage.ts` fixen
 - [ ] **CRIT-03:** `teamExists` Network-Error-Handling in `teamStorage.ts`
-- [ ] **CRIT-04:** Offline-Queue Race Condition in `offlineOutbox.ts` mit Mutex fixen
+- [ ] **CRIT-04:** Offline-Queue Race Condition in `offlineOutbox.ts` mit Mutex + Idempotency/Dedupe fixen
 - [ ] **CRIT-05:** Voting-Error-Handling in `voting.tsx` implementieren
-- [ ] **CRIT-06:** Hints server-seitig speichern (`Hint.tsx`)
 
 ### Phase 2: Hoch (UX-Blocker)
 
@@ -36,7 +35,6 @@
 - [ ] **HIGH-04:** Skip-Button Answer speichern in `question-renderer.tsx`
 - [ ] **HIGH-05:** Initial-Loading-State für Questions in `rallye/index.tsx`
 - [ ] **HIGH-06:** Offline-Queue Maximum Retries in `offlineOutbox.ts`
-- [ ] **HIGH-07:** IconSymbol Null-Check in `IconSymbol.tsx`
 
 ### Phase 3: Mittel (Polish)
 
@@ -61,6 +59,8 @@
 - [ ] **MED-19:** Alt-Text für Bild-Preview in `UploadPhotoQuestion.tsx`
 - [ ] **MED-20:** QR-Scan Debounce verbessern in `QRCodeQuestion.tsx`
 - [ ] **MED-21:** Empty-State für Scoreboard in `scoreboard.tsx`
+- [ ] **MED-22:** Hint-Nutzung lokal persistieren (Server optional)
+- [ ] **MED-23:** IconSymbol Fallback/Null-Check in `IconSymbol.tsx`
 
 ### Phase 4: Niedrig (Nice-to-have)
 
@@ -180,7 +180,7 @@ export async function processOutbox() {
 - Verlorene Queue-Items
 - Inkonsistente Daten
 
-**Lösung:** Mutex/Lock implementieren oder atomare Operation nutzen.
+**Lösung:** Mutex/Lock implementieren oder atomare Operation nutzen; zusätzlich Idempotency-Key/Dedupe, um doppelte Submissions trotz Mehrfach-Trigger zu verhindern.
 
 ---
 
@@ -198,22 +198,6 @@ export async function processOutbox() {
 **Auswirkung:** User denkt Vote wurde gezählt, wurde aber nicht. Keine Möglichkeit zum Retry.
 
 **Lösung:** Alert anzeigen und Frage nicht weitergehen lassen.
-
----
-
-### CRIT-06: Hint-Kosten nur lokal gespeichert
-
-**Datei:** `components/ui/Hint.tsx:42-46`
-
-```typescript
-store$.usedHints[questionId].set(true);
-store$.points.set(Math.max(0, currentPoints - HINT_COST));
-// Nicht auf Server gespeichert!
-```
-
-**Auswirkung:** Bei App-Neustart oder Gerätewechsel sind Hint-Punkte zurück. User könnte alle Hints "kostenlos" nutzen.
-
-**Lösung:** Hint-Nutzung in `team_questions` oder dedizierter Tabelle speichern.
 
 ---
 
@@ -326,20 +310,6 @@ if (!allQuestionsAnswered && questions.length === 0) {
 
 ---
 
-### HIGH-07: Crash bei unbekanntem Icon
-
-**Datei:** `components/ui/IconSymbol.tsx:59`
-
-```typescript
-const iconConfig = ICON_MAPPINGS[name];
-// Kein Null-Check!
-return iconConfig.source;  // Crash wenn name nicht gemappt
-```
-
-**Lösung:** Null-Check hinzufügen, Fallback-Icon verwenden.
-
----
-
 ## Mittlere Priorität (Details)
 
 ### Fehlende Loading-States
@@ -412,6 +382,41 @@ return iconConfig.source;  // Crash wenn name nicht gemappt
 **Auswirkung:** Rapid-Fire Alerts wenn User vor falschem QR Code steht.
 
 **Lösung:** Längeres Debounce oder gescannte QR Codes tracken.
+
+---
+
+### MED-22: Hint-Nutzung nur im lokalen Store (Server optional)
+
+**Datei:** `components/ui/Hint.tsx:42-46`
+
+```typescript
+store$.usedHints[questionId].set(true);
+store$.points.set(Math.max(0, currentPoints - HINT_COST));
+// Local state only
+```
+
+**Problem:** Hint-Nutzung wird nur im lokalen Store gesetzt; Persistenz über App-Neustart hängt von lokaler Speicherung ab.
+
+**Auswirkung:** Bei Daten-Reset/Reinstall oder fehlender Persistenz können Hints/Points zurückgesetzt werden; kein Cross-Device-Requirement.
+
+**Lösung:** Lokale Persistenz explizit sicherstellen (z.B. in `teamStorage`/AsyncStorage). Server-Sync optional für spätere Multi-Device-Use-Cases.
+
+---
+
+### MED-23: IconSymbol Fallback/Null-Check
+
+**Datei:** `components/ui/IconSymbol.tsx:59`
+
+```typescript
+const iconConfig = ICON_MAPPINGS[name];
+return iconConfig?.source ?? DEFAULT_ICON;
+```
+
+**Problem:** Ohne Fallback crasht die UI bei falschem Icon-Namen (z.B. nach Refactor).
+
+**Auswirkung:** Crash, aber geringere Wahrscheinlichkeit, da Icon-Namen nicht aus dem Backend kommen.
+
+**Lösung:** Null-Check + Fallback-Icon; optional Warnung im Dev-Mode.
 
 ---
 
@@ -541,3 +546,12 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 | Datum | Änderung |
 |-------|----------|
 | 03.01.2026 | Initiale Analyse erstellt |
+
+---
+
+## Revision (Codex, 03.01.2026)
+
+- **Reklassifiziert:** CRIT-06 → MED-22, da Hint-Nutzung nicht geräteübergreifend sein muss; Fokus auf lokale Persistenz.
+- **Reklassifiziert:** HIGH-07 → MED-23, da Icon-Namen nicht aus dem Backend kommen; bleibt als defensive Absicherung.
+- **Ergänzt:** CRIT-04 Lösung um Idempotency/Dedupe erweitert, um Duplicate-Submissions trotz Multi-Trigger zu verhindern.
+- **Aktualisiert:** Zusammenfassung entsprechend der Repriorisierung angepasst.
