@@ -210,7 +210,13 @@ export default function Scoreboard() {
                     isOurTeam && { fontWeight: '700' },
                   ]}
                 >
-                  {team.rank}
+                  {team.rank === 1
+                    ? '🥇'
+                    : team.rank === 2
+                      ? '🥈'
+                      : team.rank === 3
+                        ? '🥉'
+                        : team.rank}
                 </ThemedText>
                 <ThemedText
                   style={[
