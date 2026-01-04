@@ -144,31 +144,6 @@ export default function Scoreboard() {
             </ThemedText>
           ) : null}
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 15,
-            borderBottomWidth: 1,
-            borderBottomColor: palette.cellBorder,
-            backgroundColor: palette.surface2,
-          }}
-        >
-          <ThemedText
-            style={[globalStyles.scoreboardStyles.headerCell, s.text]}
-          >
-            {t('scoreboard.rank')}
-          </ThemedText>
-          <ThemedText
-            style={[globalStyles.scoreboardStyles.headerCellWide, s.text]}
-          >
-            {t('scoreboard.team')}
-          </ThemedText>
-          <ThemedText
-            style={[globalStyles.scoreboardStyles.headerCell, s.text]}
-          >
-            {t('scoreboard.points')}
-          </ThemedText>
-        </View>
 
         <ScrollView style={{ backgroundColor: palette.surface1 }}>
           {rows.map((team) => {

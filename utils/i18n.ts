@@ -151,10 +151,6 @@ export const translations = {
     'scoreboard.title': 'Endstand',
     'scoreboard.yourTeam': 'Dein Team: {{team}}',
     'scoreboard.yourTeamLabel': 'Dein Team:',
-    'scoreboard.rank': 'Platz',
-    'scoreboard.team': 'Team',
-    'scoreboard.time': 'Zeit',
-    'scoreboard.points': 'Punkte',
   },
   en: {
     'common.ok': 'OK',
@@ -304,10 +300,6 @@ export const translations = {
     'scoreboard.title': 'Final standings',
     'scoreboard.yourTeam': 'Your team: {{team}}',
     'scoreboard.yourTeamLabel': 'Your team:',
-    'scoreboard.rank': 'Rank',
-    'scoreboard.team': 'Team',
-    'scoreboard.time': 'Time',
-    'scoreboard.points': 'Points',
   },
 } as const;
 

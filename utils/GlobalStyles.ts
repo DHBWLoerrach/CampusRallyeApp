@@ -296,20 +296,6 @@ export const globalStyles = createGroupedStyles({
     },
   },
   scoreboardStyles: {
-    headerCell: {
-      flex: 1,
-      fontWeight: 'bold',
-      color: Colors.dhbwGray,
-      textAlign: 'center',
-    },
-
-    headerCellWide: {
-      flex: 3,
-      fontWeight: 'bold',
-      color: Colors.dhbwGray,
-      textAlign: 'center',
-    },
-
     row: {
       flexDirection: 'row',
       padding: 15,
