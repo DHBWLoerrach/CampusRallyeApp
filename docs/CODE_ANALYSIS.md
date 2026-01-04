@@ -66,6 +66,27 @@ Vorschläge:
 
 ---
 
+## Style-Audit: Unused Design Tokens (Schritt 3)
+
+**Datum:** 03.01.2026  
+**Scope:** `utils/Colors.ts`, `utils/Constants.ts`
+
+Erkenntnisse (statische Referenzsuche nach `Colors.<key>`, `Colors.lightMode/darkMode.<key>` und `palette.<key>`):
+
+- Unbenutzte Root-Keys in `utils/Colors.ts`:
+  - `background`, `borderSubtle`, `card`, `cellBorder`, `contrastBlue`, `dhbwRedLight`, `dhbwRedWebView`, `icon`, `lightBlue`, `lightText`, `link`, `scheduleHeader`, `scheduleInfo`, `surface0`, `surface1`, `surface2`, `tabBarIcon`, `tabBarText`, `tabHeader`, `text`, `textMuted`
+- Unbenutzte Theme-Keys (Light/Dark) in `utils/Colors.ts`:
+  - `dhbwGray`, `dhbwRed`, `dhbwRedLight`, `dhbwRedWebView`, `icon`, `lightGray`, `scheduleHeader`, `scheduleInfo`, `surface2`, `tabBarText`
+- Unbenutzte Keys in `utils/Constants.ts`:
+  - `dhbwRed`, `dhbwRedSecondary`, `dhbwBlue`, `dhbwGray`, `bigFont`
+
+Vorschläge:
+
+- Entfernen der oben genannten Tokens, wenn keine externen/versteckten Referenzen existieren (z. B. Konfigs, JSON, Dokumentation).
+- Falls Tokens als Reserve für zukünftige UI-Varianten gedacht sind, entsprechend dokumentieren, um Fehlinterpretationen bei Cleanup zu vermeiden.
+
+---
+
 ## Task-Liste
 
 ### Phase 1: Kritisch (Datenverlust/Crashes)
