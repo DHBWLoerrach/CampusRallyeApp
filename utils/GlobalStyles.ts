@@ -38,11 +38,6 @@ export const globalStyles = createGroupedStyles({
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       maxWidth: SCREEN_WIDTH,
     },
-    bigText: {
-      color: Colors.dhbwGray,
-      fontSize: normalizeFont(24),
-      textAlign: 'center',
-    },
     refreshContainer: {
       flexGrow: 1,
     },
@@ -95,10 +90,6 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwGray,
       marginBottom: 3,
     },
-    rallyeStatus: {
-      fontSize: 14,
-      color: Colors.mediumGray,
-    },
     passwordHint: {
       fontSize: 12,
       marginTop: 4,
@@ -116,11 +107,6 @@ export const globalStyles = createGroupedStyles({
       alignItems: 'center',
       justifyContent: 'center',
       minWidth: 24,
-    },
-    selectButton: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      alignSelf: 'stretch',
     },
     cancelButton: {
       marginTop: 8,
@@ -266,34 +252,6 @@ export const globalStyles = createGroupedStyles({
       paddingHorizontal: SCREEN_WIDTH * 0.02,
       width: '100%',
     },
-    cardFace: {
-      width: '100%',
-      height: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backfaceVisibility: 'hidden',
-      position: 'absolute',
-    },
-    cardBack: {
-      transform: [{ rotateY: '180deg' }],
-    },
-    passwordInput: {
-      width: '80%',
-      height: 40,
-      borderWidth: 1,
-      borderColor: Colors.dhbwGray,
-      borderRadius: Constants.cornerRadius,
-      paddingHorizontal: 10,
-      marginVertical: 20,
-    },
-    passwordHelper: {
-      textAlign: 'center',
-      marginBottom: 12,
-    },
-    buttonRow: {
-      flexDirection: 'row',
-      gap: 10,
-    },
   },
   scoreboardStyles: {
     row: {
@@ -302,10 +260,6 @@ export const globalStyles = createGroupedStyles({
       // backgroundColor handled by themed style
       borderBottomWidth: 1,
       borderBottomColor: Colors.lightGray,
-    },
-
-    rowHighlighted: {
-      backgroundColor: Colors.veryLightGray,
     },
 
     cell: {
@@ -454,9 +408,6 @@ export const globalStyles = createGroupedStyles({
         fontSize: normalizeFont(16),
         textAlign: 'center',
       },
-      disabled: {
-        backgroundColor: 'lightgrey',
-      },
       sizes: {
         small: {
           padding: SCREEN_WIDTH * 0.02,
@@ -499,37 +450,8 @@ export const globalStyles = createGroupedStyles({
       minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.145 : 0.185),
       marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.013),
     },
-    headerImage: {
-      width: SCREEN_WIDTH,
-      height: SCREEN_HEIGHT * 0.3,
-      resizeMode: 'cover',
-    },
-    header: {
-      marginTop: SCREEN_HEIGHT * 0.01,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    logo: {
-      width: SCREEN_WIDTH * 0.12,
-      height: SCREEN_WIDTH * 0.12,
-      marginLeft: SCREEN_WIDTH * 0.03,
-    },
     text: {
       color: Colors.dhbwGray,
-    },
-    title: {
-      flex: 1,
-      color: Colors.dhbwRed,
-    },
-    content: {
-      flex: 1,
-      width: '100%',
-      justifyContent: 'center',
-      paddingVertical: SCREEN_HEIGHT * 0.02,
-    },
-    button: {
-      width: '100%',
-      marginVertical: 60,
     },
     offline: {
       flex: 1,
