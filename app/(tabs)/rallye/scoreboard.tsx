@@ -239,7 +239,7 @@ export default function Scoreboard() {
                   {team.total_points}
                   {'\n'}
                   <ThemedText style={[s.muted, { fontSize: 12 }]}>
-                    {formatDuration(team.time_spent)}
+                    ({formatDuration(team.time_spent)})
                   </ThemedText>
                 </ThemedText>
               </View>
