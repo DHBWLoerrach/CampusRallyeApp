@@ -137,7 +137,10 @@ export default function Scoreboard() {
                 { marginTop: 10 },
               ]}
             >
-              {t('scoreboard.yourTeam', { team: ourTeam.name })}
+              {t('scoreboard.yourTeamLabel')}{' '}
+              <ThemedText variant="accent" style={{ fontWeight: '700' }}>
+                {ourTeam.name}
+              </ThemedText>
             </ThemedText>
           ) : null}
         </View>
