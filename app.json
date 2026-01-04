@@ -2,7 +2,7 @@
   "expo": {
     "name": "Rallye LÖ",
     "slug": "CampusRallyeApp",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "orientation": "portrait",
     "scheme": "rallyeapp",
     "userInterfaceStyle": "automatic",
