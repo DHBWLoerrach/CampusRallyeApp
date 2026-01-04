@@ -87,6 +87,22 @@ Vorschläge:
 
 ---
 
+## Style-Audit: Style-Prop-Mismatch (Schritt 4)
+
+**Datum:** 03.01.2026  
+**Scope:** `app/`, `components/` (JSX-Style-Props)
+
+Erkenntnisse:
+
+- Keine echten Style-Prop-Mismatches gefunden.
+- Ein False-Positive: `components/ui/TeamNameSheet.tsx:59` (Text mit `marginBottom` ist in React Native zulässig).
+
+Vorschlag:
+
+- Kein Handlungsbedarf.
+
+---
+
 ## Task-Liste
 
 ### Phase 1: Kritisch (Datenverlust/Crashes)
