@@ -17,6 +17,37 @@
 
 ---
 
+## Style-Audit: Inline-Style-Duplikate (Schritt 1)
+
+**Datum:** 03.01.2026  
+**Scope:** `app/`, `components/` (TS/TSX/JS/JSX), JSX-Style-Props
+
+Gefundene Duplikate (Inline-Objekte mit >=2 Vorkommen):
+
+- `{ width: '100%' }` (10x) in `components/rallye/questions/QRCodeQuestion.tsx:130`, `components/rallye/questions/UploadPhotoQuestion.tsx:61`, `app/(tabs)/rallye/index.tsx:273`, `app/(tabs)/rallye/states/Preparation.tsx:32`, `app/(tabs)/rallye/voting.tsx:127`
+- `{ flex: 1 }` (9x) in `components/rallye/questions/ImageQuestion.tsx:91`, `components/rallye/questions/SkillQuestion.tsx:77`, `app/(tabs)/rallye/question-renderer.tsx:144`, `app/index.tsx:224`, `components/ui/Screen.tsx:57`
+- `{ marginTop: 10 }` (8x) in `app/(tabs)/rallye/index.tsx:286`, `app/(tabs)/rallye/voting.tsx:140`, `app/(tabs)/rallye/scoreboard.tsx:137`, `components/rallye/questions/UploadPhotoQuestion.tsx:249`
+- `{ textAlign: 'left' }` (4x) in `app/_layout.tsx:109`, `components/rallye/questions/ImageQuestion.tsx:117`, `components/rallye/questions/SkillQuestion.tsx:103`
+- `{ textAlign: 'center', marginBottom: 10 }` (3x) in `app/(tabs)/rallye/question-renderer.tsx:115`, `components/rallye/questions/QRCodeQuestion.tsx:115`, `components/rallye/questions/UploadPhotoQuestion.tsx:242`
+- `{ fontWeight: '700' }` (3x) in `app/(tabs)/rallye/scoreboard.tsx:141`, `app/(tabs)/rallye/scoreboard.tsx:185`, `app/(tabs)/rallye/scoreboard.tsx:211`
+- `{ backgroundColor: stateBackground }` (3x) in `app/index.tsx:160`, `app/index.tsx:179`, `app/index.tsx:200`
+- `{ backgroundColor }` (3x, Basis-Styles) in `components/themed/ThemedView.tsx:21`, `components/themed/ThemedScrollView.tsx:21`, `components/ui/Card.tsx:80`
+- `{ color: mutedTextColor }` (3x) in `components/ui/RallyeSelectionModal.tsx:205`, `components/ui/RallyeSelectionModal.tsx:285`, `components/ui/RallyeSelectionModal.tsx:335`
+- `{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }` (2x) in `app/(tabs)/infos/about.jsx:28`, `app/(tabs)/infos/imprint.jsx:18`
+- `{ color: Colors.dhbwRed }` (2x) in `app/(tabs)/infos/about.jsx:67`, `app/(tabs)/infos/imprint.jsx:122`
+- `{ backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }` (2x) in `app/(tabs)/infos/index.jsx:20`, `app/(tabs)/infos/index.jsx:35`
+- `{ padding: 10 }` (2x) in `app/(tabs)/rallye/voting.tsx:245`, `app/(tabs)/rallye/voting.tsx:247`
+- `{ paddingBottom: keyboardHeight }` (2x) in `components/rallye/questions/ImageQuestion.tsx:102`, `components/rallye/questions/SkillQuestion.tsx:88`
+- `{ alignItems: 'stretch', flex: 0, flexGrow: 0 }` (2x) in `components/rallye/questions/ImageQuestion.tsx:107`, `components/rallye/questions/SkillQuestion.tsx:93`
+- `{ backgroundColor: palette.background }` (2x) in `components/ui/CollapsibleHeroHeader.tsx:129`, `components/ui/CollapsibleHeroHeader.tsx:195`
+- `{ color: headerTextColor }` (2x) in `components/ui/RallyeSelectionModal.tsx:265`, `components/ui/RallyeSelectionModal.tsx:324`
+- `{ backgroundColor: isDarkMode ? Colors.darkMode.borderSubtle : Colors.veryLightGray }` (2x) in `components/ui/RallyeSelectionModal.tsx:294`, `components/ui/RallyeSelectionModal.tsx:369`
+- `{ flex: 1, backgroundColor: palette.background }` (2x) in `components/ui/Screen.tsx:68`, `components/ui/Screen.tsx:121`
+
+Hinweis: Einige Duplikate sind Basis-Styles in UI-Komponenten (z. B. ThemedView/Screen) und könnten bewusst inline bleiben.
+
+---
+
 ## Task-Liste
 
 ### Phase 1: Kritisch (Datenverlust/Crashes)
