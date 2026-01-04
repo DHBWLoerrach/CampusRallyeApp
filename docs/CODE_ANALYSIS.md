@@ -48,6 +48,24 @@ Hinweis: Einige Duplikate sind Basis-Styles in UI-Komponenten (z. B. ThemedView/
 
 ---
 
+## Style-Audit: Hardcoded Colors & Theme-Konsistenz (Schritt 2)
+
+**Datum:** 03.01.2026  
+**Scope:** `app/`, `components/`, `utils/GlobalStyles.ts`
+
+Erkenntnisse:
+
+- Potenzielle Dark-Mode-Inkonsistenz: `globalStyles.teamStyles.title` und `globalStyles.teamStyles.message` setzen `color: Colors.dhbwGray` und werden in `app/(tabs)/rallye/team-setup.tsx` ohne `s.text`/`s.muted` genutzt. In Dark Mode wirkt das Grau ggf. zu dunkel/kontrastarm.
+- Einige Light-Mode-Farben sind in `utils/GlobalStyles.ts` hinterlegt, werden aber in Komponenten per `palette` überschrieben (z. B. `globalStyles.rallyeModal.*`, `scoreboardStyles.row`). Kein Bug, aber redundant.
+- Hardcoded Overlays/Whites sind intentional (Hero/Overlay/CTA), z. B. `components/ui/CollapsibleHeroHeader.tsx` (Weiß + rgba-Overlay), `components/ui/TeamNameSheet.tsx` (Backdrop), `components/ui/Hint.tsx` (Icon-Farbe). Keine klaren Theme-Bugs.
+
+Vorschläge:
+
+- `team-setup` dark-mode-sicher machen: `globalStyles.teamStyles.title/message` nicht hart einfärben oder in `app/(tabs)/rallye/team-setup.tsx` mit `s.text`/`s.muted` kombinieren.
+- Optional: In `utils/GlobalStyles.ts` Light-Mode-Farben reduzieren, wo komponentenseitig bereits `palette` genutzt wird.
+
+---
+
 ## Task-Liste
 
 ### Phase 1: Kritisch (Datenverlust/Crashes)
