@@ -8,6 +8,7 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useAppStyles } from '@/utils/AppStyles';
 import { orderQuestionsWithUploadsLast } from '@/utils/orderQuestions';
+import { spacing } from '@/utils/spacing';
 import Preparation from '@/app/(tabs)/rallye/states/Preparation';
 import NoQuestions from '@/app/(tabs)/rallye/states/NoQuestions';
 import TeamSetup from '@/app/(tabs)/rallye/team-setup';
@@ -229,10 +230,11 @@ const RallyeIndex = observer(function RallyeIndex() {
       <>
         <ScreenScrollView
           padding="none"
-          edges={['bottom']}
+          edges={[]}
           contentContainerStyle={[
             globalStyles.default.refreshContainer,
             globalStyles.default.container,
+            { paddingBottom: spacing(2) },
           ]}
           refreshControl={
             <RefreshControl refreshing={loading} onRefresh={onRefresh} />

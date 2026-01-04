@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Image, View } from 'react-native';
+import { Alert, Image, ScrollView, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { QuestionProps } from '@/types/rallye';
 import {
@@ -44,6 +44,26 @@ type ImagePreviewProps = {
   t: ReturnType<typeof useLanguage>['t'];
 };
 
+type QuestionLayoutProps = {
+  children: React.ReactNode;
+  hint: QuestionProps['question']['hint'];
+  s: ReturnType<typeof useAppStyles>;
+};
+
+function QuestionLayout({ children, hint, s }: QuestionLayoutProps) {
+  return (
+    <ThemedView variant="background" style={s.screen}>
+      <ScrollView
+        testID="upload-photo-scroll"
+        contentContainerStyle={globalStyles.default.refreshContainer}
+      >
+        {children}
+      </ScrollView>
+      {hint ? <Hint hint={hint} /> : null}
+    </ThemedView>
+  );
+}
+
 function PhotoCamera({
   cameraRef,
   onSurrender,
@@ -54,11 +74,14 @@ function PhotoCamera({
 }: PhotoCameraProps) {
   const [facing, setFacing] = useState<'back' | 'front'>('back');
   return (
-    <ThemedView
-      variant="background"
-      style={[globalStyles.default.container, s.screen]}
-    >
-      <VStack style={{ width: '100%' }} gap={2}>
+    <QuestionLayout hint={question.hint} s={s}>
+      <VStack
+        style={[
+          globalStyles.default.container,
+          { alignItems: 'stretch', flex: 0, flexGrow: 0 },
+        ]}
+        gap={2}
+      >
         <InfoBox mb={0}>
           <ThemedText
             variant="title"
@@ -96,8 +119,7 @@ function PhotoCamera({
           </View>
         </InfoBox>
       </VStack>
-      {question.hint ? <Hint hint={question.hint} /> : null}
-    </ThemedView>
+    </QuestionLayout>
   );
 }
 
@@ -113,11 +135,14 @@ function ImagePreview({
   t,
 }: ImagePreviewProps) {
   return (
-    <ThemedView
-      variant="background"
-      style={[globalStyles.default.container, s.screen]}
-    >
-      <VStack style={{ width: '100%' }} gap={2}>
+    <QuestionLayout hint={question.hint} s={s}>
+      <VStack
+        style={[
+          globalStyles.default.container,
+          { alignItems: 'stretch', flex: 0, flexGrow: 0 },
+        ]}
+        gap={2}
+      >
         <InfoBox mb={0}>
           <ThemedText
             variant="title"
@@ -170,8 +195,7 @@ function ImagePreview({
           ) : null}
         </InfoBox>
       </VStack>
-      {question.hint ? <Hint hint={question.hint} /> : null}
-    </ThemedView>
+    </QuestionLayout>
   );
 }
 
@@ -224,11 +248,14 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
 
   if (!permission.granted) {
     return (
-      <ThemedView
-        variant="background"
-        style={[globalStyles.default.container, s.screen]}
-      >
-        <VStack style={{ width: '100%' }} gap={2}>
+      <QuestionLayout hint={question.hint} s={s}>
+        <VStack
+          style={[
+            globalStyles.default.container,
+            { alignItems: 'stretch', flex: 0, flexGrow: 0 },
+          ]}
+          gap={2}
+        >
           <InfoBox mb={0}>
             <ThemedText
               variant="title"
@@ -257,8 +284,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
             </View>
           </InfoBox>
         </VStack>
-        {question.hint ? <Hint hint={question.hint} /> : null}
-      </ThemedView>
+      </QuestionLayout>
     );
   }
 
