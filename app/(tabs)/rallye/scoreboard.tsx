@@ -22,9 +22,8 @@ type TeamRow = {
   group_name?: string;
 };
 
-// Hilfsfunktion zum Formatieren der Zeit (ms -> MM:SS oder HH:MM:SS)
 function formatDuration(ms?: number | null) {
-  if (!ms) return '-';
+  if (ms == null) return '-';
   const totalSeconds = Math.floor(ms / 1000);
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
