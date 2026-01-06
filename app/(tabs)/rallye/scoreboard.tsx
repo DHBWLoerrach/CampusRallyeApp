@@ -17,13 +17,13 @@ type TeamRow = {
   created_at: string;
   time_played: string | null;
   total_points?: number;
-  time_spent?: number;
+  time_spent?: number | null;
   rank?: number;
   group_name?: string;
 };
 
 // Hilfsfunktion zum Formatieren der Zeit (ms -> MM:SS oder HH:MM:SS)
-function formatDuration(ms?: number) {
+function formatDuration(ms?: number | null) {
   if (!ms) return '-';
   const totalSeconds = Math.floor(ms / 1000);
   const h = Math.floor(totalSeconds / 3600);
@@ -38,6 +38,19 @@ function formatDuration(ms?: number) {
   }
   return `${mStr}:${sStr}`;
 }
+
+const calculateDuration = (
+  created_at: string,
+  time_played: string | null
+): number | null => {
+  if (!time_played) return null;
+  const start = new Date(created_at).getTime();
+  const end = new Date(time_played).getTime();
+  if (Number.isNaN(start) || Number.isNaN(end) || end < start) {
+    return null;
+  }
+  return end - start;
+};
 
 export default function Scoreboard() {
   const rallye = useSelector(() => store$.rallye.get());
@@ -60,13 +73,12 @@ export default function Scoreboard() {
           .eq('rallye_id', rallyeId);
         const teamRows = (data || []) as TeamRow[];
 
+        const teamIds = teamRows.map((t) => t.id);
+
         const { data: teamPoints, error } = await supabase
           .from('team_questions')
           .select('team_id, points')
-          .in(
-            'team_id',
-            teamRows.map((t) => t.id)
-          );
+          .in('team_id', teamIds);
         if (error) throw error;
 
         let combined = teamRows.map((t) => {
@@ -75,17 +87,18 @@ export default function Scoreboard() {
             (acc: number, cur: any) => acc + cur.points,
             0
           );
-          const start = new Date(t.created_at).getTime();
-          const end = t.time_played ? new Date(t.time_played).getTime() : start;
-          const time_spent = Math.max(0, end - start);
+          const time_spent = calculateDuration(t.created_at, t.time_played);
           return { ...t, total_points, time_spent } as TeamRow;
         });
 
-        combined.sort((a, b) =>
-          b.total_points! !== a.total_points!
-            ? b.total_points! - a.total_points!
-            : a.time_spent! - b.time_spent!
-        );
+        combined.sort((a, b) => {
+          if (b.total_points! !== a.total_points!) {
+            return b.total_points! - a.total_points!;
+          }
+          const timeA = a.time_spent ?? Number.MAX_SAFE_INTEGER;
+          const timeB = b.time_spent ?? Number.MAX_SAFE_INTEGER;
+          return timeA - timeB;
+        });
 
         combined = combined.map((t, i) => {
           return { ...t, rank: i + 1, group_name: t.name };
