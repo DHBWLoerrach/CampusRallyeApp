@@ -128,6 +128,18 @@ export default function Scoreboard() {
           >
             {t('scoreboard.title')}
           </ThemedText>
+          {rallye?.name && (
+            <ThemedText
+              variant="subtitle"
+              style={[
+                globalStyles.rallyeStatesStyles.infoSubtitle,
+                s.text,
+                { marginTop: 4, marginBottom: 8 },
+              ]}
+            >
+              {rallye.name}
+            </ThemedText>
+          )}
           {ourTeam ? (
             <ThemedText
               variant="body"
@@ -188,10 +200,10 @@ export default function Scoreboard() {
                   {team.rank === 1
                     ? '🥇'
                     : team.rank === 2
-                      ? '🥈'
-                      : team.rank === 3
-                        ? '🥉'
-                        : team.rank}
+                    ? '🥈'
+                    : team.rank === 3
+                    ? '🥉'
+                    : team.rank}
                 </ThemedText>
                 <ThemedText
                   style={[
@@ -222,7 +234,6 @@ export default function Scoreboard() {
           })}
         </ScrollView>
       </View>
-
     </ScreenScrollView>
   );
 }
