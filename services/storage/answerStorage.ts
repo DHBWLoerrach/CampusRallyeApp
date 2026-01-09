@@ -62,7 +62,7 @@ export async function uploadPhotoAnswer({
   const filePath = `${teamId}_${questionId}.jpg`;
 
   const { error: uploadError } = await supabase.storage
-    .from('upload_photo_answers')
+    .from('upload-photos')
     .upload(filePath, bytes, { upsert: false, contentType: 'image/jpeg' });
 
   // Treat "already exists" as success (idempotent retry without SELECT policy)

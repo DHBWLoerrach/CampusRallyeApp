@@ -217,7 +217,7 @@ export default function Voting({
                 (() => {
                   const imageUri = `${
                     process.env.EXPO_PUBLIC_SUPABASE_URL
-                  }/storage/v1/object/public/upload_photo_answers/${(
+                  }/storage/v1/object/public/upload-photos/${(
                     item?.tq_team_answer || ''
                   ).trim()}`;
                   return (

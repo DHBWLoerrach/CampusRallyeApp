@@ -26,7 +26,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
   const pictureUri = useMemo(() => {
     if (!question.bucket_path) return null;
     const result = supabase.storage
-      .from('question-media')
+      .from('question-pictures')
       .getPublicUrl(question.bucket_path);
     return result?.data?.publicUrl ?? null;
   }, [question.bucket_path]);
