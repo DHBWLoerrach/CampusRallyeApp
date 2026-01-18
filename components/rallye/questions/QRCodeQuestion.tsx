@@ -1,15 +1,16 @@
 import React, { useRef, useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
 import { store$ } from '@/services/storage/Store';
+import { useSelector } from '@legendapp/state/react';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
 import Colors from '@/utils/Colors';
-import { saveAnswer } from '@/services/storage/answerStorage';
-import { useTheme } from '@/utils/ThemeContext';
+import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { useLanguage } from '@/utils/LanguageContext';
+import { confirm } from '@/utils/ConfirmAlert';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
@@ -21,70 +22,83 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const processingRef = useRef(false);
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const { isDarkMode } = useTheme();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const s = useAppStyles();
 
   const team = store$.team.get();
-  const answers = store$.answers.get() as AnswerRow[];
+  const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
   const correct = (
     answers.find((a) => a.question_id === question.id && a.correct)?.text || ''
-  ).toLowerCase();
+  )
+    .toLowerCase()
+    .trim();
+  const answerKeyReady = correct.length > 0;
 
   const submitSurrender = async () => {
     setScanMode(false);
-    if (team) await saveAnswer(team.id, question.id, false, 0);
-    store$.gotoNextQuestion();
+    try {
+      await submitAnswerAndAdvance({
+        teamId: team?.id ?? null,
+        questionId: question.id,
+        answeredCorrectly: false,
+        pointsAwarded: 0,
+      });
+    } catch (e) {
+      console.error('Error submitting surrender:', e);
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
+    }
   };
 
-  const handleSurrender = () => {
-    Alert.alert(
-      language === 'de' ? 'Sicherheitsfrage' : 'Security question',
-      language === 'de'
-        ? 'Willst du diese Aufgabe wirklich aufgeben?'
-        : 'Do you really want to give up this task?',
-      [
-        { text: language === 'de' ? 'Abbrechen' : 'Cancel', style: 'cancel' },
-        {
-          text:
-            language === 'de'
-              ? 'Ja, ich möchte aufgeben'
-              : 'Yes, I want to give up',
-          onPress: submitSurrender,
-        },
-      ]
-    );
+  const handleSurrender = async () => {
+    const confirmed = await confirm({
+      title: t('confirm.surrender.title'),
+      message: t('confirm.surrender.message'),
+      confirmText: t('confirm.surrender.confirm'),
+      cancelText: t('common.cancel'),
+      destructive: true,
+    });
+    if (!confirmed) return;
+    await submitSurrender();
   };
 
   const handleQRCode = ({ data }: { data: string }) => {
     if (processingRef.current) return;
+    if (!answerKeyReady) {
+      Alert.alert(
+        t('question.error.pleaseWaitTitle'),
+        t('question.error.qrLoading')
+      );
+      return;
+    }
     processingRef.current = true;
     setScanMode(false);
     try {
       if (correct !== data.toLowerCase()) {
-        Alert.alert(
-          language === 'de'
-            ? 'Der QR-Code ist falsch! Du bist vermutlich nicht am richtigen Ort.'
-            : 'The QR code is incorrect! You are probably not at the right place.'
-        );
+        Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
       } else {
-        Alert.alert(
-          'OK',
-          language === 'de'
-            ? 'Das ist der richtige QR-Code!'
-            : 'This is the correct QR code!',
-          [
-            {
-              text: language === 'de' ? 'Weiter' : 'Next',
-              onPress: async () => {
-                store$.points.set(store$.points.get() + question.points);
-                if (team)
-                  await saveAnswer(team.id, question.id, true, question.points);
-                store$.gotoNextQuestion();
-              },
+        Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
+          {
+            text: t('common.next'),
+            onPress: () => {
+              void (async () => {
+                try {
+                  await submitAnswerAndAdvance({
+                    teamId: team?.id ?? null,
+                    questionId: question.id,
+                    answeredCorrectly: true,
+                    pointsAwarded: question.points,
+                  });
+                } catch (e) {
+                  console.error('Error submitting QR answer:', e);
+                  Alert.alert(
+                    t('common.errorTitle'),
+                    t('question.error.saveAnswer')
+                  );
+                }
+              })();
             },
-          ]
-        );
+          },
+        ]);
       }
     } finally {
       setTimeout(() => {
@@ -99,24 +113,26 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     return (
       <ThemedView variant="background" style={globalStyles.default.container}>
         <ThemedText style={{ textAlign: 'center', marginBottom: 10 }}>
-          {language === 'de'
-            ? 'Wir brauchen Zugriff auf die Kamera'
-            : 'We need access to the camera'}
+          {t('question.camera.needAccess')}
         </ThemedText>
         <UIButton onPress={requestPermission}>
-          {language === 'de'
-            ? 'Zugriff auf Kamera erlauben'
-            : 'Allow access to camera'}
+          {t('question.camera.allow')}
         </UIButton>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView variant="background" style={[globalStyles.default.container, s.screen, { flex: 1 }] }>
+    <ThemedView
+      variant="background"
+      style={[globalStyles.default.container, s.screen, { flex: 1 }]}
+    >
       <VStack style={{ width: '100%' }} gap={2}>
         <InfoBox mb={0}>
-          <ThemedText style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}>
+          <ThemedText
+            variant="title"
+            style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+          >
             {question.question}
           </ThemedText>
         </InfoBox>
@@ -133,23 +149,28 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
 
         <InfoBox mb={0}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
-            <UIButton icon={scanMode ? 'circle-stop' : 'qrcode'} onPress={() => setScanMode(!scanMode)}>
+            <UIButton
+              icon={scanMode ? 'circle-stop' : 'qrcode'}
+              disabled={!answerKeyReady}
+              onPress={() => setScanMode(!scanMode)}
+            >
               {scanMode
-                ? language === 'de'
-                  ? 'Kamera ausblenden'
-                  : 'Hide Camera'
-                : language === 'de'
-                ? 'QR-Code scannen'
-                : 'Scan QR Code'}
+                ? t('question.qr.hideCamera')
+                : answerKeyReady
+                ? t('question.qr.scan')
+                : t('common.loading')}
             </UIButton>
-            <UIButton icon="face-frown-open" color={Colors.dhbwGray} onPress={handleSurrender}>
-              {language === 'de' ? 'Aufgeben' : 'Surrender'}
+            <UIButton
+              icon="face-frown-open"
+              color={Colors.dhbwGray}
+              onPress={handleSurrender}
+            >
+              {t('common.surrender')}
             </UIButton>
           </View>
         </InfoBox>
-
-        {question.hint ? <Hint hint={question.hint} /> : null}
       </VStack>
+      {question.hint ? <Hint hint={question.hint} /> : null}
     </ThemedView>
   );
 }

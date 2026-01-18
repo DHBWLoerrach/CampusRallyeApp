@@ -5,6 +5,9 @@ import Constants from './Constants';
 // Display dimensions for dynamic calculations
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+// Small screen detection (iPhone SE, older devices)
+const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
+
 // Helper function for responsive font sizes
 const normalizeFont = (size: number) => {
   const scale = SCREEN_WIDTH / 375; // Basis: iPhone X width
@@ -29,16 +32,11 @@ export const globalStyles = createGroupedStyles({
       flexDirection: 'column',
       flexGrow: 1,
       alignItems: 'center',
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
       // backgroundColor intentionally left out to allow themed container (s.screen) to control it
-      paddingVertical: SCREEN_HEIGHT * 0.02,
+      paddingVertical: SCREEN_HEIGHT * 0.01,
       paddingHorizontal: SCREEN_WIDTH * 0.05,
       maxWidth: SCREEN_WIDTH,
-    },
-    bigText: {
-      color: Colors.dhbwGray,
-      fontSize: normalizeFont(24),
-      textAlign: 'center',
     },
     refreshContainer: {
       flexGrow: 1,
@@ -56,26 +54,31 @@ export const globalStyles = createGroupedStyles({
       padding: 20,
       borderRadius: Constants.cornerRadius,
       width: '85%',
+      maxWidth: 400,
       maxHeight: '80%',
     },
     modalTitle: {
       fontSize: 22,
       fontWeight: 'bold',
       marginBottom: 15,
-      textAlign: 'center',
+      textAlign: 'left',
+      alignSelf: 'stretch',
     },
     rallyeCard: {
       backgroundColor: Colors.veryLightGray,
       borderRadius: Constants.cornerRadius,
-      padding: 15,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
       marginVertical: 8,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+      gap: 12,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: Colors.lightMode.borderSubtle,
     },
     rallyeInfo: {
       flex: 1,
-      paddingRight: 10,
     },
     rallyeName: {
       fontSize: 18,
@@ -87,25 +90,83 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwGray,
       marginBottom: 3,
     },
-    rallyeStatus: {
-      fontSize: 14,
-      color: Colors.mediumGray,
+    passwordHint: {
+      fontSize: 12,
+      marginTop: 4,
     },
-    selectButton: {
-      paddingVertical: 8,
-      paddingHorizontal: 12,
+    passwordHintContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 6,
+      gap: 5,
+    },
+    passwordHintIcon: {
+      marginTop: 1,
+    },
+    rallyeAction: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 24,
     },
     cancelButton: {
-      marginTop: 20,
+      marginTop: 8,
       alignSelf: 'center',
-      paddingVertical: 8,
-      paddingHorizontal: 20,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+      minHeight: 44,
+      justifyContent: 'center',
+    },
+    cancelButtonSeparator: {
+      height: 1,
+      backgroundColor: Colors.veryLightGray,
+      marginTop: 8,
+      marginHorizontal: -20,
+    },
+    cancelButtonText: {
+      textDecorationLine: 'none',
     },
     noDataText: {
       textAlign: 'center',
-      fontSize: 16,
+      fontSize: 15,
       color: Colors.mediumGray,
-      marginVertical: 10,
+      marginVertical: 24,
+      paddingHorizontal: 16,
+      lineHeight: 22,
+    },
+    slideView: {
+      width: '100%',
+    },
+    passwordSlideView: {
+      position: 'absolute',
+      top: 20,
+      left: 20,
+      right: 20,
+      bottom: 20,
+    },
+    passwordSubtitle: {
+      fontSize: 16,
+      marginBottom: 16,
+      marginTop: -8,
+    },
+    passwordInput: {
+      width: '100%',
+      height: 44,
+      borderWidth: 1,
+      borderColor: Colors.dhbwGray,
+      borderRadius: Constants.cornerRadius,
+      paddingHorizontal: 12,
+      marginBottom: 12,
+    },
+    passwordHelper: {
+      textAlign: 'center',
+      marginBottom: 8,
+      fontSize: 13,
+    },
+    passwordButtonRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 8,
     },
   },
   rallyeStatesStyles: {
@@ -150,12 +211,10 @@ export const globalStyles = createGroupedStyles({
       maxHeight: SCREEN_HEIGHT * 0.33,
     },
     infoTitle: {
-      fontSize: normalizeFont(20),
       textAlign: 'center',
       color: Colors.dhbwGray,
     },
     infoSubtitle: {
-      fontSize: 16,
       textAlign: 'center',
       color: Colors.dhbwGray,
       marginTop: '3%',
@@ -167,11 +226,11 @@ export const globalStyles = createGroupedStyles({
   cardStyles: {
     card: {
       width: '100%',
-      height: SCREEN_HEIGHT * 0.22,
+      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.16 : 0.22),
       // backgroundColor handled by themed style
       borderRadius: Constants.cornerRadius,
-      padding: SCREEN_WIDTH * 0.04,
-      marginVertical: SCREEN_HEIGHT * 0.015,
+      padding: SCREEN_WIDTH * (IS_SMALL_SCREEN ? 0.03 : 0.04),
+      marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.015),
       alignItems: 'center',
       justifyContent: 'center',
       shadowColor: '#000',
@@ -184,69 +243,23 @@ export const globalStyles = createGroupedStyles({
       elevation: 5,
     },
     cardTitle: {
-      fontSize: normalizeFont(16),
-      fontWeight: 'bold',
-      color: Colors.dhbwGray,
       marginTop: SCREEN_HEIGHT * 0.01,
       textAlign: 'center',
     },
     cardDescription: {
-      fontSize: normalizeFont(14),
-      color: Colors.dhbwGray,
-      textAlign: 'center',
+      textAlign: 'left',
       marginTop: SCREEN_HEIGHT * 0.01,
       paddingHorizontal: SCREEN_WIDTH * 0.02,
-    },
-    cardFace: {
       width: '100%',
-      height: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backfaceVisibility: 'hidden',
-      position: 'absolute',
-    },
-    cardBack: {
-      transform: [{ rotateY: '180deg' }],
-    },
-    passwordInput: {
-      width: '80%',
-      height: 40,
-      borderWidth: 1,
-      borderColor: Colors.dhbwGray,
-      borderRadius: Constants.cornerRadius,
-      paddingHorizontal: 10,
-      marginVertical: 20,
-    },
-    buttonRow: {
-      flexDirection: 'row',
-      gap: 10,
     },
   },
   scoreboardStyles: {
-    headerCell: {
-      flex: 1,
-      fontWeight: 'bold',
-      color: Colors.dhbwGray,
-      textAlign: 'center',
-    },
-
-    headerCellWide: {
-      flex: 3,
-      fontWeight: 'bold',
-      color: Colors.dhbwGray,
-      textAlign: 'center',
-    },
-    
     row: {
       flexDirection: 'row',
       padding: 15,
       // backgroundColor handled by themed style
       borderBottomWidth: 1,
       borderBottomColor: Colors.lightGray,
-    },
-
-    rowHighlighted: {
-      backgroundColor: Colors.veryLightGray,
     },
 
     cell: {
@@ -264,8 +277,6 @@ export const globalStyles = createGroupedStyles({
       color: Colors.dhbwRed,
       fontWeight: 'bold',
     },
-
-
   },
   settingsStyles: {
     container: {
@@ -397,9 +408,6 @@ export const globalStyles = createGroupedStyles({
         fontSize: normalizeFont(16),
         textAlign: 'center',
       },
-      disabled: {
-        backgroundColor: 'lightgrey',
-      },
       sizes: {
         small: {
           padding: SCREEN_WIDTH * 0.02,
@@ -434,42 +442,16 @@ export const globalStyles = createGroupedStyles({
       alignItems: 'center',
       // backgroundColor handled by themed style
       paddingHorizontal: SCREEN_WIDTH * 0.04,
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
+      paddingTop: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.02 : 0.025),
+      paddingBottom: SCREEN_HEIGHT * 0.015,
     },
-    headerImage: {
-      width: SCREEN_WIDTH,
-      height: SCREEN_HEIGHT * 0.3,
-      resizeMode: 'cover',
-    },
-    header: {
-      marginTop: SCREEN_HEIGHT * 0.01,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    logo: {
-      width: SCREEN_WIDTH * 0.12,
-      height: SCREEN_WIDTH * 0.12,
-      marginLeft: SCREEN_WIDTH * 0.03,
+    compactCard: {
+      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.145 : 0.185),
+      marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.013),
     },
     text: {
       color: Colors.dhbwGray,
-      fontSize: normalizeFont(16),
-    },
-    title: {
-      flex: 1,
-      color: Colors.dhbwRed,
-      fontWeight: '500',
-      fontSize: normalizeFont(18),
-    },
-    content: {
-      flex: 1,
-      width: '100%',
-      justifyContent: 'center',
-      paddingVertical: SCREEN_HEIGHT * 0.02,
-    },
-    button: {
-      width: '100%',
-      marginVertical: 60,
     },
     offline: {
       flex: 1,

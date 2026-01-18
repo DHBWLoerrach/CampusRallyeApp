@@ -1,28 +1,24 @@
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  View,
-  TouchableOpacity,
-} from 'react-native';
-import { supabase } from '@/utils/Supabase';
+import { ActivityIndicator, Alert, View } from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
 import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
+import { CollapsibleHeroHeader } from '@/components/ui/CollapsibleHeroHeader';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import { store$ } from '@/services/storage/Store';
+import { useSelector } from '@legendapp/state/react';
+import NetInfo from '@react-native-community/netinfo';
+import ThemedText from '@/components/themed/ThemedText';
+import { confirm } from '@/utils/ConfirmAlert';
+import { useAppStyles } from '@/utils/AppStyles';
 import {
   getActiveRallyes,
   setCurrentRallye,
   getTourModeRallye,
+  type RallyeRow,
 } from '@/services/storage/rallyeStorage';
 import {
   getCurrentTeam,
@@ -30,266 +26,276 @@ import {
   clearCurrentTeam,
 } from '@/services/storage/teamStorage';
 
-// TODO: Fix types
-const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
-  try {
-    if (password === selectedRallye.password) {
-      // Set selected rallye and enable tabs
-      store$.rallye.set(selectedRallye);
+export default function Welcome() {
+  const { isDarkMode } = useTheme();
+  const { t } = useLanguage();
+  const s = useAppStyles();
+
+  const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
+  const resumeRallye = useSelector(() => store$.rallye.get());
+  const resumeTeam = useSelector(() => store$.team.get());
+
+  const [fetchState, setFetchState] = useState<
+    'loading' | 'ready' | 'offline' | 'empty' | 'error'
+  >('loading');
+  const [joining, setJoining] = useState(false);
+
+  const [showRallyeModal, setShowRallyeModal] = useState(false);
+  const [activeRallyes, setActiveRallyes] = useState<RallyeRow[]>([]);
+  const [hasTourMode, setHasTourMode] = useState(false);
+  const hasActiveRallyes = activeRallyes.length > 0;
+
+  const startTourMode = async () => {
+    try {
+      const tourRallye = await getTourModeRallye();
+      if (tourRallye) {
+        store$.team.set(null);
+        store$.reset();
+        store$.rallye.set(tourRallye);
+        await setCurrentRallye(tourRallye);
+        store$.enabled.set(true);
+      } else {
+        Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
+      }
+    } catch (e) {
+      console.error('Error starting tour mode:', e);
+      Alert.alert(t('common.errorTitle'), t('welcome.participationStartError'));
+    }
+  };
+
+  const loadRallyes = async () => {
+    setFetchState('loading');
+    try {
+      const netState = await NetInfo.fetch();
+      const isOffline =
+        netState.isConnected === false ||
+        netState.isInternetReachable === false;
+      if (isOffline) {
+        setActiveRallyes([]);
+        setHasTourMode(false);
+        setFetchState('offline');
+        return;
+      }
+    } catch (e) {
+      console.error('Error checking network status:', e);
+      setActiveRallyes([]);
+      setHasTourMode(false);
+      setFetchState('offline');
+      return;
+    }
+
+    const { data, error } = await getActiveRallyes();
+    if (error) {
+      setActiveRallyes([]);
+      setHasTourMode(false);
+      setFetchState('error');
+      return;
+    }
+
+    setActiveRallyes(data);
+    if (data.length === 0) {
+      const tourModeRallye = await getTourModeRallye();
+      const tourModeAvailable = !!tourModeRallye;
+      setHasTourMode(tourModeAvailable);
+      setFetchState(tourModeAvailable ? 'ready' : 'empty');
+      return;
+    }
+
+    setHasTourMode(false);
+    setFetchState('ready');
+  };
+
+  useEffect(() => {
+    void loadRallyes();
+  }, []);
+
+  const joinRallye = async (rallye: RallyeRow): Promise<boolean> => {
+    if (joining) return false;
+    setJoining(true);
+    try {
+      store$.team.set(null);
+      store$.reset();
+      store$.rallye.set(rallye);
+      await setCurrentRallye(rallye);
 
       // Rehydrate previously created team for this rallye (if any)
       try {
-        const existingTeam = await getCurrentTeam(selectedRallye.id);
+        const existingTeam = await getCurrentTeam(rallye.id);
         if (existingTeam) {
-          const exists = await teamExists(selectedRallye.id, existingTeam.id);
-          if (exists) {
+          const exists = await teamExists(rallye.id, existingTeam.id);
+          if (exists === 'exists') {
             store$.team.set(existingTeam);
-          } else {
-            // Clean up stale local reference
-            await clearCurrentTeam(selectedRallye.id);
+          } else if (exists === 'missing') {
+            await clearCurrentTeam(rallye.id);
             store$.team.set(null);
+          } else {
+            store$.team.set(existingTeam);
           }
-        } else {
-          store$.team.set(null);
         }
       } catch (rehydrateErr) {
-        console.error('Error rehydrating team after password submit:', rehydrateErr);
-        // Fall back to no team; UI will handle setup if needed
+        console.error('Error rehydrating team after join:', rehydrateErr);
         store$.team.set(null);
       }
 
       store$.enabled.set(true);
-    } else {
-      Alert.alert(
-        'Falsches Passwort',
-        'Bitte geben Sie das richtige Passwort ein.'
-      );
+      return true;
+    } catch (e) {
+      console.error('Error joining rallye:', e);
+      Alert.alert(t('common.errorTitle'), t('welcome.participationStartError'));
+      return false;
+    } finally {
+      setJoining(false);
     }
-  } catch (error) {
-    console.error('Fehler beim Überprüfen des Passworts:', error);
-    Alert.alert('Fehler', 'Es ist ein Fehler aufgetreten.');
-  }
-};
-
-const handleNoPasswordSubmit = async () => {
-  const tourRallye = await getTourModeRallye();
-  if (tourRallye) {
-    store$.team.set(null);
-    store$.reset();
-    store$.rallye.set(tourRallye);
-    await setCurrentRallye(tourRallye);
-    store$.enabled.set(true);
-  } else {
-    Alert.alert('Fehler', 'Kein Tour Mode Rallye verfügbar.');
-  }
-};
-
-export default function Welcome() {
-  const { isDarkMode } = useTheme();
-  const { language, toggleLanguage } = useLanguage();
-
-  const [loading, setLoading] = useState(false);
-  const [online, setOnline] = useState(true);
-
-  const [showRallyeModal, setShowRallyeModal] = useState(false);
-  const [activeRallyes, setActiveRallyes] = useState([]);
-  const [selectedRallye, setSelectedRallye] = useState(null);
-
-  useEffect(() => {
-    onRefresh();
-  }, []);
-
-  const onRefresh = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('rallye')
-      .select('*')
-      .not('status', 'in', '(inactive,ended)')
-      .eq('tour_mode', false);
-
-    if (data) {
-      setOnline(true);
-    } else {
-      setOnline(false);
-    }
-    setLoading(false);
   };
 
-  useEffect(() => {
-    (async () => {
-      const rallyes = await getActiveRallyes();
-      setActiveRallyes(rallyes);
-    })();
-  }, [showRallyeModal]);
+  const stateBackground = isDarkMode
+    ? Colors.darkMode.background
+    : Colors.lightMode.background;
+  const compactCardStyle = globalStyles.welcomeStyles.compactCard;
 
-  const handleRallyeSelect = async (rallye) => {
-    setSelectedRallye(rallye);
-    await setCurrentRallye(rallye);
-    setShowRallyeModal(false);
-  };
-
-  const OfflineContent = ({ loading, onRefresh }) => (
+  const LoadingContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.offline,
         {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
+          backgroundColor: stateBackground,
         },
       ]}
     >
-      <Text
-        style={[
-          globalStyles.welcomeStyles.text,
-          { marginBottom: 20 },
-          {
-            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-          },
-        ]}
+      <ActivityIndicator size="large" color={Colors.dhbwRed} />
+      <ThemedText
+        variant="body"
+        style={[globalStyles.welcomeStyles.text, s.muted, { marginTop: 16 }]}
       >
-        {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
-      </Text>
-      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+        {t('common.loading')}
+      </ThemedText>
+    </View>
+  );
+
+  const StateContent = ({ message }: { message: string }) => (
+    <View
+      style={[
+        globalStyles.welcomeStyles.offline,
+        {
+          backgroundColor: stateBackground,
+        },
+      ]}
+    >
+      <ThemedText
+        variant="body"
+        style={[globalStyles.welcomeStyles.text, s.muted, { marginBottom: 20 }]}
+      >
+        {message}
+      </ThemedText>
+      <UIButton icon="rotate" onPress={loadRallyes}>
+        {t('common.refresh')}
       </UIButton>
     </View>
   );
 
-  const OnlineContent = () => (
+  const ReadyContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.container,
         {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
+          backgroundColor: stateBackground,
         },
       ]}
     >
+      {!hasActiveRallyes && hasTourMode ? (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.noRallyes.title')}
+          description={t('welcome.noRallyes.description')}
+          icon="info.circle"
+        />
+      ) : null}
+      {resumeAvailable && resumeRallye && resumeTeam ? (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.resume.title')}
+          description={t('welcome.resume.details', {
+            rallye: resumeRallye.name,
+            team: resumeTeam.name,
+          })}
+          icon="clock"
+        >
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <UIButton onPress={() => store$.enabled.set(true)}>
+                {t('common.resume')}
+              </UIButton>
+            </View>
+            <View style={{ flex: 1 }}>
+              <UIButton
+                outline
+                color={Colors.dhbwRed}
+                onPress={() => {
+                  void (async () => {
+                    const confirmed = await confirm({
+                      title: t('welcome.clearParticipation.title'),
+                      message: t('welcome.clearParticipation.message'),
+                      confirmText: t('welcome.clearParticipation.confirm'),
+                      cancelText: t('common.cancel'),
+                      destructive: true,
+                    });
+                    if (!confirmed) return;
+                    void store$.leaveRallye();
+                  })();
+                }}
+              >
+                {t('common.startOver')}
+              </UIButton>
+            </View>
+          </View>
+        </Card>
+      ) : null}
+
+      {hasActiveRallyes ? (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.join.title')}
+          description={t('welcome.join.description')}
+          icon="mappin.and.ellipse"
+        >
+          <UIButton disabled={joining} onPress={() => setShowRallyeModal(true)}>
+            {t('welcome.join.select')}
+          </UIButton>
+        </Card>
+      ) : null}
       <Card
-        title={
-          language === 'de'
-            ? 'An Campus Rallye teilnehmen'
-            : 'Join Campus Rallye'
-        }
-        description={
-          language === 'de'
-            ? 'Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team'
-            : 'Join a guided rally and explore the campus with your team'
-        }
-        icon="mappin.and.ellipse"
-        onShowModal={() => {
-          setShowRallyeModal(true);
-        }}
-        selectedRallye={selectedRallye}
-        onPasswordSubmit={(password) => {
-          if (!selectedRallye) {
-            Alert.alert(
-              language === 'de' ? 'Fehler' : 'Error',
-              language === 'de'
-                ? 'Bitte wähle zuerst eine Rallye aus.'
-                : 'Please select a rally first.'
-            );
-            return;
-          }
-          handlePasswordSubmit(password, selectedRallye);
-        }}
-      />
-      <Card
-        title={language === 'de' ? 'Campus-Gelände erkunden' : 'Explore Campus'}
-        description={
-          language === 'de'
-            ? 'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck'
-            : 'Explore the campus at your own pace without time pressure'
-        }
+        containerStyle={compactCardStyle}
+        title={t('welcome.explore.title')}
+        description={t('welcome.explore.description')}
         icon="binoculars"
-        onPress={handleNoPasswordSubmit}
-      />
+      >
+        <UIButton outline onPress={startTourMode}>
+          {t('welcome.explore.start')}
+        </UIButton>
+      </Card>
     </View>
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
+    <CollapsibleHeroHeader
+      heroImage={require('../assets/images/app/dhbw-campus-header.png')}
+      logoImage={require('../assets/images/app/dhbw-logo.png')}
+      title={t('welcome.appTitle')}
     >
-      <View
-        style={[
-          globalStyles.welcomeStyles.container,
-          {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.background
-              : Colors.lightMode.background,
-          },
-        ]}
-      >
-        <View style={{ position: 'relative' }}>
-          <Image
-            style={globalStyles.welcomeStyles.headerImage}
-            source={require('../assets/images/app/dhbw-campus-header.png')}
-          />
-
-          <TouchableOpacity
-            style={{ position: 'absolute', top: 40, left: 13 }}
-            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-            onPress={toggleLanguage}
-          >
-            <IconSymbol
-              name="globe"
-              size={24}
-              color={isDarkMode ? Colors.lightMode.text : Colors.darkMode.text}
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={globalStyles.welcomeStyles.header}>
-          <Text
-            style={[
-              globalStyles.welcomeStyles.text,
-              globalStyles.welcomeStyles.title,
-              {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-              },
-            ]}
-          >
-            {language === 'de'
-              ? 'DHBW Lörrach Campus Rallye'
-              : 'DHBW Lörrach Campus Rallye'}
-          </Text>
-          <Image
-            style={globalStyles.welcomeStyles.logo}
-            source={require('../assets/images/app/dhbw-logo.png')}
-          />
-        </View>
-        <View
-          style={[
-            globalStyles.welcomeStyles.content,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.background
-                : Colors.lightMode.background,
-            },
-          ]}
-        >
-          {loading && (
-            <View>
-              <ActivityIndicator size="large" color={Colors.dhbwRed} />
-            </View>
-          )}
-          {online && !loading && <OnlineContent />}
-          {!online && !loading && (
-            <OfflineContent onRefresh={onRefresh} loading={loading} />
-          )}
-        </View>
-      </View>
+      {fetchState === 'loading' && <LoadingContent />}
+      {fetchState === 'ready' && <ReadyContent />}
+      {fetchState === 'offline' && (
+        <StateContent message={t('welcome.offline')} />
+      )}
+      {fetchState === 'empty' && <StateContent message={t('welcome.empty')} />}
+      {fetchState === 'error' && <StateContent message={t('welcome.error')} />}
       <RallyeSelectionModal
         visible={showRallyeModal}
         onClose={() => setShowRallyeModal(false)}
         activeRallyes={activeRallyes}
-        onSelect={handleRallyeSelect}
+        onJoin={joinRallye}
+        joining={joining}
       />
-    </KeyboardAvoidingView>
+    </CollapsibleHeroHeader>
   );
 }

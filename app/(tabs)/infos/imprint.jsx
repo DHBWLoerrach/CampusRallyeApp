@@ -3,15 +3,15 @@ import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
-import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
+import { ScreenScrollView } from '@/components/ui/Screen';
 
 export default function Imprint() {
   const { isDarkMode } = useTheme();
   const { language } = useLanguage();
 
   return (
-    <ThemedScrollView variant="background">
+    <ScreenScrollView padding="none">
       <View
         style={[
           globalStyles.imprintStyles.texts.container,
@@ -120,12 +120,14 @@ export default function Imprint() {
           </ThemedText>
           <ThemedText
             style={{ color: Colors.dhbwRed }}
-            onPress={() => Linking.openURL('https://github.com/DHBWLoerrach/CampusRallyeApp')}
+            onPress={() =>
+              Linking.openURL('https://github.com/DHBWLoerrach/CampusRallyeApp')
+            }
           >
             https://github.com/DHBWLoerrach/CampusRallyeApp
           </ThemedText>
         </View>
       </View>
-    </ThemedScrollView>
+    </ScreenScrollView>
   );
 }

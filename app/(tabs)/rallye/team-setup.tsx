@@ -1,22 +1,24 @@
 import { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import { supabase } from '@/utils/Supabase';
 import { store$ } from '@/services/storage/Store';
-import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import generateTeamName from '@/utils/RandomTeamNames';
 import { setCurrentTeam } from '@/services/storage/teamStorage';
-import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
+import { Screen } from '@/components/ui/Screen';
+import { useLanguage } from '@/utils/LanguageContext';
 
 const TeamSetup = observer(function TeamSetup() {
   const [loading, setLoading] = useState(false);
   const s = useAppStyles();
+  const { t } = useLanguage();
   const rallye = useSelector(() => store$.rallye.get());
   const createTeam = async () => {
+    if (!rallye) return;
     setLoading(true);
     const teamName = generateTeamName();
     try {
@@ -31,35 +33,32 @@ const TeamSetup = observer(function TeamSetup() {
         store$.team.set(data);
         await setCurrentTeam(rallye.id, data);
         // Kurze Bestätigung via Bottom Sheet im Rallye-Screen
-        (store$ as any).showTeamNameSheet.set(true);
+        store$.showTeamNameSheet.set(true);
       }
     } catch (e) {
       console.error('Error creating team:', e);
-      Alert.alert(
-        'Fehler',
-        'Team konnte nicht erstellt werden. Bitte erneut versuchen.'
-      );
+      Alert.alert(t('common.errorTitle'), t('teamSetup.error.message'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ThemedView variant="background" style={globalStyles.default.container}>
+    <Screen padding="none" contentStyle={globalStyles.default.container}>
       <ThemedText style={[globalStyles.teamStyles.title]}>
         {rallye?.name}
       </ThemedText>
       <View style={[globalStyles.teamStyles.container]}>
         <View style={[globalStyles.teamStyles.infoBox, s.infoBox]}>
           <ThemedText style={globalStyles.teamStyles.message}>
-            {'Bilde ein Team, um an der Rallye teilzunehmen.'}
+            {t('teamSetup.message')}
           </ThemedText>
           <UIButton disabled={loading} onPress={createTeam}>
-            Team bilden
+            {t('teamSetup.button')}
           </UIButton>
         </View>
       </View>
-    </ThemedView>
+    </Screen>
   );
 });
 

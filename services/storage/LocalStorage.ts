@@ -18,4 +18,3 @@ export const storeData = async (storageKey: string, value: any) => {
     console.error('Error writing local storage:', error);
   }
 };
-

@@ -4,8 +4,8 @@ import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
-import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
+import { ScreenScrollView } from '@/components/ui/Screen';
 
 const AppVersion = ({ isDarkMode }) => {
   let versionString = `Version: ${Application.nativeApplicationVersion} (${Application.nativeBuildVersion})`;
@@ -21,7 +21,7 @@ export default function About() {
   const { language } = useLanguage();
 
   return (
-    <ThemedScrollView variant="background">
+    <ScreenScrollView padding="none">
       <View
         style={[
           globalStyles.informationStyles.container,
@@ -74,6 +74,6 @@ export default function About() {
         </ThemedText>
         <AppVersion isDarkMode={isDarkMode} />
       </View>
-    </ThemedScrollView>
+    </ScreenScrollView>
   );
 }

@@ -1,22 +1,8 @@
 import { supabase } from '@/utils/Supabase';
-import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
-import { store$ } from './Store';
-import { Buffer } from 'buffer';
-import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system/next';
+import { enqueueSaveAnswer } from './offlineOutbox';
 
-export async function getOfflineQueue() {
-  return (await getStorageItem(StorageKeys.OFFLINE_QUEUE)) || [];
-}
-
-export async function addToOfflineQueue(action: any) {
-  const queue = await getOfflineQueue();
-  queue.push(action);
-  await setStorageItem(StorageKeys.OFFLINE_QUEUE, queue);
-}
-
-export async function clearOfflineQueue() {
-  await setStorageItem(StorageKeys.OFFLINE_QUEUE, []);
-}
+export type SaveAnswerResult = { status: 'sent' | 'queued' };
 
 export async function saveAnswer(
   teamId: number,
@@ -24,7 +10,7 @@ export async function saveAnswer(
   answeredCorrectly: boolean,
   points: number,
   answer: string = ''
-) {
+): Promise<SaveAnswerResult> {
   try {
     const { error } = await supabase.from('team_questions').insert({
       team_id: teamId,
@@ -34,50 +20,55 @@ export async function saveAnswer(
       team_answer: answer,
     });
     if (error) throw error;
-    return true;
+    return { status: 'sent' };
   } catch (error) {
     console.error('Error saving answer:', error);
-    await addToOfflineQueue({
-      type: 'SAVE_ANSWER',
-      data: { teamId, questionId, answeredCorrectly, points },
-    });
-    return false;
+    try {
+      await enqueueSaveAnswer({
+        team_id: teamId,
+        question_id: questionId,
+        correct: answeredCorrectly,
+        points,
+        team_answer: answer,
+      });
+      return { status: 'queued' };
+    } catch (queueError) {
+      console.error('Error enqueueing offline answer:', queueError);
+      throw queueError;
+    }
   }
 }
 
-export async function uploadPhotoAnswer(imageUri: string) {
-  try {
-    const base64 = await FileSystem.readAsStringAsync(imageUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    const buffer = Buffer.from(base64, 'base64');
-
-    const teamId = (store$.team.get() as any).id as number;
-    const current = store$.currentQuestion.get() as any;
-    const questionId = current.id as number;
-    const points = current.points as number;
-
-    const fileName = `${teamId}_${questionId}_${Date.now()}.jpg`;
-    const filePath = `${fileName}`;
-
-    const { data, error: uploadError } = await supabase.storage
-      .from('upload_photo_answers')
-      .upload(filePath, buffer, { upsert: true, contentType: 'image/*' });
-    if (uploadError) throw uploadError;
-
-    await saveAnswer(teamId, questionId, true, points, filePath);
-
-    store$.points.set((store$.points.get() as number) + points);
-    store$.gotoNextQuestion();
-
-    return data;
-  } catch (error) {
-    console.error('Error uploading image answer:', error);
-    await addToOfflineQueue({
-      type: 'UPLOAD_PHOTO_ANSWER',
-      data: { imageUri },
-    });
-    return false as const;
+export async function uploadPhotoAnswer({
+  imageUri,
+  teamId,
+  questionId,
+}: {
+  imageUri: string;
+  teamId: number;
+  questionId: number;
+}): Promise<{ filePath: string }> {
+  // Use the new expo-file-system File API (SDK 54+)
+  const file = new File(imageUri);
+  const base64 = await file.base64();
+  // Convert base64 to Uint8Array for Supabase upload
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
   }
-}
 
+  // Deterministic path for idempotent retries (one photo per team/question).
+  const filePath = `${teamId}_${questionId}.jpg`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('upload-photos')
+    .upload(filePath, bytes, { upsert: false, contentType: 'image/jpeg' });
+
+  // Treat "already exists" as success (idempotent retry without SELECT policy)
+  if (uploadError && uploadError.message !== 'The resource already exists') {
+    throw uploadError;
+  }
+
+  return { filePath };
+}
