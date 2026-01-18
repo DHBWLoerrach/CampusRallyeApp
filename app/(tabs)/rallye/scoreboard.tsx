@@ -134,32 +134,6 @@ export default function Scoreboard() {
             borderBottomColor: palette.cellBorder,
           }}
         >
-<<<<<<< HEAD
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCell]}>
-            Platz
-          </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCellWide]}>
-            Team
-          </ThemedText>
-          <ThemedText style={[globalStyles.scoreboardStyles.headerCell]}>
-            Punkte
-          </ThemedText>
-        </View>
-
-        <ScrollView
-          style={[
-            { maxHeight: 300 },
-            {
-              backgroundColor: isDarkMode
-                ? palette.scheduleHeader
-                : Colors.veryLightGray,
-            },
-          ]}
-        >
-          {rows.map((team) => (
-            <View
-              key={team.id}
-=======
           <ThemedText
             variant="title"
             style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
@@ -169,17 +143,12 @@ export default function Scoreboard() {
           {rallye?.name && (
             <ThemedText
               variant="subtitle"
->>>>>>> origin/main
               style={[
                 globalStyles.rallyeStatesStyles.infoSubtitle,
                 s.text,
                 { marginTop: 4, marginBottom: 8 },
               ]}
             >
-<<<<<<< HEAD
-              <ThemedText style={[globalStyles.scoreboardStyles.cell]}>
-                {team.rank}
-=======
               {rallye.name}
             </ThemedText>
           )}
@@ -195,7 +164,6 @@ export default function Scoreboard() {
               {t('scoreboard.yourTeamLabel')}{' '}
               <ThemedText variant="accent" style={{ fontWeight: '700' }}>
                 {ourTeam.name}
->>>>>>> origin/main
               </ThemedText>
             </ThemedText>
           ) : null}
@@ -224,28 +192,6 @@ export default function Scoreboard() {
                 accessible
                 accessibilityLabel={rowLabel}
                 style={[
-<<<<<<< HEAD
-                  globalStyles.scoreboardStyles.cellWide,
-                  team.group_name === ourTeam?.name &&
-                    globalStyles.scoreboardStyles.cellHighlighted,
-                  {
-                    color:
-                      team.group_name === ourTeam?.name
-                        ? Colors.dhbwRed
-                        : Colors.dhbwGray,
-                  },
-                ]}
-              >
-                {team.group_name}{'\n'}
-                {formatDuration(team.time_spent)}
-              </ThemedText>
-              
-              <ThemedText style={[globalStyles.scoreboardStyles.cell]}>
-                {team.total_points}
-              </ThemedText>
-            </View>
-          ))}
-=======
                   globalStyles.scoreboardStyles.row,
                   s.listRow,
                   isOurTeam && {
@@ -298,7 +244,6 @@ export default function Scoreboard() {
               </View>
             );
           })}
->>>>>>> origin/main
         </ScrollView>
       </View>
     </ScreenScrollView>
