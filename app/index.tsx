@@ -2,26 +2,25 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
   Text,
   View,
-  TouchableOpacity,
   AppState,
   AppStateStatus,
 } from 'react-native';
-import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
 import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
 import SelectionModal, { SelectionItem } from '@/components/ui/SelectionModal';
+import { CollapsibleHeroHeader } from '@/components/ui/CollapsibleHeroHeader';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import { store$ } from '@/services/storage/Store';
+import { useSelector } from '@legendapp/state/react';
+import ThemedText from '@/components/themed/ThemedText';
+import { useAppStyles } from '@/utils/AppStyles';
+import { confirm } from '@/utils/ConfirmAlert';
 import {
   setCurrentRallye,
   getOrganizationsWithActiveRallyes,
@@ -34,6 +33,7 @@ import {
   getSelectedDepartment as getStoredDepartment,
   setSelectedDepartment as storeSelectedDepartment,
   clearSelectedDepartment,
+  type RallyeRow,
 } from '@/services/storage/rallyeStorage';
 import {
   getCurrentTeam,
@@ -43,70 +43,23 @@ import {
 import { Organization, Department, Rallye } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
-// Typen für die Auswahl-Phasen
+// Types for selection phases
 type SelectionStep = 'organization' | 'department' | 'rallye';
-
-// TODO: Fix types
-const handlePasswordSubmit = async (password: string, selectedRallye: any) => {
-  try {
-    if (password === selectedRallye.password) {
-      // Set selected rallye and enable tabs
-      store$.rallye.set(selectedRallye);
-
-      // Rehydrate previously created team for this rallye (if any)
-      try {
-        const existingTeam = await getCurrentTeam(selectedRallye.id);
-        if (existingTeam) {
-          const exists = await teamExists(selectedRallye.id, existingTeam.id);
-          if (exists) {
-            store$.team.set(existingTeam);
-          } else {
-            // Clean up stale local reference
-            await clearCurrentTeam(selectedRallye.id);
-            store$.team.set(null);
-          }
-        } else {
-          store$.team.set(null);
-        }
-      } catch (rehydrateErr) {
-        Logger.error('Welcome', 'Error rehydrating team after password submit', rehydrateErr);
-        // Fall back to no team; UI will handle setup if needed
-        store$.team.set(null);
-      }
-
-      store$.enabled.set(true);
-    } else {
-      Alert.alert(
-        'Falsches Passwort',
-        'Bitte geben Sie das richtige Passwort ein.'
-      );
-    }
-  } catch (error) {
-    Logger.error('Welcome', 'Fehler beim Überprüfen des Passworts', error);
-    Alert.alert('Fehler', 'Es ist ein Fehler aufgetreten.');
-  }
-};
-
-const handleNoPasswordSubmit = async (tourRallye: Rallye) => {
-  if (tourRallye) {
-    store$.team.set(null);
-    store$.reset();
-    store$.rallye.set(tourRallye);
-    await setCurrentRallye(tourRallye);
-    store$.enabled.set(true);
-  } else {
-    Alert.alert('Fehler', 'Kein Tour Mode Rallye verfügbar.');
-  }
-};
 
 export default function Welcome() {
   const { isDarkMode } = useTheme();
-  const { language, toggleLanguage } = useLanguage();
+  const { t } = useLanguage();
+  const s = useAppStyles();
+
+  const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
+  const resumeRallye = useSelector(() => store$.rallye.get());
+  const resumeTeam = useSelector(() => store$.team.get());
 
   const [loading, setLoading] = useState(false);
+  const [joining, setJoining] = useState(false);
   const [online, setOnline] = useState(true);
 
-  // Neue States für hierarchische Navigation
+  // States for hierarchical navigation
   const [selectionStep, setSelectionStep] = useState<SelectionStep>('organization');
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
@@ -114,21 +67,25 @@ export default function Welcome() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [tourModeRallye, setTourModeRallye] = useState<Rallye | null>(null);
 
-  // Bestehende States
+  // Modal states
   const [showRallyeModal, setShowRallyeModal] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [showDeptModal, setShowDeptModal] = useState(false);
   const [activeRallyes, setActiveRallyes] = useState<Rallye[]>([]);
-  const [selectedRallye, setSelectedRallye] = useState<Rallye | null>(null);
 
-  // Auto-Refresh: Refs für Interval und App-State
+  // Auto-Refresh refs
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isInitializedRef = useRef<boolean>(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const AUTO_REFRESH_INTERVAL = 60000; // 60 Sekunden (optimiert für Batterie/Datenverbrauch)
+  const AUTO_REFRESH_INTERVAL = 60000;
 
-  // Initialisierung: Lade gespeicherte Auswahl und Organisationen beim Start
+  const stateBackground = isDarkMode
+    ? Colors.darkMode.background
+    : Colors.lightMode.background;
+  const compactCardStyle = globalStyles.welcomeStyles.compactCard;
+
+  // Initialization
   useEffect(() => {
     initializeSelection();
   }, []);
@@ -136,12 +93,10 @@ export default function Welcome() {
   const initializeSelection = async () => {
     setLoading(true);
     try {
-      // Lade gespeicherte Auswahl
       const savedOrg = await getStoredOrganization();
       const savedDept = await getStoredDepartment();
 
       if (savedOrg) {
-        // Organisation war gespeichert - prüfe ob sie noch existiert/aktiv ist
         const orgs = await getOrganizationsWithActiveRallyes();
         setOrganizations(orgs);
         setOnline(true);
@@ -150,14 +105,12 @@ export default function Welcome() {
         if (orgStillValid) {
           setSelectedOrganization(orgStillValid);
           
-          // Lade Departments und Tour-Mode für diese Organisation
           const depts = await getDepartmentsForOrganization(orgStillValid.id);
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(orgStillValid.id);
           setTourModeRallye(tourRallye);
 
           if (savedDept) {
-            // Department war auch gespeichert - prüfe ob es noch existiert/aktiv ist
             const deptStillValid = depts.find(d => d.id === savedDept.id);
             if (deptStillValid) {
               setSelectedDepartment(deptStillValid);
@@ -165,7 +118,6 @@ export default function Welcome() {
               setActiveRallyes(rallyes);
               setSelectionStep('rallye');
             } else {
-              // Department nicht mehr gültig - lösche aus Storage
               await clearSelectedDepartment();
               setSelectionStep('department');
             }
@@ -173,32 +125,29 @@ export default function Welcome() {
             setSelectionStep('department');
           }
         } else {
-          // Organisation nicht mehr gültig - lösche aus Storage
           await clearSelectedOrganization();
           setSelectionStep('organization');
         }
       } else {
-        // Keine gespeicherte Auswahl - lade Organisationen
         const orgs = await getOrganizationsWithActiveRallyes();
         setOrganizations(orgs);
         setOnline(true);
         
-        // Auto-Selection: Wenn nur eine Organisation verfügbar, automatisch auswählen
+        // Auto-select if only one organization
         if (orgs.length === 1) {
-          Logger.debug('AutoSelect', 'Nur eine Organisation verfügbar, wähle automatisch aus');
+          Logger.debug('AutoSelect', 'Only one organization available, auto-selecting');
           const singleOrg = orgs[0];
           setSelectedOrganization(singleOrg);
           await storeSelectedOrganization(singleOrg);
           
-          // Lade Departments und Tour-Mode für diese Organisation
           const depts = await getDepartmentsForOrganization(singleOrg.id);
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(singleOrg.id);
           setTourModeRallye(tourRallye);
           
-          // Auto-Selection: Wenn nur ein Department verfügbar, automatisch auswählen
+          // Auto-select if only one department
           if (depts.length === 1) {
-            Logger.debug('AutoSelect', 'Nur ein Department verfügbar, wähle automatisch aus');
+            Logger.debug('AutoSelect', 'Only one department available, auto-selecting');
             const singleDept = depts[0];
             setSelectedDepartment(singleDept);
             await storeSelectedDepartment(singleDept);
@@ -218,51 +167,27 @@ export default function Welcome() {
       setSelectionStep('organization');
     }
     setLoading(false);
-    
-    // Markiere Initialisierung als abgeschlossen für Auto-Refresh
     isInitializedRef.current = true;
-    Logger.debug('Init', 'Initialisierung abgeschlossen, Auto-Refresh aktiviert');
   };
 
-  // Auto-Refresh: Aktualisiert Daten basierend auf aktuellem Schritt
+  // Auto-refresh logic
   const refreshCurrentData = useCallback(async () => {
-    // Nicht refreshen während des Ladens oder vor Initialisierung
     if (loading || !isInitializedRef.current) return;
+    if (store$.enabled.get()) return;
+    if (appStateRef.current !== 'active') return;
+    if (showRallyeModal || showOrgModal || showDeptModal) return;
 
-    // Nicht refreshen wenn eine Rallye aktiv ist (User ist in der Rallye)
-    if (store$.enabled.get()) {
-      Logger.debug('AutoRefresh', 'Übersprungen: Rallye ist aktiv');
-      return;
-    }
-
-    // Nicht refreshen wenn App im Hintergrund ist
-    if (appStateRef.current !== 'active') {
-      Logger.debug('AutoRefresh', 'Übersprungen: App nicht aktiv');
-      return;
-    }
-
-    // Nicht refreshen wenn ein Modal geöffnet ist
-    if (showRallyeModal || showOrgModal || showDeptModal) {
-      Logger.debug('AutoRefresh', 'Übersprungen: Modal ist geöffnet');
-      return;
-    }
-
-    // Vorherigen Request abbrechen falls noch laufend
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
 
-    Logger.debug('AutoRefresh', `Aktualisiere Daten für Schritt: ${selectionStep}`);
-
     try {
       if (selectionStep === 'organization') {
-        // Aktualisiere Organisationsliste
         const orgs = await getOrganizationsWithActiveRallyes();
         setOrganizations(orgs);
         setOnline(true);
       } else if (selectionStep === 'department' && selectedOrganization) {
-        // Aktualisiere Departments und prüfe ob Organisation noch gültig
         const orgs = await getOrganizationsWithActiveRallyes();
         const orgStillValid = orgs.find(o => o.id === selectedOrganization.id);
         
@@ -272,24 +197,19 @@ export default function Welcome() {
           const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
           setTourModeRallye(tourRallye);
           
-          // Falls keine Departments mehr und kein Tour-Mode → zurück zur Org-Auswahl
           if (depts.length === 0 && !tourRallye) {
-            Logger.debug('AutoRefresh', 'Organisation hat keine aktiven Inhalte mehr, zurück zur Auswahl');
             await clearSelectedOrganization();
             setSelectedOrganization(null);
             setOrganizations(orgs);
             setSelectionStep('organization');
           }
         } else {
-          // Organisation nicht mehr gültig
-          Logger.debug('AutoRefresh', 'Organisation nicht mehr gültig, zurück zur Auswahl');
           await clearSelectedOrganization();
           setSelectedOrganization(null);
           setOrganizations(orgs);
           setSelectionStep('organization');
         }
       } else if (selectionStep === 'rallye' && selectedOrganization && selectedDepartment) {
-        // Aktualisiere Rallyes und prüfe ob Department noch gültig
         const depts = await getDepartmentsForOrganization(selectedOrganization.id);
         const deptStillValid = depts.find(d => d.id === selectedDepartment.id);
         
@@ -299,17 +219,13 @@ export default function Welcome() {
           const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
           setTourModeRallye(tourRallye);
           
-          // Falls keine Rallyes mehr und kein Tour-Mode → zurück zur Department-Auswahl
           if (rallyes.length === 0 && !tourRallye) {
-            Logger.debug('AutoRefresh', 'Department hat keine aktiven Rallyes mehr, zurück zur Auswahl');
             await clearSelectedDepartment();
             setSelectedDepartment(null);
             setDepartments(depts);
             setSelectionStep('department');
           }
         } else {
-          // Department nicht mehr gültig → zurück zur Department-Auswahl
-          Logger.debug('AutoRefresh', 'Department nicht mehr gültig, zurück zur Auswahl');
           await clearSelectedDepartment();
           setSelectedDepartment(null);
           setDepartments(depts);
@@ -317,47 +233,35 @@ export default function Welcome() {
         }
       }
     } catch (error) {
-      // AbortError ignorieren (erwartetes Verhalten bei Abbruch)
-      if (error instanceof Error && error.name === 'AbortError') {
-        Logger.debug('AutoRefresh', 'Request wurde abgebrochen');
-        return;
-      }
-      Logger.error('AutoRefresh', 'Fehler beim Aktualisieren', error);
+      if (error instanceof Error && error.name === 'AbortError') return;
+      Logger.error('AutoRefresh', 'Error refreshing data', error);
     }
   }, [selectionStep, selectedOrganization, selectedDepartment, loading, showRallyeModal, showOrgModal, showDeptModal]);
 
-  // Auto-Refresh: Setup und Cleanup des Intervals
+  // Auto-refresh setup
   useEffect(() => {
-    // Initialer Sync nach kurzer Verzögerung (nach Initialisierung)
     const initialSyncTimeout = setTimeout(() => {
       if (isInitializedRef.current) {
-        Logger.debug('AutoRefresh', 'Initialer Sync nach App-Start');
         refreshCurrentData();
       }
-    }, 2000); // 2 Sekunden nach Mount für initialen Sync
+    }, 2000);
 
-    // Starte Auto-Refresh Interval
     refreshIntervalRef.current = setInterval(() => {
       refreshCurrentData();
     }, AUTO_REFRESH_INTERVAL);
 
-    // App-State Listener: Sync wenn App aus Hintergrund kommt
     const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
       if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App kommt in den Vordergrund → sofort refreshen
-        Logger.debug('AutoRefresh', 'App aus Hintergrund aktiviert, führe Sync durch');
         refreshCurrentData();
       }
       appStateRef.current = nextAppState;
     });
 
-    // Cleanup
     return () => {
       clearTimeout(initialSyncTimeout);
       if (refreshIntervalRef.current) {
         clearInterval(refreshIntervalRef.current);
       }
-      // Abbrechen laufender Requests
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -365,111 +269,63 @@ export default function Welcome() {
     };
   }, [refreshCurrentData]);
 
-  const loadOrganizations = async () => {
-    setLoading(true);
-    try {
-      const orgs = await getOrganizationsWithActiveRallyes();
-      setOrganizations(orgs);
-      setOnline(orgs.length > 0 || true);
-    } catch (error) {
-      Logger.error('Welcome', 'Error loading organizations', error);
-      setOnline(false);
-    }
-    setLoading(false);
-  };
-
-  // Handler für Organisation-Auswahl
+  // Handler for organization selection
   const handleOrganizationSelect = async (org: Organization) => {
-    Logger.debug('Welcome', `handleOrganizationSelect called for org: ${org.id} (${org.name})`);
     setSelectedOrganization(org);
     setLoading(true);
     try {
-      // Speichere Auswahl persistent
       await storeSelectedOrganization(org);
       
       const depts = await getDepartmentsForOrganization(org.id);
-      Logger.debug('Welcome', `Departments loaded for org ${org.id}:`, depts);
-      Logger.debug('Welcome', `Number of departments: ${depts.length}`);
       setDepartments(depts);
       
-      // Lade Tour-Mode Rallye für diese Organisation
       const tourRallye = await getTourModeRallyeForOrganization(org.id);
-      Logger.debug('Welcome', `Tour mode rallye for org ${org.id}:`, tourRallye);
       setTourModeRallye(tourRallye);
       
-      // Auto-Selection: Wenn nur ein Department verfügbar, automatisch auswählen
       if (depts.length === 1) {
-        Logger.debug('AutoSelect', 'Nur ein Department verfügbar, wähle automatisch aus');
         const singleDept = depts[0];
         setSelectedDepartment(singleDept);
         await storeSelectedDepartment(singleDept);
         const rallyes = await getRallyesForDepartment(singleDept.id);
-        Logger.debug('Welcome', `Rallyes for single dept ${singleDept.id}:`, rallyes);
         setActiveRallyes(rallyes);
         setSelectionStep('rallye');
       } else {
-        Logger.debug('Welcome', `Setting selection step to 'department' (depts.length=${depts.length})`);
         setSelectionStep('department');
       }
     } catch (error) {
       Logger.error('Welcome', 'Error loading departments', error);
-      Alert.alert('Fehler', 'Departments konnten nicht geladen werden.');
+      Alert.alert(t('common.errorTitle'), t('welcome.departmentLoadError'));
     }
     setLoading(false);
   };
 
-  // Handler für Department-Auswahl
+  // Handler for department selection
   const handleDepartmentSelect = async (dept: Department) => {
-    Logger.debug('Welcome', `handleDepartmentSelect called with dept: ${dept.id} (${dept.name})`);
     setSelectedDepartment(dept);
     setLoading(true);
     try {
-      // Speichere Auswahl persistent
       await storeSelectedDepartment(dept);
       
       const rallyes = await getRallyesForDepartment(dept.id);
-      Logger.debug('Welcome', `Rallyes loaded for dept ${dept.id}:`, rallyes);
-      Logger.debug('Welcome', `Number of rallyes: ${rallyes.length}`);
       setActiveRallyes(rallyes);
       setSelectionStep('rallye');
     } catch (error) {
       Logger.error('Welcome', 'Error loading rallyes', error);
-      Alert.alert('Fehler', 'Rallyes konnten nicht geladen werden.');
+      Alert.alert(t('common.errorTitle'), t('welcome.rallyeLoadError'));
     }
     setLoading(false);
   };
 
-  // Handler für Zurück-Navigation
+  // Handler for back navigation
   const handleBack = async () => {
     if (selectionStep === 'rallye') {
-      // Prüfe ob nur ein Department vorhanden ist (Softlock-Vermeidung)
-      // Wenn ja, springe direkt zur Organisations-Auswahl
-      if (departments.length <= 1) {
-        Logger.debug('Navigation', 'Nur ein Department vorhanden, springe direkt zur Organisations-Auswahl');
-        // Lösche Organisation-Auswahl aus Storage (löscht auch Department)
-        await clearSelectedOrganization();
-        // Zuerst States zurücksetzen, dann Step ändern (verhindert Race Conditions)
-        setSelectedOrganization(null);
-        setSelectedDepartment(null);
-        setDepartments([]);
-        setActiveRallyes([]);
-        setTourModeRallye(null);
-        setSelectionStep('organization');
-      } else {
-        // Normale Navigation: Zurück zur Department-Auswahl
-        Logger.debug('Navigation', 'Zurück zur Department-Auswahl');
-        await clearSelectedDepartment();
-        // Zuerst States zurücksetzen, dann Step ändern
-        setSelectedDepartment(null);
-        setActiveRallyes([]);
-        setSelectedRallye(null);
-        setSelectionStep('department');
-      }
+      // Always go back to department selection first
+      await clearSelectedDepartment();
+      setSelectedDepartment(null);
+      setActiveRallyes([]);
+      setSelectionStep('department');
     } else if (selectionStep === 'department') {
-      Logger.debug('Navigation', 'Zurück zur Organisations-Auswahl');
-      // Lösche Organisation-Auswahl aus Storage (löscht auch Department)
       await clearSelectedOrganization();
-      // Zuerst States zurücksetzen, dann Step ändern
       setSelectedOrganization(null);
       setSelectedDepartment(null);
       setDepartments([]);
@@ -478,10 +334,10 @@ export default function Welcome() {
     }
   };
 
-  // Handler für Tour-Mode (angepasst für Organisation)
+  // Handler for tour mode
   const handleTourModeSubmit = async () => {
     if (!tourModeRallye) {
-      Alert.alert('Fehler', 'Kein Tour Mode für diesen Standort verfügbar.');
+      Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
       return;
     }
     store$.team.set(null);
@@ -491,13 +347,47 @@ export default function Welcome() {
     store$.enabled.set(true);
   };
 
-  const handleRallyeSelect = async (rallye: any) => {
-    setSelectedRallye(rallye as Rallye);
-    await setCurrentRallye(rallye);
-    setShowRallyeModal(false);
+  // Handler for joining a rallye (new API)
+  const joinRallye = async (rallye: RallyeRow): Promise<boolean> => {
+    if (joining) return false;
+    setJoining(true);
+    try {
+      store$.team.set(null);
+      store$.reset();
+      store$.rallye.set(rallye);
+      await setCurrentRallye(rallye);
+
+      // Rehydrate previously created team for this rallye (if any)
+      try {
+        const existingTeam = await getCurrentTeam(rallye.id);
+        if (existingTeam) {
+          const exists = await teamExists(rallye.id, existingTeam.id);
+          if (exists === 'exists') {
+            store$.team.set(existingTeam);
+          } else if (exists === 'missing') {
+            await clearCurrentTeam(rallye.id);
+            store$.team.set(null);
+          } else {
+            store$.team.set(existingTeam);
+          }
+        }
+      } catch (rehydrateErr) {
+        Logger.error('Welcome', 'Error rehydrating team after join', rehydrateErr);
+        store$.team.set(null);
+      }
+
+      store$.enabled.set(true);
+      return true;
+    } catch (e) {
+      Logger.error('Welcome', 'Error joining rallye', e);
+      Alert.alert(t('common.errorTitle'), t('welcome.participationStartError'));
+      return false;
+    } finally {
+      setJoining(false);
+    }
   };
 
-  // Handler für Organisation-Auswahl aus Modal
+  // Handler for organization selection from modal
   const handleOrgModalSelect = (item: SelectionItem) => {
     const org = organizations.find(o => o.id === item.id);
     if (org) {
@@ -506,7 +396,7 @@ export default function Welcome() {
     }
   };
 
-  // Handler für Department-Auswahl aus Modal
+  // Handler for department selection from modal
   const handleDeptModalSelect = (item: SelectionItem) => {
     const dept = departments.find(d => d.id === item.id);
     if (dept) {
@@ -515,239 +405,215 @@ export default function Welcome() {
     }
   };
 
-  const OfflineContent = ({ loading, onRefresh }: { loading: boolean; onRefresh: () => void }) => (
-    <View
-      style={[
-        globalStyles.welcomeStyles.offline,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
-    >
-      <Text
-        style={[
-          globalStyles.welcomeStyles.text,
-          { marginBottom: 20 },
-          {
-            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-          },
-        ]}
-      >
-        {language === 'de' ? 'Du bist offline…' : 'You are offline…'}
-      </Text>
-      <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
-        {language === 'de' ? 'Aktualisieren' : 'Refresh'}
+  // Loading content
+  const LoadingContent = () => (
+    <View style={[globalStyles.welcomeStyles.offline, { backgroundColor: stateBackground }]}>
+      <ActivityIndicator size="large" color={Colors.dhbwRed} />
+      <ThemedText variant="body" style={[globalStyles.welcomeStyles.text, s.muted, { marginTop: 16 }]}>
+        {t('common.loading')}
+      </ThemedText>
+    </View>
+  );
+
+  // Offline content
+  const OfflineContent = () => (
+    <View style={[globalStyles.welcomeStyles.offline, { backgroundColor: stateBackground }]}>
+      <ThemedText variant="body" style={[globalStyles.welcomeStyles.text, s.muted, { marginBottom: 20 }]}>
+        {t('welcome.offline')}
+      </ThemedText>
+      <UIButton icon="rotate" onPress={initializeSelection}>
+        {t('common.refresh')}
       </UIButton>
     </View>
   );
 
-  // Phase 1: Organisations-Auswahl
+  // Phase 1: Organization selection
   const OrganizationContent = () => (
-    <View
-      style={[
-        globalStyles.welcomeStyles.container,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
-    >
+    <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
       <Card
-        title={
-          language === 'de'
-            ? 'Standort auswählen'
-            : 'Select Location'
-        }
-        description={
-          language === 'de'
-            ? 'Wähle deinen Standort aus, um verfügbare Rallyes zu sehen'
-            : 'Select your location to see available rallyes'
-        }
+        containerStyle={compactCardStyle}
+        title={t('welcome.selectLocation.title')}
+        description={t('welcome.selectLocation.description')}
         icon="building.2"
-        onShowModal={() => setShowOrgModal(true)}
-        onPasswordSubmit={() => {}}
-      />
+        layout="vertical"
+      >
+        <UIButton onPress={() => setShowOrgModal(true)}>
+          {t('welcome.selectLocation.button')}
+        </UIButton>
+      </Card>
     </View>
   );
 
-  // Phase 2: Department-Auswahl
-  // Department-Karte nur anzeigen wenn es Departments mit aktiven Rallyes gibt
+  // Phase 2: Department selection
   const hasDepartmentsWithRallyes = departments.length > 0;
   const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye;
 
   const DepartmentContent = () => (
-    <View
-      style={[
-        globalStyles.welcomeStyles.container,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
-    >
+    <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
       {hasDepartmentsWithRallyes && (
         <Card
-          title={
-            language === 'de'
-              ? 'Studiengang auswählen'
-              : 'Select Department'
-          }
-          description={
-            language === 'de'
-              ? 'Wähle deinen Studiengang aus, um an einer Rallye teilzunehmen'
-              : 'Select your department to join a rallye'
-          }
+          containerStyle={compactCardStyle}
+          title={t('welcome.selectDepartment.title')}
+          description={t('welcome.selectDepartment.description')}
           icon="graduationcap"
-          onShowModal={() => setShowDeptModal(true)}
-          onPasswordSubmit={() => {}}
-        />
+          layout="vertical"
+        >
+          <UIButton onPress={() => setShowDeptModal(true)}>
+            {t('welcome.selectDepartment.button')}
+          </UIButton>
+        </Card>
       )}
       {tourModeRallye && (
         <Card
-          title={language === 'de' ? 'Campus-Gelände erkunden' : 'Explore Campus'}
-          description={
-            language === 'de'
-              ? 'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck'
-              : 'Explore the campus at your own pace without time pressure'
-          }
+          containerStyle={compactCardStyle}
+          title={t('welcome.explore.title')}
+          description={t('welcome.explore.description')}
           icon="binoculars"
-          onPress={handleTourModeSubmit}
-          onPasswordSubmit={() => {}}
-        />
+        >
+          <UIButton outline onPress={handleTourModeSubmit}>
+            {t('welcome.explore.start')}
+          </UIButton>
+        </Card>
       )}
       {hasNoContent && (
         <View style={{ alignItems: 'center', padding: 20 }}>
-          <Text
-            style={{
-              textAlign: 'center',
-              fontSize: 16,
-              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
-              marginBottom: 16,
-            }}
-          >
-            {language === 'de'
-              ? 'Derzeit sind keine aktiven Rallyes für diesen Standort verfügbar.'
-              : 'No active rallyes are currently available for this location.'}
-          </Text>
-          <UIButton icon="rotate" onPress={() => handleBack()}>
-            {language === 'de' ? 'Zurück' : 'Back'}
+          <ThemedText variant="body" style={[s.text, { textAlign: 'center', marginBottom: 16 }]}>
+            {t('welcome.noContent')}
+          </ThemedText>
+          <UIButton icon="arrow.backward" onPress={handleBack}>
+            {t('common.back')}
           </UIButton>
         </View>
       )}
     </View>
   );
 
-  // Phase 3: Rallye-Auswahl
+  // Phase 3: Rallye selection
+  const hasActiveRallyes = activeRallyes.length > 0;
+
   const RallyeContent = () => (
-    <View
-      style={[
-        globalStyles.welcomeStyles.container,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.background
-            : Colors.lightMode.background,
-        },
-      ]}
-    >
-      {/* Department-Name Anzeige mit Trennlinien */}
+    <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
+      {/* Department name display with dividers */}
       {selectedDepartment && (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            width: '100%',
-            marginBottom: 16,
-            paddingHorizontal: 8,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              height: 1,
-              backgroundColor: isDarkMode
-                ? 'rgba(255, 255, 255, 0.3)'
-                : 'rgba(92, 105, 113, 0.4)',
-            }}
-          />
-          <Text
-            style={{
-              paddingHorizontal: 12,
-              fontSize: 15,
-              fontWeight: '500',
-              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray,
-            }}
-          >
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          width: '100%',
+          marginBottom: 16,
+          paddingHorizontal: 8,
+        }}>
+          <View style={{
+            flex: 1,
+            height: 1,
+            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(92, 105, 113, 0.4)',
+          }} />
+          <Text style={{
+            paddingHorizontal: 12,
+            fontSize: 15,
+            fontWeight: '500',
+            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray,
+          }}>
             {selectedDepartment.name}
           </Text>
-          <View
-            style={{
-              flex: 1,
-              height: 1,
-              backgroundColor: isDarkMode
-                ? 'rgba(255, 255, 255, 0.3)'
-                : 'rgba(92, 105, 113, 0.4)',
-            }}
-          />
+          <View style={{
+            flex: 1,
+            height: 1,
+            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(92, 105, 113, 0.4)',
+          }} />
         </View>
       )}
-      <Card
-        title={
-          language === 'de'
-            ? 'An Campus Rallye teilnehmen'
-            : 'Join Campus Rallye'
-        }
-        description={
-          language === 'de'
-            ? 'Nimm an einer Rallye teil und entdecke den Campus mit deinem Team'
-            : 'Join a rally and explore the campus with your team'
-        }
-        icon="mappin.and.ellipse"
-        onShowModal={() => {
-          setShowRallyeModal(true);
-        }}
-        selectedRallye={selectedRallye}
-        onPasswordSubmit={(password: string) => {
-          if (!selectedRallye) {
-            Alert.alert(
-              language === 'de' ? 'Fehler' : 'Error',
-              language === 'de'
-                ? 'Bitte wähle zuerst eine Rallye aus.'
-                : 'Please select a rally first.'
-            );
-            return;
-          }
-          handlePasswordSubmit(password, selectedRallye);
-        }}
-      />
+
+      {/* Resume card */}
+      {resumeAvailable && resumeRallye && resumeTeam && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.resume.title')}
+          description={t('welcome.resume.details', {
+            rallye: resumeRallye.name,
+            team: resumeTeam.name,
+          })}
+          icon="clock"
+        >
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <UIButton onPress={() => store$.enabled.set(true)}>
+                {t('common.resume')}
+              </UIButton>
+            </View>
+            <View style={{ flex: 1 }}>
+              <UIButton
+                outline
+                color={Colors.dhbwRed}
+                onPress={() => {
+                  void (async () => {
+                    const confirmed = await confirm({
+                      title: t('welcome.clearParticipation.title'),
+                      message: t('welcome.clearParticipation.message'),
+                      confirmText: t('welcome.clearParticipation.confirm'),
+                      cancelText: t('common.cancel'),
+                      destructive: true,
+                    });
+                    if (!confirmed) return;
+                    void store$.leaveRallye();
+                  })();
+                }}
+              >
+                {t('common.startOver')}
+              </UIButton>
+            </View>
+          </View>
+        </Card>
+      )}
+
+      {/* Join rallye card */}
+      {hasActiveRallyes && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.join.title')}
+          description={t('welcome.join.description')}
+          icon="mappin.and.ellipse"
+        >
+          <UIButton disabled={joining} onPress={() => setShowRallyeModal(true)}>
+            {t('welcome.join.select')}
+          </UIButton>
+        </Card>
+      )}
+
+      {/* Tour mode card */}
       {tourModeRallye && (
         <Card
-          title={language === 'de' ? 'Campus-Gelände erkunden' : 'Explore Campus'}
-          description={
-            language === 'de'
-              ? 'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck'
-              : 'Explore the campus at your own pace without time pressure'
-          }
+          containerStyle={compactCardStyle}
+          title={t('welcome.explore.title')}
+          description={t('welcome.explore.description')}
           icon="binoculars"
-          onPress={handleTourModeSubmit}
-          onPasswordSubmit={() => {}}
+        >
+          <UIButton outline onPress={handleTourModeSubmit}>
+            {t('welcome.explore.start')}
+          </UIButton>
+        </Card>
+      )}
+
+      {/* No rallyes available */}
+      {!hasActiveRallyes && !tourModeRallye && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.noRallyes.title')}
+          description={t('welcome.noRallyes.description')}
+          icon="info.circle"
         />
       )}
     </View>
   );
 
-  // Dynamischer Titel basierend auf ausgewählter Organisation
+  // Get header title based on selection
   const getHeaderTitle = () => {
     if (selectedOrganization) {
       return `${selectedOrganization.name} Campus Rallyes`;
     }
-    return language === 'de' ? 'Campus Rallyes' : 'Campus Rallyes';
+    return 'Campus Rallyes';
   };
 
-  // Render des aktuellen Schritts
+  // Render current step
   const renderCurrentStep = () => {
     switch (selectionStep) {
       case 'organization':
@@ -762,130 +628,40 @@ export default function Welcome() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
+    <CollapsibleHeroHeader
+      heroImage={require('../assets/images/app/dhbw-campus-header.png')}
+      logoImage={require('../assets/images/app/dhbw-logo.png')}
+      title={getHeaderTitle()}
+      showBackButton={selectionStep !== 'organization'}
+      onBackPress={handleBack}
     >
-      <View
-        style={[
-          globalStyles.welcomeStyles.container,
-          {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.background
-              : Colors.lightMode.background,
-          },
-        ]}
-      >
-        <View style={{ position: 'relative' }}>
-          <Image
-            style={globalStyles.welcomeStyles.headerImage}
-            source={require('../assets/images/app/dhbw-campus-header.png')}
-          />
+      {loading && <LoadingContent />}
+      {!loading && online && renderCurrentStep()}
+      {!loading && !online && <OfflineContent />}
 
-          {/* Sprach-Toggle (Links) */}
-          <TouchableOpacity
-            style={{
-              position: 'absolute',
-              top: 40,
-              left: 13,
-              backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
-              borderRadius: 8,
-              padding: 8,
-            }}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            onPress={toggleLanguage}
-          >
-            <IconSymbol
-              name="globe"
-              size={24}
-              color={Colors.dhbwRed}
-            />
-          </TouchableOpacity>
-
-          {/* Zurück-Button (Rechts) - nur sichtbar wenn nicht in Phase 1 */}
-          {selectionStep !== 'organization' && (
-            <TouchableOpacity
-              style={{
-                position: 'absolute',
-                top: 40,
-                right: 13,
-                backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
-                borderRadius: 8,
-                padding: 8,
-              }}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              onPress={handleBack}
-            >
-              <IconSymbol
-                name="arrow.backward"
-                size={24}
-                color={Colors.dhbwRed}
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-        <View style={globalStyles.welcomeStyles.header}>
-          <Text
-            style={[
-              globalStyles.welcomeStyles.text,
-              globalStyles.welcomeStyles.title,
-              {
-                color: isDarkMode
-                  ? Colors.darkMode.text
-                  : Colors.lightMode.text,
-              },
-            ]}
-          >
-            {getHeaderTitle()}
-          </Text>
-          <Image
-            style={globalStyles.welcomeStyles.logo}
-            source={require('../assets/images/app/dhbw-logo.png')}
-          />
-        </View>
-        <View
-          style={[
-            globalStyles.welcomeStyles.content,
-            {
-              backgroundColor: isDarkMode
-                ? Colors.darkMode.background
-                : Colors.lightMode.background,
-            },
-          ]}
-        >
-          {loading && (
-            <View>
-              <ActivityIndicator size="large" color={Colors.dhbwRed} />
-            </View>
-          )}
-          {online && !loading && renderCurrentStep()}
-          {!online && !loading && (
-            <OfflineContent onRefresh={loadOrganizations} loading={loading} />
-          )}
-        </View>
-      </View>
       <RallyeSelectionModal
         visible={showRallyeModal}
         onClose={() => setShowRallyeModal(false)}
-        activeRallyes={activeRallyes as any}
-        onSelect={handleRallyeSelect}
+        activeRallyes={activeRallyes as RallyeRow[]}
+        onJoin={joinRallye}
+        joining={joining}
       />
       <SelectionModal
         visible={showOrgModal}
         onClose={() => setShowOrgModal(false)}
         items={organizations.map(org => ({ id: org.id, name: org.name }))}
         onSelect={handleOrgModalSelect}
-        title={language === 'de' ? 'Standort auswählen' : 'Select Location'}
-        emptyMessage={language === 'de' ? 'Keine Standorte verfügbar' : 'No locations available'}
+        title={t('welcome.selectLocation.modalTitle')}
+        emptyMessage={t('welcome.selectLocation.empty')}
       />
       <SelectionModal
         visible={showDeptModal}
         onClose={() => setShowDeptModal(false)}
         items={departments.map(dept => ({ id: dept.id, name: dept.name }))}
         onSelect={handleDeptModalSelect}
-        title={language === 'de' ? 'Studiengang auswählen' : 'Select Department'}
-        emptyMessage={language === 'de' ? 'Keine Studiengänge verfügbar' : 'No departments available'}
+        title={t('welcome.selectDepartment.modalTitle')}
+        emptyMessage={t('welcome.selectDepartment.empty')}
       />
-    </KeyboardAvoidingView>
+    </CollapsibleHeroHeader>
   );
 }

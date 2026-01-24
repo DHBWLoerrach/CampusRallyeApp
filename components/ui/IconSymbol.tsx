@@ -35,6 +35,7 @@ const MAPPING = {
     source: 'community',
   },
   'chevron.right': { name: 'chevron-right', source: 'material' },
+  'chevron.left': { name: 'chevron-left', source: 'material' },
   clock: { name: 'schedule', source: 'material' },
   // Neue Icons für Mandantenfähigkeit
   'building.2': { name: 'domain', source: 'material' },

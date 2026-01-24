@@ -41,6 +41,12 @@ type CollapsibleHeroHeaderProps = {
   children: ReactNode;
   /** Content container style */
   contentContainerStyle?: object;
+  /** Show back button */
+  showBackButton?: boolean;
+  /** Back button press handler */
+  onBackPress?: () => void;
+  /** Back button label */
+  backLabel?: string;
 };
 
 /**
@@ -53,6 +59,9 @@ export function CollapsibleHeroHeader({
   title,
   children,
   contentContainerStyle,
+  showBackButton = false,
+  onBackPress,
+  backLabel,
 }: CollapsibleHeroHeaderProps) {
   const { isDarkMode } = useTheme();
   const { t, toggleLanguage, language } = useLanguage();
@@ -160,6 +169,22 @@ export function CollapsibleHeroHeader({
           </ThemedText>
         </TouchableOpacity>
 
+        {/* Back Button (optional) */}
+        {showBackButton && onBackPress && (
+          <TouchableOpacity
+            style={[styles.backButton, { top: insets.top + 8 }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole="button"
+            accessibilityLabel={backLabel || t('common.back')}
+            onPress={onBackPress}
+          >
+            <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.languageText}>
+              {backLabel || t('common.back')}
+            </ThemedText>
+          </TouchableOpacity>
+        )}
+
         {/* Title and Logo (positioned at bottom of header) */}
         <Animated.View
           style={[
@@ -226,6 +251,17 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   languageToggle: {
+    position: 'absolute',
+    left: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 6,
+  },
+  backButton: {
     position: 'absolute',
     right: 16,
     flexDirection: 'row',

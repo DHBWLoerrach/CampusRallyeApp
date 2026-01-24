@@ -109,7 +109,6 @@ export async function getRallyeStatus(rallyeId: number) {
   }
   return data?.status ?? null;
 }
-<<<<<<< HEAD
 
 // --- Neue Funktionen für Mandantenfähigkeit ---
 

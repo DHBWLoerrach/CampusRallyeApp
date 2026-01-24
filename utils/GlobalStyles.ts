@@ -226,12 +226,12 @@ export const globalStyles = createGroupedStyles({
   cardStyles: {
     card: {
       width: '100%',
-      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.16 : 0.22),
+      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.12 : 0.14),
       // backgroundColor handled by themed style
       borderRadius: Constants.cornerRadius,
       padding: SCREEN_WIDTH * (IS_SMALL_SCREEN ? 0.03 : 0.04),
       marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.015),
-      alignItems: 'center',
+      alignItems: 'flex-start',
       justifyContent: 'center',
       shadowColor: '#000',
       shadowOffset: {
@@ -244,12 +244,12 @@ export const globalStyles = createGroupedStyles({
     },
     cardTitle: {
       marginTop: SCREEN_HEIGHT * 0.01,
-      textAlign: 'center',
+      textAlign: 'left',
     },
     cardDescription: {
       textAlign: 'left',
       marginTop: SCREEN_HEIGHT * 0.01,
-      paddingHorizontal: SCREEN_WIDTH * 0.02,
+      paddingHorizontal: 0,
       width: '100%',
     },
   },
@@ -457,12 +457,8 @@ export const globalStyles = createGroupedStyles({
       // backgroundColor handled by themed style
       paddingHorizontal: SCREEN_WIDTH * 0.04,
       justifyContent: 'flex-start',
-<<<<<<< HEAD
-      paddingTop: SCREEN_HEIGHT * 0.02,
-=======
       paddingTop: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.02 : 0.025),
       paddingBottom: SCREEN_HEIGHT * 0.015,
->>>>>>> origin/main
     },
     compactCard: {
       minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.145 : 0.185),
