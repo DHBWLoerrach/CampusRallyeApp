@@ -15,12 +15,12 @@ export default function TabLayout() {
       initialRouteName="rallye"
       screenOptions={{
         headerRight: () => <LogoutButton />,
-        headerStyle: { backgroundColor: palette.background },
+        headerStyle: { backgroundColor: palette.surface1 },
         headerTitleStyle: { color: palette.text },
         headerTintColor: palette.text,
         tabBarStyle: {
-          backgroundColor: palette.background,
-          borderTopColor: palette.cellBorder,
+          backgroundColor: palette.surface1,
+          borderTopColor: palette.borderSubtle,
         },
         tabBarActiveTintColor: Colors.dhbwRed,
         tabBarInactiveTintColor: palette.tabBarIcon,

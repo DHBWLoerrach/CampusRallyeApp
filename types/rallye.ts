@@ -23,7 +23,6 @@ export interface AnswerRow {
 
 export interface QuestionProps {
   question: Question;
-  onAnswer?: (correct: boolean, points: number) => void;
 }
 
 export interface Organization {
@@ -50,3 +49,10 @@ export interface Rallye {
   created_at: string;
 }
 
+export interface Team {
+  id: number;
+  name: string;
+  rallye_id?: number;
+  points?: number;
+  time_played?: string | null;
+}

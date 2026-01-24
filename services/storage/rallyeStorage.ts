@@ -1,14 +1,38 @@
 import { supabase } from '@/utils/Supabase';
-import { StorageKeys, getStorageItem, setStorageItem, removeStorageItem } from './asyncStorage';
+import {
+  StorageKeys,
+  getStorageItem,
+  removeStorageItem,
+  setStorageItem,
+} from './asyncStorage';
 import { Organization, Department, Rallye } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
-export async function getCurrentRallye() {
-  return getStorageItem(StorageKeys.CURRENT_RALLYE);
+export type RallyeRow = {
+  id: number;
+  name: string;
+  password?: string | null;
+  status: string;
+  tour_mode: boolean;
+  studiengang?: string | null;
+  end_time?: string | null;
+};
+
+export type RallyeFetchResult = {
+  data: RallyeRow[];
+  error: unknown | null;
+};
+
+export async function getCurrentRallye(): Promise<RallyeRow | null> {
+  return (await getStorageItem(StorageKeys.CURRENT_RALLYE)) as RallyeRow | null;
 }
 
-export async function setCurrentRallye(rallye: any) {
+export async function setCurrentRallye(rallye: RallyeRow) {
   return setStorageItem(StorageKeys.CURRENT_RALLYE, rallye);
+}
+
+export async function clearCurrentRallye() {
+  return removeStorageItem(StorageKeys.CURRENT_RALLYE);
 }
 
 // --- Persistente Auswahl-Speicherung ---
@@ -41,20 +65,25 @@ export async function clearSelectedDepartment(): Promise<void> {
 
 // --- Ende Persistente Auswahl-Speicherung ---
 
-export async function getActiveRallyes() {
-  const { data, error } = await supabase
-    .from('rallye')
-    .select('*')
-    .not('status', 'in', '(inactive,ended)')
-    .eq('tour_mode', false);
-  if (error) {
+export async function getActiveRallyes(): Promise<RallyeFetchResult> {
+  try {
+    const { data, error } = await supabase
+      .from('rallye')
+      .select('*')
+      .not('status', 'in', '(inactive,ended)')
+      .eq('tour_mode', false);
+    if (error) {
+      Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
+      return { data: [], error };
+    }
+    return { data: (data ?? []) as RallyeRow[], error: null };
+  } catch (error) {
     Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
-    return [] as any[];
+    return { data: [], error };
   }
-  return data ?? [];
 }
 
-export async function getTourModeRallye() {
+export async function getTourModeRallye(): Promise<RallyeRow | null> {
   const { data, error } = await supabase
     .from('rallye')
     .select('*')
@@ -65,7 +94,7 @@ export async function getTourModeRallye() {
     Logger.error('RallyeStorage', 'Error fetching tour mode rallye', error);
     return null;
   }
-  return data;
+  return data as RallyeRow;
 }
 
 export async function getRallyeStatus(rallyeId: number) {
@@ -80,6 +109,7 @@ export async function getRallyeStatus(rallyeId: number) {
   }
   return data?.status ?? null;
 }
+<<<<<<< HEAD
 
 // --- Neue Funktionen für Mandantenfähigkeit ---
 
@@ -344,4 +374,3 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
 
   return rallye as Rallye;
 }
-

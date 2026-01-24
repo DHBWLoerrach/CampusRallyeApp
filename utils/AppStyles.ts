@@ -1,44 +1,27 @@
 import { makeStyles } from './makeStyles';
-import Colors from './Colors';
 import Constants from './Constants';
 
 export const useAppStyles = makeStyles((p) => ({
   // Generic screens and sections
   screen: {
     flex: 1,
-    backgroundColor: p.background,
-  },
-  section: {
-    backgroundColor: p.card,
-    borderRadius: Constants.cornerRadius,
-  },
-  card: {
-    backgroundColor: p.card,
-    borderRadius: Constants.cornerRadius,
+    backgroundColor: p.surface0,
   },
   infoBox: {
-    backgroundColor: p.card,
+    backgroundColor: p.surface1,
     borderRadius: Constants.cornerRadius,
     padding: 16,
   },
   listRow: {
-    backgroundColor: p.card,
+    backgroundColor: p.surface1,
     borderBottomWidth: 1,
-    borderBottomColor: p.cellBorder,
-  },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: p.cellBorder,
+    borderBottomColor: p.borderSubtle,
   },
   // Text helpers
   text: {
     color: p.text,
   },
   muted: {
-    color: Colors.mediumGray,
-  },
-  title: {
-    color: p.text,
-    fontWeight: '600',
+    color: p.textMuted,
   },
 }));

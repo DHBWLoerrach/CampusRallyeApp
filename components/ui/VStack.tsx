@@ -8,11 +8,15 @@ type Props = ViewProps & {
 };
 
 // Simple vertical stack with configurable gap between children.
-export default function VStack({ gap = 2, style, children, ...rest }: PropsWithChildren<Props>) {
+export default function VStack({
+  gap = 2,
+  style,
+  children,
+  ...rest
+}: PropsWithChildren<Props>) {
   return (
     <View style={[{ gap: spacing(gap) }, style]} {...rest}>
       {children}
     </View>
   );
 }
-

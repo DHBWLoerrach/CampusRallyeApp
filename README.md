@@ -12,7 +12,7 @@ Mehrere Schritte zu beachten:
 ### Vorbereitungen (Supabase)
 
 Die Daten werden in Supabase gespeichert. Zur Weiterentwicklung und
-Test der Webanwendung muss eine eigene Supabase-Instanz in 
+Test der Webanwendung muss eine eigene Supabase-Instanz in
 der Cloud erstellt werden.
 
 Supabase-Owner können einen SQL-Dump des Schemas (Tabellen, Funktionen, usw.) ohne Daten wie folgt mit dem Supabase-CLI erstellen:
@@ -23,7 +23,6 @@ supabase db dump --db-url "postgresql://postgres:<password>@<serverurl>/postgres
 
 #### Supabase in der Cloud
 
-
 - Bei https://supabase.com kostenlos anmelden
 - In Supabase ein neues Projekt erstellen (z.B. `CampusRallye`)
 - Im Supabase-Projekt zum _SQL Editor_ wechseln (via linker Seitenleiste)
@@ -33,17 +32,17 @@ supabase db dump --db-url "postgresql://postgres:<password>@<serverurl>/postgres
 
 #### Daten erstellen
 
-Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstellt werden. 
+Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstellt werden.
 
 In der Tabelle `rallye` zwei neue Rallyes bzw. zwei neue Zeilen eintragen (_Insert row_):
 
 - Name: Rallye, Studiengang: Informatik, Status `running` und `end_time` in der Zukunft, `tour_mode=FALSE`
 - Name: Erkundung, Studiengang: Allgemein, Status `running` und `end_time` in der Zukunft, `tour_mode=TRUE`
 
-In der Tabelle `questions` ein paar Fragen mit Punkten erstellen (z.B. Typ _knowledge_), dazu passende Antwort(en) in 
+In der Tabelle `questions` ein paar Fragen mit Punkten erstellen (z.B. Typ _knowledge_), dazu passende Antwort(en) in
 der Tabelle `answers` mit `question_id` der Frage eintragen und zusätzlich in der Tabelle `join_rallye_questions` den Rallyes zuordnen.
 
-Möglich ist auch die lokale Einrichtung und Verwendung der Webandwendung zur Verwaltung 
+Möglich ist auch die lokale Einrichtung und Verwendung der Webandwendung zur Verwaltung
 von Campus Rallyes. Im GitHub-Projekt (https://github.com/DHBWLoerrach/campus-rallye-admin)
 ist eine Anleitung zur Einrichtung beschrieben.
 
@@ -65,7 +64,7 @@ Voraussetzungen für die Weiterentwicklung dieses Projekts sind folgende:
 
 ```
 EXPO_PUBLIC_SUPABASE_URL=http://SERVER:54321
-EXPO_PUBLIC_SUPABASE_ANON_KEY=SUPABASE_ANON_KEY
+EXPO_PUBLIC_SUPABASE_ANON_KEY=SUPABASE_PUBLISHABLE_KEY
 ```
 
 Im Webinterface von Supabase oben auf _Connect_ klicken und die Daten im Reiter _Mobile Frameworks_ verwenden.
@@ -88,7 +87,17 @@ entsprechenden Tabellen in der Supabase-Instanz in Erfahrung gebracht werden.
 `npx expo start -g` started den Metro-Bundler, um die App auf einem Smartphone oder Emulator/Simulator in der Expo Go App zu testen.
 Dazu muss die App _Expo Go_ (https://expo.dev/go) auf dem Handy installiert sein und der QR-Code gescannt werden (Android: in Expo Go, iOS: via Kamera-App).
 
-Hinweis: Im DHBW-Wlan muss der Metro-Bundler mit „Tunnel“-Option gestartet werden:  `npx expo start -g --tunnel`
+Hinweis: Im DHBW-Wlan muss der Metro-Bundler mit „Tunnel“-Option gestartet werden: `npx expo start -g --tunnel`
+
+### Tests
+
+Unit- und Component-Tests laufen mit Jest:
+
+`npm test`
+
+Für Linting:
+
+`npm run lint`
 
 ### Development Builds der App erstellen
 

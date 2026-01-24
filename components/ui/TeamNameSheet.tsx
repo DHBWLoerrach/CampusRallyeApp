@@ -18,7 +18,7 @@ export default function TeamNameSheet({
   durationMs = 3000,
 }: Props) {
   const { isDarkMode } = useTheme();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   useEffect(() => {
     if (!visible) return;
     const id = setTimeout(onClose, durationMs);
@@ -60,7 +60,7 @@ export default function TeamNameSheet({
               opacity: 0.8,
             }}
           >
-            {language === 'de' ? 'Euer Team' : 'Your Team'}
+            {t('team.sheetTitle')}
           </Text>
           <Text
             style={{

@@ -1,33 +1,34 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Alert, RefreshControl, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, RefreshControl } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
 import { store$ } from '@/services/storage/Store';
 import { supabase } from '@/utils/Supabase';
-import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { useAppStyles } from '@/utils/AppStyles';
+import { orderQuestionsWithUploadsLast } from '@/utils/orderQuestions';
+import { spacing } from '@/utils/spacing';
 import Preparation from '@/app/(tabs)/rallye/states/Preparation';
 import NoQuestions from '@/app/(tabs)/rallye/states/NoQuestions';
 import TeamSetup from '@/app/(tabs)/rallye/team-setup';
 import Voting from '@/app/(tabs)/rallye/voting';
 import Scoreboard from '@/app/(tabs)/rallye/scoreboard';
 import QuestionRenderer from '@/app/(tabs)/rallye/question-renderer';
-import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
-import ThemedView from '@/components/themed/ThemedView';
-import { useAppStyles } from '@/utils/AppStyles';
-import { useTheme } from '@/utils/ThemeContext';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import TeamNameSheet from '@/components/ui/TeamNameSheet';
+import UIButton from '@/components/ui/UIButton';
+import { ScreenScrollView } from '@/components/ui/Screen';
 
 function isPreparation(status?: string) {
   return status === 'preparation' || status === 'preparing';
 }
 
 const RallyeIndex = observer(function RallyeIndex() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
+  const tRef = useRef(t);
   const [loading, setLoading] = useState(false);
   const s = useAppStyles();
 
@@ -35,18 +36,23 @@ const RallyeIndex = observer(function RallyeIndex() {
   const team = useSelector(() => store$.team.get());
   const idx = useSelector(() => store$.questionIndex.get());
   const qsLen = useSelector(() => store$.questions.get().length);
-  const totalQuestions = useSelector(() => (store$ as any).totalQuestions.get());
-  const answeredCount = useSelector(() => (store$ as any).answeredCount.get());
-  const showTeamNameSheet = useSelector(() => (store$ as any).showTeamNameSheet.get());
+  const totalQuestions = useSelector(() => store$.totalQuestions.get());
+  const answeredCount = useSelector(() => store$.answeredCount.get());
+  const showTeamNameSheet = useSelector(() => store$.showTeamNameSheet.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
   const points = useSelector(() => store$.points.get());
-  const allQuestionsAnswered = useSelector(() => store$.allQuestionsAnswered.get());
+  const allQuestionsAnswered = useSelector(() =>
+    store$.allQuestionsAnswered.get()
+  );
   const timeExpired = useSelector(() => store$.timeExpired.get());
 
-  const bgColor = useMemo(() => ({}), []);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
-  const loadAnswers = async () => {
+  const loadAnswers = useCallback(async () => {
+    if (!rallye?.id) return;
     try {
       const { data: joinData, error: joinError } = await supabase
         .from('join_rallye_questions')
@@ -63,9 +69,9 @@ const RallyeIndex = observer(function RallyeIndex() {
     } catch (error) {
       console.error('Error fetching rallye answers:', error);
     }
-  };
+  }, [rallye]);
 
-  const loadQuestions = async () => {
+  const loadQuestions = useCallback(async () => {
     if (!rallye) return;
     setLoading(true);
     try {
@@ -77,11 +83,11 @@ const RallyeIndex = observer(function RallyeIndex() {
 
       const questionIds = (joinData || []).map((row: any) => row.question_id);
       // Track total number of questions for progress display
-      (store$ as any).totalQuestions.set(questionIds.length);
+      store$.totalQuestions.set(questionIds.length);
       if (questionIds.length === 0) {
         store$.questions.set([]);
-        store$.currentQuestion.set(null);
-        (store$ as any).answeredCount.set(0);
+        store$.questionIndex.set(0);
+        store$.answeredCount.set(0);
         return;
       }
 
@@ -96,7 +102,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         answeredIds = (answeredData || []).map((row: any) => row.question_id);
       }
       // Track number of answered questions for progress display
-      (store$ as any).answeredCount.set(answeredIds.length);
+      store$.answeredCount.set(answeredIds.length);
 
       if (answeredIds.length === questionIds.length && !rallye.tour_mode) {
         store$.allQuestionsAnswered.set(true);
@@ -120,28 +126,23 @@ const RallyeIndex = observer(function RallyeIndex() {
         question_type: q.type,
       }));
 
-      for (let i = mapped.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [mapped[i], mapped[j]] = [mapped[j], mapped[i]];
-      }
+      const ordered = orderQuestionsWithUploadsLast(mapped);
 
-      store$.questions.set(mapped);
-      store$.currentQuestion.set(mapped[0] || null);
+      store$.questions.set(ordered);
+      store$.currentQuestion.set(ordered[0] || null);
       store$.questionIndex.set(0);
     } catch (err) {
       console.error('Fehler beim Laden der Fragen:', err);
       Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Die Fragen konnten nicht geladen werden.'
-          : 'The questions could not be loaded.'
+        tRef.current('common.errorTitle'),
+        tRef.current('rallye.error.loadQuestions')
       );
     } finally {
       setLoading(false);
     }
-  };
+  }, [rallye, team]);
 
-  const refreshStatus = async () => {
+  const refreshStatus = useCallback(async () => {
     if (!rallye) return;
     setLoading(true);
     // slight delay to avoid flicker
@@ -163,7 +164,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [rallye]);
 
   useEffect(() => {
     if (!rallye) return;
@@ -173,17 +174,12 @@ const RallyeIndex = observer(function RallyeIndex() {
       // Ensure we refresh dynamic rallye fields like name/status
       await refreshStatus();
     })();
-  }, [rallye?.id, team?.id]);
+  }, [loadAnswers, loadQuestions, rallye, refreshStatus]);
 
   const onRefresh = async () => {
     const net = await NetInfo.fetch();
     if (!net.isConnected) {
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Keine Internetverbindung verfügbar'
-          : 'No internet connection available'
-      );
+      Alert.alert(t('common.errorTitle'), t('rallye.error.noInternet'));
       return;
     }
     if (rallye?.status === 'running') {
@@ -192,31 +188,6 @@ const RallyeIndex = observer(function RallyeIndex() {
       await refreshStatus();
     } else {
       await refreshStatus();
-    }
-  };
-
-  // Running flow handlers
-  const handleAnswer = async (answeredCorrectly: boolean, answerPoints: number) => {
-    try {
-      if (answeredCorrectly) store$.points.set(points + answerPoints);
-      if (team && currentQuestion) {
-        const { error } = await supabase.from('team_questions').insert({
-          team_id: team.id,
-          question_id: currentQuestion.id,
-          correct: answeredCorrectly,
-          points: answeredCorrectly ? answerPoints : 0,
-        });
-        if (error) throw error;
-      }
-      store$.gotoNextQuestion();
-    } catch (e) {
-      console.error('Fehler beim Speichern der Antwort:', e);
-      Alert.alert(
-        language === 'de' ? 'Fehler' : 'Error',
-        language === 'de'
-          ? 'Antwort konnte nicht gespeichert werden.'
-          : 'Answer could not be saved.'
-      );
     }
   };
 
@@ -248,7 +219,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );
@@ -257,33 +228,33 @@ const RallyeIndex = observer(function RallyeIndex() {
   if (questions.length > 0 && !allQuestionsAnswered) {
     return (
       <>
-        <ThemedScrollView
-          variant="background"
-          contentContainerStyle={[globalStyles.default.refreshContainer]}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+        <ScreenScrollView
+          padding="none"
+          edges={[]}
+          contentContainerStyle={[
+            globalStyles.default.refreshContainer,
+            globalStyles.default.container,
+            { paddingBottom: spacing(2) },
+          ]}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          }
         >
-          <ThemedView variant="background" style={globalStyles.default.container}>
-          <ThemedText style={{ fontSize: 16, fontWeight: '500', marginBottom: 8 }}>
-              {(rallye?.name ? `${rallye.name} • ` : '') +
-                (language === 'de'
-                  ? `Frage ${
-                      (rallye?.tour_mode
-                        ? idx + 1
-                        : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
-                    } von ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`
-                  : `Question ${
-                      (rallye?.tour_mode
-                        ? idx + 1
-                        : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen))
-                    } of ${rallye?.tour_mode ? qsLen : totalQuestions || qsLen}`)}
-            </ThemedText>
-            <QuestionRenderer question={currentQuestion} onAnswer={handleAnswer} />
-          </ThemedView>
-        </ThemedScrollView>
+          <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
+            {(rallye?.name ? `${rallye.name} • ` : '') +
+              t('rallye.progress', {
+                current: rallye?.tour_mode
+                  ? idx + 1
+                  : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
+                total: rallye?.tour_mode ? qsLen : totalQuestions || qsLen,
+              })}
+          </ThemedText>
+          <QuestionRenderer question={currentQuestion} />
+        </ScreenScrollView>
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );
@@ -293,33 +264,51 @@ const RallyeIndex = observer(function RallyeIndex() {
     // Exploration finished: show simple summary and back to welcome
     return (
       <>
-        <ThemedScrollView variant="background" contentContainerStyle={[globalStyles.default.refreshContainer]}>
+        <ScreenScrollView
+          padding="none"
+          edges={['bottom']}
+          contentContainerStyle={[
+            globalStyles.default.refreshContainer,
+            globalStyles.rallyeStatesStyles.container,
+          ]}
+        >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
-              <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
-                {language === 'de' ? 'Alle Fragen beantwortet.' : 'All questions answered.'}
+              <ThemedText
+                variant="title"
+                style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+              >
+                {t('rallye.allAnswered.title')}
               </ThemedText>
-              <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
-                {language === 'de' ? 'Erreichte Punkte: ' : 'Points achieved: '} {points}
+              <ThemedText
+                variant="body"
+                style={[
+                  globalStyles.rallyeStatesStyles.infoSubtitle,
+                  s.muted,
+                  { marginTop: 10 },
+                ]}
+              >
+                {t('rallye.pointsAchieved', { points })}
               </ThemedText>
             </InfoBox>
             <InfoBox mb={2}>
-              <Text
+              <UIButton
+                variant="ghost"
+                icon="arrow-left"
                 onPress={() => {
                   store$.reset();
                   store$.enabled.set(false);
                 }}
-                style={{ color: Colors.dhbwRed, fontWeight: '600', textAlign: 'center' }}
               >
-                {language === 'de' ? 'Zurück zum Start' : 'Back to start'}
-              </Text>
+                {t('rallye.backToStart')}
+              </UIButton>
             </InfoBox>
           </VStack>
-        </ThemedScrollView>
+        </ScreenScrollView>
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );
@@ -329,43 +318,70 @@ const RallyeIndex = observer(function RallyeIndex() {
     // Time up vs finished before end
     return (
       <>
-        <ThemedScrollView
-          variant="background"
-          contentContainerStyle={[globalStyles.default.refreshContainer]}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+        <ScreenScrollView
+          padding="none"
+          edges={['bottom']}
+          contentContainerStyle={[
+            globalStyles.default.refreshContainer,
+            globalStyles.rallyeStatesStyles.container,
+          ]}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          }
         >
           <VStack style={{ width: '100%' }} gap={2}>
             <InfoBox mb={2}>
-              <ThemedText style={globalStyles.rallyeStatesStyles.infoTitle}>
+              <ThemedText
+                variant="title"
+                style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+              >
                 {timeExpired
-                  ? language === 'de' ? 'Zeit abgelaufen!' : 'Time up!'
-                  : language === 'de' ? 'Alle Fragen beantwortet' : 'All questions answered'}
+                  ? t('rallye.timeUp')
+                  : t('rallye.allAnswered.simple')}
               </ThemedText>
               {!timeExpired && team ? (
-                <ThemedText style={[globalStyles.rallyeStatesStyles.infoSubtitle, { marginTop: 10 }]}>
-                  {language === 'de' ? 'Team: ' : 'Team: '} {team?.name}
+                <ThemedText
+                  variant="body"
+                  style={[
+                    globalStyles.rallyeStatesStyles.infoSubtitle,
+                    s.muted,
+                    { marginTop: 10 },
+                  ]}
+                >
+                  {t('rallye.teamLabel', { team: team?.name ?? '' })}
                 </ThemedText>
               ) : null}
-              <ThemedText style={globalStyles.rallyeStatesStyles.infoSubtitle}>
-                {language === 'de' ? 'Punkte: ' : 'Points: '} {points}
+              <ThemedText
+                variant="body"
+                style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
+              >
+                {t('rallye.pointsLabel', { points })}
               </ThemedText>
             </InfoBox>
             <InfoBox>
-              <ThemedText style={globalStyles.rallyeStatesStyles.meetingPoint}>
-                {language === 'de' ? 'Bitte kommt zum vereinbarten Treffpunkt' : 'Please come to the agreed meeting point.'}
+              <ThemedText
+                variant="body"
+                style={globalStyles.rallyeStatesStyles.meetingPoint}
+              >
+                {t('rallye.meetingPoint')}
               </ThemedText>
             </InfoBox>
             <InfoBox mb={2}>
-              <Text style={{ color: Colors.dhbwRed, textAlign: 'center' }} onPress={onRefresh}>
-                {language === 'de' ? 'Aktualisieren' : 'Refresh'}
-              </Text>
+              <UIButton
+                variant="ghost"
+                icon="rotate"
+                disabled={loading}
+                onPress={onRefresh}
+              >
+                {t('common.refresh')}
+              </UIButton>
             </InfoBox>
           </VStack>
-        </ThemedScrollView>
+        </ScreenScrollView>
         <TeamNameSheet
           visible={!!showTeamNameSheet}
           name={team?.name || ''}
-          onClose={() => (store$ as any).showTeamNameSheet.set(false)}
+          onClose={() => store$.showTeamNameSheet.set(false)}
         />
       </>
     );
