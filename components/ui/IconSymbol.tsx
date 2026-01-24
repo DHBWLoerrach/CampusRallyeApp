@@ -38,6 +38,7 @@ const MAPPING = {
   'chevron.left': { name: 'chevron-left', source: 'material' },
   clock: { name: 'schedule', source: 'material' },
   // Neue Icons für Mandantenfähigkeit
+  'party.popper': { name: 'party-popper', source: 'community' },
   'building.2': { name: 'domain', source: 'material' },
   graduationcap: { name: 'school', source: 'material' },
   'arrow.backward': { name: 'arrow-back', source: 'material' },
