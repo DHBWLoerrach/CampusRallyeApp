@@ -318,6 +318,41 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
 }
 
 /**
+ * Findet ein Department das den gleichen Namen wie die Organisation hat
+ * und mindestens eine aktive Rallye hat.
+ * Wird für "Campus Events" verwendet.
+ */
+export async function getCampusEventsDepartment(org: Organization): Promise<Department | null> {
+  Logger.debug('RallyeStorage', `getCampusEventsDepartment called for org: ${org.name}`);
+  
+  // Schritt 1: Suche Department mit gleichem Namen wie Organisation
+  const { data: matchingDept, error: deptError } = await supabase
+    .from('department')
+    .select('*')
+    .eq('organization_id', org.id)
+    .eq('name', org.name)
+    .single();
+
+  if (deptError || !matchingDept) {
+    Logger.debug('RallyeStorage', `No department with name "${org.name}" found for org ${org.id}`);
+    return null;
+  }
+
+  Logger.debug('RallyeStorage', `Found matching department: ${matchingDept.id}`);
+
+  // Schritt 2: Prüfe ob dieses Department aktive Rallyes hat
+  const rallyes = await getRallyesForDepartment(matchingDept.id);
+  
+  if (rallyes.length === 0) {
+    Logger.debug('RallyeStorage', `Department "${org.name}" has no active rallyes`);
+    return null;
+  }
+
+  Logger.debug('RallyeStorage', `Department "${org.name}" has ${rallyes.length} active rallye(s)`);
+  return matchingDept as Department;
+}
+
+/**
  * Lädt die Tour-Mode Rallye für eine Organisation.
  * Gibt null zurück, wenn keine default_rallye_id gesetzt ist oder die Rallye nicht aktiv ist.
  */

@@ -27,6 +27,7 @@ import {
   getDepartmentsForOrganization,
   getRallyesForDepartment,
   getTourModeRallyeForOrganization,
+  getCampusEventsDepartment,
   getSelectedOrganization as getStoredOrganization,
   setSelectedOrganization as storeSelectedOrganization,
   clearSelectedOrganization,
@@ -66,6 +67,7 @@ export default function Welcome() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [tourModeRallye, setTourModeRallye] = useState<Rallye | null>(null);
+  const [campusEventsDepartment, setCampusEventsDepartment] = useState<Department | null>(null);
 
   // Modal states
   const [showRallyeModal, setShowRallyeModal] = useState(false);
@@ -109,6 +111,8 @@ export default function Welcome() {
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(orgStillValid.id);
           setTourModeRallye(tourRallye);
+          const campusEvents = await getCampusEventsDepartment(orgStillValid);
+          setCampusEventsDepartment(campusEvents);
 
           if (savedDept) {
             const deptStillValid = depts.find(d => d.id === savedDept.id);
@@ -144,6 +148,8 @@ export default function Welcome() {
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(singleOrg.id);
           setTourModeRallye(tourRallye);
+          const campusEvents = await getCampusEventsDepartment(singleOrg);
+          setCampusEventsDepartment(campusEvents);
           
           // Auto-select if only one department
           if (depts.length === 1) {
@@ -196,17 +202,21 @@ export default function Welcome() {
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
           setTourModeRallye(tourRallye);
+          const campusEvents = await getCampusEventsDepartment(orgStillValid);
+          setCampusEventsDepartment(campusEvents);
           
-          if (depts.length === 0 && !tourRallye) {
+          if (depts.length === 0 && !tourRallye && !campusEvents) {
             await clearSelectedOrganization();
             setSelectedOrganization(null);
             setOrganizations(orgs);
+            setCampusEventsDepartment(null);
             setSelectionStep('organization');
           }
         } else {
           await clearSelectedOrganization();
           setSelectedOrganization(null);
           setOrganizations(orgs);
+          setCampusEventsDepartment(null);
           setSelectionStep('organization');
         }
       } else if (selectionStep === 'rallye' && selectedOrganization && selectedDepartment) {
@@ -282,6 +292,9 @@ export default function Welcome() {
       const tourRallye = await getTourModeRallyeForOrganization(org.id);
       setTourModeRallye(tourRallye);
       
+      const campusEvents = await getCampusEventsDepartment(org);
+      setCampusEventsDepartment(campusEvents);
+      
       if (depts.length === 1) {
         const singleDept = depts[0];
         setSelectedDepartment(singleDept);
@@ -330,6 +343,7 @@ export default function Welcome() {
       setSelectedDepartment(null);
       setDepartments([]);
       setTourModeRallye(null);
+      setCampusEventsDepartment(null);
       setSelectionStep('organization');
     }
   };
@@ -345,6 +359,25 @@ export default function Welcome() {
     store$.rallye.set(tourModeRallye);
     await setCurrentRallye(tourModeRallye);
     store$.enabled.set(true);
+  };
+
+  // Handler for Campus Events selection
+  const handleCampusEventsSelect = async () => {
+    if (!campusEventsDepartment) return;
+    
+    setLoading(true);
+    try {
+      setSelectedDepartment(campusEventsDepartment);
+      await storeSelectedDepartment(campusEventsDepartment);
+      
+      const rallyes = await getRallyesForDepartment(campusEventsDepartment.id);
+      setActiveRallyes(rallyes);
+      setSelectionStep('rallye');
+    } catch (error) {
+      Logger.error('Welcome', 'Error loading campus events rallyes', error);
+      Alert.alert(t('common.errorTitle'), t('welcome.rallyeLoadError'));
+    }
+    setLoading(false);
   };
 
   // Handler for joining a rallye (new API)
@@ -446,7 +479,7 @@ export default function Welcome() {
 
   // Phase 2: Department selection
   const hasDepartmentsWithRallyes = departments.length > 0;
-  const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye;
+  const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye && !campusEventsDepartment;
 
   const DepartmentContent = () => (
     <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
@@ -460,6 +493,18 @@ export default function Welcome() {
         >
           <UIButton onPress={() => setShowDeptModal(true)}>
             {t('welcome.selectDepartment.button')}
+          </UIButton>
+        </Card>
+      )}
+      {campusEventsDepartment && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.campusEvents.title')}
+          description={t('welcome.campusEvents.description')}
+          icon="party.popper"
+        >
+          <UIButton onPress={handleCampusEventsSelect}>
+            {t('welcome.campusEvents.button')}
           </UIButton>
         </Card>
       )}

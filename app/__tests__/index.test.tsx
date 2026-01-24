@@ -7,6 +7,7 @@ import {
   getDepartmentsForOrganization,
   getRallyesForDepartment,
   getTourModeRallyeForOrganization,
+  getCampusEventsDepartment,
   getSelectedOrganization,
   getSelectedDepartment,
 } from '@/services/storage/rallyeStorage';
@@ -100,6 +101,7 @@ jest.mock('@/services/storage/rallyeStorage', () => ({
   getDepartmentsForOrganization: jest.fn(),
   getRallyesForDepartment: jest.fn(),
   getTourModeRallyeForOrganization: jest.fn(),
+  getCampusEventsDepartment: jest.fn(),
   getSelectedOrganization: jest.fn(),
   setSelectedOrganization: jest.fn(),
   clearSelectedOrganization: jest.fn(),
@@ -150,6 +152,10 @@ const mockedGetTourModeRallyeForOrganization =
   getTourModeRallyeForOrganization as jest.MockedFunction<
     typeof getTourModeRallyeForOrganization
   >;
+const mockedGetCampusEventsDepartment =
+  getCampusEventsDepartment as jest.MockedFunction<
+    typeof getCampusEventsDepartment
+  >;
 const mockedGetSelectedOrganization =
   getSelectedOrganization as jest.MockedFunction<typeof getSelectedOrganization>;
 const mockedGetSelectedDepartment =
@@ -186,6 +192,7 @@ describe('Welcome', () => {
     mockedGetSelectedOrganization.mockResolvedValue(null);
     mockedGetSelectedDepartment.mockResolvedValue(null);
     mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([]);
+    mockedGetCampusEventsDepartment.mockResolvedValue(null);
   });
 
   it('shows tour mode when no rallyes are available but tour mode exists', async () => {
@@ -205,6 +212,7 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
     mockedGetTourModeRallyeForOrganization.mockResolvedValue(tourModeRallye);
+    mockedGetCampusEventsDepartment.mockResolvedValue(null);
 
     const { getByText, queryByText } = render(<Welcome />);
 
@@ -237,6 +245,7 @@ describe('Welcome', () => {
     mockedGetDepartmentsForOrganization.mockResolvedValue([mockDepartment]);
     mockedGetRallyesForDepartment.mockResolvedValue([rallye]);
     mockedGetTourModeRallyeForOrganization.mockResolvedValue(null);
+    mockedGetCampusEventsDepartment.mockResolvedValue(null);
     mockedSetCurrentRallye.mockResolvedValue();
     mockedGetCurrentTeam.mockResolvedValue(existingTeam);
     mockedTeamExists.mockResolvedValue('unknown');
