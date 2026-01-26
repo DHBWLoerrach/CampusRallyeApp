@@ -5,7 +5,7 @@ import {
   removeStorageItem,
   setStorageItem,
 } from './asyncStorage';
-import type { Department, Organization } from '@/types/rallye';
+import { Organization, Department, Rallye } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
 export type RallyeRow = {
@@ -283,9 +283,7 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
 /**
  * Lädt alle aktiven Rallyes für ein Department.
  */
-export async function getRallyesForDepartment(
-  deptId: number
-): Promise<RallyeRow[]> {
+export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]> {
   Logger.debug('RallyeStorage', `getRallyesForDepartment called with deptId: ${deptId}`);
   
   // Hole alle Rallye-IDs, die diesem Department zugeordnet sind
@@ -331,16 +329,14 @@ export async function getRallyesForDepartment(
 
   Logger.debug('RallyeStorage', `Active rallyes for dept ${deptId}:`, activeRallyes);
 
-  return activeRallyes as RallyeRow[];
+  return activeRallyes as Rallye[];
 }
 
 /**
  * Lädt die Tour-Mode Rallye für eine Organisation.
  * Gibt null zurück, wenn keine default_rallye_id gesetzt ist oder die Rallye nicht aktiv ist.
  */
-export async function getTourModeRallyeForOrganization(
-  orgId: number
-): Promise<RallyeRow | null> {
+export async function getTourModeRallyeForOrganization(orgId: number): Promise<Rallye | null> {
   // Schritt 1: Hole die default_rallye_id der Organisation
   const { data: org, error: orgError } = await supabase
     .from('organization')
@@ -375,5 +371,5 @@ export async function getTourModeRallyeForOrganization(
     return null;
   }
 
-  return rallye as RallyeRow;
+  return rallye as Rallye;
 }

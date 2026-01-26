@@ -43,11 +43,6 @@ export const translations = {
     'welcome.join.description':
       'Nimm an einer geführten Rallye teil und entdecke den Campus mit deinem Team',
     'welcome.join.select': 'Rallye auswählen',
-    'welcome.organizationTitle': '{{organization}} Campus Rallye',
-    'welcome.selectOrganization.title': 'Standort auswählen',
-    'welcome.selectOrganization.description':
-      'Wähle deinen Standort aus, um verfügbare Rallyes zu sehen',
-    'welcome.selectOrganization.empty': 'Keine Standorte verfügbar',
     'welcome.explore.title': 'Campus-Gelände erkunden',
     'welcome.explore.description':
       'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck',
@@ -212,11 +207,6 @@ export const translations = {
     'welcome.join.description':
       'Join a guided rally and explore the campus with your team',
     'welcome.join.select': 'Select rallye',
-    'welcome.organizationTitle': '{{organization}} Campus Rallye',
-    'welcome.selectOrganization.title': 'Select location',
-    'welcome.selectOrganization.description':
-      'Select your location to see available rallyes',
-    'welcome.selectOrganization.empty': 'No locations available',
     'welcome.explore.title': 'Explore Campus',
     'welcome.explore.description':
       'Explore the campus at your own pace without time pressure',

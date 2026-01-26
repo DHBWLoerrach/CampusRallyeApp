@@ -2,13 +2,13 @@ import React, { type ReactNode } from 'react';
 import { act, render, waitFor } from '@testing-library/react-native';
 import Welcome from '../index';
 import {
-  getDepartmentsForOrganization,
-  getOrganizationsWithActiveRallyes,
-  getRallyesForDepartment,
-  getSelectedDepartment,
-  getSelectedOrganization,
-  getTourModeRallyeForOrganization,
   setCurrentRallye,
+  getOrganizationsWithActiveRallyes,
+  getDepartmentsForOrganization,
+  getRallyesForDepartment,
+  getTourModeRallyeForOrganization,
+  getSelectedOrganization,
+  getSelectedDepartment,
 } from '@/services/storage/rallyeStorage';
 import {
   clearCurrentTeam,
@@ -150,9 +150,7 @@ const mockedGetTourModeRallyeForOrganization =
     typeof getTourModeRallyeForOrganization
   >;
 const mockedGetSelectedOrganization =
-  getSelectedOrganization as jest.MockedFunction<
-    typeof getSelectedOrganization
-  >;
+  getSelectedOrganization as jest.MockedFunction<typeof getSelectedOrganization>;
 const mockedGetSelectedDepartment =
   getSelectedDepartment as jest.MockedFunction<typeof getSelectedDepartment>;
 const mockedSetCurrentRallye = setCurrentRallye as jest.MockedFunction<
@@ -167,29 +165,43 @@ const mockedClearCurrentTeam = clearCurrentTeam as jest.MockedFunction<
 >;
 
 describe('Welcome', () => {
+  const mockOrganization = {
+    id: 1,
+    name: 'Test Org',
+    default_rallye_id: null,
+    created_at: '2024-01-01T00:00:00Z',
+  };
+  const mockDepartment = {
+    id: 1,
+    name: 'Test Dept',
+    organization_id: 1,
+    created_at: '2024-01-01T00:00:00Z',
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockRallyeModalProps = null;
+    // Default mocks for initialization
+    mockedGetSelectedOrganization.mockResolvedValue(null);
+    mockedGetSelectedDepartment.mockResolvedValue(null);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([]);
   });
 
   it('shows tour mode when no rallyes are available but tour mode exists', async () => {
-    const org = {
-      id: 1,
-      name: 'Main Campus',
-      default_rallye_id: 2,
-      created_at: '2024-01-01T00:00:00Z',
-    };
-
-    mockedGetSelectedOrganization.mockResolvedValue(null);
-    mockedGetSelectedDepartment.mockResolvedValue(null);
-    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([org]);
-    mockedGetDepartmentsForOrganization.mockResolvedValue([]);
+    // Setup: Organization selected, department selected, no active rallyes but tour mode exists
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetSelectedDepartment.mockResolvedValue(mockDepartment);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
+    mockedGetDepartmentsForOrganization.mockResolvedValue([mockDepartment]);
     mockedGetRallyesForDepartment.mockResolvedValue([]);
     mockedGetTourModeRallyeForOrganization.mockResolvedValue({
       id: 1,
       name: 'Campus Tour',
       status: 'running',
+      password: '',
       tour_mode: true,
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
     });
 
     const { getByText, queryByText } = render(<Welcome />);
@@ -198,8 +210,9 @@ describe('Welcome', () => {
       expect(getByText('welcome.explore.title')).toBeTruthy();
     });
 
-    expect(getByText('welcome.noRallyes.title')).toBeTruthy();
-    expect(queryByText('welcome.empty')).toBeNull();
+    // When tour mode exists, we should see the explore card, not the noRallyes card
+    expect(getByText('welcome.explore.description')).toBeTruthy();
+    expect(queryByText('welcome.noRallyes.title')).toBeNull();
     expect(queryByText('welcome.join.title')).toBeNull();
   });
 
@@ -208,26 +221,18 @@ describe('Welcome', () => {
       id: 5,
       name: 'Rallye',
       status: 'running',
+      password: 'test123',
       tour_mode: false,
-    };
-    const org = {
-      id: 1,
-      name: 'Main Campus',
-      default_rallye_id: null,
-      created_at: '2024-01-01T00:00:00Z',
-    };
-    const dept = {
-      id: 3,
-      name: 'Informatik',
-      organization_id: 1,
+      end_time: null,
       created_at: '2024-01-01T00:00:00Z',
     };
     const existingTeam = { id: 7, name: 'Team' };
 
-    mockedGetSelectedOrganization.mockResolvedValue(null);
-    mockedGetSelectedDepartment.mockResolvedValue(null);
-    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([org]);
-    mockedGetDepartmentsForOrganization.mockResolvedValue([dept]);
+    // Setup: Organization and department selected, one active rallye
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetSelectedDepartment.mockResolvedValue(mockDepartment);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
+    mockedGetDepartmentsForOrganization.mockResolvedValue([mockDepartment]);
     mockedGetRallyesForDepartment.mockResolvedValue([rallye]);
     mockedGetTourModeRallyeForOrganization.mockResolvedValue(null);
     mockedSetCurrentRallye.mockResolvedValue();

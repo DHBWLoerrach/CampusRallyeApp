@@ -47,8 +47,6 @@ type CollapsibleHeroHeaderProps = {
   onBackPress?: () => void;
   /** Back button label */
   backLabel?: string;
-  backAccessibilityLabel?: string;
-  backAccessibilityHint?: string;
 };
 
 /**
@@ -64,8 +62,6 @@ export function CollapsibleHeroHeader({
   showBackButton = false,
   onBackPress,
   backLabel,
-  backAccessibilityLabel,
-  backAccessibilityHint,
 }: CollapsibleHeroHeaderProps) {
   const { isDarkMode } = useTheme();
   const { t, toggleLanguage, language } = useLanguage();
@@ -179,13 +175,12 @@ export function CollapsibleHeroHeader({
             style={[styles.backButton, { top: insets.top + 8 }]}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             accessibilityRole="button"
-            accessibilityLabel={backAccessibilityLabel ?? backLabel ?? t('common.back')}
-            accessibilityHint={backAccessibilityHint ?? t('common.back')}
+            accessibilityLabel={backLabel || t('common.back')}
             onPress={onBackPress}
           >
             <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
             <ThemedText style={styles.languageText}>
-              {backLabel ?? t('common.back')}
+              {backLabel || t('common.back')}
             </ThemedText>
           </TouchableOpacity>
         )}
