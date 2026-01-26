@@ -2,8 +2,12 @@ import React, { type ReactNode } from 'react';
 import { act, render, waitFor } from '@testing-library/react-native';
 import Welcome from '../index';
 import {
-  getActiveRallyes,
-  getTourModeRallye,
+  getDepartmentsForOrganization,
+  getOrganizationsWithActiveRallyes,
+  getRallyesForDepartment,
+  getSelectedDepartment,
+  getSelectedOrganization,
+  getTourModeRallyeForOrganization,
   setCurrentRallye,
 } from '@/services/storage/rallyeStorage';
 import {
@@ -86,8 +90,16 @@ jest.mock('@/services/storage/Store', () => ({
 
 jest.mock('@/services/storage/rallyeStorage', () => ({
   __esModule: true,
-  getActiveRallyes: jest.fn(),
-  getTourModeRallye: jest.fn(),
+  getOrganizationsWithActiveRallyes: jest.fn(),
+  getDepartmentsForOrganization: jest.fn(),
+  getRallyesForDepartment: jest.fn(),
+  getTourModeRallyeForOrganization: jest.fn(),
+  getSelectedOrganization: jest.fn(),
+  setSelectedOrganization: jest.fn(),
+  clearSelectedOrganization: jest.fn(),
+  getSelectedDepartment: jest.fn(),
+  setSelectedDepartment: jest.fn(),
+  clearSelectedDepartment: jest.fn(),
   setCurrentRallye: jest.fn(),
 }));
 
@@ -116,12 +128,28 @@ jest.mock('@legendapp/state/react', () => ({
   useSelector: (selector: () => unknown) => selector(),
 }));
 
-const mockedGetActiveRallyes = getActiveRallyes as jest.MockedFunction<
-  typeof getActiveRallyes
->;
-const mockedGetTourModeRallye = getTourModeRallye as jest.MockedFunction<
-  typeof getTourModeRallye
->;
+const mockedGetOrganizationsWithActiveRallyes =
+  getOrganizationsWithActiveRallyes as jest.MockedFunction<
+    typeof getOrganizationsWithActiveRallyes
+  >;
+const mockedGetDepartmentsForOrganization =
+  getDepartmentsForOrganization as jest.MockedFunction<
+    typeof getDepartmentsForOrganization
+  >;
+const mockedGetRallyesForDepartment =
+  getRallyesForDepartment as jest.MockedFunction<
+    typeof getRallyesForDepartment
+  >;
+const mockedGetTourModeRallyeForOrganization =
+  getTourModeRallyeForOrganization as jest.MockedFunction<
+    typeof getTourModeRallyeForOrganization
+  >;
+const mockedGetSelectedOrganization =
+  getSelectedOrganization as jest.MockedFunction<
+    typeof getSelectedOrganization
+  >;
+const mockedGetSelectedDepartment =
+  getSelectedDepartment as jest.MockedFunction<typeof getSelectedDepartment>;
 const mockedSetCurrentRallye = setCurrentRallye as jest.MockedFunction<
   typeof setCurrentRallye
 >;
@@ -140,8 +168,19 @@ describe('Welcome', () => {
   });
 
   it('shows tour mode when no rallyes are available but tour mode exists', async () => {
-    mockedGetActiveRallyes.mockResolvedValue({ data: [], error: null });
-    mockedGetTourModeRallye.mockResolvedValue({
+    const org = {
+      id: 1,
+      name: 'Main Campus',
+      default_rallye_id: 2,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(null);
+    mockedGetSelectedDepartment.mockResolvedValue(null);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([org]);
+    mockedGetDepartmentsForOrganization.mockResolvedValue([]);
+    mockedGetRallyesForDepartment.mockResolvedValue([]);
+    mockedGetTourModeRallyeForOrganization.mockResolvedValue({
       id: 1,
       name: 'Campus Tour',
       status: 'running',
@@ -166,10 +205,26 @@ describe('Welcome', () => {
       status: 'running',
       tour_mode: false,
     };
+    const org = {
+      id: 1,
+      name: 'Main Campus',
+      default_rallye_id: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const dept = {
+      id: 3,
+      name: 'Informatik',
+      organization_id: 1,
+      created_at: '2024-01-01T00:00:00Z',
+    };
     const existingTeam = { id: 7, name: 'Team' };
 
-    mockedGetActiveRallyes.mockResolvedValue({ data: [rallye], error: null });
-    mockedGetTourModeRallye.mockResolvedValue(null);
+    mockedGetSelectedOrganization.mockResolvedValue(null);
+    mockedGetSelectedDepartment.mockResolvedValue(null);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([org]);
+    mockedGetDepartmentsForOrganization.mockResolvedValue([dept]);
+    mockedGetRallyesForDepartment.mockResolvedValue([rallye]);
+    mockedGetTourModeRallyeForOrganization.mockResolvedValue(null);
     mockedSetCurrentRallye.mockResolvedValue();
     mockedGetCurrentTeam.mockResolvedValue(existingTeam);
     mockedTeamExists.mockResolvedValue('unknown');

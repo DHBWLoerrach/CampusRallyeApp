@@ -41,6 +41,11 @@ type CollapsibleHeroHeaderProps = {
   children: ReactNode;
   /** Content container style */
   contentContainerStyle?: object;
+  /** Optional back button */
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+  backAccessibilityLabel?: string;
+  backAccessibilityHint?: string;
 };
 
 /**
@@ -53,6 +58,10 @@ export function CollapsibleHeroHeader({
   title,
   children,
   contentContainerStyle,
+  showBackButton = false,
+  onBackPress,
+  backAccessibilityLabel,
+  backAccessibilityHint,
 }: CollapsibleHeroHeaderProps) {
   const { isDarkMode } = useTheme();
   const { t, toggleLanguage, language } = useLanguage();
@@ -160,6 +169,19 @@ export function CollapsibleHeroHeader({
           </ThemedText>
         </TouchableOpacity>
 
+        {showBackButton && onBackPress ? (
+          <TouchableOpacity
+            style={[styles.backButton, { top: insets.top + 8 }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole="button"
+            accessibilityLabel={backAccessibilityLabel ?? t('common.back')}
+            accessibilityHint={backAccessibilityHint ?? t('common.back')}
+            onPress={onBackPress}
+          >
+            <IconSymbol name="arrow.backward" size={18} color="#FFFFFF" />
+          </TouchableOpacity>
+        ) : null}
+
         {/* Title and Logo (positioned at bottom of header) */}
         <Animated.View
           style={[
@@ -227,7 +249,7 @@ const styles = StyleSheet.create({
   },
   languageToggle: {
     position: 'absolute',
-    right: 16,
+    left: 16,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -235,6 +257,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     gap: 6,
+  },
+  backButton: {
+    position: 'absolute',
+    right: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
   },
   languageText: {
     color: '#FFFFFF',

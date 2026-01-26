@@ -36,6 +36,10 @@ const MAPPING = {
   },
   'chevron.right': { name: 'chevron-right', source: 'material' },
   clock: { name: 'schedule', source: 'material' },
+  // Neue Icons für Mandantenfähigkeit
+  'building.2': { name: 'domain', source: 'material' },
+  graduationcap: { name: 'school', source: 'material' },
+  'arrow.backward': { name: 'arrow-back', source: 'material' },
 } as Record<string, IconConfig>;
 
 /**
