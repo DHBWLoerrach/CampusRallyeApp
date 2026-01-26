@@ -199,6 +199,9 @@ export default function Welcome() {
 
   const refreshCurrentData = useCallback(async () => {
     if (fetchState === 'loading' || !isInitializedRef.current) return;
+    if (store$.enabled.get()) return;
+    if (appStateRef.current !== 'active') return;
+    if (showRallyeModal || showOrgModal || showDeptModal) return;
 
     try {
       if (selectionStep === 'organization') {
@@ -292,6 +295,9 @@ export default function Welcome() {
     selectionStep,
     selectedOrganization,
     selectedDepartment,
+    showRallyeModal,
+    showOrgModal,
+    showDeptModal,
   ]);
 
   useEffect(() => {
@@ -538,6 +544,7 @@ export default function Welcome() {
       title={t('welcome.selectOrganization.title')}
       description={t('welcome.selectOrganization.description')}
       icon="building.2"
+      layout="vertical"
     >
       <UIButton onPress={() => setShowOrgModal(true)}>
         {t('common.select')}
@@ -554,6 +561,7 @@ export default function Welcome() {
           title={t('welcome.selectDepartment.title')}
           description={t('welcome.selectDepartment.description')}
           icon="graduationcap"
+          layout="vertical"
         >
           <UIButton onPress={() => setShowDeptModal(true)}>
             {t('common.select')}

@@ -226,12 +226,12 @@ export const globalStyles = createGroupedStyles({
   cardStyles: {
     card: {
       width: '100%',
-      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.16 : 0.22),
+      minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.12 : 0.14),
       // backgroundColor handled by themed style
       borderRadius: Constants.cornerRadius,
       padding: SCREEN_WIDTH * (IS_SMALL_SCREEN ? 0.03 : 0.04),
       marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.015),
-      alignItems: 'center',
+      alignItems: 'flex-start',
       justifyContent: 'center',
       shadowColor: '#000',
       shadowOffset: {
@@ -244,16 +244,30 @@ export const globalStyles = createGroupedStyles({
     },
     cardTitle: {
       marginTop: SCREEN_HEIGHT * 0.01,
-      textAlign: 'center',
+      textAlign: 'left',
     },
     cardDescription: {
       textAlign: 'left',
       marginTop: SCREEN_HEIGHT * 0.01,
-      paddingHorizontal: SCREEN_WIDTH * 0.02,
+      paddingHorizontal: 0,
       width: '100%',
     },
   },
   scoreboardStyles: {
+    headerCell: {
+      flex: 1,
+      fontWeight: 'bold',
+      color: Colors.dhbwGray,
+      textAlign: 'center',
+    },
+
+    headerCellWide: {
+      flex: 3,
+      fontWeight: 'bold',
+      color: Colors.dhbwGray,
+      textAlign: 'center',
+    },
+
     row: {
       flexDirection: 'row',
       padding: 15,

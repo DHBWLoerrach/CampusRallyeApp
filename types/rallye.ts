@@ -25,14 +25,6 @@ export interface QuestionProps {
   question: Question;
 }
 
-export interface Team {
-  id: number;
-  name: string;
-  rallye_id?: number;
-  points?: number;
-  time_played?: string | null;
-}
-
 export interface Organization {
   id: number;
   name: string;
@@ -55,4 +47,12 @@ export interface Rallye {
   tour_mode: boolean; // Deprecated: wird durch Organization.default_rallye_id ersetzt
   end_time: string | null;
   created_at: string;
+}
+
+export interface Team {
+  id: number;
+  name: string;
+  rallye_id?: number;
+  points?: number;
+  time_played?: string | null;
 }

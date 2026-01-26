@@ -8,6 +8,7 @@ import {
 } from './teamStorage';
 import { startOutbox } from './offlineOutbox';
 import { AnswerRow, Question, Team } from '@/types/rallye';
+import { Logger } from '@/utils/Logger';
 
 export type SessionState =
   | 'not_joined'
@@ -111,10 +112,10 @@ export const store$ = observable({
         const team = store$.team.get();
         if (rallye && team && !rallye.tour_mode) {
           await setTimePlayed(rallye.id, team.id);
-          console.log('Rallye finished, time_played set for team:', team.id);
+          Logger.info('Store', `Rallye finished, time_played set for team: ${team.id}`);
         }
       } catch (err) {
-        console.error('Error setting time_played:', err);
+        Logger.error('Store', 'Error setting time_played', err);
       }
     } else {
       store$.questionIndex.set(nextIndex);

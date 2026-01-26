@@ -14,7 +14,8 @@ import ThemedText from '@/components/themed/ThemedText';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
-const ICON_SIZE = IS_SMALL_SCREEN ? 32 : 40;
+const ICON_SIZE_SMALL = IS_SMALL_SCREEN ? 20 : 24;
+const ICON_SIZE_LARGE = IS_SMALL_SCREEN ? 32 : 40;
 
 type Props = {
   title: string;
@@ -24,6 +25,8 @@ type Props = {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   containerStyle?: StyleProp<ViewStyle>;
+  /** Layout style: 'horizontal' puts icon left of title, 'vertical' puts icon above title */
+  layout?: 'horizontal' | 'vertical';
 };
 
 export default function Card({
@@ -35,6 +38,7 @@ export default function Card({
   accessibilityHint,
   containerStyle,
   children,
+  layout = 'horizontal',
 }: PropsWithChildren<Props>) {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
@@ -49,17 +53,39 @@ export default function Card({
       }
     : null;
 
+  const isVertical = layout === 'vertical';
+  const iconSize = isVertical ? ICON_SIZE_LARGE : ICON_SIZE_SMALL;
+
   const content = (
     <>
-      <IconSymbol name={icon} size={ICON_SIZE} color={Colors.dhbwRed} />
+      {isVertical ? (
+        // Vertical layout: icon above title (centered)
+        <>
+          <IconSymbol name={icon} size={iconSize} color={Colors.dhbwRed} />
+          <ThemedText
+            style={[globalStyles.cardStyles.cardTitle, { textAlign: 'center' }]}
+            variant="bodyStrong"
+          >
+            {title}
+          </ThemedText>
+        </>
+      ) : (
+        // Horizontal layout: icon left of title
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+          <IconSymbol name={icon} size={iconSize} color={Colors.dhbwRed} />
+          <ThemedText
+            style={[globalStyles.cardStyles.cardTitle, { marginLeft: 8, marginTop: 0, flex: 1 }]}
+            variant="bodyStrong"
+          >
+            {title}
+          </ThemedText>
+        </View>
+      )}
       <ThemedText
-        style={globalStyles.cardStyles.cardTitle}
-        variant="bodyStrong"
-      >
-        {title}
-      </ThemedText>
-      <ThemedText
-        style={globalStyles.cardStyles.cardDescription}
+        style={[
+          globalStyles.cardStyles.cardDescription,
+          isVertical && { textAlign: 'center' },
+        ]}
         variant="bodySmall"
       >
         {description}
@@ -72,6 +98,13 @@ export default function Card({
     </>
   );
 
+  const verticalCardStyle = isVertical
+    ? {
+        alignItems: 'center' as const,
+        minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.16 : 0.22),
+      }
+    : null;
+
   if (!onPress) {
     return (
       <View
@@ -79,6 +112,7 @@ export default function Card({
           globalStyles.cardStyles.card,
           { backgroundColor },
           surfaceStyle,
+          verticalCardStyle,
           containerStyle,
         ]}
       >
@@ -97,6 +131,7 @@ export default function Card({
         globalStyles.cardStyles.card,
         { backgroundColor },
         surfaceStyle,
+        verticalCardStyle,
         containerStyle,
         pressed ? { opacity: 0.92, transform: [{ scale: 0.99 }] } : null,
       ]}

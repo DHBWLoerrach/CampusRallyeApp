@@ -41,9 +41,12 @@ type CollapsibleHeroHeaderProps = {
   children: ReactNode;
   /** Content container style */
   contentContainerStyle?: object;
-  /** Optional back button */
+  /** Show back button */
   showBackButton?: boolean;
+  /** Back button press handler */
   onBackPress?: () => void;
+  /** Back button label */
+  backLabel?: string;
   backAccessibilityLabel?: string;
   backAccessibilityHint?: string;
 };
@@ -60,6 +63,7 @@ export function CollapsibleHeroHeader({
   contentContainerStyle,
   showBackButton = false,
   onBackPress,
+  backLabel,
   backAccessibilityLabel,
   backAccessibilityHint,
 }: CollapsibleHeroHeaderProps) {
@@ -169,18 +173,22 @@ export function CollapsibleHeroHeader({
           </ThemedText>
         </TouchableOpacity>
 
-        {showBackButton && onBackPress ? (
+        {/* Back Button (optional) */}
+        {showBackButton && onBackPress && (
           <TouchableOpacity
             style={[styles.backButton, { top: insets.top + 8 }]}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             accessibilityRole="button"
-            accessibilityLabel={backAccessibilityLabel ?? t('common.back')}
+            accessibilityLabel={backAccessibilityLabel ?? backLabel ?? t('common.back')}
             accessibilityHint={backAccessibilityHint ?? t('common.back')}
             onPress={onBackPress}
           >
-            <IconSymbol name="arrow.backward" size={18} color="#FFFFFF" />
+            <IconSymbol name="chevron.left" size={18} color="#FFFFFF" />
+            <ThemedText style={styles.languageText}>
+              {backLabel ?? t('common.back')}
+            </ThemedText>
           </TouchableOpacity>
-        ) : null}
+        )}
 
         {/* Title and Logo (positioned at bottom of header) */}
         <Animated.View
@@ -261,12 +269,13 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     right: 16,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 20,
-    width: 36,
-    height: 36,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 6,
   },
   languageText: {
     color: '#FFFFFF',

@@ -39,6 +39,11 @@ jest.mock('@/components/ui/RallyeSelectionModal', () => ({
   },
 }));
 
+jest.mock('@/components/ui/SelectionModal', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 jest.mock('@/components/ui/Card', () => {
   const { Text, View } = jest.requireActual('react-native');
   return {
