@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, Image, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import UIButton from '@/components/ui/UIButton';
 import { supabase } from '@/utils/Supabase';
-import Colors from '@/utils/Colors';
-import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
-import VStack from '@/components/ui/VStack';
-import { useAppStyles } from '@/utils/AppStyles';
 import { Screen } from '@/components/ui/Screen';
 
 export default function Voting({
@@ -30,22 +26,93 @@ export default function Voting({
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
-  const s = useAppStyles();
   const { t } = useLanguage();
   const rallyeId = rallye?.id;
   const teamId = team?.id;
 
   const getVotingData = useCallback(async () => {
-    if (!rallyeId || !teamId) return;
+    if (!rallyeId || !teamId) {
+      return;
+    }
     try {
-      const { data, error } = await supabase.rpc('get_voting_content', {
-        rallye_id_param: rallyeId,
-        own_team_id_param: teamId,
-      });
-      if (error) throw error;
-      setVoting(data || []);
-    } catch (e) {
-      console.error('Error fetching voting questions:', e);
+      // Get voting questions with question details
+      const { data: votingQuestions, error: votingError } = await supabase
+        .from('voting')
+        .select('question_id, questions(id, content, type)')
+        .eq('rallye_id', rallyeId);
+
+      if (votingError) throw votingError;
+      if (!votingQuestions || votingQuestions.length === 0) {
+        setVoting([]);
+        return;
+      }
+
+      // Get all teams in this rallye except own team
+      const { data: teams, error: teamsError } = await supabase
+        .from('rallye_team')
+        .select('id, name')
+        .eq('rallye_id', rallyeId)
+        .neq('id', teamId);
+
+      if (teamsError) throw teamsError;
+      if (!teams || teams.length === 0) {
+        setVoting([]);
+        return;
+      }
+
+      // Build voting data structure
+      const votingData: any[] = [];
+      for (const vq of votingQuestions) {
+        const question = vq.questions as any;
+        if (!question) {
+          continue;
+        }
+
+        for (const team of teams) {
+          const { data: tqData, error: tqError } = await supabase
+            .from('team_questions')
+            .select('id, team_answer')
+            .eq('team_id', team.id)
+            .eq('question_id', question.id)
+            .maybeSingle();
+
+          if (tqError && tqError.code !== 'PGRST116') throw tqError;
+
+          let tqId = tqData?.id;
+          let teamAnswer = tqData?.team_answer;
+
+          if (!tqId) {
+            const { data: newTq, error: insertError } = await supabase
+              .from('team_questions')
+              .insert({
+                team_id: team.id,
+                question_id: question.id,
+                team_answer: null,
+                points: 0,
+                correct: false,
+              })
+              .select('id, team_answer')
+              .single();
+
+            if (insertError) throw insertError;
+            tqId = newTq.id;
+            teamAnswer = newTq.team_answer;
+          }
+
+          votingData.push({
+            tq_question_id: question.id,
+            question_content: question.content,
+            rt_id: team.id,
+            rt_team_name: team.name,
+            tq_id: tqId,
+            tq_team_answer: teamAnswer,
+          });
+        }
+      }
+
+      setVoting(votingData);
+    } catch {
+      setVoting([]);
     }
   }, [rallyeId, teamId]);
 
@@ -65,8 +132,9 @@ export default function Voting({
         .eq('rallye_id', rallyeId);
       if (error) throw error;
       setTeamCount((data || []).length);
-    } catch (e) {
-      console.error('Error fetching team count:', e);
+    } catch {
+      setCounter(0);
+      setTeamCount(0);
     }
   }, [rallyeId]);
 
@@ -114,7 +182,6 @@ export default function Voting({
       setSelectedUpdateId(null);
       setSelectedTeam(null);
     } catch (e) {
-      console.error('Error updating team question:', e);
       Alert.alert(t('common.errorTitle'), t('voting.error.submit'));
     } finally {
       setSendingResult(false);
@@ -123,137 +190,74 @@ export default function Voting({
 
   if (!votingAllowed || teamCount < 2) {
     return (
-      <Screen padding="none" contentStyle={globalStyles.default.container}>
-        <VStack style={{ width: '100%' }} gap={2}>
-          <InfoBox mb={2}>
-            <ThemedText
-              variant="title"
-              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-            >
+      <Screen padding="none">
+        <>
+          <InfoBox>
+            <ThemedText variant="title">
               {t('voting.ended.title')}
             </ThemedText>
-            <ThemedText
-              variant="body"
-              style={[
-                globalStyles.rallyeStatesStyles.infoSubtitle,
-                s.muted,
-                { marginTop: 10 },
-              ]}
-            >
+            <ThemedText variant="body">
               {t('voting.ended.message')}
             </ThemedText>
           </InfoBox>
-          <InfoBox mb={2}>
+          <InfoBox>
             <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
               {t('common.refresh')}
             </UIButton>
           </InfoBox>
-        </VStack>
+        </>
       </Screen>
     );
   }
 
   return (
-    <Screen
-      padding="none"
-      edges={['bottom']}
-      contentStyle={[globalStyles.default.container, { flex: 1 }]}
-    >
+    <Screen padding="none" edges={['bottom']}>
       <FlatList
         data={currentQuestion}
-        keyExtractor={(item) => `${item.tq_team_id}`}
+        keyExtractor={(item) => `${item.tq_id}`}
         onRefresh={getVotingData}
         refreshing={loading}
-        ListHeaderComponent={() =>
-          currentQuestion && currentQuestion.length > 0 ? (
-            <View style={{ paddingTop: 10, paddingBottom: 30 }}>
-              <InfoBox mb={2}>
-                <ThemedText
-                  variant="title"
-                  style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-                >
-                  {currentQuestion[0]?.question_content}
-                </ThemedText>
-                <ThemedText
-                  variant="body"
-                  style={[
-                    globalStyles.rallyeStatesStyles.infoSubtitle,
-                    s.muted,
-                    { marginTop: 10 },
-                  ]}
-                >
-                  {t('voting.instruction')}
-                </ThemedText>
-              </InfoBox>
-            </View>
-          ) : null
+        ListHeaderComponent={
+          currentQuestion.length > 0 ? (
+            <InfoBox>
+              <ThemedText variant="title">
+                {currentQuestion[0].question_content}
+              </ThemedText>
+            </InfoBox>
+          ) : undefined
         }
         renderItem={({ item }) => (
           <TouchableOpacity
             testID={`vote-option-${item.tq_id}`}
             onPress={() => {
-              setSelectedTeam(item.rt_id);
-              setSelectedUpdateId(item.tq_id);
+              if (selectedTeam === item.rt_id) {
+                setSelectedTeam(null);
+                setSelectedUpdateId(null);
+              } else {
+                setSelectedTeam(item.rt_id);
+                setSelectedUpdateId(item.tq_id);
+              }
             }}
-            activeOpacity={1.0}
-            style={{ alignItems: 'flex-start', paddingTop: 10 }}
           >
-            <InfoBox
-              mb={2}
-              style={{
-                borderColor:
-                  selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
-                borderWidth: selectedTeam === item.rt_id ? 2 : 0,
-              }}
-            >
-              {item.question_type === 'knowledge' ? (
-                <ThemedText
-                  variant="title"
-                  style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-                >
+              <InfoBox>
+                <ThemedText variant="title">
                   {item.tq_team_answer}
                 </ThemedText>
-              ) : (
-                (() => {
-                  const imageUri = `${
-                    process.env.EXPO_PUBLIC_SUPABASE_URL
-                  }/storage/v1/object/public/upload-photos/${(
-                    item?.tq_team_answer || ''
-                  ).trim()}`;
-                  return (
-                    <Image
-                      source={{ uri: imageUri }}
-                      style={{
-                        width: '100%',
-                        height: 200,
-                        resizeMode: 'contain',
-                        marginBottom: 10,
-                      }}
-                    />
-                  );
-                })()
-              )}
-              <ThemedText
-                variant="body"
-                style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
-              >
-                {item.rt_team_name}
-              </ThemedText>
-            </InfoBox>
-          </TouchableOpacity>
+                <ThemedText variant="body">
+                  {item.rt_team_name}
+                </ThemedText>
+              </InfoBox>
+            </TouchableOpacity>
         )}
-        contentContainerStyle={[{ padding: 10 }]}
       />
-      <View style={{ padding: 10 }}>
-        <InfoBox mb={2}>
-          <UIButton
-            disabled={!selectedTeam || sendingResult}
-            onPress={handleNextQuestion}
-          >
-            {t('voting.next')}
-          </UIButton>
-        </InfoBox>
-      </View>
+      <InfoBox>
+        <UIButton
+          disabled={!selectedTeam || sendingResult}
+          onPress={handleNextQuestion}
+        >
+          {t('voting.next')}
+        </UIButton>
+      </InfoBox>
     </Screen>
   );
 }

@@ -157,8 +157,7 @@ export const translations = {
       'Platz {{rank}}, Team {{team}}, Zeit {{time}}, Punkte {{points}}',
     'voting.ended.title': 'Die Abstimmung wurde beendet.',
     'voting.ended.message': 'Wartet auf die Beendigung der Rallye.',
-    'voting.instruction':
-      'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.',
+    'voting.instruction': 'Wähle das beste Bild aus.',
     'voting.next': 'Nächste Abstimmung',
     'voting.error.submit': 'Abstimmung konnte nicht gespeichert werden.',
     'scoreboard.title': 'Endstand',
@@ -319,8 +318,7 @@ export const translations = {
       'Rank {{rank}}, Team {{team}}, Time {{time}}, Points {{points}}',
     'voting.ended.title': 'Voting has ended.',
     'voting.ended.message': 'Wait for the rallye to finish.',
-    'voting.instruction':
-      'Give an extra point to the team that you think solved the task above the best.',
+    'voting.instruction': 'Choose the best picture.',
     'voting.next': 'Next vote',
     'voting.error.submit': 'Vote could not be saved.',
     'scoreboard.title': 'Final standings',

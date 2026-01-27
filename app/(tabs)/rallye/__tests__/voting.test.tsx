@@ -148,14 +148,14 @@ describe('Voting', () => {
       if (table === 'rallye_team') {
         return {
           select: jest.fn(() => ({
-            eq: jest.fn(() =>
-              Promise.resolve({
+                eq: jest.fn(() =>
+                  Promise.resolve({
                 data: [{ id: 1 }, { id: 2 }],
-                error: null,
-              })
-            ),
-          })),
-        };
+                    error: null,
+                  })
+                ),
+              })),
+            };
       }
       return {
         select: jest.fn(() => ({
