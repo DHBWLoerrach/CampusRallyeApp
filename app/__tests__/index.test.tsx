@@ -2,9 +2,13 @@ import React, { type ReactNode } from 'react';
 import { act, render, waitFor } from '@testing-library/react-native';
 import Welcome from '../index';
 import {
-  getActiveRallyes,
-  getTourModeRallye,
   setCurrentRallye,
+  getOrganizationsWithActiveRallyes,
+  getDepartmentsForOrganization,
+  getRallyesForDepartment,
+  getTourModeRallyeForOrganization,
+  getSelectedOrganization,
+  getSelectedDepartment,
 } from '@/services/storage/rallyeStorage';
 import {
   clearCurrentTeam,
@@ -33,6 +37,11 @@ jest.mock('@/components/ui/RallyeSelectionModal', () => ({
     mockRallyeModalProps = props;
     return null;
   },
+}));
+
+jest.mock('@/components/ui/SelectionModal', () => ({
+  __esModule: true,
+  default: () => null,
 }));
 
 jest.mock('@/components/ui/Card', () => {
@@ -86,8 +95,16 @@ jest.mock('@/services/storage/Store', () => ({
 
 jest.mock('@/services/storage/rallyeStorage', () => ({
   __esModule: true,
-  getActiveRallyes: jest.fn(),
-  getTourModeRallye: jest.fn(),
+  getOrganizationsWithActiveRallyes: jest.fn(),
+  getDepartmentsForOrganization: jest.fn(),
+  getRallyesForDepartment: jest.fn(),
+  getTourModeRallyeForOrganization: jest.fn(),
+  getSelectedOrganization: jest.fn(),
+  setSelectedOrganization: jest.fn(),
+  clearSelectedOrganization: jest.fn(),
+  getSelectedDepartment: jest.fn(),
+  setSelectedDepartment: jest.fn(),
+  clearSelectedDepartment: jest.fn(),
   setCurrentRallye: jest.fn(),
 }));
 
@@ -116,12 +133,26 @@ jest.mock('@legendapp/state/react', () => ({
   useSelector: (selector: () => unknown) => selector(),
 }));
 
-const mockedGetActiveRallyes = getActiveRallyes as jest.MockedFunction<
-  typeof getActiveRallyes
->;
-const mockedGetTourModeRallye = getTourModeRallye as jest.MockedFunction<
-  typeof getTourModeRallye
->;
+const mockedGetOrganizationsWithActiveRallyes =
+  getOrganizationsWithActiveRallyes as jest.MockedFunction<
+    typeof getOrganizationsWithActiveRallyes
+  >;
+const mockedGetDepartmentsForOrganization =
+  getDepartmentsForOrganization as jest.MockedFunction<
+    typeof getDepartmentsForOrganization
+  >;
+const mockedGetRallyesForDepartment =
+  getRallyesForDepartment as jest.MockedFunction<
+    typeof getRallyesForDepartment
+  >;
+const mockedGetTourModeRallyeForOrganization =
+  getTourModeRallyeForOrganization as jest.MockedFunction<
+    typeof getTourModeRallyeForOrganization
+  >;
+const mockedGetSelectedOrganization =
+  getSelectedOrganization as jest.MockedFunction<typeof getSelectedOrganization>;
+const mockedGetSelectedDepartment =
+  getSelectedDepartment as jest.MockedFunction<typeof getSelectedDepartment>;
 const mockedSetCurrentRallye = setCurrentRallye as jest.MockedFunction<
   typeof setCurrentRallye
 >;
@@ -134,18 +165,43 @@ const mockedClearCurrentTeam = clearCurrentTeam as jest.MockedFunction<
 >;
 
 describe('Welcome', () => {
+  const mockOrganization = {
+    id: 1,
+    name: 'Test Org',
+    default_rallye_id: null,
+    created_at: '2024-01-01T00:00:00Z',
+  };
+  const mockDepartment = {
+    id: 1,
+    name: 'Test Dept',
+    organization_id: 1,
+    created_at: '2024-01-01T00:00:00Z',
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockRallyeModalProps = null;
+    // Default mocks for initialization
+    mockedGetSelectedOrganization.mockResolvedValue(null);
+    mockedGetSelectedDepartment.mockResolvedValue(null);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([]);
   });
 
   it('shows tour mode when no rallyes are available but tour mode exists', async () => {
-    mockedGetActiveRallyes.mockResolvedValue({ data: [], error: null });
-    mockedGetTourModeRallye.mockResolvedValue({
+    // Setup: Organization selected, department selected, no active rallyes but tour mode exists
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetSelectedDepartment.mockResolvedValue(mockDepartment);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
+    mockedGetDepartmentsForOrganization.mockResolvedValue([mockDepartment]);
+    mockedGetRallyesForDepartment.mockResolvedValue([]);
+    mockedGetTourModeRallyeForOrganization.mockResolvedValue({
       id: 1,
       name: 'Campus Tour',
       status: 'running',
+      password: '',
       tour_mode: true,
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
     });
 
     const { getByText, queryByText } = render(<Welcome />);
@@ -154,8 +210,9 @@ describe('Welcome', () => {
       expect(getByText('welcome.explore.title')).toBeTruthy();
     });
 
-    expect(getByText('welcome.noRallyes.title')).toBeTruthy();
-    expect(queryByText('welcome.empty')).toBeNull();
+    // When tour mode exists, we should see the explore card, not the noRallyes card
+    expect(getByText('welcome.explore.description')).toBeTruthy();
+    expect(queryByText('welcome.noRallyes.title')).toBeNull();
     expect(queryByText('welcome.join.title')).toBeNull();
   });
 
@@ -164,12 +221,20 @@ describe('Welcome', () => {
       id: 5,
       name: 'Rallye',
       status: 'running',
+      password: 'test123',
       tour_mode: false,
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
     };
     const existingTeam = { id: 7, name: 'Team' };
 
-    mockedGetActiveRallyes.mockResolvedValue({ data: [rallye], error: null });
-    mockedGetTourModeRallye.mockResolvedValue(null);
+    // Setup: Organization and department selected, one active rallye
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetSelectedDepartment.mockResolvedValue(mockDepartment);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
+    mockedGetDepartmentsForOrganization.mockResolvedValue([mockDepartment]);
+    mockedGetRallyesForDepartment.mockResolvedValue([rallye]);
+    mockedGetTourModeRallyeForOrganization.mockResolvedValue(null);
     mockedSetCurrentRallye.mockResolvedValue();
     mockedGetCurrentTeam.mockResolvedValue(existingTeam);
     mockedTeamExists.mockResolvedValue('unknown');

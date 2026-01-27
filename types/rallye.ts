@@ -25,6 +25,30 @@ export interface QuestionProps {
   question: Question;
 }
 
+export interface Organization {
+  id: number;
+  name: string;
+  default_rallye_id: number | null;
+  created_at: string;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  organization_id: number;
+  created_at: string;
+}
+
+export interface Rallye {
+  id: number;
+  name: string;
+  status: string;
+  password: string;
+  tour_mode: boolean; // Deprecated: wird durch Organization.default_rallye_id ersetzt
+  end_time: string | null;
+  created_at: string;
+}
+
 export interface Team {
   id: number;
   name: string;

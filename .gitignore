@@ -4,6 +4,7 @@
 node_modules/
 rallye-db/
 rallye-db-new/
+package-lock.json
 
 # Expo
 .expo/
@@ -38,6 +39,9 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Jetbrains
+.idea/
 
 ios/
 android/
