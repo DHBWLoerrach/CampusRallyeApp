@@ -86,6 +86,7 @@ export default function Welcome() {
     ? Colors.darkMode.background
     : Colors.lightMode.background;
   const compactCardStyle = globalStyles.welcomeStyles.compactCard;
+  const organizationCardStyle = globalStyles.welcomeStyles.organizationCard;
 
   // Initialization
   useEffect(() => {
@@ -463,16 +464,45 @@ export default function Welcome() {
   // Phase 1: Organization selection
   const OrganizationContent = () => (
     <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
-      <Card
-        containerStyle={compactCardStyle}
-        title={t('welcome.selectLocation.title')}
-        description={t('welcome.selectLocation.description')}
-        icon="building.2"
-      >
-        <UIButton onPress={() => setShowOrgModal(true)}>
-          {t('welcome.selectLocation.button')}
-        </UIButton>
-      </Card>
+      {organizations.length === 0 && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.selectLocation.title')}
+          description={t('welcome.selectLocation.empty')}
+          icon="info.circle"
+        />
+      )}
+      {organizations.length > 0 && organizations.length <= 3 && (
+        <>
+          <ThemedText
+            variant="bodySmall"
+            style={[s.muted, { textAlign: 'left', width: '100%', marginBottom: 8 }]}
+          >
+            {t('welcome.selectLocation.description')}
+          </ThemedText>
+          {organizations.map(org => (
+            <Card
+              key={org.id}
+              containerStyle={organizationCardStyle}
+              title={org.name}
+              icon="building.2"
+              onPress={() => handleOrganizationSelect(org)}
+            />
+          ))}
+        </>
+      )}
+      {organizations.length > 3 && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.selectLocation.title')}
+          description={t('welcome.selectLocation.description')}
+          icon="building.2"
+        >
+          <UIButton onPress={() => setShowOrgModal(true)}>
+            {t('welcome.selectLocation.button')}
+          </UIButton>
+        </Card>
+      )}
     </View>
   );
 

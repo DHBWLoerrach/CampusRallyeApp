@@ -19,7 +19,7 @@ const ICON_SIZE_LARGE = IS_SMALL_SCREEN ? 32 : 40;
 
 type Props = {
   title: string;
-  description: string;
+  description?: string;
   icon: IconSymbolName;
   onPress?: () => void;
   accessibilityLabel?: string;
@@ -55,6 +55,7 @@ export default function Card({
 
   const isVertical = layout === 'vertical';
   const iconSize = isVertical ? ICON_SIZE_LARGE : ICON_SIZE_SMALL;
+  const hasDescription = Boolean(description && description.trim().length > 0);
 
   const content = (
     <>
@@ -81,15 +82,17 @@ export default function Card({
           </ThemedText>
         </View>
       )}
-      <ThemedText
-        style={[
-          globalStyles.cardStyles.cardDescription,
-          isVertical && { textAlign: 'center' },
-        ]}
-        variant="bodySmall"
-      >
-        {description}
-      </ThemedText>
+      {hasDescription ? (
+        <ThemedText
+          style={[
+            globalStyles.cardStyles.cardDescription,
+            isVertical && { textAlign: 'center' },
+          ]}
+          variant="bodySmall"
+        >
+          {description}
+        </ThemedText>
+      ) : null}
       {children ? (
         <View style={{ width: '100%', marginTop: IS_SMALL_SCREEN ? 10 : 14 }}>
           {children}
