@@ -20,7 +20,6 @@ export type RallyeRow = {
   password?: string | null;
   status: RallyeStatus;
   mode: RallyeMode;
-  studiengang?: string | null;
   end_time?: string | null;
 };
 

@@ -36,13 +36,6 @@ function isPasswordRequired(r: RallyeRow) {
   return !!(r.password ?? '').trim().length;
 }
 
-function hasValidStudiengang(studiengang: string | null | undefined): boolean {
-  if (!studiengang) return false;
-  const normalized = studiengang.trim().toLowerCase();
-  // Filter out placeholder values
-  return normalized.length > 0 && normalized !== 'kein studiengang';
-}
-
 export default function RallyeSelectionModal({
   visible,
   onClose,
@@ -102,7 +95,6 @@ export default function RallyeSelectionModal({
   const cancelTextColor = palette.textMuted ?? Colors.mediumGray;
 
   const selectedRallyeName = passwordRallye?.name ?? '';
-  const selectedRallyeStudiengang = passwordRallye?.studiengang ?? '';
 
   const handleSelect = async (rallye: RallyeRow) => {
     if (!isPasswordRequired(rallye)) {
@@ -177,20 +169,6 @@ export default function RallyeSelectionModal({
           >
             {item.name}
           </Text>
-          {hasValidStudiengang(item.studiengang) ? (
-            <Text
-              style={[
-                globalStyles.rallyeModal.rallyeStudiengang,
-                {
-                  color: isDarkMode
-                    ? Colors.darkMode.textMuted
-                    : Colors.mediumGray,
-                },
-              ]}
-            >
-              {item.studiengang}
-            </Text>
-          ) : null}
           {passwordRequired ? (
             <View style={globalStyles.rallyeModal.passwordHintContainer}>
               <IconSymbol
@@ -326,18 +304,6 @@ export default function RallyeSelectionModal({
             >
               {selectedRallyeName}
             </Text>
-
-            {/* Studiengang if valid */}
-            {hasValidStudiengang(selectedRallyeStudiengang) ? (
-              <Text
-                style={[
-                  globalStyles.rallyeModal.passwordSubtitle,
-                  { color: mutedTextColor },
-                ]}
-              >
-                {selectedRallyeStudiengang}
-              </Text>
-            ) : null}
 
             {/* Password input - no label, just placeholder */}
             <ThemedTextInput
