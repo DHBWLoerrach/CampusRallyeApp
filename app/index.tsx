@@ -87,6 +87,12 @@ export default function Welcome() {
     : Colors.lightMode.background;
   const compactCardStyle = globalStyles.welcomeStyles.compactCard;
   const organizationCardStyle = globalStyles.welcomeStyles.organizationCard;
+  const ctaButtonStyle = {
+    backgroundColor: isDarkMode ? Colors.darkMode.surface2 : Colors.lightMode.surface2,
+    borderWidth: 1,
+    borderColor: isDarkMode ? Colors.darkMode.borderSubtle : Colors.lightMode.borderSubtle,
+  };
+  const ctaButtonTextStyle = { color: Colors.dhbwRed };
 
   // Initialization
   useEffect(() => {
@@ -498,7 +504,11 @@ export default function Welcome() {
           description={t('welcome.selectLocation.description')}
           icon="building.2"
         >
-          <UIButton onPress={() => setShowOrgModal(true)}>
+          <UIButton
+            onPress={() => setShowOrgModal(true)}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {t('welcome.selectLocation.button')}
           </UIButton>
         </Card>
@@ -519,7 +529,11 @@ export default function Welcome() {
           description={t('welcome.selectDepartment.description')}
           icon="graduationcap"
         >
-          <UIButton onPress={() => setShowDeptModal(true)}>
+          <UIButton
+            onPress={() => setShowDeptModal(true)}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {t('welcome.selectDepartment.button')}
           </UIButton>
         </Card>
@@ -531,7 +545,11 @@ export default function Welcome() {
           description={t('welcome.campusEvents.description')}
           icon="party.popper"
         >
-          <UIButton onPress={handleCampusEventsSelect}>
+          <UIButton
+            onPress={handleCampusEventsSelect}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {t('welcome.campusEvents.button')}
           </UIButton>
         </Card>
@@ -612,7 +630,11 @@ export default function Welcome() {
         >
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1 }}>
-              <UIButton onPress={() => store$.enabled.set(true)}>
+              <UIButton
+                onPress={() => store$.enabled.set(true)}
+                style={ctaButtonStyle}
+                textStyle={ctaButtonTextStyle}
+              >
                 {t('common.resume')}
               </UIButton>
             </View>
@@ -649,7 +671,12 @@ export default function Welcome() {
           description={t('welcome.join.description')}
           icon="mappin.and.ellipse"
         >
-          <UIButton disabled={joining} onPress={() => setShowRallyeModal(true)}>
+          <UIButton
+            disabled={joining}
+            onPress={() => setShowRallyeModal(true)}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {t('welcome.join.select')}
           </UIButton>
         </Card>

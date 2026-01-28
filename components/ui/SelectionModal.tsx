@@ -31,6 +31,12 @@ export default function SelectionModal({
 }: Props) {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
+  const ctaButtonStyle = {
+    backgroundColor: isDarkMode ? Colors.darkMode.surface2 : Colors.lightMode.surface2,
+    borderWidth: 1,
+    borderColor: isDarkMode ? Colors.darkMode.borderSubtle : Colors.lightMode.borderSubtle,
+  };
+  const ctaButtonTextStyle = { color: Colors.dhbwRed };
 
   const renderItem: ListRenderItem<SelectionItem> = ({ item }) => (
     <View
@@ -67,7 +73,11 @@ export default function SelectionModal({
           </Text>
         )}
       </View>
-      <UIButton onPress={() => onSelect(item)}>
+      <UIButton
+        onPress={() => onSelect(item)}
+        style={ctaButtonStyle}
+        textStyle={ctaButtonTextStyle}
+      >
         {language === 'de' ? 'Auswählen' : 'Select'}
       </UIButton>
     </View>
@@ -105,7 +115,7 @@ export default function SelectionModal({
               {emptyMessage || (language === 'de' ? 'Keine Einträge verfügbar' : 'No items available')}
             </Text>
           )}
-          <UIButton onPress={onClose}>
+          <UIButton onPress={onClose} style={ctaButtonStyle} textStyle={ctaButtonTextStyle}>
             {language === 'de' ? 'Abbrechen' : 'Cancel'}
           </UIButton>
         </View>

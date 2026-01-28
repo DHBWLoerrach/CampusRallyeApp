@@ -93,6 +93,12 @@ export default function RallyeSelectionModal({
   const cardBackgroundColor = palette.surface1;
   const cardBorderColor = palette.borderSubtle;
   const cancelTextColor = palette.textMuted ?? Colors.mediumGray;
+  const ctaButtonStyle = {
+    backgroundColor: palette.surface2,
+    borderWidth: 1,
+    borderColor: palette.borderSubtle,
+  };
+  const ctaButtonTextStyle = { color: Colors.dhbwRed };
 
   const selectedRallyeName = passwordRallye?.name ?? '';
 
@@ -355,7 +361,8 @@ export default function RallyeSelectionModal({
               <UIButton
                 onPress={() => void confirmPasswordAndJoin()}
                 size="dialog"
-                color={Colors.dhbwRed}
+                style={ctaButtonStyle}
+                textStyle={ctaButtonTextStyle}
                 loading={joining}
               >
                 {t('rallye.password.join')}
