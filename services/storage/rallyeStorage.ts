@@ -5,14 +5,14 @@ import {
   removeStorageItem,
   setStorageItem,
 } from './asyncStorage';
-import { Organization, Department, Rallye } from '@/types/rallye';
+import { Organization, Department, Rallye, RallyeStatus } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
 export type RallyeRow = {
   id: number;
   name: string;
   password?: string | null;
-  status: string;
+  status: RallyeStatus;
   tour_mode: boolean;
   studiengang?: string | null;
   end_time?: string | null;
@@ -97,7 +97,9 @@ export async function getTourModeRallye(): Promise<RallyeRow | null> {
   return data as RallyeRow;
 }
 
-export async function getRallyeStatus(rallyeId: number) {
+export async function getRallyeStatus(
+  rallyeId: number
+): Promise<RallyeStatus | null> {
   const { data, error } = await supabase
     .from('rallye')
     .select('status')

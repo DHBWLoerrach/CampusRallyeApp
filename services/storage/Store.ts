@@ -14,7 +14,7 @@ export type SessionState =
   | 'not_joined'
   | 'playing'
   | 'finished'
-  | 'post_processing';
+  | 'voting';
 
 type SessionInputs = {
   enabled: boolean;
@@ -30,8 +30,13 @@ function deriveSessionState({
   timeExpired,
 }: SessionInputs): SessionState {
   if (!enabled || !rallye) return 'not_joined';
-  if (rallye.status === 'post_processing') return 'post_processing';
-  if (rallye.status === 'ended' || allQuestionsAnswered || timeExpired)
+  if (rallye.status === 'voting') return 'voting';
+  if (
+    rallye.status === 'ranking' ||
+    rallye.status === 'ended' ||
+    allQuestionsAnswered ||
+    timeExpired
+  )
     return 'finished';
   return 'playing';
 }

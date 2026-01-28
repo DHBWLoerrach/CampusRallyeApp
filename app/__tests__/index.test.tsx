@@ -16,6 +16,7 @@ import {
   teamExists,
 } from '@/services/storage/teamStorage';
 import { store$ } from '@/services/storage/Store';
+import type { Rallye } from '@/types/rallye';
 
 let mockRallyeModalProps: any;
 
@@ -194,7 +195,7 @@ describe('Welcome', () => {
     mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
     mockedGetDepartmentsForOrganization.mockResolvedValue([mockDepartment]);
     mockedGetRallyesForDepartment.mockResolvedValue([]);
-    mockedGetTourModeRallyeForOrganization.mockResolvedValue({
+    const tourModeRallye: Rallye = {
       id: 1,
       name: 'Campus Tour',
       status: 'running',
@@ -202,7 +203,8 @@ describe('Welcome', () => {
       tour_mode: true,
       end_time: null,
       created_at: '2024-01-01T00:00:00Z',
-    });
+    };
+    mockedGetTourModeRallyeForOrganization.mockResolvedValue(tourModeRallye);
 
     const { getByText, queryByText } = render(<Welcome />);
 
@@ -217,7 +219,7 @@ describe('Welcome', () => {
   });
 
   it('keeps local team when team existence is unknown during join', async () => {
-    const rallye = {
+    const rallye: Rallye = {
       id: 5,
       name: 'Rallye',
       status: 'running',

@@ -21,9 +21,10 @@ import VStack from '@/components/ui/VStack';
 import TeamNameSheet from '@/components/ui/TeamNameSheet';
 import UIButton from '@/components/ui/UIButton';
 import { ScreenScrollView } from '@/components/ui/Screen';
+import type { RallyeStatus } from '@/types/rallye';
 
-function isPreparation(status?: string) {
-  return status === 'preparation' || status === 'preparing';
+function isPreparation(status?: RallyeStatus) {
+  return status === 'preparing';
 }
 
 const RallyeIndex = observer(function RallyeIndex() {
@@ -200,11 +201,11 @@ const RallyeIndex = observer(function RallyeIndex() {
     return <Preparation loading={loading} onRefresh={onRefresh} />;
   }
 
-  if (rallye.status === 'post_processing') {
+  if (rallye.status === 'voting') {
     return <Voting loading={loading} onRefresh={onRefresh} />;
   }
 
-  if (rallye.status === 'ended') {
+  if (rallye.status === 'ranking' || rallye.status === 'ended') {
     return <Scoreboard />;
   }
 

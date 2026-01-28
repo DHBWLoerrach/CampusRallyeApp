@@ -5,6 +5,17 @@ export type QuestionType =
   | 'multiple_choice'
   | 'picture';
 
+export const RALLYE_STATUSES = [
+  'preparing',
+  'inactive',
+  'running',
+  'voting',
+  'ranking',
+  'ended',
+] as const;
+
+export type RallyeStatus = (typeof RALLYE_STATUSES)[number];
+
 export interface Question {
   id: number;
   question: string;
@@ -42,7 +53,7 @@ export interface Department {
 export interface Rallye {
   id: number;
   name: string;
-  status: string;
+  status: RallyeStatus;
   password: string;
   tour_mode: boolean; // Deprecated: wird durch Organization.default_rallye_id ersetzt
   end_time: string | null;
