@@ -47,6 +47,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     store$.allQuestionsAnswered.get()
   );
   const timeExpired = useSelector(() => store$.timeExpired.get());
+  const isTourMode = rallye?.mode === 'tour';
 
   useEffect(() => {
     tRef.current = t;
@@ -94,7 +95,7 @@ const RallyeIndex = observer(function RallyeIndex() {
 
       // already answered for team mode
       let answeredIds: number[] = [];
-      if (!rallye.tour_mode && team) {
+      if (!isTourMode && team) {
         const { data: answeredData, error: answeredError } = await supabase
           .from('team_questions')
           .select('question_id')
@@ -105,13 +106,13 @@ const RallyeIndex = observer(function RallyeIndex() {
       // Track number of answered questions for progress display
       store$.answeredCount.set(answeredIds.length);
 
-      if (answeredIds.length === questionIds.length && !rallye.tour_mode) {
+      if (answeredIds.length === questionIds.length && !isTourMode) {
         store$.allQuestionsAnswered.set(true);
         store$.questionIndex.set(0);
         return;
       }
 
-      const filteredIds = rallye.tour_mode
+      const filteredIds = isTourMode
         ? questionIds
         : questionIds.filter((id: number) => !answeredIds.includes(id));
 
@@ -141,7 +142,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  }, [rallye, team]);
+  }, [isTourMode, rallye, team]);
 
   const refreshStatus = useCallback(async () => {
     if (!rallye) return;
@@ -209,7 +210,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     return <Scoreboard />;
   }
 
-  if (rallye.status === 'running' && !rallye.tour_mode && !team) {
+  if (rallye.status === 'running' && !isTourMode && !team) {
     return <TeamSetup />;
   }
 
@@ -244,10 +245,10 @@ const RallyeIndex = observer(function RallyeIndex() {
           <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
             {(rallye?.name ? `${rallye.name} • ` : '') +
               t('rallye.progress', {
-                current: rallye?.tour_mode
+                current: isTourMode
                   ? idx + 1
                   : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
-                total: rallye?.tour_mode ? qsLen : totalQuestions || qsLen,
+                total: isTourMode ? qsLen : totalQuestions || qsLen,
               })}
           </ThemedText>
           <QuestionRenderer question={currentQuestion} />
@@ -261,7 +262,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     );
   }
 
-  if (allQuestionsAnswered && rallye.tour_mode) {
+  if (allQuestionsAnswered && isTourMode) {
     // Exploration finished: show simple summary and back to welcome
     return (
       <>
@@ -315,7 +316,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     );
   }
 
-  if (allQuestionsAnswered && !rallye.tour_mode) {
+  if (allQuestionsAnswered && !isTourMode) {
     // Time up vs finished before end
     return (
       <>

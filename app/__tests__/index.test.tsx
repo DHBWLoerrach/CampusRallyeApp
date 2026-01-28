@@ -200,7 +200,7 @@ describe('Welcome', () => {
       name: 'Campus Tour',
       status: 'running',
       password: '',
-      tour_mode: true,
+      mode: 'tour',
       end_time: null,
       created_at: '2024-01-01T00:00:00Z',
     };
@@ -224,7 +224,7 @@ describe('Welcome', () => {
       name: 'Rallye',
       status: 'running',
       password: 'test123',
-      tour_mode: false,
+      mode: 'department',
       end_time: null,
       created_at: '2024-01-01T00:00:00Z',
     };

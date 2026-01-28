@@ -5,6 +5,8 @@ export type QuestionType =
   | 'multiple_choice'
   | 'picture';
 
+export type RallyeMode = 'tour' | 'department';
+
 export const RALLYE_STATUSES = [
   'preparing',
   'inactive',
@@ -55,7 +57,7 @@ export interface Rallye {
   name: string;
   status: RallyeStatus;
   password: string;
-  tour_mode: boolean; // Deprecated: wird durch Organization.default_rallye_id ersetzt
+  mode: RallyeMode;
   end_time: string | null;
   created_at: string;
 }

@@ -5,7 +5,13 @@ import {
   removeStorageItem,
   setStorageItem,
 } from './asyncStorage';
-import { Organization, Department, Rallye, RallyeStatus } from '@/types/rallye';
+import {
+  Organization,
+  Department,
+  Rallye,
+  RallyeMode,
+  RallyeStatus,
+} from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
 export type RallyeRow = {
@@ -13,7 +19,7 @@ export type RallyeRow = {
   name: string;
   password?: string | null;
   status: RallyeStatus;
-  tour_mode: boolean;
+  mode: RallyeMode;
   studiengang?: string | null;
   end_time?: string | null;
 };
@@ -23,8 +29,37 @@ export type RallyeFetchResult = {
   error: unknown | null;
 };
 
+type LegacyStoredRallye = Omit<RallyeRow, 'mode'> & {
+  mode?: RallyeMode;
+  tour_mode?: boolean;
+};
+
+function normalizeStoredRallye(rallye: LegacyStoredRallye): RallyeRow {
+  if (rallye.mode) {
+    return rallye as RallyeRow;
+  }
+  if (typeof rallye.tour_mode === 'boolean') {
+    const { tour_mode, ...rest } = rallye;
+    return {
+      ...(rest as Omit<RallyeRow, 'mode'>),
+      mode: tour_mode ? 'tour' : 'department',
+    };
+  }
+  return { ...(rallye as Omit<RallyeRow, 'mode'>), mode: 'department' };
+}
+
+function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
+  mode: RallyeMode;
+} {
+  return { ...rallye, mode };
+}
+
 export async function getCurrentRallye(): Promise<RallyeRow | null> {
-  return (await getStorageItem(StorageKeys.CURRENT_RALLYE)) as RallyeRow | null;
+  const stored = (await getStorageItem(
+    StorageKeys.CURRENT_RALLYE
+  )) as LegacyStoredRallye | null;
+  if (!stored) return null;
+  return normalizeStoredRallye(stored);
 }
 
 export async function setCurrentRallye(rallye: RallyeRow) {
@@ -70,13 +105,13 @@ export async function getActiveRallyes(): Promise<RallyeFetchResult> {
     const { data, error } = await supabase
       .from('rallye')
       .select('*')
-      .not('status', 'in', '(inactive,ended)')
-      .eq('tour_mode', false);
+      .not('status', 'in', '(inactive,ended)');
     if (error) {
       Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
       return { data: [], error };
     }
-    return { data: (data ?? []) as RallyeRow[], error: null };
+    const mapped = (data ?? []).map((r: any) => withMode(r, 'department'));
+    return { data: mapped as RallyeRow[], error: null };
   } catch (error) {
     Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
     return { data: [], error };
@@ -84,17 +119,31 @@ export async function getActiveRallyes(): Promise<RallyeFetchResult> {
 }
 
 export async function getTourModeRallye(): Promise<RallyeRow | null> {
+  const { data: orgs, error: orgError } = await supabase
+    .from('organization')
+    .select('default_rallye_id');
+  if (orgError) {
+    Logger.error('RallyeStorage', 'Error fetching organizations for tour mode', orgError);
+    return null;
+  }
+  const orgWithTour = (orgs ?? []).find(
+    (org: any) => org.default_rallye_id !== null
+  );
+  if (!orgWithTour?.default_rallye_id) return null;
+
   const { data, error } = await supabase
     .from('rallye')
     .select('*')
-    .eq('tour_mode', true)
-    .eq('status', 'running')
+    .eq('id', orgWithTour.default_rallye_id)
     .single();
   if (error) {
     Logger.error('RallyeStorage', 'Error fetching tour mode rallye', error);
     return null;
   }
-  return data as RallyeRow;
+  if (!data || data.status === 'inactive' || data.status === 'ended') {
+    return null;
+  }
+  return withMode(data, 'tour') as RallyeRow;
 }
 
 export async function getRallyeStatus(
@@ -331,7 +380,7 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
 
   Logger.debug('RallyeStorage', `Active rallyes for dept ${deptId}:`, activeRallyes);
 
-  return activeRallyes as Rallye[];
+  return activeRallyes.map((r: any) => withMode(r, 'department')) as Rallye[];
 }
 
 /**
@@ -373,5 +422,5 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
     return null;
   }
 
-  return rallye as Rallye;
+  return withMode(rallye, 'tour') as Rallye;
 }

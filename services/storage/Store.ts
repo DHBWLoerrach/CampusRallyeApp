@@ -115,7 +115,7 @@ export const store$ = observable({
       try {
         const rallye = store$.rallye.get();
         const team = store$.team.get();
-        if (rallye && team && !rallye.tour_mode) {
+        if (rallye && team && rallye.mode !== 'tour') {
           await setTimePlayed(rallye.id, team.id);
           Logger.info('Store', `Rallye finished, time_played set for team: ${team.id}`);
         }
@@ -128,7 +128,7 @@ export const store$ = observable({
     // In team mode, advance the answered counter so the header reflects progress
     try {
       const rallye = store$.rallye.get();
-      if (rallye && !rallye.tour_mode) {
+      if (rallye && rallye.mode !== 'tour') {
         const current = store$.answeredCount.get() || 0;
         const total = store$.totalQuestions.get() ?? 0;
         const next = total > 0 ? Math.min(current + 1, total) : current + 1;
@@ -199,7 +199,7 @@ export const store$ = observable({
             if (exists === 'exists') {
               store$.team.set(loadTeam);
               // Explicit resume prompt instead of auto-navigation
-              if (!rallye.tour_mode) {
+              if (rallye.mode !== 'tour') {
                 store$.resumeAvailable.set(true);
               }
             } else if (exists === 'missing') {
@@ -208,12 +208,12 @@ export const store$ = observable({
               store$.teamDeleted.set(true);
             } else {
               store$.team.set(loadTeam);
-              if (!rallye.tour_mode) store$.resumeAvailable.set(true);
+              if (rallye.mode !== 'tour') store$.resumeAvailable.set(true);
             }
           } catch (e) {
             console.error('Error verifying team existence on init:', e);
             store$.team.set(loadTeam);
-            if (!rallye.tour_mode) store$.resumeAvailable.set(true);
+            if (rallye.mode !== 'tour') store$.resumeAvailable.set(true);
           }
         } else {
           store$.team.set(null);

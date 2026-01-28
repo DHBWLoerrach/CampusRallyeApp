@@ -13,7 +13,7 @@ export default function RallyeHeader() {
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
 
-  const showTimer = rallye?.status === 'running' && !rallye?.tour_mode;
+  const showTimer = rallye?.status === 'running' && rallye?.mode !== 'tour';
 
   return (
     <View
