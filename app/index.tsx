@@ -468,7 +468,6 @@ export default function Welcome() {
         title={t('welcome.selectLocation.title')}
         description={t('welcome.selectLocation.description')}
         icon="building.2"
-        layout="vertical"
       >
         <UIButton onPress={() => setShowOrgModal(true)}>
           {t('welcome.selectLocation.button')}
@@ -489,7 +488,6 @@ export default function Welcome() {
           title={t('welcome.selectDepartment.title')}
           description={t('welcome.selectDepartment.description')}
           icon="graduationcap"
-          layout="vertical"
         >
           <UIButton onPress={() => setShowDeptModal(true)}>
             {t('welcome.selectDepartment.button')}
