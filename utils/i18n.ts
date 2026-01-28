@@ -65,7 +65,7 @@ export const translations = {
     'welcome.selectDepartment.modalTitle': 'Studiengang auswählen',
     'welcome.selectDepartment.empty': 'Keine Studiengänge verfügbar',
     'welcome.noContent': 'Derzeit sind keine aktiven Rallyes für diesen Standort verfügbar.',
-    'welcome.campusEvents.title': 'Campus Events',
+    'welcome.campusEvents.title': 'Campus-Events',
     'welcome.campusEvents.description': 'Nimm an Rallyes für Campus-weite Veranstaltungen teil',
     'welcome.campusEvents.button': 'Events ansehen',
     'welcome.departmentLoadError': 'Studiengänge konnten nicht geladen werden.',
