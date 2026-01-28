@@ -28,25 +28,6 @@ export type RallyeFetchResult = {
   error: unknown | null;
 };
 
-type LegacyStoredRallye = Omit<RallyeRow, 'mode'> & {
-  mode?: RallyeMode;
-  tour_mode?: boolean;
-};
-
-function normalizeStoredRallye(rallye: LegacyStoredRallye): RallyeRow {
-  if (rallye.mode) {
-    return rallye as RallyeRow;
-  }
-  if (typeof rallye.tour_mode === 'boolean') {
-    const { tour_mode, ...rest } = rallye;
-    return {
-      ...(rest as Omit<RallyeRow, 'mode'>),
-      mode: tour_mode ? 'tour' : 'department',
-    };
-  }
-  return { ...(rallye as Omit<RallyeRow, 'mode'>), mode: 'department' };
-}
-
 function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
   mode: RallyeMode;
 } {
@@ -54,11 +35,7 @@ function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
 }
 
 export async function getCurrentRallye(): Promise<RallyeRow | null> {
-  const stored = (await getStorageItem(
-    StorageKeys.CURRENT_RALLYE
-  )) as LegacyStoredRallye | null;
-  if (!stored) return null;
-  return normalizeStoredRallye(stored);
+  return (await getStorageItem(StorageKeys.CURRENT_RALLYE)) as RallyeRow | null;
 }
 
 export async function setCurrentRallye(rallye: RallyeRow) {
