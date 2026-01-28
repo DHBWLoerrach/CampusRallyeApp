@@ -535,6 +535,9 @@ export default function Welcome() {
 
   // Phase 3: Rallye selection
   const hasActiveRallyes = activeRallyes.length > 0;
+  const isCampusEventsSelection = Boolean(
+    selectedDepartment && campusEventsDepartment && selectedDepartment.id === campusEventsDepartment.id
+  );
 
   const RallyeContent = () => (
     <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
@@ -625,7 +628,7 @@ export default function Welcome() {
       )}
 
       {/* Tour mode card */}
-      {tourModeRallye && (
+      {tourModeRallye && !isCampusEventsSelection && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.explore.title')}
