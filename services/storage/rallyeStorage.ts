@@ -30,7 +30,15 @@ function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
 }
 
 export async function getCurrentRallye(): Promise<RallyeRow | null> {
-  return (await getStorageItem(StorageKeys.CURRENT_RALLYE)) as RallyeRow | null;
+  const stored = (await getStorageItem(
+    StorageKeys.CURRENT_RALLYE
+  )) as Partial<RallyeRow> | null;
+  if (!stored) return null;
+  if (stored.mode !== 'tour' && stored.mode !== 'department') {
+    await removeStorageItem(StorageKeys.CURRENT_RALLYE);
+    return null;
+  }
+  return stored as RallyeRow;
 }
 
 export async function setCurrentRallye(rallye: RallyeRow) {
