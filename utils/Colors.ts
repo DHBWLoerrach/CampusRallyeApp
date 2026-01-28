@@ -18,7 +18,6 @@ export type ThemePalette = {
   dhbwRed: string;
   dhbwRedLight: string;
   lightGray: string;
-  dhbwRedWebView: string;
   cellBorder: string;
   borderSubtle: string;
 };
@@ -33,7 +32,6 @@ const Colors = {
   dhbwRedLight: '#E2001A80',
   lightBlue: '#9fdbf5',
   contrastBlue: '#334D7A',
-  dhbwRedWebView: 'rgb(226,0,26)', // FIXME: needed by WebView
   lightText: '#7F91A7',
   link: '#E2001A',
   text: '#2c2c2c',
@@ -48,7 +46,6 @@ const Colors = {
     dhbwRed: '#E2001A',
     dhbwRedLight: '#E2001A80',
     lightGray: '#DADADA',
-    dhbwRedWebView: 'rgb(226,0,26)', // FIXME: needed by WebView
     icon: '#484848',
     text: '#000',
     textMuted: '#777777',
@@ -77,7 +74,6 @@ const Colors = {
     dhbwRed: '#E2001A',
     dhbwRedLight: '#E2001A80',
     lightGray: '#DADADA',
-    dhbwRedWebView: 'rgb(226,0,26)', // FIXME: needed by WebView
     cellBorder: '#2a2a2e',
   } as ThemePalette,
 };

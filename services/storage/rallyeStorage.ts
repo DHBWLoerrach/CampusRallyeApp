@@ -23,11 +23,6 @@ export type RallyeRow = {
   end_time?: string | null;
 };
 
-export type RallyeFetchResult = {
-  data: RallyeRow[];
-  error: unknown | null;
-};
-
 function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
   mode: RallyeMode;
 } {
@@ -76,51 +71,6 @@ export async function clearSelectedDepartment(): Promise<void> {
 
 // --- Ende Persistente Auswahl-Speicherung ---
 
-export async function getActiveRallyes(): Promise<RallyeFetchResult> {
-  try {
-    const { data, error } = await supabase
-      .from('rallye')
-      .select('*')
-      .not('status', 'in', '(inactive,ended)');
-    if (error) {
-      Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
-      return { data: [], error };
-    }
-    const mapped = (data ?? []).map((r: any) => withMode(r, 'department'));
-    return { data: mapped as RallyeRow[], error: null };
-  } catch (error) {
-    Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
-    return { data: [], error };
-  }
-}
-
-export async function getTourModeRallye(): Promise<RallyeRow | null> {
-  const { data: orgs, error: orgError } = await supabase
-    .from('organization')
-    .select('default_rallye_id');
-  if (orgError) {
-    Logger.error('RallyeStorage', 'Error fetching organizations for tour mode', orgError);
-    return null;
-  }
-  const orgWithTour = (orgs ?? []).find(
-    (org: any) => org.default_rallye_id !== null
-  );
-  if (!orgWithTour?.default_rallye_id) return null;
-
-  const { data, error } = await supabase
-    .from('rallye')
-    .select('*')
-    .eq('id', orgWithTour.default_rallye_id)
-    .single();
-  if (error) {
-    Logger.error('RallyeStorage', 'Error fetching tour mode rallye', error);
-    return null;
-  }
-  if (!data || data.status === 'inactive' || data.status === 'ended') {
-    return null;
-  }
-  return withMode(data, 'tour') as RallyeRow;
-}
 
 export async function getRallyeStatus(
   rallyeId: number
