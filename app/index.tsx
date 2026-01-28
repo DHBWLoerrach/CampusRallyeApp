@@ -21,6 +21,7 @@ import { useSelector } from '@legendapp/state/react';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import { confirm } from '@/utils/ConfirmAlert';
+import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import {
   setCurrentRallye,
   getOrganizationsWithActiveRallyes,
@@ -51,6 +52,7 @@ export default function Welcome() {
   const { isDarkMode } = useTheme();
   const { t } = useLanguage();
   const s = useAppStyles();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
   const resumeRallye = useSelector(() => store$.rallye.get());
@@ -87,12 +89,8 @@ export default function Welcome() {
     : Colors.lightMode.background;
   const compactCardStyle = globalStyles.welcomeStyles.compactCard;
   const organizationCardStyle = globalStyles.welcomeStyles.organizationCard;
-  const ctaButtonStyle = {
-    backgroundColor: isDarkMode ? Colors.darkMode.surface2 : Colors.lightMode.surface2,
-    borderWidth: 1,
-    borderColor: isDarkMode ? Colors.darkMode.borderSubtle : Colors.lightMode.borderSubtle,
-  };
-  const ctaButtonTextStyle = { color: Colors.dhbwRed };
+  const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
+    getSoftCtaButtonStyles(palette);
 
   // Initialization
   useEffect(() => {

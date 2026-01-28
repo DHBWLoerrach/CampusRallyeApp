@@ -3,6 +3,7 @@ import { FlatList, Modal, Text, View, ListRenderItem } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
+import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 
@@ -31,12 +32,9 @@ export default function SelectionModal({
 }: Props) {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
-  const ctaButtonStyle = {
-    backgroundColor: isDarkMode ? Colors.darkMode.surface2 : Colors.lightMode.surface2,
-    borderWidth: 1,
-    borderColor: isDarkMode ? Colors.darkMode.borderSubtle : Colors.lightMode.borderSubtle,
-  };
-  const ctaButtonTextStyle = { color: Colors.dhbwRed };
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
+    getSoftCtaButtonStyles(palette);
 
   const renderItem: ListRenderItem<SelectionItem> = ({ item }) => (
     <View

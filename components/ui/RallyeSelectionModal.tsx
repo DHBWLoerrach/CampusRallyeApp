@@ -21,6 +21,7 @@ import type { RallyeRow } from '@/services/storage/rallyeStorage';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -93,12 +94,8 @@ export default function RallyeSelectionModal({
   const cardBackgroundColor = palette.surface1;
   const cardBorderColor = palette.borderSubtle;
   const cancelTextColor = palette.textMuted ?? Colors.mediumGray;
-  const ctaButtonStyle = {
-    backgroundColor: palette.surface2,
-    borderWidth: 1,
-    borderColor: palette.borderSubtle,
-  };
-  const ctaButtonTextStyle = { color: Colors.dhbwRed };
+  const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
+    getSoftCtaButtonStyles(palette);
 
   const selectedRallyeName = passwordRallye?.name ?? '';
 
