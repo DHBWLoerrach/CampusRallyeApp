@@ -1,6 +1,8 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { act, render } from '@testing-library/react-native';
 import Scoreboard from '../scoreboard';
+
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 // Mocks
 jest.mock('@/components/ui/Screen', () => {
@@ -77,7 +79,7 @@ jest.mock('@legendapp/state/react', () => ({
 }));
 
 describe('Scoreboard', () => {
-  it('renders rallye name in header', () => {
+  it('renders rallye name in header', async () => {
     mockRallye = {
       id: 1,
       name: 'Test Rallye Name',
@@ -85,6 +87,9 @@ describe('Scoreboard', () => {
     };
 
     const { getByText } = render(<Scoreboard />);
+    await act(async () => {
+      await flushPromises();
+    });
 
     expect(getByText('scoreboard.title')).toBeTruthy();
     expect(getByText('Test Rallye Name')).toBeTruthy();

@@ -21,6 +21,7 @@ import type { RallyeRow } from '@/services/storage/rallyeStorage';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -34,13 +35,6 @@ type Props = {
 
 function isPasswordRequired(r: RallyeRow) {
   return !!(r.password ?? '').trim().length;
-}
-
-function hasValidStudiengang(studiengang: string | null | undefined): boolean {
-  if (!studiengang) return false;
-  const normalized = studiengang.trim().toLowerCase();
-  // Filter out placeholder values
-  return normalized.length > 0 && normalized !== 'kein studiengang';
 }
 
 export default function RallyeSelectionModal({
@@ -100,9 +94,10 @@ export default function RallyeSelectionModal({
   const cardBackgroundColor = palette.surface1;
   const cardBorderColor = palette.borderSubtle;
   const cancelTextColor = palette.textMuted ?? Colors.mediumGray;
+  const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
+    getSoftCtaButtonStyles(palette);
 
   const selectedRallyeName = passwordRallye?.name ?? '';
-  const selectedRallyeStudiengang = passwordRallye?.studiengang ?? '';
 
   const handleSelect = async (rallye: RallyeRow) => {
     if (!isPasswordRequired(rallye)) {
@@ -177,20 +172,6 @@ export default function RallyeSelectionModal({
           >
             {item.name}
           </Text>
-          {hasValidStudiengang(item.studiengang) ? (
-            <Text
-              style={[
-                globalStyles.rallyeModal.rallyeStudiengang,
-                {
-                  color: isDarkMode
-                    ? Colors.darkMode.textMuted
-                    : Colors.mediumGray,
-                },
-              ]}
-            >
-              {item.studiengang}
-            </Text>
-          ) : null}
           {passwordRequired ? (
             <View style={globalStyles.rallyeModal.passwordHintContainer}>
               <IconSymbol
@@ -327,18 +308,6 @@ export default function RallyeSelectionModal({
               {selectedRallyeName}
             </Text>
 
-            {/* Studiengang if valid */}
-            {hasValidStudiengang(selectedRallyeStudiengang) ? (
-              <Text
-                style={[
-                  globalStyles.rallyeModal.passwordSubtitle,
-                  { color: mutedTextColor },
-                ]}
-              >
-                {selectedRallyeStudiengang}
-              </Text>
-            ) : null}
-
             {/* Password input - no label, just placeholder */}
             <ThemedTextInput
               autoFocus={!!passwordRallye}
@@ -389,7 +358,8 @@ export default function RallyeSelectionModal({
               <UIButton
                 onPress={() => void confirmPasswordAndJoin()}
                 size="dialog"
-                color={Colors.dhbwRed}
+                style={ctaButtonStyle}
+                textStyle={ctaButtonTextStyle}
                 loading={joining}
               >
                 {t('rallye.password.join')}

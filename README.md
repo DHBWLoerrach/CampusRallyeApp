@@ -34,10 +34,13 @@ supabase db dump --db-url "postgresql://postgres:<password>@<serverurl>/postgres
 
 Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstellt werden.
 
-In der Tabelle `rallye` zwei neue Rallyes bzw. zwei neue Zeilen eintragen (_Insert row_):
+Beispiel-Setup für eine normale Rallye (Abteilung) und eine Erkundung (Tour):
 
-- Name: Rallye, Studiengang: Informatik, Status `running` und `end_time` in der Zukunft, `tour_mode=FALSE`
-- Name: Erkundung, Studiengang: Allgemein, Status `running` und `end_time` in der Zukunft, `tour_mode=TRUE`
+- Tabelle `organization`: neue Organisation anlegen.
+- Tabelle `department`: Departments (früher „Studiengänge“) für die Organisation anlegen.
+- Tabelle `rallye`: zwei neue Rallyes anlegen, Status z.B. `running` und `end_time` in der Zukunft.
+- Tabelle `join_department_rallye`: die normale Rallye mit dem passenden Department verknüpfen.
+- Tabelle `organization`: `default_rallye_id` auf die Erkundungs-Rallye setzen (Tour-Mode).
 
 In der Tabelle `questions` ein paar Fragen mit Punkten erstellen (z.B. Typ _knowledge_), dazu passende Antwort(en) in
 der Tabelle `answers` mit `question_id` der Frage eintragen und zusätzlich in der Tabelle `join_rallye_questions` den Rallyes zuordnen.
@@ -77,17 +80,17 @@ Der benötigte API-Key ist unter _Project Settings_ (Zahnrad in der linken Seite
 EXPO_PUBLIC_SUPABASE_ANON_KEY=API_KEY_HERE
 ```
 
-Nun kann die App getestet und weiterentwickelt werden. Für das aktive Testen muss nun mit `npx expo -g` der Server gestartet werden. Die App kann in Expo Go App getestet werden (Scan des QR-Codes). Informationen hierzu werden direkt auf der Konsole angezeigt.
+Nun kann die App getestet und weiterentwickelt werden. Für das aktive Testen muss nun mit `npm run start` der Server gestartet werden. Die App kann in Expo Go App getestet werden (Scan des QR-Codes). Informationen hierzu werden direkt auf der Konsole angezeigt.
 
 Die Anmeldedaten für die Teilnahme an einer Rallye in der App können aus den
 entsprechenden Tabellen in der Supabase-Instanz in Erfahrung gebracht werden.
 
 ### App mit Expo testen
 
-`npx expo start -g` started den Metro-Bundler, um die App auf einem Smartphone oder Emulator/Simulator in der Expo Go App zu testen.
+`npm run start` startet den Metro-Bundler, um die App auf einem Smartphone oder Emulator/Simulator in der Expo Go App zu testen.
 Dazu muss die App _Expo Go_ (https://expo.dev/go) auf dem Handy installiert sein und der QR-Code gescannt werden (Android: in Expo Go, iOS: via Kamera-App).
 
-Hinweis: Im DHBW-Wlan muss der Metro-Bundler mit „Tunnel“-Option gestartet werden: `npx expo start -g --tunnel`
+Hinweis: Im DHBW-Wlan muss der Metro-Bundler mit „Tunnel“-Option gestartet werden: `npx expo start --tunnel`
 
 ### Tests
 

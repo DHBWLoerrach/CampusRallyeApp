@@ -5,26 +5,40 @@ import {
   removeStorageItem,
   setStorageItem,
 } from './asyncStorage';
-import { Organization, Department, Rallye } from '@/types/rallye';
+import {
+  Organization,
+  Department,
+  Rallye,
+  RallyeMode,
+  RallyeStatus,
+} from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
 export type RallyeRow = {
   id: number;
   name: string;
   password?: string | null;
-  status: string;
-  tour_mode: boolean;
-  studiengang?: string | null;
+  status: RallyeStatus;
+  mode: RallyeMode;
   end_time?: string | null;
 };
 
-export type RallyeFetchResult = {
-  data: RallyeRow[];
-  error: unknown | null;
-};
+function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
+  mode: RallyeMode;
+} {
+  return { ...rallye, mode };
+}
 
 export async function getCurrentRallye(): Promise<RallyeRow | null> {
-  return (await getStorageItem(StorageKeys.CURRENT_RALLYE)) as RallyeRow | null;
+  const stored = (await getStorageItem(
+    StorageKeys.CURRENT_RALLYE
+  )) as Partial<RallyeRow> | null;
+  if (!stored) return null;
+  if (stored.mode !== 'tour' && stored.mode !== 'department') {
+    await removeStorageItem(StorageKeys.CURRENT_RALLYE);
+    return null;
+  }
+  return stored as RallyeRow;
 }
 
 export async function setCurrentRallye(rallye: RallyeRow) {
@@ -65,39 +79,10 @@ export async function clearSelectedDepartment(): Promise<void> {
 
 // --- Ende Persistente Auswahl-Speicherung ---
 
-export async function getActiveRallyes(): Promise<RallyeFetchResult> {
-  try {
-    const { data, error } = await supabase
-      .from('rallye')
-      .select('*')
-      .not('status', 'in', '(inactive,ended)')
-      .eq('tour_mode', false);
-    if (error) {
-      Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
-      return { data: [], error };
-    }
-    return { data: (data ?? []) as RallyeRow[], error: null };
-  } catch (error) {
-    Logger.error('RallyeStorage', 'Error fetching active rallyes', error);
-    return { data: [], error };
-  }
-}
 
-export async function getTourModeRallye(): Promise<RallyeRow | null> {
-  const { data, error } = await supabase
-    .from('rallye')
-    .select('*')
-    .eq('tour_mode', true)
-    .eq('status', 'running')
-    .single();
-  if (error) {
-    Logger.error('RallyeStorage', 'Error fetching tour mode rallye', error);
-    return null;
-  }
-  return data as RallyeRow;
-}
-
-export async function getRallyeStatus(rallyeId: number) {
+export async function getRallyeStatus(
+  rallyeId: number
+): Promise<RallyeStatus | null> {
   const { data, error } = await supabase
     .from('rallye')
     .select('status')
@@ -329,7 +314,42 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
 
   Logger.debug('RallyeStorage', `Active rallyes for dept ${deptId}:`, activeRallyes);
 
-  return activeRallyes as Rallye[];
+  return activeRallyes.map((r: any) => withMode(r, 'department')) as Rallye[];
+}
+
+/**
+ * Findet ein Department das den gleichen Namen wie die Organisation hat
+ * und mindestens eine aktive Rallye hat.
+ * Wird für "Campus Events" verwendet.
+ */
+export async function getCampusEventsDepartment(org: Organization): Promise<Department | null> {
+  Logger.debug('RallyeStorage', `getCampusEventsDepartment called for org: ${org.name}`);
+  
+  // Schritt 1: Suche Department mit gleichem Namen wie Organisation
+  const { data: matchingDept, error: deptError } = await supabase
+    .from('department')
+    .select('*')
+    .eq('organization_id', org.id)
+    .eq('name', org.name)
+    .single();
+
+  if (deptError || !matchingDept) {
+    Logger.debug('RallyeStorage', `No department with name "${org.name}" found for org ${org.id}`);
+    return null;
+  }
+
+  Logger.debug('RallyeStorage', `Found matching department: ${matchingDept.id}`);
+
+  // Schritt 2: Prüfe ob dieses Department aktive Rallyes hat
+  const rallyes = await getRallyesForDepartment(matchingDept.id);
+  
+  if (rallyes.length === 0) {
+    Logger.debug('RallyeStorage', `Department "${org.name}" has no active rallyes`);
+    return null;
+  }
+
+  Logger.debug('RallyeStorage', `Department "${org.name}" has ${rallyes.length} active rallye(s)`);
+  return matchingDept as Department;
 }
 
 /**
@@ -371,5 +391,5 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
     return null;
   }
 
-  return rallye as Rallye;
+  return withMode(rallye, 'tour') as Rallye;
 }

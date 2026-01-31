@@ -3,6 +3,7 @@ import { FlatList, Modal, Text, View, ListRenderItem } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
+import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 
@@ -31,6 +32,9 @@ export default function SelectionModal({
 }: Props) {
   const { language } = useLanguage();
   const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
+    getSoftCtaButtonStyles(palette);
 
   const renderItem: ListRenderItem<SelectionItem> = ({ item }) => (
     <View
@@ -67,7 +71,11 @@ export default function SelectionModal({
           </Text>
         )}
       </View>
-      <UIButton onPress={() => onSelect(item)}>
+      <UIButton
+        onPress={() => onSelect(item)}
+        style={ctaButtonStyle}
+        textStyle={ctaButtonTextStyle}
+      >
         {language === 'de' ? 'Auswählen' : 'Select'}
       </UIButton>
     </View>
@@ -105,7 +113,7 @@ export default function SelectionModal({
               {emptyMessage || (language === 'de' ? 'Keine Einträge verfügbar' : 'No items available')}
             </Text>
           )}
-          <UIButton onPress={onClose}>
+          <UIButton onPress={onClose} style={ctaButtonStyle} textStyle={ctaButtonTextStyle}>
             {language === 'de' ? 'Abbrechen' : 'Cancel'}
           </UIButton>
         </View>

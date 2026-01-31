@@ -63,7 +63,11 @@ export default function Scoreboard() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    if (!rallyeId || rallyeStatus !== 'ended') return;
+    if (
+      !rallyeId ||
+      (rallyeStatus !== 'ranking' && rallyeStatus !== 'ended')
+    )
+      return;
     (async () => {
       try {
         let { data } = await supabase

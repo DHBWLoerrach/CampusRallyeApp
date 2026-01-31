@@ -21,12 +21,14 @@ import { useSelector } from '@legendapp/state/react';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import { confirm } from '@/utils/ConfirmAlert';
+import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import {
   setCurrentRallye,
   getOrganizationsWithActiveRallyes,
   getDepartmentsForOrganization,
   getRallyesForDepartment,
   getTourModeRallyeForOrganization,
+  getCampusEventsDepartment,
   getSelectedOrganization as getStoredOrganization,
   setSelectedOrganization as storeSelectedOrganization,
   clearSelectedOrganization,
@@ -50,6 +52,7 @@ export default function Welcome() {
   const { isDarkMode } = useTheme();
   const { t } = useLanguage();
   const s = useAppStyles();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
   const resumeRallye = useSelector(() => store$.rallye.get());
@@ -66,6 +69,7 @@ export default function Welcome() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [tourModeRallye, setTourModeRallye] = useState<Rallye | null>(null);
+  const [campusEventsDepartment, setCampusEventsDepartment] = useState<Department | null>(null);
 
   // Modal states
   const [showRallyeModal, setShowRallyeModal] = useState(false);
@@ -84,6 +88,9 @@ export default function Welcome() {
     ? Colors.darkMode.background
     : Colors.lightMode.background;
   const compactCardStyle = globalStyles.welcomeStyles.compactCard;
+  const organizationCardStyle = globalStyles.welcomeStyles.organizationCard;
+  const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
+    getSoftCtaButtonStyles(palette);
 
   // Initialization
   useEffect(() => {
@@ -109,6 +116,8 @@ export default function Welcome() {
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(orgStillValid.id);
           setTourModeRallye(tourRallye);
+          const campusEvents = await getCampusEventsDepartment(orgStillValid);
+          setCampusEventsDepartment(campusEvents);
 
           if (savedDept) {
             const deptStillValid = depts.find(d => d.id === savedDept.id);
@@ -144,6 +153,8 @@ export default function Welcome() {
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(singleOrg.id);
           setTourModeRallye(tourRallye);
+          const campusEvents = await getCampusEventsDepartment(singleOrg);
+          setCampusEventsDepartment(campusEvents);
           
           // Auto-select if only one department
           if (depts.length === 1) {
@@ -196,17 +207,21 @@ export default function Welcome() {
           setDepartments(depts);
           const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
           setTourModeRallye(tourRallye);
+          const campusEvents = await getCampusEventsDepartment(orgStillValid);
+          setCampusEventsDepartment(campusEvents);
           
-          if (depts.length === 0 && !tourRallye) {
+          if (depts.length === 0 && !tourRallye && !campusEvents) {
             await clearSelectedOrganization();
             setSelectedOrganization(null);
             setOrganizations(orgs);
+            setCampusEventsDepartment(null);
             setSelectionStep('organization');
           }
         } else {
           await clearSelectedOrganization();
           setSelectedOrganization(null);
           setOrganizations(orgs);
+          setCampusEventsDepartment(null);
           setSelectionStep('organization');
         }
       } else if (selectionStep === 'rallye' && selectedOrganization && selectedDepartment) {
@@ -282,6 +297,9 @@ export default function Welcome() {
       const tourRallye = await getTourModeRallyeForOrganization(org.id);
       setTourModeRallye(tourRallye);
       
+      const campusEvents = await getCampusEventsDepartment(org);
+      setCampusEventsDepartment(campusEvents);
+      
       if (depts.length === 1) {
         const singleDept = depts[0];
         setSelectedDepartment(singleDept);
@@ -330,6 +348,7 @@ export default function Welcome() {
       setSelectedDepartment(null);
       setDepartments([]);
       setTourModeRallye(null);
+      setCampusEventsDepartment(null);
       setSelectionStep('organization');
     }
   };
@@ -345,6 +364,25 @@ export default function Welcome() {
     store$.rallye.set(tourModeRallye);
     await setCurrentRallye(tourModeRallye);
     store$.enabled.set(true);
+  };
+
+  // Handler for Campus Events selection
+  const handleCampusEventsSelect = async () => {
+    if (!campusEventsDepartment) return;
+    
+    setLoading(true);
+    try {
+      setSelectedDepartment(campusEventsDepartment);
+      await storeSelectedDepartment(campusEventsDepartment);
+      
+      const rallyes = await getRallyesForDepartment(campusEventsDepartment.id);
+      setActiveRallyes(rallyes);
+      setSelectionStep('rallye');
+    } catch (error) {
+      Logger.error('Welcome', 'Error loading campus events rallyes', error);
+      Alert.alert(t('common.errorTitle'), t('welcome.rallyeLoadError'));
+    }
+    setLoading(false);
   };
 
   // Handler for joining a rallye (new API)
@@ -430,23 +468,55 @@ export default function Welcome() {
   // Phase 1: Organization selection
   const OrganizationContent = () => (
     <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
-      <Card
-        containerStyle={compactCardStyle}
-        title={t('welcome.selectLocation.title')}
-        description={t('welcome.selectLocation.description')}
-        icon="building.2"
-        layout="vertical"
-      >
-        <UIButton onPress={() => setShowOrgModal(true)}>
-          {t('welcome.selectLocation.button')}
-        </UIButton>
-      </Card>
+      {organizations.length === 0 && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.selectLocation.title')}
+          description={t('welcome.selectLocation.empty')}
+          icon="info.circle"
+        />
+      )}
+      {organizations.length > 0 && organizations.length <= 3 && (
+        <>
+          <ThemedText
+            variant="bodySmall"
+            style={[s.muted, { textAlign: 'left', width: '100%', marginBottom: 8 }]}
+          >
+            {t('welcome.selectLocation.description')}
+          </ThemedText>
+          {organizations.map(org => (
+            <Card
+              key={org.id}
+              containerStyle={organizationCardStyle}
+              title={org.name}
+              icon="building.2"
+              onPress={() => handleOrganizationSelect(org)}
+            />
+          ))}
+        </>
+      )}
+      {organizations.length > 3 && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.selectLocation.title')}
+          description={t('welcome.selectLocation.description')}
+          icon="building.2"
+        >
+          <UIButton
+            onPress={() => setShowOrgModal(true)}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
+            {t('welcome.selectLocation.button')}
+          </UIButton>
+        </Card>
+      )}
     </View>
   );
 
   // Phase 2: Department selection
   const hasDepartmentsWithRallyes = departments.length > 0;
-  const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye;
+  const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye && !campusEventsDepartment;
 
   const DepartmentContent = () => (
     <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
@@ -456,10 +526,29 @@ export default function Welcome() {
           title={t('welcome.selectDepartment.title')}
           description={t('welcome.selectDepartment.description')}
           icon="graduationcap"
-          layout="vertical"
         >
-          <UIButton onPress={() => setShowDeptModal(true)}>
+          <UIButton
+            onPress={() => setShowDeptModal(true)}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {t('welcome.selectDepartment.button')}
+          </UIButton>
+        </Card>
+      )}
+      {campusEventsDepartment && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.campusEvents.title')}
+          description={t('welcome.campusEvents.description')}
+          icon="party.popper"
+        >
+          <UIButton
+            onPress={handleCampusEventsSelect}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
+            {t('welcome.campusEvents.button')}
           </UIButton>
         </Card>
       )}
@@ -490,6 +579,9 @@ export default function Welcome() {
 
   // Phase 3: Rallye selection
   const hasActiveRallyes = activeRallyes.length > 0;
+  const isCampusEventsSelection = Boolean(
+    selectedDepartment && campusEventsDepartment && selectedDepartment.id === campusEventsDepartment.id
+  );
 
   const RallyeContent = () => (
     <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
@@ -536,7 +628,11 @@ export default function Welcome() {
         >
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 1 }}>
-              <UIButton onPress={() => store$.enabled.set(true)}>
+              <UIButton
+                onPress={() => store$.enabled.set(true)}
+                style={ctaButtonStyle}
+                textStyle={ctaButtonTextStyle}
+              >
                 {t('common.resume')}
               </UIButton>
             </View>
@@ -573,14 +669,19 @@ export default function Welcome() {
           description={t('welcome.join.description')}
           icon="mappin.and.ellipse"
         >
-          <UIButton disabled={joining} onPress={() => setShowRallyeModal(true)}>
+          <UIButton
+            disabled={joining}
+            onPress={() => setShowRallyeModal(true)}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {t('welcome.join.select')}
           </UIButton>
         </Card>
       )}
 
       {/* Tour mode card */}
-      {tourModeRallye && (
+      {tourModeRallye && !isCampusEventsSelection && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.explore.title')}
