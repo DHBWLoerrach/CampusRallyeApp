@@ -17,7 +17,7 @@ import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
-import type { RallyeRow } from '@/services/storage/rallyeStorage';
+import type { RallyeData } from '@/types/rallye';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -28,12 +28,12 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 type Props = {
   visible: boolean;
   onClose: () => void;
-  activeRallyes: RallyeRow[];
-  onJoin: (r: RallyeRow) => Promise<boolean>;
+  activeRallyes: RallyeData[];
+  onJoin: (r: RallyeData) => Promise<boolean>;
   joining?: boolean;
 };
 
-function isPasswordRequired(r: RallyeRow) {
+function isPasswordRequired(r: RallyeData) {
   return !!(r.password ?? '').trim().length;
 }
 
@@ -48,7 +48,7 @@ export default function RallyeSelectionModal({
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
-  const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
+  const [passwordRallye, setPasswordRallye] = useState<RallyeData | null>(null);
   const [password, setPassword] = useState('');
 
   // Slide animation
@@ -99,7 +99,7 @@ export default function RallyeSelectionModal({
 
   const selectedRallyeName = passwordRallye?.name ?? '';
 
-  const handleSelect = async (rallye: RallyeRow) => {
+  const handleSelect = async (rallye: RallyeData) => {
     if (!isPasswordRequired(rallye)) {
       const ok = await onJoin(rallye);
       if (ok) onClose();
@@ -132,7 +132,7 @@ export default function RallyeSelectionModal({
     if (ok) onClose();
   };
 
-  const renderItem: ListRenderItem<RallyeRow> = ({ item }) => {
+  const renderItem: ListRenderItem<RallyeData> = ({ item }) => {
     const passwordRequired = isPasswordRequired(item);
     return (
       <Pressable

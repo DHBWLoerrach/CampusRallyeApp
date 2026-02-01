@@ -40,8 +40,8 @@ export const confirmAnswer = async ({
   answer: string;
   t: Translator;
 }) => {
-  const rallye = store$.rallye.get();
-  if (rallye?.mode === 'tour') return true;
+  const session = store$.session.get();
+  if (session?.sessionType === 'exploration') return true;
   return confirm({
     title: t('confirm.answer.title'),
     message: t('confirm.answer.message', { answer }),

@@ -1,5 +1,5 @@
 import { observable } from '@legendapp/state';
-import { clearCurrentRallye, getCurrentRallye, RallyeRow } from './rallyeStorage';
+import { clearCurrentRallye, getCurrentSession, RallyeSession } from './rallyeStorage';
 import {
   getCurrentTeam,
   clearCurrentTeam,
@@ -18,22 +18,22 @@ export type SessionState =
 
 type SessionInputs = {
   enabled: boolean;
-  rallye: RallyeRow | null;
+  session: RallyeSession | null;
   allQuestionsAnswered: boolean;
   timeExpired: boolean;
 };
 
 function deriveSessionState({
   enabled,
-  rallye,
+  session,
   allQuestionsAnswered,
   timeExpired,
 }: SessionInputs): SessionState {
-  if (!enabled || !rallye) return 'not_joined';
-  if (rallye.status === 'voting') return 'voting';
+  if (!enabled || !session) return 'not_joined';
+  if (session.rallye.status === 'voting') return 'voting';
   if (
-    rallye.status === 'ranking' ||
-    rallye.status === 'ended' ||
+    session.rallye.status === 'ranking' ||
+    session.rallye.status === 'ended' ||
     allQuestionsAnswered ||
     timeExpired
   )
@@ -41,11 +41,16 @@ function deriveSessionState({
   return 'playing';
 }
 
+// Helper to check if session is exploration mode
+function isExploration(session: RallyeSession | null): boolean {
+  return session?.sessionType === 'exploration';
+}
+
 // Start outbox processing once for the app lifecycle.
 startOutbox();
 
 export const store$ = observable({
-  rallye: null as RallyeRow | null,
+  session: null as RallyeSession | null,
   enabled: false,
   // When a previously joined team exists on this device, we show an explicit resume prompt.
   resumeAvailable: false,
@@ -72,7 +77,7 @@ export const store$ = observable({
   sessionState: () =>
     deriveSessionState({
       enabled: store$.enabled.get(),
-      rallye: store$.rallye.get(),
+      session: store$.session.get(),
       allQuestionsAnswered: store$.allQuestionsAnswered.get(),
       timeExpired: store$.timeExpired.get(),
     }),
@@ -85,7 +90,7 @@ export const store$ = observable({
     if (!current) return null;
     const answers = store$.answers.get();
     return answers.filter(
-      (a) => a.question_id === current.id && a.correct === true
+      (a: AnswerRow) => a.question_id === current.id && a.correct === true
     )[0];
   },
 
@@ -93,7 +98,7 @@ export const store$ = observable({
     const current = store$.currentQuestion();
     if (!current) return null;
     const answers = store$.answers.get();
-    const filtered = answers.filter((a) => a.question_id === current.id);
+    const filtered = answers.filter((a: AnswerRow) => a.question_id === current.id);
     const shuffleArray = <T,>(array: T[]): T[] => {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -113,10 +118,10 @@ export const store$ = observable({
 
       // Rallye beendet: Zeit speichern
       try {
-        const rallye = store$.rallye.get();
+        const session = store$.session.get();
         const team = store$.team.get();
-        if (rallye && team && rallye.mode !== 'tour') {
-          await setTimePlayed(rallye.id, team.id);
+        if (session && team && !isExploration(session)) {
+          await setTimePlayed(session.rallye.id, team.id);
           Logger.info('Store', `Rallye finished, time_played set for team: ${team.id}`);
         }
       } catch (err) {
@@ -125,10 +130,10 @@ export const store$ = observable({
     } else {
       store$.questionIndex.set(nextIndex);
     }
-    // In team mode, advance the answered counter so the header reflects progress
+    // In competition mode, advance the answered counter so the header reflects progress
     try {
-      const rallye = store$.rallye.get();
-      if (rallye && rallye.mode !== 'tour') {
+      const session = store$.session.get();
+      if (session && !isExploration(session)) {
         const current = store$.answeredCount.get() || 0;
         const total = store$.totalQuestions.get() ?? 0;
         const next = total > 0 ? Math.min(current + 1, total) : current + 1;
@@ -137,7 +142,7 @@ export const store$ = observable({
     } catch {}
     // Note: We intentionally do not persist questionIndex. Question ordering is randomized
     // on fetch; resuming by index is therefore not stable. Progress is derived from Supabase
-    // `team_questions` (team mode) and in-memory state (tour mode).
+    // `team_questions` (competition mode) and in-memory state (exploration mode).
   },
 
   reset: () => {
@@ -154,11 +159,11 @@ export const store$ = observable({
   },
 
   leaveRallye: async () => {
-    const rallye = store$.rallye.get();
+    const session = store$.session.get();
     try {
-      if (rallye?.id) {
+      if (session?.rallye.id) {
         // Remove local device → team assignment for this rallye.
-        await clearCurrentTeam(rallye.id);
+        await clearCurrentTeam(session.rallye.id);
       }
       // Clear persisted "current rallye" marker so we don't offer resume again.
       await clearCurrentRallye();
@@ -166,7 +171,7 @@ export const store$ = observable({
       console.error('Error leaving rallye:', e);
     } finally {
       store$.team.set(null);
-      store$.rallye.set(null);
+      store$.session.set(null);
       store$.reset();
       store$.resumeAvailable.set(false);
       store$.enabled.set(false);
@@ -175,17 +180,17 @@ export const store$ = observable({
 
   initialize: async () => {
     try {
-      let rallye: RallyeRow | null = null;
+      let session: RallyeSession | null = null;
       try {
-        rallye = await getCurrentRallye();
+        session = await getCurrentSession();
       } catch (e) {
-        console.error('Error loading stored rallye:', e);
+        console.error('Error loading stored session:', e);
       }
-      store$.rallye.set(rallye);
+      store$.session.set(session);
       store$.resumeAvailable.set(false);
 
-      if (rallye) {
-        const rallyeId = rallye.id;
+      if (session) {
+        const rallyeId = session.rallye.id;
         let loadTeam: Team | null = null;
         try {
           loadTeam = await getCurrentTeam(rallyeId) as Team | null;
@@ -199,7 +204,7 @@ export const store$ = observable({
             if (exists === 'exists') {
               store$.team.set(loadTeam);
               // Explicit resume prompt instead of auto-navigation
-              if (rallye.mode !== 'tour') {
+              if (!isExploration(session)) {
                 store$.resumeAvailable.set(true);
               }
             } else if (exists === 'missing') {
@@ -208,12 +213,12 @@ export const store$ = observable({
               store$.teamDeleted.set(true);
             } else {
               store$.team.set(loadTeam);
-              if (rallye.mode !== 'tour') store$.resumeAvailable.set(true);
+              if (!isExploration(session)) store$.resumeAvailable.set(true);
             }
           } catch (e) {
             console.error('Error verifying team existence on init:', e);
             store$.team.set(loadTeam);
-            if (rallye.mode !== 'tour') store$.resumeAvailable.set(true);
+            if (!isExploration(session)) store$.resumeAvailable.set(true);
           }
         } else {
           store$.team.set(null);

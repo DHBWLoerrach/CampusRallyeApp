@@ -33,7 +33,9 @@ const RallyeIndex = observer(function RallyeIndex() {
   const [loading, setLoading] = useState(false);
   const s = useAppStyles();
 
-  const rallye = useSelector(() => store$.rallye.get());
+  const session = useSelector(() => store$.session.get());
+  const rallye = session?.rallye ?? null;
+  const isExploration = session?.sessionType === 'exploration';
   const team = useSelector(() => store$.team.get());
   const idx = useSelector(() => store$.questionIndex.get());
   const qsLen = useSelector(() => store$.questions.get().length);
@@ -47,7 +49,6 @@ const RallyeIndex = observer(function RallyeIndex() {
     store$.allQuestionsAnswered.get()
   );
   const timeExpired = useSelector(() => store$.timeExpired.get());
-  const isTourMode = rallye?.mode === 'tour';
 
   useEffect(() => {
     tRef.current = t;
@@ -95,7 +96,7 @@ const RallyeIndex = observer(function RallyeIndex() {
 
       // already answered for team mode
       let answeredIds: number[] = [];
-      if (!isTourMode && team) {
+      if (!isExploration && team) {
         const { data: answeredData, error: answeredError } = await supabase
           .from('team_questions')
           .select('question_id')
@@ -106,13 +107,13 @@ const RallyeIndex = observer(function RallyeIndex() {
       // Track number of answered questions for progress display
       store$.answeredCount.set(answeredIds.length);
 
-      if (answeredIds.length === questionIds.length && !isTourMode) {
+      if (answeredIds.length === questionIds.length && !isExploration) {
         store$.allQuestionsAnswered.set(true);
         store$.questionIndex.set(0);
         return;
       }
 
-      const filteredIds = isTourMode
+      const filteredIds = isExploration
         ? questionIds
         : questionIds.filter((id: number) => !answeredIds.includes(id));
 
@@ -142,7 +143,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  }, [isTourMode, rallye, team]);
+  }, [isExploration, rallye, team]);
 
   const refreshStatus = useCallback(async () => {
     if (!rallye) return;
@@ -157,26 +158,49 @@ const RallyeIndex = observer(function RallyeIndex() {
         .single();
       if (error) throw error;
       if (data) {
-        store$.rallye.status.set(data.status);
-        if (data.end_time) store$.rallye.end_time.set(data.end_time);
-        if (data.name) store$.rallye.name.set(data.name);
+        // Update the rallye data within the session
+        const currentSession = store$.session.get();
+        if (currentSession) {
+          store$.session.set({
+            ...currentSession,
+            rallye: {
+              ...currentSession.rallye,
+              status: data.status,
+              end_time: data.end_time ?? currentSession.rallye.end_time,
+              name: data.name ?? currentSession.rallye.name,
+            },
+          });
+        }
       }
     } catch (e) {
       console.error('Error fetching rallye status:', e);
     } finally {
       setLoading(false);
     }
-  }, [rallye]);
+  }, [rallye?.id]);
 
+  // Initial load effect - only runs when rallye.id changes (not on every rallye update)
   useEffect(() => {
-    if (!rallye) return;
+    if (!rallye?.id) return;
     (async () => {
       await loadQuestions();
       await loadAnswers();
       // Ensure we refresh dynamic rallye fields like name/status
       await refreshStatus();
     })();
-  }, [loadAnswers, loadQuestions, rallye, refreshStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rallye?.id]);
+
+  // Reload questions when team is created (competition mode)
+  // This is needed because loadQuestions filters out already answered questions for the team
+  useEffect(() => {
+    if (!rallye?.id || !team?.id || isExploration) return;
+    (async () => {
+      await loadQuestions();
+      await loadAnswers();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [team?.id]);
 
   const onRefresh = async () => {
     const net = await NetInfo.fetch();
@@ -210,7 +234,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     return <Scoreboard />;
   }
 
-  if (rallye.status === 'running' && !isTourMode && !team) {
+  if (rallye.status === 'running' && !isExploration && !team) {
     return <TeamSetup />;
   }
 
@@ -245,10 +269,10 @@ const RallyeIndex = observer(function RallyeIndex() {
           <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
             {(rallye?.name ? `${rallye.name} • ` : '') +
               t('rallye.progress', {
-                current: isTourMode
+                current: isExploration
                   ? idx + 1
                   : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
-                total: isTourMode ? qsLen : totalQuestions || qsLen,
+                total: isExploration ? qsLen : totalQuestions || qsLen,
               })}
           </ThemedText>
           <QuestionRenderer question={currentQuestion} />
@@ -262,7 +286,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     );
   }
 
-  if (allQuestionsAnswered && isTourMode) {
+  if (allQuestionsAnswered && isExploration) {
     // Exploration finished: show simple summary and back to welcome
     return (
       <>
@@ -316,7 +340,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     );
   }
 
-  if (allQuestionsAnswered && !isTourMode) {
+  if (allQuestionsAnswered && !isExploration) {
     // Time up vs finished before end
     return (
       <>

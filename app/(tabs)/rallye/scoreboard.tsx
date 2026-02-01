@@ -52,7 +52,8 @@ const calculateDuration = (
 };
 
 export default function Scoreboard() {
-  const rallye = useSelector(() => store$.rallye.get());
+  const session = useSelector(() => store$.session.get());
+  const rallye = session?.rallye ?? null;
   const rallyeId = rallye?.id;
   const rallyeStatus = rallye?.status;
   const ourTeam = useSelector(() => store$.team.get());

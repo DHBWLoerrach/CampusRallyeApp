@@ -23,11 +23,12 @@ import { useAppStyles } from '@/utils/AppStyles';
 import { confirm } from '@/utils/ConfirmAlert';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import {
-  setCurrentRallye,
+  setCurrentSession,
+  createSession,
   getOrganizationsWithActiveRallyes,
   getDepartmentsForOrganization,
   getRallyesForDepartment,
-  getTourModeRallyeForOrganization,
+  getExplorationRallyeForOrganization,
   getCampusEventsDepartment,
   getSelectedOrganization as getStoredOrganization,
   setSelectedOrganization as storeSelectedOrganization,
@@ -35,14 +36,13 @@ import {
   getSelectedDepartment as getStoredDepartment,
   setSelectedDepartment as storeSelectedDepartment,
   clearSelectedDepartment,
-  type RallyeRow,
 } from '@/services/storage/rallyeStorage';
 import {
   getCurrentTeam,
   teamExists,
   clearCurrentTeam,
 } from '@/services/storage/teamStorage';
-import { Organization, Department, Rallye } from '@/types/rallye';
+import { Organization, Department, RallyeData } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
 // Types for selection phases
@@ -55,7 +55,7 @@ export default function Welcome() {
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   const resumeAvailable = useSelector(() => store$.resumeAvailable.get());
-  const resumeRallye = useSelector(() => store$.rallye.get());
+  const resumeSession = useSelector(() => store$.session.get());
   const resumeTeam = useSelector(() => store$.team.get());
 
   const [loading, setLoading] = useState(false);
@@ -68,14 +68,14 @@ export default function Welcome() {
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [tourModeRallye, setTourModeRallye] = useState<Rallye | null>(null);
+  const [explorationRallye, setExplorationRallye] = useState<RallyeData | null>(null);
   const [campusEventsDepartment, setCampusEventsDepartment] = useState<Department | null>(null);
 
   // Modal states
   const [showRallyeModal, setShowRallyeModal] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [showDeptModal, setShowDeptModal] = useState(false);
-  const [activeRallyes, setActiveRallyes] = useState<Rallye[]>([]);
+  const [activeRallyes, setActiveRallyes] = useState<RallyeData[]>([]);
 
   // Auto-Refresh refs
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -114,8 +114,8 @@ export default function Welcome() {
           
           const depts = await getDepartmentsForOrganization(orgStillValid.id);
           setDepartments(depts);
-          const tourRallye = await getTourModeRallyeForOrganization(orgStillValid.id);
-          setTourModeRallye(tourRallye);
+          const explorationRallyeData = await getExplorationRallyeForOrganization(orgStillValid.id);
+          setExplorationRallye(explorationRallyeData);
           const campusEvents = await getCampusEventsDepartment(orgStillValid);
           setCampusEventsDepartment(campusEvents);
 
@@ -151,23 +151,13 @@ export default function Welcome() {
           
           const depts = await getDepartmentsForOrganization(singleOrg.id);
           setDepartments(depts);
-          const tourRallye = await getTourModeRallyeForOrganization(singleOrg.id);
-          setTourModeRallye(tourRallye);
+          const explorationRallyeData = await getExplorationRallyeForOrganization(singleOrg.id);
+          setExplorationRallye(explorationRallyeData);
           const campusEvents = await getCampusEventsDepartment(singleOrg);
           setCampusEventsDepartment(campusEvents);
           
-          // Auto-select if only one department
-          if (depts.length === 1) {
-            Logger.debug('AutoSelect', 'Only one department available, auto-selecting');
-            const singleDept = depts[0];
-            setSelectedDepartment(singleDept);
-            await storeSelectedDepartment(singleDept);
-            const rallyes = await getRallyesForDepartment(singleDept.id);
-            setActiveRallyes(rallyes);
-            setSelectionStep('rallye');
-          } else {
-            setSelectionStep('department');
-          }
+          // Always show department selection - let user choose consciously
+          setSelectionStep('department');
         } else {
           setSelectionStep('organization');
         }
@@ -205,12 +195,12 @@ export default function Welcome() {
         if (orgStillValid) {
           const depts = await getDepartmentsForOrganization(selectedOrganization.id);
           setDepartments(depts);
-          const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
-          setTourModeRallye(tourRallye);
+          const explorationRallyeData = await getExplorationRallyeForOrganization(selectedOrganization.id);
+          setExplorationRallye(explorationRallyeData);
           const campusEvents = await getCampusEventsDepartment(orgStillValid);
           setCampusEventsDepartment(campusEvents);
           
-          if (depts.length === 0 && !tourRallye && !campusEvents) {
+          if (depts.length === 0 && !explorationRallyeData && !campusEvents) {
             await clearSelectedOrganization();
             setSelectedOrganization(null);
             setOrganizations(orgs);
@@ -231,10 +221,10 @@ export default function Welcome() {
         if (deptStillValid) {
           const rallyes = await getRallyesForDepartment(selectedDepartment.id);
           setActiveRallyes(rallyes);
-          const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
-          setTourModeRallye(tourRallye);
+          const explorationRallyeData = await getExplorationRallyeForOrganization(selectedOrganization.id);
+          setExplorationRallye(explorationRallyeData);
           
-          if (rallyes.length === 0 && !tourRallye) {
+          if (rallyes.length === 0 && !explorationRallyeData) {
             await clearSelectedDepartment();
             setSelectedDepartment(null);
             setDepartments(depts);
@@ -294,22 +284,14 @@ export default function Welcome() {
       const depts = await getDepartmentsForOrganization(org.id);
       setDepartments(depts);
       
-      const tourRallye = await getTourModeRallyeForOrganization(org.id);
-      setTourModeRallye(tourRallye);
+      const explorationRallyeData = await getExplorationRallyeForOrganization(org.id);
+      setExplorationRallye(explorationRallyeData);
       
       const campusEvents = await getCampusEventsDepartment(org);
       setCampusEventsDepartment(campusEvents);
       
-      if (depts.length === 1) {
-        const singleDept = depts[0];
-        setSelectedDepartment(singleDept);
-        await storeSelectedDepartment(singleDept);
-        const rallyes = await getRallyesForDepartment(singleDept.id);
-        setActiveRallyes(rallyes);
-        setSelectionStep('rallye');
-      } else {
-        setSelectionStep('department');
-      }
+      // Always show department selection - let user choose consciously
+      setSelectionStep('department');
     } catch (error) {
       Logger.error('Welcome', 'Error loading departments', error);
       Alert.alert(t('common.errorTitle'), t('welcome.departmentLoadError'));
@@ -347,37 +329,42 @@ export default function Welcome() {
       setSelectedOrganization(null);
       setSelectedDepartment(null);
       setDepartments([]);
-      setTourModeRallye(null);
+      setExplorationRallye(null);
       setCampusEventsDepartment(null);
       setSelectionStep('organization');
     }
   };
 
-  // Handler for tour mode
-  const handleTourModeSubmit = async () => {
-    if (!tourModeRallye) {
+  // Handler for exploration mode (formerly tour mode)
+  const handleExplorationModeSubmit = async () => {
+    if (!explorationRallye) {
       Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
       return;
     }
     store$.team.set(null);
     store$.reset();
-    store$.rallye.set(tourModeRallye);
-    await setCurrentRallye(tourModeRallye);
+    const session = createSession(explorationRallye, 'exploration');
+    store$.session.set(session);
+    await setCurrentSession(session);
     store$.enabled.set(true);
   };
 
-  // Handler for Campus Events selection
+  // Handler for Campus Events selection - only shows modal, no page change
   const handleCampusEventsSelect = async () => {
     if (!campusEventsDepartment) return;
     
     setLoading(true);
     try {
-      setSelectedDepartment(campusEventsDepartment);
-      await storeSelectedDepartment(campusEventsDepartment);
-      
+      // Load rallyes but don't change the page/step
       const rallyes = await getRallyesForDepartment(campusEventsDepartment.id);
       setActiveRallyes(rallyes);
-      setSelectionStep('rallye');
+      
+      // Just open the modal without changing the view
+      if (rallyes.length > 0) {
+        setShowRallyeModal(true);
+      } else {
+        Alert.alert(t('common.errorTitle'), t('welcome.noRallyes.description'));
+      }
     } catch (error) {
       Logger.error('Welcome', 'Error loading campus events rallyes', error);
       Alert.alert(t('common.errorTitle'), t('welcome.rallyeLoadError'));
@@ -385,15 +372,16 @@ export default function Welcome() {
     setLoading(false);
   };
 
-  // Handler for joining a rallye (new API)
-  const joinRallye = async (rallye: RallyeRow): Promise<boolean> => {
+  // Handler for joining a rallye (competition mode)
+  const joinRallye = async (rallye: RallyeData): Promise<boolean> => {
     if (joining) return false;
     setJoining(true);
     try {
       store$.team.set(null);
       store$.reset();
-      store$.rallye.set(rallye);
-      await setCurrentRallye(rallye);
+      const session = createSession(rallye, 'competition');
+      store$.session.set(session);
+      await setCurrentSession(session);
 
       // Rehydrate previously created team for this rallye (if any)
       try {
@@ -516,7 +504,7 @@ export default function Welcome() {
 
   // Phase 2: Department selection
   const hasDepartmentsWithRallyes = departments.length > 0;
-  const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye && !campusEventsDepartment;
+  const hasNoContent = !hasDepartmentsWithRallyes && !explorationRallye && !campusEventsDepartment;
 
   const DepartmentContent = () => (
     <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
@@ -552,14 +540,14 @@ export default function Welcome() {
           </UIButton>
         </Card>
       )}
-      {tourModeRallye && (
+      {explorationRallye && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.explore.title')}
           description={t('welcome.explore.description')}
           icon="binoculars"
         >
-          <UIButton outline onPress={handleTourModeSubmit}>
+          <UIButton outline onPress={handleExplorationModeSubmit}>
             {t('welcome.explore.start')}
           </UIButton>
         </Card>
@@ -616,12 +604,12 @@ export default function Welcome() {
       )}
 
       {/* Resume card */}
-      {resumeAvailable && resumeRallye && resumeTeam && (
+      {resumeAvailable && resumeSession && resumeTeam && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.resume.title')}
           description={t('welcome.resume.details', {
-            rallye: resumeRallye.name,
+            rallye: resumeSession.rallye.name,
             team: resumeTeam.name,
           })}
           icon="clock"
@@ -680,22 +668,40 @@ export default function Welcome() {
         </Card>
       )}
 
+      {/* Campus Events card - show when viewing a non-campus-events department */}
+      {campusEventsDepartment && !isCampusEventsSelection && (
+        <Card
+          containerStyle={compactCardStyle}
+          title={t('welcome.campusEvents.title')}
+          description={t('welcome.campusEvents.description')}
+          icon="party.popper"
+        >
+          <UIButton
+            onPress={handleCampusEventsSelect}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
+            {t('welcome.campusEvents.button')}
+          </UIButton>
+        </Card>
+      )}
+
       {/* Tour mode card */}
-      {tourModeRallye && !isCampusEventsSelection && (
+      {explorationRallye && !isCampusEventsSelection && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.explore.title')}
           description={t('welcome.explore.description')}
           icon="binoculars"
         >
-          <UIButton outline onPress={handleTourModeSubmit}>
+          <UIButton outline onPress={handleExplorationModeSubmit}>
             {t('welcome.explore.start')}
           </UIButton>
         </Card>
       )}
 
       {/* No rallyes available */}
-      {!hasActiveRallyes && !tourModeRallye && (
+      {!hasActiveRallyes && !explorationRallye && (isCampusEventsSelection || !campusEventsDepartment) && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.noRallyes.title')}
@@ -743,7 +749,7 @@ export default function Welcome() {
       <RallyeSelectionModal
         visible={showRallyeModal}
         onClose={() => setShowRallyeModal(false)}
-        activeRallyes={activeRallyes as RallyeRow[]}
+        activeRallyes={activeRallyes}
         onJoin={joinRallye}
         joining={joining}
       />

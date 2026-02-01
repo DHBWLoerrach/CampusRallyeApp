@@ -8,42 +8,66 @@ import {
 import {
   Organization,
   Department,
-  Rallye,
-  RallyeMode,
+  RallyeData,
+  RallyeSession,
+  SessionType,
   RallyeStatus,
 } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
-export type RallyeRow = {
-  id: number;
-  name: string;
-  password?: string | null;
-  status: RallyeStatus;
-  mode: RallyeMode;
-  end_time?: string | null;
-};
+// Re-export types for consumers
+export type { RallyeSession, RallyeData, SessionType };
 
-function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
-  mode: RallyeMode;
-} {
-  return { ...rallye, mode };
+// Helper to create a session from raw rallye data
+function createSession(rallye: RallyeData, sessionType: SessionType): RallyeSession {
+  return { rallye, sessionType };
 }
 
-export async function getCurrentRallye(): Promise<RallyeRow | null> {
-  const stored = (await getStorageItem(
-    StorageKeys.CURRENT_RALLYE
-  )) as Partial<RallyeRow> | null;
+// Legacy type alias for backwards compatibility during migration
+/** @deprecated Use RallyeSession instead */
+export type RallyeRow = RallyeSession;
+
+export async function getCurrentSession(): Promise<RallyeSession | null> {
+  const stored = await getStorageItem<RallyeSession>(StorageKeys.CURRENT_RALLYE);
   if (!stored) return null;
-  if (stored.mode !== 'tour' && stored.mode !== 'department') {
+  
+  // Validate session has required fields
+  if (!stored.rallye || !stored.sessionType) {
+    // Try to migrate legacy format (had mode directly on rallye)
+    const legacy = stored as any;
+    if (legacy.id && (legacy.mode === 'tour' || legacy.mode === 'department')) {
+      const sessionType: SessionType = legacy.mode === 'tour' ? 'exploration' : 'competition';
+      const rallye: RallyeData = {
+        id: legacy.id,
+        name: legacy.name,
+        status: legacy.status,
+        password: legacy.password ?? null,
+        end_time: legacy.end_time ?? null,
+      };
+      const migrated = createSession(rallye, sessionType);
+      await setCurrentSession(migrated);
+      return migrated;
+    }
     await removeStorageItem(StorageKeys.CURRENT_RALLYE);
     return null;
   }
-  return stored as RallyeRow;
+  
+  if (stored.sessionType !== 'exploration' && stored.sessionType !== 'competition') {
+    await removeStorageItem(StorageKeys.CURRENT_RALLYE);
+    return null;
+  }
+  return stored;
 }
 
-export async function setCurrentRallye(rallye: RallyeRow) {
-  return setStorageItem(StorageKeys.CURRENT_RALLYE, rallye);
+export async function setCurrentSession(session: RallyeSession) {
+  return setStorageItem(StorageKeys.CURRENT_RALLYE, session);
 }
+
+// Legacy aliases for backwards compatibility
+/** @deprecated Use getCurrentSession instead */
+export const getCurrentRallye = getCurrentSession;
+/** @deprecated Use setCurrentSession instead */
+export const setCurrentRallye = setCurrentSession;
 
 export async function clearCurrentRallye() {
   return removeStorageItem(StorageKeys.CURRENT_RALLYE);
@@ -206,9 +230,25 @@ export async function getOrganizationsWithActiveRallyes(): Promise<Organization[
 
 /**
  * Lädt alle Departments einer Organisation, die mindestens eine aktive Rallye haben.
+ * Filtert Departments heraus, deren Name identisch mit dem Organisation-Namen ist
+ * (diese werden separat als "Campus Events" behandelt).
  */
 export async function getDepartmentsForOrganization(orgId: number): Promise<Department[]> {
   Logger.debug('RallyeStorage', `getDepartmentsForOrganization called with orgId: ${orgId}`);
+
+  // Hole Organisation für Namensvergleich
+  const { data: org, error: orgError } = await supabase
+    .from('organization')
+    .select('name')
+    .eq('id', orgId)
+    .single();
+
+  if (orgError) {
+    Logger.error('RallyeStorage', 'Error fetching organization for department filter', orgError);
+    return [];
+  }
+
+  const orgName = org?.name ?? '';
   
   // Schritt 1: Hole alle Joins mit Rallye-Daten
   const { data: allJoins, error: joinError } = await supabase
@@ -262,13 +302,21 @@ export async function getDepartmentsForOrganization(orgId: number): Promise<Depa
     return [];
   }
 
-  return (departments as Department[]) ?? [];
+  // Filtere Departments heraus, deren Name identisch mit Organisation-Name ist
+  // Diese werden als "Campus Events" separat behandelt
+  const filteredDepts = (departments ?? []).filter(
+    (d: Department) => d.name !== orgName
+  );
+  Logger.debug('RallyeStorage', `Filtered departments (excluded "${orgName}"): ${filteredDepts.length} of ${departments?.length ?? 0}`);
+
+  return filteredDepts as Department[];
 }
 
 /**
  * Lädt alle aktiven Rallyes für ein Department.
+ * Returns raw RallyeData - caller decides session type based on context.
  */
-export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]> {
+export async function getRallyesForDepartment(deptId: number): Promise<RallyeData[]> {
   Logger.debug('RallyeStorage', `getRallyesForDepartment called with deptId: ${deptId}`);
   
   // Hole alle Rallye-IDs, die diesem Department zugeordnet sind
@@ -295,7 +343,7 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
   // Hole die Rallyes
   const { data: allRallyes, error: rallyeError } = await supabase
     .from('rallye')
-    .select('*')
+    .select('id, name, status, password, end_time, created_at')
     .in('id', rallyeIds);
 
   Logger.debug('RallyeStorage', 'All rallyes fetched:', { allRallyes, rallyeError });
@@ -314,7 +362,7 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
 
   Logger.debug('RallyeStorage', `Active rallyes for dept ${deptId}:`, activeRallyes);
 
-  return activeRallyes.map((r: any) => withMode(r, 'department')) as Rallye[];
+  return activeRallyes as RallyeData[];
 }
 
 /**
@@ -353,10 +401,11 @@ export async function getCampusEventsDepartment(org: Organization): Promise<Depa
 }
 
 /**
- * Lädt die Tour-Mode Rallye für eine Organisation.
+ * Lädt die Exploration-Rallye für eine Organisation (früher "Tour-Mode").
  * Gibt null zurück, wenn keine default_rallye_id gesetzt ist oder die Rallye nicht aktiv ist.
+ * Returns raw RallyeData - caller creates session with 'exploration' type.
  */
-export async function getTourModeRallyeForOrganization(orgId: number): Promise<Rallye | null> {
+export async function getExplorationRallyeForOrganization(orgId: number): Promise<RallyeData | null> {
   // Schritt 1: Hole die default_rallye_id der Organisation
   const { data: org, error: orgError } = await supabase
     .from('organization')
@@ -365,24 +414,24 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
     .single();
 
   if (orgError) {
-    Logger.error('RallyeStorage', 'Error fetching organization for tour mode', orgError);
+    Logger.error('RallyeStorage', 'Error fetching organization for exploration rallye', orgError);
     return null;
   }
 
   if (!org?.default_rallye_id) {
-    // Keine Tour-Mode Rallye konfiguriert
+    // Keine Exploration-Rallye konfiguriert
     return null;
   }
 
   // Schritt 2: Hole die Rallye
   const { data: rallye, error: rallyeError } = await supabase
     .from('rallye')
-    .select('*')
+    .select('id, name, status, password, end_time, created_at')
     .eq('id', org.default_rallye_id)
     .single();
 
   if (rallyeError) {
-    Logger.error('RallyeStorage', 'Error fetching tour mode rallye', rallyeError);
+    Logger.error('RallyeStorage', 'Error fetching exploration rallye', rallyeError);
     return null;
   }
 
@@ -391,5 +440,12 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
     return null;
   }
 
-  return withMode(rallye, 'tour') as Rallye;
+  return rallye as RallyeData;
 }
+
+// Legacy alias for backwards compatibility
+/** @deprecated Use getExplorationRallyeForOrganization instead */
+export const getTourModeRallyeForOrganization = getExplorationRallyeForOrganization;
+
+// Helper to create sessions (exported for use in app code)
+export { createSession };

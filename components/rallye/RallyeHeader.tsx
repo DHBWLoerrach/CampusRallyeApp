@@ -10,10 +10,12 @@ import ThemedText from '@/components/themed/ThemedText';
 export default function RallyeHeader() {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
-  const rallye = useSelector(() => store$.rallye.get());
+  const session = useSelector(() => store$.session.get());
+  const rallye = session?.rallye ?? null;
+  const isExploration = session?.sessionType === 'exploration';
   const team = useSelector(() => store$.team.get());
 
-  const showTimer = rallye?.status === 'running' && rallye?.mode !== 'tour';
+  const showTimer = rallye?.status === 'running' && !isExploration;
 
   return (
     <View

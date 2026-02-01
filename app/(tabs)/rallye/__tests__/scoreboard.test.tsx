@@ -62,11 +62,11 @@ jest.mock('@/utils/LanguageContext', () => ({
 }));
 
 // Mock Store
-let mockRallye: any = null;
+let mockSession: any = null;
 jest.mock('@/services/storage/Store', () => ({
   store$: {
-    rallye: {
-      get: () => mockRallye,
+    session: {
+      get: () => mockSession,
     },
     team: {
       get: () => null,
@@ -80,10 +80,13 @@ jest.mock('@legendapp/state/react', () => ({
 
 describe('Scoreboard', () => {
   it('renders rallye name in header', async () => {
-    mockRallye = {
-      id: 1,
-      name: 'Test Rallye Name',
-      status: 'ended',
+    mockSession = {
+      rallye: {
+        id: 1,
+        name: 'Test Rallye Name',
+        status: 'ended',
+      },
+      sessionType: 'competition',
     };
 
     const { getByText } = render(<Scoreboard />);
@@ -96,7 +99,7 @@ describe('Scoreboard', () => {
   });
 
   it('does not render rallye name if not present', () => {
-    mockRallye = null;
+    mockSession = null;
     const { queryByText } = render(<Scoreboard />);
     expect(queryByText('Test Rallye Name')).toBeNull();
   });

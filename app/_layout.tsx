@@ -45,10 +45,10 @@ function RootErrorFallback({
   const debugInfo = __DEV__
     ? (() => {
         try {
-          const rallye = store$.rallye.get() as any;
+          const session = store$.session.get() as any;
           const team = store$.team.get() as any;
           const question = store$.currentQuestion.get() as any;
-          return `rallye:${rallye?.id ?? 'n/a'} team:${team?.id ?? 'n/a'} question:${question?.id ?? 'n/a'}`;
+          return `rallye:${session?.rallye?.id ?? 'n/a'} team:${team?.id ?? 'n/a'} question:${question?.id ?? 'n/a'}`;
         } catch (debugError) {
           console.error('Failed to read debug info:', debugError);
           return 'debug:unavailable';

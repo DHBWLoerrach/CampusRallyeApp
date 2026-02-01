@@ -27,7 +27,8 @@ export default function Voting({
   const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
   const [currentVotingIdx, setCurrentVotingIdx] = useState(0);
   const [sendingResult, setSendingResult] = useState(false);
-  const rallye = useSelector(() => store$.rallye.get());
+  const session = useSelector(() => store$.session.get());
+  const rallye = session?.rallye ?? null;
   const team = useSelector(() => store$.team.get());
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
   const s = useAppStyles();

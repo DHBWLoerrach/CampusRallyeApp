@@ -19,7 +19,7 @@ jest.mock('@legendapp/state/react', () => ({
 
 jest.mock('@/services/storage/Store', () => ({
   store$: {
-    rallye: { get: jest.fn(() => ({ id: 1 })) },
+    session: { get: jest.fn(() => ({ rallye: { id: 1 }, sessionType: 'competition' })) },
     team: { get: jest.fn(() => ({ id: 2 })) },
     votingAllowed: { get: jest.fn(() => true), set: jest.fn() },
   },

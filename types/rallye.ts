@@ -5,6 +5,13 @@ export type QuestionType =
   | 'multiple_choice'
   | 'picture';
 
+// Session type describes HOW a user participates in a rallye
+// - 'exploration': Self-guided tour without timer or team (campus exploration)
+// - 'competition': Team-based rallye with timer and scoring
+export type SessionType = 'exploration' | 'competition';
+
+// Legacy alias for backwards compatibility during migration
+/** @deprecated Use SessionType instead */
 export type RallyeMode = 'tour' | 'department';
 
 export const RALLYE_STATUSES = [
@@ -52,6 +59,24 @@ export interface Department {
   created_at: string;
 }
 
+// Raw rallye data as stored in the database (no mode field)
+export interface RallyeData {
+  id: number;
+  name: string;
+  status: RallyeStatus;
+  password: string | null;
+  end_time: string | null;
+  created_at?: string;
+}
+
+// Active session: combines rallye data with participation type
+export interface RallyeSession {
+  rallye: RallyeData;
+  sessionType: SessionType;
+}
+
+// Legacy Rallye type with mode - used during migration
+/** @deprecated Use RallyeSession instead */
 export interface Rallye {
   id: number;
   name: string;
@@ -60,6 +85,16 @@ export interface Rallye {
   mode: RallyeMode;
   end_time: string | null;
   created_at: string;
+}
+
+// Helper to convert legacy mode to session type
+export function modeToSessionType(mode: RallyeMode): SessionType {
+  return mode === 'tour' ? 'exploration' : 'competition';
+}
+
+// Helper to convert session type to legacy mode
+export function sessionTypeToMode(sessionType: SessionType): RallyeMode {
+  return sessionType === 'exploration' ? 'tour' : 'department';
 }
 
 export interface Team {

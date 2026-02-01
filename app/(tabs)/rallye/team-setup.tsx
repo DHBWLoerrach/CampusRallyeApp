@@ -16,7 +16,8 @@ const TeamSetup = observer(function TeamSetup() {
   const [loading, setLoading] = useState(false);
   const s = useAppStyles();
   const { t } = useLanguage();
-  const rallye = useSelector(() => store$.rallye.get());
+  const session = useSelector(() => store$.session.get());
+  const rallye = session?.rallye ?? null;
   const createTeam = async () => {
     if (!rallye) return;
     setLoading(true);
