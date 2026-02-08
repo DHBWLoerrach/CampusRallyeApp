@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, FlatList, TouchableOpacity } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import UIButton from '@/components/ui/UIButton';
@@ -8,6 +8,11 @@ import { useLanguage } from '@/utils/LanguageContext';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import { Screen } from '@/components/ui/Screen';
+import { spacing } from '@/utils/spacing';
+import { useTheme } from '@/utils/ThemeContext';
+import Colors from '@/utils/Colors';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function Voting({
   onRefresh,
@@ -27,6 +32,8 @@ export default function Voting({
   const team = useSelector(() => store$.team.get());
   const votingAllowed = useSelector(() => store$.votingAllowed.get());
   const { t } = useLanguage();
+  const { isDarkMode } = useTheme();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const rallyeId = rallye?.id;
   const teamId = team?.id;
 
@@ -172,27 +179,36 @@ export default function Voting({
 
   const handleNextQuestion = async () => {
     try {
-      if (!selectedUpdateId) return;
+      if (!selectedUpdateId || !selectedTeam || !rallyeId || !teamId) return;
       setSendingResult(true);
-      const { error } = await supabase.rpc('increment_team_question_points', {
-        target_answer_id: selectedUpdateId,
+      
+      const currentQuestionId = currentQuestion[0]?.tq_question_id;
+      if (!currentQuestionId) throw new Error('No question ID');
+
+      const { error } = await supabase.rpc('cast_voting_vote', {
+        p_rallye_id: Number(rallyeId),
+        p_question_id: Number(currentQuestionId),
+        p_voting_team_id: Number(teamId),
+        p_voted_for_team_id: Number(selectedTeam),
       });
+      
       if (error) throw error;
+
       setCurrentVotingIdx((i) => i + 1);
       setSelectedUpdateId(null);
       setSelectedTeam(null);
-    } catch (e) {
+    } catch {
       Alert.alert(t('common.errorTitle'), t('voting.error.submit'));
     } finally {
       setSendingResult(false);
     }
   };
 
-  if (!votingAllowed || teamCount < 2) {
+  if (!votingAllowed || teamCount < 3) {
     return (
       <Screen padding="none">
         <>
-          <InfoBox>
+          <InfoBox style={{ marginHorizontal: SCREEN_WIDTH * 0.05, marginTop: spacing(2) }}>
             <ThemedText variant="title">
               {t('voting.ended.title')}
             </ThemedText>
@@ -200,7 +216,7 @@ export default function Voting({
               {t('voting.ended.message')}
             </ThemedText>
           </InfoBox>
-          <InfoBox>
+          <InfoBox style={{ marginHorizontal: SCREEN_WIDTH * 0.05 }}>
             <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
               {t('common.refresh')}
             </UIButton>
@@ -217,6 +233,11 @@ export default function Voting({
         keyExtractor={(item) => `${item.tq_id}`}
         onRefresh={getVotingData}
         refreshing={loading}
+        contentContainerStyle={{
+          paddingHorizontal: SCREEN_WIDTH * 0.05,
+          paddingTop: spacing(2),
+          paddingBottom: spacing(2),
+        }}
         ListHeaderComponent={
           currentQuestion.length > 0 ? (
             <InfoBox>
@@ -226,29 +247,42 @@ export default function Voting({
             </InfoBox>
           ) : undefined
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            testID={`vote-option-${item.tq_id}`}
-            onPress={() => {
-              if (selectedTeam === item.rt_id) {
-                setSelectedTeam(null);
-                setSelectedUpdateId(null);
-              } else {
-                setSelectedTeam(item.rt_id);
-                setSelectedUpdateId(item.tq_id);
-              }
-            }}
-          >
-              <InfoBox>
-                <ThemedText variant="title">
+        renderItem={({ item }) => {
+          const isSelected = selectedTeam === item.rt_id;
+          return (
+            <TouchableOpacity
+              testID={`vote-option-${item.tq_id}`}
+              onPress={() => {
+                if (selectedTeam === item.rt_id) {
+                  setSelectedTeam(null);
+                  setSelectedUpdateId(null);
+                } else {
+                  setSelectedTeam(item.rt_id);
+                  setSelectedUpdateId(item.tq_id);
+                }
+              }}
+            >
+              <InfoBox
+                style={[
+                  isSelected && {
+                    backgroundColor: isDarkMode
+                      ? 'rgba(255, 255, 255, 0.15)'
+                      : 'rgba(255, 255, 255, 0.8)',
+                    borderWidth: 2,
+                    borderColor: palette.dhbwRed,
+                  },
+                ]}
+              >
+                <ThemedText variant="title" style={{ textAlign: 'center' }}>
                   {item.tq_team_answer}
                 </ThemedText>
-                <ThemedText variant="body">
+                <ThemedText variant="body" style={{ textAlign: 'center' }}>
                   {item.rt_team_name}
                 </ThemedText>
               </InfoBox>
             </TouchableOpacity>
-        )}
+          );
+        }}
       />
       <InfoBox>
         <UIButton

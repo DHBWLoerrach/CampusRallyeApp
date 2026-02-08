@@ -165,6 +165,9 @@ export const translations = {
     'voting.instruction': 'Wähle das beste Bild aus.',
     'voting.next': 'Nächste Abstimmung',
     'voting.error.submit': 'Abstimmung konnte nicht gespeichert werden.',
+    'voting.complete.title': 'Abstimmung abgeschlossen!',
+    'voting.complete.message':
+      'Alle Teams haben abgestimmt. {{points}} Punkte wurden vergeben.',
     'scoreboard.title': 'Endstand',
     'scoreboard.yourTeam': 'Dein Team: {{team}}',
     'scoreboard.yourTeamLabel': 'Dein Team:',
@@ -331,6 +334,9 @@ export const translations = {
     'voting.instruction': 'Choose the best picture.',
     'voting.next': 'Next vote',
     'voting.error.submit': 'Vote could not be saved.',
+    'voting.complete.title': 'Voting complete!',
+    'voting.complete.message':
+      'All teams have voted. {{points}} points were awarded.',
     'scoreboard.title': 'Final standings',
     'scoreboard.yourTeam': 'Your team: {{team}}',
     'scoreboard.yourTeamLabel': 'Your team:',

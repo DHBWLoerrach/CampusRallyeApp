@@ -31,8 +31,34 @@ jest.mock('@/utils/LanguageContext', () => ({
   }),
 }));
 
+jest.mock('@/utils/ThemeContext', () => ({
+  useTheme: () => ({
+    isDarkMode: false,
+  }),
+}));
+
+jest.mock('@/utils/Colors', () => ({
+  __esModule: true,
+  default: {
+    lightMode: {
+      dhbwRed: '#E2001A',
+      background: '#fcfcfc',
+      text: '#000',
+    },
+    darkMode: {
+      dhbwRed: '#E2001A',
+      background: '#121214',
+      text: '#fff',
+    },
+  },
+}));
+
 jest.mock('@/utils/AppStyles', () => ({
   useAppStyles: () => ({ text: {}, muted: {} }),
+}));
+
+jest.mock('@/utils/spacing', () => ({
+  spacing: (n: number) => n * 8,
 }));
 
 jest.mock('@/components/themed/ThemedText', () => {
@@ -98,36 +124,13 @@ describe('Voting', () => {
     jest.clearAllMocks();
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    
     mockRpc.mockImplementation((name: string) => {
-      if (name === 'get_voting_content') {
-        return Promise.resolve({
-          data: [
-            {
-              tq_question_id: 1,
-              tq_id: 'vote-1',
-              tq_team_id: 'team-1',
-              rt_id: 'team-1',
-              rt_team_name: 'Team A',
-              question_content: 'Question 1',
-              question_type: 'knowledge',
-              tq_team_answer: 'Answer A',
-            },
-            {
-              tq_question_id: 2,
-              tq_id: 'vote-2',
-              tq_team_id: 'team-2',
-              rt_id: 'team-2',
-              rt_team_name: 'Team B',
-              question_content: 'Question 2',
-              question_type: 'knowledge',
-              tq_team_answer: 'Answer B',
-            },
-          ],
-          error: null,
+      if (name === 'cast_voting_vote') {
+        return Promise.resolve({ 
+          data: { voting_complete: false, teams_voted: 1, total_teams: 3 },
+          error: new Error('fail') 
         });
-      }
-      if (name === 'increment_team_question_points') {
-        return Promise.resolve({ error: new Error('fail') });
       }
       return Promise.resolve({ data: [], error: null });
     });
@@ -135,27 +138,87 @@ describe('Voting', () => {
     mockFrom.mockImplementation((table: string) => {
       if (table === 'voting') {
         return {
-          select: jest.fn(() => ({
-            eq: jest.fn(() =>
-              Promise.resolve({
-                data: [{ question_id: 1 }, { question_id: 2 }],
-                error: null,
-              })
-            ),
-          })),
+          select: jest.fn((columns: string) => {
+            // For counting questions
+            if (columns === 'question_id') {
+              return {
+                eq: jest.fn(() =>
+                  Promise.resolve({
+                    data: [{ question_id: 1 }, { question_id: 2 }],
+                    error: null,
+                  })
+                ),
+              };
+            }
+            // For loading voting questions with question details
+            return {
+              eq: jest.fn(() =>
+                Promise.resolve({
+                  data: [
+                    {
+                      question_id: 1,
+                      questions: {
+                        id: 1,
+                        content: 'Question 1',
+                        type: 'knowledge',
+                      },
+                    },
+                  ],
+                  error: null,
+                })
+              ),
+            };
+          }),
         };
       }
       if (table === 'rallye_team') {
         return {
-          select: jest.fn(() => ({
+          select: jest.fn((columns: string) => {
+            // For counting teams
+            if (columns === 'id') {
+              return {
                 eq: jest.fn(() =>
                   Promise.resolve({
-                data: [{ id: 1 }, { id: 2 }],
+                    data: [{ id: '1' }, { id: '2' }, { id: '3' }],
+                    error: null,
+                  })
+                ),
+              };
+            }
+            // For loading team names
+            return {
+              eq: jest.fn(() => ({
+                neq: jest.fn(() =>
+                  Promise.resolve({
+                    data: [
+                      { id: 'team-1', name: 'Team A' },
+                    ],
                     error: null,
                   })
                 ),
               })),
             };
+          }),
+        };
+      }
+      if (table === 'team_questions') {
+        return {
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                maybeSingle: jest.fn(() =>
+                  Promise.resolve({
+                    data: {
+                      id: 'vote-1',
+                      team_answer: 'Answer A',
+                    },
+                    error: null,
+                  })
+                ),
+              })),
+            })),
+          })),
+        };
       }
       return {
         select: jest.fn(() => ({
