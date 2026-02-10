@@ -11,6 +11,7 @@ import { Screen } from '@/components/ui/Screen';
 import { spacing } from '@/utils/spacing';
 import { useTheme } from '@/utils/ThemeContext';
 import Colors from '@/utils/Colors';
+import VStack from '@/components/ui/VStack';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -207,8 +208,8 @@ export default function Voting({
   if (!votingAllowed || teamCount < 3) {
     return (
       <Screen padding="none">
-        <>
-          <InfoBox style={{ marginHorizontal: SCREEN_WIDTH * 0.05, marginTop: spacing(2) }}>
+        <VStack style={{ width: '100%', padding: SCREEN_WIDTH * 0.05, paddingTop: spacing(2) }} gap={2}>
+          <InfoBox>
             <ThemedText variant="title">
               {t('voting.ended.title')}
             </ThemedText>
@@ -216,12 +217,12 @@ export default function Voting({
               {t('voting.ended.message')}
             </ThemedText>
           </InfoBox>
-          <InfoBox style={{ marginHorizontal: SCREEN_WIDTH * 0.05 }}>
+          <InfoBox>
             <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
               {t('common.refresh')}
             </UIButton>
           </InfoBox>
-        </>
+        </VStack>
       </Screen>
     );
   }
