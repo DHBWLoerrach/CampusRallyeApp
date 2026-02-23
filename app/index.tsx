@@ -515,7 +515,11 @@ export default function Welcome() {
   );
 
   // Phase 2: Department selection
-  const hasDepartmentsWithRallyes = departments.length > 0;
+  // Filter out the campus events department so it doesn't appear twice
+  const selectableDepartments = campusEventsDepartment
+    ? departments.filter(d => d.id !== campusEventsDepartment.id)
+    : departments;
+  const hasDepartmentsWithRallyes = selectableDepartments.length > 0;
   const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye && !campusEventsDepartment;
 
   const DepartmentContent = () => (
@@ -758,7 +762,7 @@ export default function Welcome() {
       <SelectionModal
         visible={showDeptModal}
         onClose={() => setShowDeptModal(false)}
-        items={departments.map(dept => ({ id: dept.id, name: dept.name }))}
+        items={selectableDepartments.map(dept => ({ id: dept.id, name: dept.name }))}
         onSelect={handleDeptModalSelect}
         title={t('welcome.selectDepartment.modalTitle')}
         emptyMessage={t('welcome.selectDepartment.empty')}
