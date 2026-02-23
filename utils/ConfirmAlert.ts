@@ -40,8 +40,7 @@ export const confirmAnswer = async ({
   answer: string;
   t: Translator;
 }) => {
-  const rallye = store$.rallye.get();
-  if (rallye?.mode === 'tour') return true;
+  if (store$.isTourMode.get()) return true;
   return confirm({
     title: t('confirm.answer.title'),
     message: t('confirm.answer.message', { answer }),

@@ -12,8 +12,9 @@ export default function RallyeHeader() {
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
+  const isTourMode = useSelector(() => store$.isTourMode.get());
 
-  const showTimer = rallye?.status === 'running' && rallye?.mode !== 'tour';
+  const showTimer = rallye?.status === 'running' && !isTourMode;
 
   return (
     <View

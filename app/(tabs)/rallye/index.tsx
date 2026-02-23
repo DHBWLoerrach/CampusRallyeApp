@@ -47,7 +47,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     store$.allQuestionsAnswered.get()
   );
   const timeExpired = useSelector(() => store$.timeExpired.get());
-  const isTourMode = rallye?.mode === 'tour';
+  const isTourMode = useSelector(() => store$.isTourMode.get());
 
   useEffect(() => {
     tRef.current = t;
