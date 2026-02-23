@@ -49,17 +49,23 @@ const RallyeIndex = observer(function RallyeIndex() {
   const timeExpired = useSelector(() => store$.timeExpired.get());
   const isTourMode = useSelector(() => store$.isTourMode.get());
 
+  // Use primitive IDs as callback dependencies so that sub-field mutations
+  // on the rallye observable (status, end_time, name) don't recreate the
+  // callbacks and re-trigger the main data-loading effect.
+  const rallyeId = rallye?.id;
+  const teamId = team?.id;
+
   useEffect(() => {
     tRef.current = t;
   }, [t]);
 
   const loadAnswers = useCallback(async () => {
-    if (!rallye?.id) return;
+    if (!rallyeId) return;
     try {
       const { data: joinData, error: joinError } = await supabase
         .from('join_rallye_questions')
         .select('question_id')
-        .eq('rallye_id', rallye.id);
+        .eq('rallye_id', rallyeId);
       if (joinError) throw joinError;
       const questionIds = (joinData || []).map((row: any) => row.question_id);
       const { data: answers, error: answerError } = await supabase
@@ -71,16 +77,16 @@ const RallyeIndex = observer(function RallyeIndex() {
     } catch (error) {
       console.error('Error fetching rallye answers:', error);
     }
-  }, [rallye]);
+  }, [rallyeId]);
 
   const loadQuestions = useCallback(async () => {
-    if (!rallye) return;
+    if (!rallyeId) return;
     setLoading(true);
     try {
       const { data: joinData, error: joinError } = await supabase
         .from('join_rallye_questions')
         .select('question_id')
-        .eq('rallye_id', rallye.id);
+        .eq('rallye_id', rallyeId);
       if (joinError) throw joinError;
 
       const questionIds = (joinData || []).map((row: any) => row.question_id);
@@ -95,11 +101,11 @@ const RallyeIndex = observer(function RallyeIndex() {
 
       // already answered for team mode
       let answeredIds: number[] = [];
-      if (!isTourMode && team) {
+      if (!isTourMode && teamId) {
         const { data: answeredData, error: answeredError } = await supabase
           .from('team_questions')
           .select('question_id')
-          .eq('team_id', team.id);
+          .eq('team_id', teamId);
         if (answeredError) throw answeredError;
         answeredIds = (answeredData || []).map((row: any) => row.question_id);
       }
@@ -142,10 +148,10 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  }, [isTourMode, rallye, team]);
+  }, [isTourMode, rallyeId, teamId]);
 
   const refreshStatus = useCallback(async () => {
-    if (!rallye) return;
+    if (!rallyeId) return;
     setLoading(true);
     // slight delay to avoid flicker
     await new Promise((r) => setTimeout(r, 600));
@@ -153,7 +159,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       const { data, error } = await supabase
         .from('rallye')
         .select('status, end_time, name')
-        .eq('id', rallye.id)
+        .eq('id', rallyeId)
         .single();
       if (error) throw error;
       if (data) {
@@ -166,17 +172,17 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  }, [rallye]);
+  }, [rallyeId]);
 
   useEffect(() => {
-    if (!rallye) return;
+    if (!rallyeId) return;
     (async () => {
       await loadQuestions();
       await loadAnswers();
       // Ensure we refresh dynamic rallye fields like name/status
       await refreshStatus();
     })();
-  }, [loadAnswers, loadQuestions, rallye, refreshStatus]);
+  }, [loadAnswers, loadQuestions, rallyeId, refreshStatus]);
 
   const onRefresh = async () => {
     const net = await NetInfo.fetch();
