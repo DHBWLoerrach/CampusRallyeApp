@@ -93,6 +93,14 @@ export default function Welcome() {
     : Colors.lightMode.background;
   const compactCardStyle = globalStyles.welcomeStyles.compactCard;
   const organizationCardStyle = globalStyles.welcomeStyles.organizationCard;
+  const dashboardCardStyle = [
+    compactCardStyle,
+    {
+      minHeight: 0,
+      marginVertical: 6,
+      paddingVertical: 12,
+    },
+  ];
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
 
@@ -460,7 +468,7 @@ export default function Welcome() {
     >
       {resumeAvailable && resumeRallye && resumeTeam && (
         <Card
-          containerStyle={compactCardStyle}
+          containerStyle={dashboardCardStyle}
           title={t('welcome.resume.title')}
           description={t('welcome.resume.details', {
             rallye: resumeRallye.name,
@@ -505,9 +513,8 @@ export default function Welcome() {
 
       {dashboardData.tourModeRallye && (
         <Card
-          containerStyle={compactCardStyle}
+          containerStyle={dashboardCardStyle}
           title={t('welcome.explore.title')}
-          description={t('welcome.explore.description')}
           icon="binoculars"
         >
           <UIButton outline onPress={() => void handleTourModeSubmit()}>
@@ -518,15 +525,14 @@ export default function Welcome() {
 
       {dashboardData.campusEventsRallyes.length > 0 && (
         <Card
-          containerStyle={compactCardStyle}
+          containerStyle={dashboardCardStyle}
           title={t('welcome.campusEvents.title')}
-          description={t('welcome.campusEvents.description')}
           icon="party.popper"
         >
           {dashboardData.campusEventsRallyes.map((rallye, index) => (
             <View
               key={rallye.id}
-              style={index > 0 ? { marginTop: 10 } : undefined}
+              style={index > 0 ? { marginTop: 8 } : undefined}
             >
               <UIButton
                 disabled={joining}
@@ -543,15 +549,17 @@ export default function Welcome() {
 
       {dashboardData.departmentEntries.length > 0 && (
         <>
-          <ThemedText
-            variant="bodySmall"
-            style={[
-              s.text,
-              { textAlign: 'left', width: '100%', marginBottom: 8 },
-            ]}
-          >
-            {t('welcome.selectDepartment.description')}
-          </ThemedText>
+          {dashboardData.departmentEntries.length > 1 && (
+            <ThemedText
+              variant="bodySmall"
+              style={[
+                s.text,
+                { textAlign: 'left', width: '100%', marginBottom: 8 },
+              ]}
+            >
+              {t('welcome.selectDepartment.description')}
+            </ThemedText>
+          )}
           {dashboardData.departmentEntries.map((entry) => {
             const rallyes = entry.rallyes;
             const multipleRallyes = rallyes.length > 1;
@@ -560,13 +568,8 @@ export default function Welcome() {
             return (
               <Card
                 key={entry.department.id}
-                containerStyle={compactCardStyle}
+                containerStyle={dashboardCardStyle}
                 title={entry.department.name}
-                description={
-                  multipleRallyes
-                    ? t('welcome.join.count', { count: rallyes.length })
-                    : rallyes[0]?.name ?? t('welcome.join.description')
-                }
                 icon="graduationcap"
               >
                 {!multipleRallyes && rallyes[0] && (

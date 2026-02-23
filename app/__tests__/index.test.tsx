@@ -208,7 +208,7 @@ describe('Welcome', () => {
       expect(getByText('welcome.explore.title')).toBeTruthy();
     });
 
-    expect(getByText('welcome.explore.description')).toBeTruthy();
+    expect(queryByText('welcome.explore.description')).toBeNull();
     expect(queryByText('welcome.noContent')).toBeNull();
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
@@ -232,12 +232,13 @@ describe('Welcome', () => {
     });
     mockedSetCurrentRallye.mockResolvedValue();
 
-    const { getByText } = render(<Welcome />);
+    const { getByText, queryByText } = render(<Welcome />);
 
     await waitFor(() => {
       expect(getByText('welcome.campusEvents.title')).toBeTruthy();
       expect(getByText(campusRallye.name)).toBeTruthy();
     });
+    expect(queryByText('welcome.campusEvents.description')).toBeNull();
 
     await act(async () => {
       fireEvent.press(getByText(campusRallye.name));
@@ -269,10 +270,12 @@ describe('Welcome', () => {
     mockedGetCurrentTeam.mockResolvedValue(existingTeam);
     mockedTeamExists.mockResolvedValue('unknown');
 
-    const { getByText } = render(<Welcome />);
+    const { getByText, queryByText } = render(<Welcome />);
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
+    expect(queryByText('Department Rallye')).toBeNull();
+    expect(queryByText('welcome.selectDepartment.description')).toBeNull();
 
     await act(async () => {
       fireEvent.press(getByText('rallye.join'));
@@ -346,6 +349,7 @@ describe('Welcome', () => {
       expect(getAllByText('welcome.join.select').length).toBeGreaterThan(0);
     });
 
+    expect(queryByText('welcome.join.count')).toBeNull();
     expect(queryByText('Rallye A')).toBeNull();
     expect(queryByText('Rallye B')).toBeNull();
 
@@ -356,5 +360,47 @@ describe('Welcome', () => {
 
     expect(getByText('Rallye A')).toBeTruthy();
     expect(getByText('Rallye B')).toBeTruthy();
+  });
+
+  it('shows department section label when multiple departments are available', async () => {
+    const rallyeA: Rallye = {
+      id: 9,
+      name: 'Rallye A',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const secondDepartment = {
+      id: 2,
+      name: 'Second Dept',
+      organization_id: 1,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const rallyeB: Rallye = {
+      id: 10,
+      name: 'Rallye B',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetOrganizationDashboardData.mockResolvedValue({
+      tourModeRallye: null,
+      campusEventsRallyes: [],
+      departmentEntries: [
+        { department: mockDepartment, rallyes: [rallyeA] },
+        { department: secondDepartment, rallyes: [rallyeB] },
+      ],
+    });
+
+    const { getByText } = render(<Welcome />);
+    await waitFor(() => {
+      expect(getByText('welcome.selectDepartment.description')).toBeTruthy();
+    });
   });
 });

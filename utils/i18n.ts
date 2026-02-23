@@ -39,7 +39,6 @@ export const translations = {
       'Wähle eine Rallye und tritt mit deinem Team bei',
     'welcome.join.select': 'Rallye auswählen',
     'welcome.join.hide': 'Auswahl schließen',
-    'welcome.join.count': '{{count}} aktive Rallyes',
     'welcome.explore.title': 'Campus-Gelände erkunden',
     'welcome.explore.description':
       'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck',
@@ -59,7 +58,6 @@ export const translations = {
     'welcome.selectDepartment.description': 'Studiengang-Rallyes',
     'welcome.noContent': 'Derzeit sind keine aktiven Rallyes für diesen Standort verfügbar.',
     'welcome.campusEvents.title': 'Campus-Events',
-    'welcome.campusEvents.description': 'Rallyes für campusweite Events',
     'welcome.departmentLoadError': 'Standortinhalte konnten nicht geladen werden.',
     'rallye.status.preparing': 'Noch nicht gestartet',
     'rallye.status.inactive': 'Inaktiv',
@@ -199,7 +197,6 @@ export const translations = {
       'Select a rallye and join with your team',
     'welcome.join.select': 'Select rallye',
     'welcome.join.hide': 'Close selection',
-    'welcome.join.count': '{{count}} active rallyes',
     'welcome.explore.title': 'Explore Campus',
     'welcome.explore.description':
       'Explore the campus at your own pace without time pressure',
@@ -218,7 +215,6 @@ export const translations = {
     'welcome.selectDepartment.description': 'Department rallyes',
     'welcome.noContent': 'No active rallyes are currently available for this location.',
     'welcome.campusEvents.title': 'Campus Events',
-    'welcome.campusEvents.description': 'Rallyes for campus-wide events',
     'welcome.departmentLoadError': 'Location content could not be loaded.',
     'rallye.status.preparing': 'Not started',
     'rallye.status.inactive': 'Inactive',
