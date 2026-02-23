@@ -54,20 +54,61 @@ const RallyeIndex = observer(function RallyeIndex() {
   // callbacks and re-trigger the main data-loading effect.
   const rallyeId = rallye?.id;
   const teamId = team?.id;
+  const questionIdsCacheRef = useRef<{
+    rallyeId: number;
+    ids: number[];
+  } | null>(null);
+  const questionIdsPromiseRef = useRef<{
+    rallyeId: number;
+    promise: Promise<number[]>;
+  } | null>(null);
 
   useEffect(() => {
     tRef.current = t;
   }, [t]);
 
-  const loadAnswers = useCallback(async () => {
-    if (!rallyeId) return;
-    try {
+  const getQuestionIds = useCallback(async (): Promise<number[]> => {
+    if (!rallyeId) return [];
+
+    if (questionIdsCacheRef.current?.rallyeId === rallyeId) {
+      return questionIdsCacheRef.current.ids;
+    }
+
+    if (questionIdsPromiseRef.current?.rallyeId === rallyeId) {
+      return questionIdsPromiseRef.current.promise;
+    }
+
+    const promise = (async () => {
       const { data: joinData, error: joinError } = await supabase
         .from('join_rallye_questions')
         .select('question_id')
         .eq('rallye_id', rallyeId);
       if (joinError) throw joinError;
-      const questionIds = (joinData || []).map((row: any) => row.question_id);
+
+      const ids = (joinData || []).map((row: any) => row.question_id);
+      questionIdsCacheRef.current = { rallyeId, ids };
+      return ids;
+    })();
+
+    questionIdsPromiseRef.current = { rallyeId, promise };
+
+    try {
+      return await promise;
+    } finally {
+      if (questionIdsPromiseRef.current?.rallyeId === rallyeId) {
+        questionIdsPromiseRef.current = null;
+      }
+    }
+  }, [rallyeId]);
+
+  const loadAnswers = useCallback(async () => {
+    if (!rallyeId) return;
+    try {
+      const questionIds = await getQuestionIds();
+      if (questionIds.length === 0) {
+        store$.answers.set([]);
+        return;
+      }
       const { data: answers, error: answerError } = await supabase
         .from('answers')
         .select('*')
@@ -77,19 +118,13 @@ const RallyeIndex = observer(function RallyeIndex() {
     } catch (error) {
       console.error('Error fetching rallye answers:', error);
     }
-  }, [rallyeId]);
+  }, [getQuestionIds, rallyeId]);
 
   const loadQuestions = useCallback(async () => {
     if (!rallyeId) return;
     setLoading(true);
     try {
-      const { data: joinData, error: joinError } = await supabase
-        .from('join_rallye_questions')
-        .select('question_id')
-        .eq('rallye_id', rallyeId);
-      if (joinError) throw joinError;
-
-      const questionIds = (joinData || []).map((row: any) => row.question_id);
+      const questionIds = await getQuestionIds();
       // Track total number of questions for progress display
       store$.totalQuestions.set(questionIds.length);
       if (questionIds.length === 0) {
@@ -148,7 +183,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     } finally {
       setLoading(false);
     }
-  }, [isTourMode, rallyeId, teamId]);
+  }, [getQuestionIds, isTourMode, rallyeId, teamId]);
 
   const refreshStatus = useCallback(async () => {
     if (!rallyeId) return;

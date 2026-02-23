@@ -202,12 +202,13 @@ describe('RallyeIndex effects', () => {
     mockTeam = null;
   });
 
-  it('does not re-fetch answers or rallye status when team id changes', async () => {
+  it('reuses cached question ids and does not re-fetch answers/status on team change', async () => {
     const { rerender } = render(<RallyeIndex />);
 
     await waitFor(() => {
       expect(tableCallCount('answers')).toBeGreaterThan(0);
       expect(tableCallCount('rallye')).toBeGreaterThan(0);
+      expect(tableCallCount('join_rallye_questions')).toBe(1);
     });
 
     const answersCallsAfterMount = tableCallCount('answers');
@@ -223,7 +224,7 @@ describe('RallyeIndex effects', () => {
 
     expect(tableCallCount('answers')).toBe(answersCallsAfterMount);
     expect(tableCallCount('rallye')).toBe(rallyeCallsAfterMount);
-    expect(tableCallCount('join_rallye_questions')).toBeGreaterThan(
+    expect(tableCallCount('join_rallye_questions')).toBe(
       questionJoinCallsAfterMount
     );
   });
