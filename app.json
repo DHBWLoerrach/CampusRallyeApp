@@ -45,7 +45,11 @@
         "monochromeImage": "./assets/images/monochrome-icon.png"
       },
       "edgeToEdgeEnabled": true,
-      "package": "de.dhbwloe.loerrach.CampusRallyeApp"
+      "package": "de.dhbwloe.loerrach.CampusRallyeApp",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -69,7 +73,15 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to access your location to navigate to geocaching targets.",
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to access your location to navigate to geocaching targets."
+        }
+      ],
+      "expo-sensors"
     ],
     "experiments": {
       "typedRoutes": true
