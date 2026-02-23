@@ -77,6 +77,8 @@ export const store$ = observable({
       timeExpired: store$.timeExpired.get(),
     }),
 
+  isTourMode: () => store$.rallye.get()?.mode === 'tour',
+
   currentQuestion: () =>
     store$.questions.get()[store$.questionIndex.get()],
 
