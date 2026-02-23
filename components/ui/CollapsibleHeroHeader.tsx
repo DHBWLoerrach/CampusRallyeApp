@@ -26,8 +26,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // Responsive header dimensions based on screen size
 const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
-const HEADER_MAX_HEIGHT = SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.22 : 0.28);
-const HEADER_MIN_HEIGHT = IS_SMALL_SCREEN ? 80 : 100;
+const HEADER_MAX_HEIGHT = SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.2 : 0.24);
+const HEADER_MIN_HEIGHT = IS_SMALL_SCREEN ? 76 : 92;
 const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 type CollapsibleHeroHeaderProps = {
@@ -69,6 +69,9 @@ export function CollapsibleHeroHeader({
   const scrollY = useSharedValue(0);
 
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const gradientColors = isDarkMode
+    ? (['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.82)'] as const)
+    : (['rgba(0,0,0,0.03)', 'rgba(0,0,0,0.72)'] as const);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -117,7 +120,7 @@ export function CollapsibleHeroHeader({
     const translateY = interpolate(
       scrollY.value,
       [0, HEADER_SCROLL_DISTANCE],
-      [0, -20],
+      [0, -16],
       Extrapolation.CLAMP
     );
     return { opacity, transform: [{ translateY }] };
@@ -145,9 +148,9 @@ export function CollapsibleHeroHeader({
 
         {/* Gradient Overlay */}
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.7)']}
+          colors={gradientColors}
           style={styles.gradient}
-          locations={[0.3, 1]}
+          locations={[0.25, 1]}
         />
 
         {/* Language Toggle */}
@@ -189,7 +192,7 @@ export function CollapsibleHeroHeader({
         <Animated.View
           style={[
             styles.titleContainer,
-            { paddingBottom: 16, paddingHorizontal: 16 },
+            { paddingBottom: 14, paddingHorizontal: 14 },
             titleAnimatedStyle,
           ]}
         >
@@ -255,22 +258,22 @@ const styles = StyleSheet.create({
     left: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    borderRadius: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    gap: 5,
   },
   backButton: {
     position: 'absolute',
     right: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    borderRadius: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    gap: 5,
   },
   languageText: {
     color: '#FFFFFF',
@@ -289,7 +292,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     color: '#FFFFFF',
-    fontSize: IS_SMALL_SCREEN ? 16 : 18,
+    fontSize: IS_SMALL_SCREEN ? 15 : 17,
     fontWeight: '700',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
@@ -310,8 +313,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    marginTop: -20, // Overlap the header slightly
-    paddingTop: IS_SMALL_SCREEN ? 16 : 24,
+    marginTop: -16, // Overlap the header slightly
+    paddingTop: IS_SMALL_SCREEN ? 14 : 20,
     paddingHorizontal: IS_SMALL_SCREEN ? 12 : 16,
     minHeight: SCREEN_HEIGHT - HEADER_MIN_HEIGHT,
   },

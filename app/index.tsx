@@ -546,7 +546,7 @@ export default function Welcome() {
           <ThemedText
             variant="bodySmall"
             style={[
-              s.muted,
+              s.text,
               { textAlign: 'left', width: '100%', marginBottom: 8 },
             ]}
           >
@@ -564,7 +564,7 @@ export default function Welcome() {
                 title={entry.department.name}
                 description={
                   multipleRallyes
-                    ? t('welcome.join.select')
+                    ? t('welcome.join.count', { count: rallyes.length })
                     : rallyes[0]?.name ?? t('welcome.join.description')
                 }
                 icon="graduationcap"
@@ -589,7 +589,7 @@ export default function Welcome() {
                         toggleDepartmentExpansion(entry.department.id)
                       }
                     >
-                      {expanded ? t('common.cancel') : t('welcome.join.select')}
+                      {expanded ? t('welcome.join.hide') : t('welcome.join.select')}
                     </UIButton>
                     {expanded && (
                       <View style={{ marginTop: 10 }}>

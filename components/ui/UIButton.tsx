@@ -68,8 +68,8 @@ export default function UIButton({
     textColor = accentColor;
   } else if (resolvedVariant === 'outline') {
     backgroundColor = 'transparent';
-    textColor = Colors.dhbwGray;
-    borderColor = Colors.dhbwGray;
+    textColor = accentColor;
+    borderColor = accentColor;
   }
   const contentColor = textColor;
 
