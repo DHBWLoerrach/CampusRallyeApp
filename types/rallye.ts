@@ -52,14 +52,22 @@ export interface Department {
   created_at: string;
 }
 
-export interface Rallye {
+export interface RallyeDbRow {
   id: number;
   name: string;
   status: RallyeStatus;
-  password: string;
-  mode: RallyeMode;
+  password: string | null;
   end_time: string | null;
   created_at: string;
+}
+
+export type RallyeStorageRow = Pick<
+  RallyeDbRow,
+  'id' | 'name' | 'status' | 'password' | 'end_time'
+>;
+
+export interface Rallye extends RallyeDbRow {
+  mode: RallyeMode;
 }
 
 export interface Team {

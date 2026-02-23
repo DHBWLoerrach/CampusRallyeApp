@@ -9,21 +9,16 @@ import {
   Organization,
   Department,
   Rallye,
+  RallyeDbRow,
+  RallyeStorageRow,
   RallyeMode,
   RallyeStatus,
 } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
-export type RallyeRow = {
-  id: number;
-  name: string;
-  password?: string | null;
-  status: RallyeStatus;
-  mode: RallyeMode;
-  end_time?: string | null;
-};
+export type RallyeRow = RallyeStorageRow & { mode: RallyeMode };
 
-function withMode<T extends object>(rallye: T, mode: RallyeMode): T & {
+function withMode<T extends RallyeStorageRow>(rallye: T, mode: RallyeMode): T & {
   mode: RallyeMode;
 } {
   return { ...rallye, mode };
@@ -318,7 +313,7 @@ export async function getRallyesForDepartment(deptId: number): Promise<Rallye[]>
 
   Logger.debug('RallyeStorage', `Active rallyes for dept ${deptId}:`, activeRallyes);
 
-  return activeRallyes.map((r: any) => withMode(r, 'department')) as Rallye[];
+  return activeRallyes.map((r: RallyeDbRow) => withMode(r, 'department')) as Rallye[];
 }
 
 /**
@@ -395,5 +390,5 @@ export async function getTourModeRallyeForOrganization(orgId: number): Promise<R
     return null;
   }
 
-  return withMode(rallye, 'tour') as Rallye;
+  return withMode(rallye as RallyeDbRow, 'tour') as Rallye;
 }
