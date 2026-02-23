@@ -101,6 +101,20 @@ export default function Welcome() {
       paddingVertical: 12,
     },
   ];
+  const departmentCardStyle = [dashboardCardStyle, { marginVertical: 4 }];
+  const departmentSectionStyle = {
+    width: '100%' as const,
+    borderWidth: 1,
+    borderColor: palette.borderSubtle,
+    borderRadius: 18,
+    paddingHorizontal: 6,
+    paddingTop: 10,
+    paddingBottom: 4,
+    marginBottom: 4,
+    backgroundColor: isDarkMode
+      ? 'rgba(255,255,255,0.01)'
+      : 'rgba(255,255,255,0.55)',
+  };
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
 
@@ -512,13 +526,18 @@ export default function Welcome() {
       )}
 
       {dashboardData.departmentEntries.length > 0 && (
-        <>
+        <View style={departmentSectionStyle}>
           {dashboardData.departmentEntries.length > 1 && (
             <ThemedText
               variant="bodySmall"
               style={[
                 s.text,
-                { textAlign: 'left', width: '100%', marginBottom: 8 },
+                {
+                  textAlign: 'left',
+                  width: '100%',
+                  marginBottom: 4,
+                  paddingHorizontal: 6,
+                },
               ]}
             >
               {t('welcome.selectDepartment.description')}
@@ -532,7 +551,7 @@ export default function Welcome() {
             return (
               <Card
                 key={entry.department.id}
-                containerStyle={dashboardCardStyle}
+                containerStyle={departmentCardStyle}
                 title={entry.department.name}
                 icon="graduationcap"
               >
@@ -582,7 +601,7 @@ export default function Welcome() {
               </Card>
             );
           })}
-        </>
+        </View>
       )}
 
       {dashboardData.campusEventsRallyes.length > 0 && (
