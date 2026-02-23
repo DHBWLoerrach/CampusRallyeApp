@@ -117,6 +117,11 @@ export default function Welcome() {
   };
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
+  const closeSelectionButtonStyle = [
+    ctaButtonStyle,
+    { backgroundColor: palette.surface1 },
+  ];
+  const closeSelectionButtonTextStyle = { color: palette.textMuted };
 
   const applyDashboardData = useCallback((nextData: OrganizationDashboardData) => {
     setDashboardData(nextData);
@@ -569,10 +574,17 @@ export default function Welcome() {
                 {multipleRallyes && (
                   <>
                     <UIButton
-                      outline
                       disabled={joining}
                       onPress={() =>
                         toggleDepartmentExpansion(entry.department.id)
+                      }
+                      style={
+                        expanded ? closeSelectionButtonStyle : ctaButtonStyle
+                      }
+                      textStyle={
+                        expanded
+                          ? closeSelectionButtonTextStyle
+                          : ctaButtonTextStyle
                       }
                     >
                       {expanded ? t('welcome.join.hide') : t('welcome.join.select')}
@@ -634,7 +646,11 @@ export default function Welcome() {
           title={t('welcome.explore.title')}
           icon="binoculars"
         >
-          <UIButton outline onPress={() => void handleTourModeSubmit()}>
+          <UIButton
+            onPress={() => void handleTourModeSubmit()}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {t('welcome.explore.start')}
           </UIButton>
         </Card>
