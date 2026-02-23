@@ -163,6 +163,7 @@ export const translations = {
     'geocaching.error.noCoordinates': 'Für diese Frage sind keine Zielkoordinaten hinterlegt.',
     'geocaching.error.locationDenied': 'Standortzugriff wurde verweigert. Dieser Fragetyp benötigt GPS.',
     'geocaching.retryPermission': 'Standort erneut anfragen',
+    'geocaching.skipCalibration': 'Überspringen',
   },
   en: {
     'common.ok': 'OK',
@@ -324,6 +325,7 @@ export const translations = {
     'geocaching.error.noCoordinates': 'No target coordinates are set for this question.',
     'geocaching.error.locationDenied': 'Location access was denied. This question type requires GPS.',
     'geocaching.retryPermission': 'Request location again',
+    'geocaching.skipCalibration': 'Skip',
   },
 } as const;
 

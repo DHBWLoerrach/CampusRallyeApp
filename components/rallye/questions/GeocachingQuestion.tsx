@@ -9,7 +9,11 @@ import {
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import * as Location from 'expo-location';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -36,7 +40,10 @@ import VStack from '@/components/ui/VStack';
 // -- Constants ---------------------------------------------------------------
 
 /** Minimum compass accuracy (0–3) to consider heading reliable. */
-const MIN_HEADING_ACCURACY = 2;
+const MIN_HEADING_ACCURACY = 1;
+
+/** Seconds before calibration is auto-skipped. */
+const CALIBRATION_TIMEOUT_S = 8;
 
 /** Spring config for smooth arrow rotation. */
 const ARROW_SPRING = {
@@ -65,6 +72,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const [distance, setDistance] = useState<number | null>(null);
   const [headingAccuracy, setHeadingAccuracy] = useState(0);
   const [locationDenied, setLocationDenied] = useState(false);
+  const [calibrationSkipped, setCalibrationSkipped] = useState(false);
 
   // Answer state (for text input mode)
   const [answer, setAnswer] = useState('');
@@ -77,6 +85,11 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   // Reanimated shared value for arrow rotation (degrees)
   const arrowRotation = useSharedValue(0);
+
+  // Animated figure-8 illustration values
+  const fig8X = useSharedValue(0);
+  const fig8Y = useSharedValue(0);
+  const fig8Rotate = useSharedValue(0);
 
   // Refs for subscriptions
   const positionSubRef = useRef<Location.LocationSubscription | null>(null);
@@ -181,6 +194,67 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       headingSubRef.current?.remove();
     };
   }, [phase, startTracking]);
+
+  // Auto-skip calibration after timeout
+  useEffect(() => {
+    if (calibrationSkipped) return;
+    if (headingAccuracy >= MIN_HEADING_ACCURACY) return;
+
+    const timer = setTimeout(() => {
+      setCalibrationSkipped(true);
+    }, CALIBRATION_TIMEOUT_S * 1_000);
+
+    return () => clearTimeout(timer);
+  }, [calibrationSkipped, headingAccuracy]);
+
+  // Animate figure-8 path for calibration illustration
+  useEffect(() => {
+    const showCalibration =
+      headingAccuracy < MIN_HEADING_ACCURACY && !calibrationSkipped;
+    if (!showCalibration) return;
+
+    // Horizontal: smooth oscillation
+    fig8X.value = withRepeat(
+      withSequence(
+        withTiming(30, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(-30, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(30, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+      ),
+      -1,
+      false,
+    );
+    // Vertical: figure-8 cross pattern
+    fig8Y.value = withRepeat(
+      withSequence(
+        withTiming(-20, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+        withTiming(20, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(-20, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+      ),
+      -1,
+      false,
+    );
+    // Gentle tilt rotation
+    fig8Rotate.value = withRepeat(
+      withSequence(
+        withTiming(15, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(-15, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(15, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+      ),
+      -1,
+      false,
+    );
+  }, [calibrationSkipped, fig8Rotate, fig8X, fig8Y, headingAccuracy]);
+
+  const fig8Style = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: fig8X.value },
+      { translateY: fig8Y.value },
+      { rotateZ: `${fig8Rotate.value}deg` },
+    ],
+  }));
 
   // -- Answer submission (text) -----------------------------------------------
 
@@ -349,7 +423,8 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // -- Render: navigation phase -----------------------------------------------
 
   if (phase === 'navigating') {
-    const showCalibration = headingAccuracy < MIN_HEADING_ACCURACY;
+    const showCalibration =
+      headingAccuracy < MIN_HEADING_ACCURACY && !calibrationSkipped;
 
     return (
       <ThemedView
@@ -375,12 +450,25 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
           <InfoBox mb={0} style={styles.arrowContainer}>
             {showCalibration ? (
               <View style={styles.calibrationOverlay}>
+                {/* Animated phone doing figure-8 */}
+                <Animated.View style={[styles.fig8Phone, fig8Style]}>
+                  <ThemedText style={styles.fig8PhoneIcon}>📱</ThemedText>
+                </Animated.View>
+                {/* Figure-8 path indicator */}
+                <ThemedText style={styles.fig8Path}>∞</ThemedText>
                 <ThemedText
                   variant="body"
-                  style={[s.text, { textAlign: 'center' }]}
+                  style={[s.text, { textAlign: 'center', marginTop: 12 }]}
                 >
                   {t('geocaching.calibrate')}
                 </ThemedText>
+                <UIButton
+                  color={Colors.dhbwGray}
+                  onPress={() => setCalibrationSkipped(true)}
+                  style={{ marginTop: 16 }}
+                >
+                  {t('geocaching.skipCalibration')}
+                </UIButton>
               </View>
             ) : (
               <Animated.View style={[styles.arrowWrapper, arrowStyle]}>
@@ -593,6 +681,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
+  },
+  fig8Phone: {
+    marginBottom: 8,
+  },
+  fig8PhoneIcon: {
+    fontSize: 48,
+    textAlign: 'center',
+  },
+  fig8Path: {
+    fontSize: 60,
+    color: '#BBBBBB',
+    textAlign: 'center',
+    marginTop: -20,
   },
   arrivedBadge: {
     fontSize: 16,
