@@ -35,6 +35,10 @@ export async function getCurrentRallye(): Promise<RallyeRow | null> {
   )) as Partial<RallyeRow> | null;
   if (!stored) return null;
   if (stored.mode !== 'tour' && stored.mode !== 'department') {
+    Logger.warn('RallyeStorage', 'Discarding stored rallye with invalid mode', {
+      storedMode: stored.mode,
+      id: stored.id,
+    });
     await removeStorageItem(StorageKeys.CURRENT_RALLYE);
     return null;
   }
