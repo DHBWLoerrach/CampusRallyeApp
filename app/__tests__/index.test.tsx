@@ -15,6 +15,8 @@ import {
 import { store$ } from '@/services/storage/Store';
 import type { Rallye } from '@/types/rallye';
 
+let mockPasswordSheetProps: any;
+
 jest.mock('@/components/ui/CollapsibleHeroHeader', () => {
   const { View } = jest.requireActual('react-native');
   const CollapsibleHeroHeader = ({ children }: { children: any }) => (
@@ -31,7 +33,10 @@ jest.mock('@/components/ui/RallyePasswordSheet', () => ({
   __esModule: true,
   isPasswordRequired: (rallye: { password?: string | null } | null | undefined) =>
     !!(rallye?.password ?? '').trim().length,
-  default: () => null,
+  default: (props: any) => {
+    mockPasswordSheetProps = props;
+    return null;
+  },
 }));
 
 jest.mock('@/components/ui/SelectionModal', () => ({
@@ -166,6 +171,7 @@ describe('Welcome', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPasswordSheetProps = null;
 
     mockedGetSelectedOrganization.mockResolvedValue(null);
     mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
@@ -274,5 +280,81 @@ describe('Welcome', () => {
 
     expect(mockedClearCurrentTeam).not.toHaveBeenCalled();
     expect(store$.team.set).toHaveBeenLastCalledWith(existingTeam);
+  });
+
+  it('opens password sheet for department rallye with password', async () => {
+    const passwordRallye: Rallye = {
+      id: 6,
+      name: 'Protected Rallye',
+      status: 'running',
+      password: 'secret',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetOrganizationDashboardData.mockResolvedValue({
+      tourModeRallye: null,
+      campusEventsRallyes: [],
+      departmentEntries: [{ department: mockDepartment, rallyes: [passwordRallye] }],
+    });
+
+    const { getByText } = render(<Welcome />);
+    await waitFor(() => {
+      expect(getByText('rallye.join')).toBeTruthy();
+    });
+
+    await act(async () => {
+      fireEvent.press(getByText('rallye.join'));
+    });
+
+    expect(mockPasswordSheetProps.visible).toBe(true);
+    expect(mockPasswordSheetProps.rallye).toEqual(passwordRallye);
+    expect(mockedSetCurrentRallye).not.toHaveBeenCalled();
+  });
+
+  it('expands department card when multiple rallyes are available', async () => {
+    const rallyeA: Rallye = {
+      id: 7,
+      name: 'Rallye A',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const rallyeB: Rallye = {
+      id: 8,
+      name: 'Rallye B',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetOrganizationDashboardData.mockResolvedValue({
+      tourModeRallye: null,
+      campusEventsRallyes: [],
+      departmentEntries: [{ department: mockDepartment, rallyes: [rallyeA, rallyeB] }],
+    });
+
+    const { getAllByText, queryByText, getByText } = render(<Welcome />);
+    await waitFor(() => {
+      expect(getAllByText('welcome.join.select').length).toBeGreaterThan(0);
+    });
+
+    expect(queryByText('Rallye A')).toBeNull();
+    expect(queryByText('Rallye B')).toBeNull();
+
+    await act(async () => {
+      const selectableItems = getAllByText('welcome.join.select');
+      fireEvent.press(selectableItems[selectableItems.length - 1]);
+    });
+
+    expect(getByText('Rallye A')).toBeTruthy();
+    expect(getByText('Rallye B')).toBeTruthy();
   });
 });
