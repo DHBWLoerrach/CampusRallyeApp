@@ -47,6 +47,7 @@ import { Logger } from '@/utils/Logger';
 
 // Types for selection phases
 type SelectionStep = 'organization' | 'department' | 'rallye';
+type RallyeModalContext = 'default' | 'campusEvents';
 
 export default function Welcome() {
   const { isDarkMode } = useTheme();
@@ -76,6 +77,8 @@ export default function Welcome() {
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [showDeptModal, setShowDeptModal] = useState(false);
   const [activeRallyes, setActiveRallyes] = useState<Rallye[]>([]);
+  const [rallyeModalContext, setRallyeModalContext] =
+    useState<RallyeModalContext>('default');
 
   // Auto-Refresh refs
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -369,15 +372,13 @@ export default function Welcome() {
   // Handler for Campus Events selection
   const handleCampusEventsSelect = async () => {
     if (!campusEventsDepartment) return;
-    
+
     setLoading(true);
     try {
-      setSelectedDepartment(campusEventsDepartment);
-      await storeSelectedDepartment(campusEventsDepartment);
-      
       const rallyes = await getRallyesForDepartment(campusEventsDepartment.id);
       setActiveRallyes(rallyes);
-      setSelectionStep('rallye');
+      setRallyeModalContext('campusEvents');
+      setShowRallyeModal(true);
     } catch (error) {
       Logger.error('Welcome', 'Error loading campus events rallyes', error);
       Alert.alert(t('common.errorTitle'), t('welcome.rallyeLoadError'));
@@ -675,7 +676,10 @@ export default function Welcome() {
         >
           <UIButton
             disabled={joining}
-            onPress={() => setShowRallyeModal(true)}
+            onPress={() => {
+              setRallyeModalContext('default');
+              setShowRallyeModal(true);
+            }}
             style={ctaButtonStyle}
             textStyle={ctaButtonTextStyle}
           >
@@ -746,10 +750,18 @@ export default function Welcome() {
 
       <RallyeSelectionModal
         visible={showRallyeModal}
-        onClose={() => setShowRallyeModal(false)}
+        onClose={() => {
+          setShowRallyeModal(false);
+          setRallyeModalContext('default');
+        }}
         activeRallyes={activeRallyes as RallyeRow[]}
         onJoin={joinRallye}
         joining={joining}
+        title={
+          rallyeModalContext === 'campusEvents'
+            ? t('welcome.campusEvents.modalTitle')
+            : undefined
+        }
       />
       <SelectionModal
         visible={showOrgModal}

@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { act, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import Welcome from '../index';
 import {
   setCurrentRallye,
@@ -10,6 +10,7 @@ import {
   getCampusEventsDepartment,
   getSelectedOrganization,
   getSelectedDepartment,
+  setSelectedDepartment,
 } from '@/services/storage/rallyeStorage';
 import {
   clearCurrentTeam,
@@ -72,7 +73,13 @@ jest.mock('@/components/ui/UIButton', () => {
   const { Text } = jest.requireActual('react-native');
   return {
     __esModule: true,
-    default: ({ children }: { children: ReactNode }) => <Text>{children}</Text>,
+    default: ({
+      children,
+      onPress,
+    }: {
+      children: ReactNode;
+      onPress?: () => void;
+    }) => <Text onPress={onPress}>{children}</Text>,
   };
 });
 
@@ -160,6 +167,9 @@ const mockedGetSelectedOrganization =
   getSelectedOrganization as jest.MockedFunction<typeof getSelectedOrganization>;
 const mockedGetSelectedDepartment =
   getSelectedDepartment as jest.MockedFunction<typeof getSelectedDepartment>;
+const mockedSetSelectedDepartment = setSelectedDepartment as jest.MockedFunction<
+  typeof setSelectedDepartment
+>;
 const mockedSetCurrentRallye = setCurrentRallye as jest.MockedFunction<
   typeof setCurrentRallye
 >;
@@ -223,6 +233,50 @@ describe('Welcome', () => {
     // When tour mode exists, we should see the explore card, not the noRallyes card
     expect(getByText('welcome.explore.description')).toBeTruthy();
     expect(queryByText('welcome.noRallyes.title')).toBeNull();
+    expect(queryByText('welcome.join.title')).toBeNull();
+  });
+
+  it('opens campus events modal directly without persisting selected department', async () => {
+    const campusEventsDepartment = {
+      id: 99,
+      name: 'Test Org',
+      organization_id: 1,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const campusRallye: Rallye = {
+      id: 11,
+      name: 'Campus Event Rallye',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetSelectedDepartment.mockResolvedValue(null);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
+    mockedGetDepartmentsForOrganization.mockResolvedValue([mockDepartment]);
+    mockedGetRallyesForDepartment.mockResolvedValue([campusRallye]);
+    mockedGetTourModeRallyeForOrganization.mockResolvedValue(null);
+    mockedGetCampusEventsDepartment.mockResolvedValue(campusEventsDepartment);
+
+    const { getByText, queryByText } = render(<Welcome />);
+    await waitFor(() => {
+      expect(getByText('welcome.campusEvents.button')).toBeTruthy();
+    });
+
+    await act(async () => {
+      fireEvent.press(getByText('welcome.campusEvents.button'));
+    });
+
+    await waitFor(() => {
+      expect(mockedGetRallyesForDepartment).toHaveBeenCalledWith(campusEventsDepartment.id);
+      expect(mockRallyeModalProps.visible).toBe(true);
+    });
+
+    expect(mockRallyeModalProps.title).toBe('welcome.campusEvents.modalTitle');
+    expect(mockedSetSelectedDepartment).not.toHaveBeenCalled();
     expect(queryByText('welcome.join.title')).toBeNull();
   });
 

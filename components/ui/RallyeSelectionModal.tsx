@@ -31,6 +31,7 @@ type Props = {
   activeRallyes: RallyeRow[];
   onJoin: (r: RallyeRow) => Promise<boolean>;
   joining?: boolean;
+  title?: string;
 };
 
 function isPasswordRequired(r: RallyeRow) {
@@ -43,6 +44,7 @@ export default function RallyeSelectionModal({
   activeRallyes,
   onJoin,
   joining = false,
+  title,
 }: Props) {
   const { t } = useLanguage();
   const { isDarkMode } = useTheme();
@@ -98,6 +100,7 @@ export default function RallyeSelectionModal({
     getSoftCtaButtonStyles(palette);
 
   const selectedRallyeName = passwordRallye?.name ?? '';
+  const modalTitle = title ?? t('rallye.modal.activeTitle');
 
   const handleSelect = async (rallye: RallyeRow) => {
     if (!isPasswordRequired(rallye)) {
@@ -246,7 +249,7 @@ export default function RallyeSelectionModal({
                 { color: headerTextColor },
               ]}
             >
-              {t('rallye.modal.activeTitle')}
+              {modalTitle}
             </Text>
             {activeRallyes.length > 0 ? (
               <FlatList
@@ -254,7 +257,7 @@ export default function RallyeSelectionModal({
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
                 accessibilityRole="list"
-                accessibilityLabel={t('rallye.modal.activeTitle')}
+                accessibilityLabel={modalTitle}
                 showsVerticalScrollIndicator={true}
                 fadingEdgeLength={50}
                 contentContainerStyle={{ paddingBottom: 4 }}
