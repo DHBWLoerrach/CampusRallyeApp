@@ -18,6 +18,17 @@ import { Logger } from '@/utils/Logger';
 
 export type RallyeRow = RallyeStorageRow & { mode: RallyeMode };
 
+export type OrganizationDepartmentEntry = {
+  department: Department;
+  rallyes: Rallye[];
+};
+
+export type OrganizationDashboardData = {
+  tourModeRallye: Rallye | null;
+  campusEventsRallyes: Rallye[];
+  departmentEntries: OrganizationDepartmentEntry[];
+};
+
 // Keep the constraint minimal: only fields required for persisted app usage.
 // Callers can pass richer DB rows; additional fields are preserved in the return type.
 function withMode<T extends RallyeStorageRow>(rallye: T, mode: RallyeMode): T & {
@@ -94,6 +105,147 @@ export async function getRallyeStatus(
     return null;
   }
   return data?.status ?? null;
+}
+
+function isActiveRallyeStatus(status: RallyeStatus | null | undefined): boolean {
+  return !!status && status !== 'inactive' && status !== 'ended';
+}
+
+export async function getOrganizationDashboardData(
+  orgId: number
+): Promise<OrganizationDashboardData> {
+  Logger.debug('RallyeStorage', `getOrganizationDashboardData called with orgId: ${orgId}`);
+
+  const [tourModeRallye, organizationResult, departmentsResult] = await Promise.all([
+    getTourModeRallyeForOrganization(orgId),
+    supabase.from('organization').select('id, name').eq('id', orgId).single(),
+    supabase.from('department').select('*').eq('organization_id', orgId),
+  ]);
+
+  const organization = organizationResult.data as Pick<Organization, 'id' | 'name'> | null;
+  if (organizationResult.error || !organization) {
+    Logger.error(
+      'RallyeStorage',
+      'Error fetching organization for dashboard data',
+      organizationResult.error
+    );
+    return {
+      tourModeRallye,
+      campusEventsRallyes: [],
+      departmentEntries: [],
+    };
+  }
+
+  if (departmentsResult.error) {
+    Logger.error(
+      'RallyeStorage',
+      'Error fetching departments for dashboard data',
+      departmentsResult.error
+    );
+    return {
+      tourModeRallye,
+      campusEventsRallyes: [],
+      departmentEntries: [],
+    };
+  }
+
+  const departments = (departmentsResult.data as Department[] | null) ?? [];
+  if (departments.length === 0) {
+    return {
+      tourModeRallye,
+      campusEventsRallyes: [],
+      departmentEntries: [],
+    };
+  }
+
+  const departmentIds = departments.map((department) => department.id);
+  const { data: joins, error: joinsError } = await supabase
+    .from('join_department_rallye')
+    .select('department_id, rallye_id')
+    .in('department_id', departmentIds);
+
+  if (joinsError) {
+    Logger.error('RallyeStorage', 'Error fetching department rallye joins', joinsError);
+    return {
+      tourModeRallye,
+      campusEventsRallyes: [],
+      departmentEntries: [],
+    };
+  }
+
+  if (!joins || joins.length === 0) {
+    return {
+      tourModeRallye,
+      campusEventsRallyes: [],
+      departmentEntries: [],
+    };
+  }
+
+  const rallyeIds = [
+    ...new Set(
+      joins
+        .map((join: any) => join.rallye_id)
+        .filter((rallyeId: unknown): rallyeId is number => typeof rallyeId === 'number')
+    ),
+  ];
+
+  if (rallyeIds.length === 0) {
+    return {
+      tourModeRallye,
+      campusEventsRallyes: [],
+      departmentEntries: [],
+    };
+  }
+
+  const { data: rallyeRows, error: rallyeError } = await supabase
+    .from('rallye')
+    .select('*')
+    .in('id', rallyeIds);
+
+  if (rallyeError) {
+    Logger.error('RallyeStorage', 'Error fetching rallyes for dashboard data', rallyeError);
+    return {
+      tourModeRallye,
+      campusEventsRallyes: [],
+      departmentEntries: [],
+    };
+  }
+
+  const activeRallyesById = new Map<number, Rallye>();
+  (rallyeRows as RallyeDbRow[] | null)?.forEach((rallye) => {
+    if (!isActiveRallyeStatus(rallye.status)) return;
+    activeRallyesById.set(rallye.id, withMode(rallye, 'department') as Rallye);
+  });
+
+  const rallyesByDepartment = new Map<number, Rallye[]>();
+  joins.forEach((join: any) => {
+    const rallye = activeRallyesById.get(join.rallye_id);
+    if (!rallye) return;
+    const current = rallyesByDepartment.get(join.department_id) ?? [];
+    current.push(rallye);
+    rallyesByDepartment.set(join.department_id, current);
+  });
+
+  const campusEventsDepartment =
+    departments.find((department) => department.name === organization.name) ?? null;
+
+  const campusEventsRallyes = campusEventsDepartment
+    ? rallyesByDepartment.get(campusEventsDepartment.id) ?? []
+    : [];
+
+  const departmentEntries = departments
+    .filter((department) => department.id !== campusEventsDepartment?.id)
+    .map((department) => ({
+      department,
+      rallyes: rallyesByDepartment.get(department.id) ?? [],
+    }))
+    .filter((entry) => entry.rallyes.length > 0);
+
+  return {
+    tourModeRallye,
+    campusEventsRallyes,
+    departmentEntries,
+  };
 }
 
 // --- Neue Funktionen für Mandantenfähigkeit ---
