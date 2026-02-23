@@ -530,7 +530,7 @@ export default function Welcome() {
             >
               <UIButton
                 disabled={joining}
-                onPress={() => void handleRallyePress(rallye as RallyeRow)}
+                onPress={() => void handleRallyePress(rallye)}
                 style={ctaButtonStyle}
                 textStyle={ctaButtonTextStyle}
               >
@@ -553,7 +553,7 @@ export default function Welcome() {
             {t('welcome.selectDepartment.description')}
           </ThemedText>
           {dashboardData.departmentEntries.map((entry) => {
-            const rallyes = entry.rallyes as RallyeRow[];
+            const rallyes = entry.rallyes;
             const multipleRallyes = rallyes.length > 1;
             const expanded = expandedDepartmentIds.includes(entry.department.id);
 

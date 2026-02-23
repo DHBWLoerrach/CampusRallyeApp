@@ -5,7 +5,6 @@ export const StorageKeys = {
   TEAM: 'team',
   OFFLINE_QUEUE: 'offlineQueue',
   SELECTED_ORGANIZATION: 'selectedOrganization',
-  SELECTED_DEPARTMENT: 'selectedDepartment',
 } as const;
 
 export async function getStorageItem<T = any>(key: string): Promise<T | null> {

@@ -20,13 +20,18 @@ export type RallyeRow = RallyeStorageRow & { mode: RallyeMode };
 
 export type OrganizationDepartmentEntry = {
   department: Department;
-  rallyes: Rallye[];
+  rallyes: RallyeRow[];
 };
 
 export type OrganizationDashboardData = {
-  tourModeRallye: Rallye | null;
-  campusEventsRallyes: Rallye[];
+  tourModeRallye: RallyeRow | null;
+  campusEventsRallyes: RallyeRow[];
   departmentEntries: OrganizationDepartmentEntry[];
+};
+
+type DepartmentRallyeJoin = {
+  department_id: number;
+  rallye_id: number;
 };
 
 // Keep the constraint minimal: only fields required for persisted app usage.
@@ -73,20 +78,8 @@ export async function setSelectedOrganization(org: Organization): Promise<void> 
 
 export async function clearSelectedOrganization(): Promise<void> {
   await removeStorageItem(StorageKeys.SELECTED_ORGANIZATION);
-  // Wenn Organisation gelöscht wird, auch Department löschen
-  await removeStorageItem(StorageKeys.SELECTED_DEPARTMENT);
-}
-
-export async function getSelectedDepartment(): Promise<Department | null> {
-  return getStorageItem<Department>(StorageKeys.SELECTED_DEPARTMENT);
-}
-
-export async function setSelectedDepartment(dept: Department): Promise<void> {
-  return setStorageItem(StorageKeys.SELECTED_DEPARTMENT, dept);
-}
-
-export async function clearSelectedDepartment(): Promise<void> {
-  return removeStorageItem(StorageKeys.SELECTED_DEPARTMENT);
+  // Clean up stale department selection from older app versions.
+  await removeStorageItem('selectedDepartment');
 }
 
 // --- Ende Persistente Auswahl-Speicherung ---
@@ -173,7 +166,8 @@ export async function getOrganizationDashboardData(
     };
   }
 
-  if (!joins || joins.length === 0) {
+  const typedJoins = (joins as DepartmentRallyeJoin[] | null) ?? [];
+  if (typedJoins.length === 0) {
     return {
       tourModeRallye,
       campusEventsRallyes: [],
@@ -181,13 +175,7 @@ export async function getOrganizationDashboardData(
     };
   }
 
-  const rallyeIds = [
-    ...new Set(
-      joins
-        .map((join: any) => join.rallye_id)
-        .filter((rallyeId: unknown): rallyeId is number => typeof rallyeId === 'number')
-    ),
-  ];
+  const rallyeIds = [...new Set(typedJoins.map((join) => join.rallye_id))];
 
   if (rallyeIds.length === 0) {
     return {
@@ -211,14 +199,14 @@ export async function getOrganizationDashboardData(
     };
   }
 
-  const activeRallyesById = new Map<number, Rallye>();
+  const activeRallyesById = new Map<number, RallyeRow>();
   (rallyeRows as RallyeDbRow[] | null)?.forEach((rallye) => {
     if (!isActiveRallyeStatus(rallye.status)) return;
-    activeRallyesById.set(rallye.id, withMode(rallye, 'department') as Rallye);
+    activeRallyesById.set(rallye.id, withMode(rallye, 'department'));
   });
 
-  const rallyesByDepartment = new Map<number, Rallye[]>();
-  joins.forEach((join: any) => {
+  const rallyesByDepartment = new Map<number, RallyeRow[]>();
+  typedJoins.forEach((join) => {
     const rallye = activeRallyesById.get(join.rallye_id);
     if (!rallye) return;
     const current = rallyesByDepartment.get(join.department_id) ?? [];
