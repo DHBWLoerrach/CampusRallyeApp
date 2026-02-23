@@ -511,42 +511,6 @@ export default function Welcome() {
         </Card>
       )}
 
-      {dashboardData.tourModeRallye && (
-        <Card
-          containerStyle={dashboardCardStyle}
-          title={t('welcome.explore.title')}
-          icon="binoculars"
-        >
-          <UIButton outline onPress={() => void handleTourModeSubmit()}>
-            {t('welcome.explore.start')}
-          </UIButton>
-        </Card>
-      )}
-
-      {dashboardData.campusEventsRallyes.length > 0 && (
-        <Card
-          containerStyle={dashboardCardStyle}
-          title={t('welcome.campusEvents.title')}
-          icon="party.popper"
-        >
-          {dashboardData.campusEventsRallyes.map((rallye, index) => (
-            <View
-              key={rallye.id}
-              style={index > 0 ? { marginTop: 8 } : undefined}
-            >
-              <UIButton
-                disabled={joining}
-                onPress={() => void handleRallyePress(rallye)}
-                style={ctaButtonStyle}
-                textStyle={ctaButtonTextStyle}
-              >
-                {rallye.name}
-              </UIButton>
-            </View>
-          ))}
-        </Card>
-      )}
-
       {dashboardData.departmentEntries.length > 0 && (
         <>
           {dashboardData.departmentEntries.length > 1 && (
@@ -621,6 +585,42 @@ export default function Welcome() {
         </>
       )}
 
+      {dashboardData.campusEventsRallyes.length > 0 && (
+        <Card
+          containerStyle={dashboardCardStyle}
+          title={t('welcome.campusEvents.title')}
+          icon="party.popper"
+        >
+          {dashboardData.campusEventsRallyes.map((rallye, index) => (
+            <View
+              key={rallye.id}
+              style={index > 0 ? { marginTop: 8 } : undefined}
+            >
+              <UIButton
+                disabled={joining}
+                onPress={() => void handleRallyePress(rallye)}
+                style={ctaButtonStyle}
+                textStyle={ctaButtonTextStyle}
+              >
+                {rallye.name}
+              </UIButton>
+            </View>
+          ))}
+        </Card>
+      )}
+
+      {dashboardData.tourModeRallye && (
+        <Card
+          containerStyle={dashboardCardStyle}
+          title={t('welcome.explore.title')}
+          icon="binoculars"
+        >
+          <UIButton outline onPress={() => void handleTourModeSubmit()}>
+            {t('welcome.explore.start')}
+          </UIButton>
+        </Card>
+      )}
+
       {!hasDashboardContent && (
         <View style={{ alignItems: 'center', padding: 20 }}>
           <ThemedText
@@ -654,7 +654,7 @@ export default function Welcome() {
       heroImage={require('../assets/images/app/dhbw-campus-header.png')}
       logoImage={require('../assets/images/app/dhbw-logo.png')}
       title={getHeaderTitle()}
-      showBackButton={selectionStep === 'dashboard'}
+      showBackButton={selectionStep === 'dashboard' && organizations.length > 1}
       onBackPress={handleBack}
     >
       {loading && <LoadingContent />}
