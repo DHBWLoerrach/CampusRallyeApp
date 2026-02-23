@@ -5,6 +5,9 @@ export type QuestionType =
   | 'multiple_choice'
   | 'picture';
 
+// UI mapping:
+// - 'tour' => "Campus Tour" (self-guided, no team required)
+// - 'department' => "Rallye" (team-based mode)
 export type RallyeMode = 'tour' | 'department';
 
 export const RALLYE_STATUSES = [
