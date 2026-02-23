@@ -176,13 +176,17 @@ const RallyeIndex = observer(function RallyeIndex() {
 
   useEffect(() => {
     if (!rallyeId) return;
-    (async () => {
-      await loadQuestions();
+    void loadQuestions();
+  }, [loadQuestions, rallyeId]);
+
+  useEffect(() => {
+    if (!rallyeId) return;
+    void (async () => {
       await loadAnswers();
       // Ensure we refresh dynamic rallye fields like name/status
       await refreshStatus();
     })();
-  }, [loadAnswers, loadQuestions, rallyeId, refreshStatus]);
+  }, [loadAnswers, rallyeId, refreshStatus]);
 
   const onRefresh = async () => {
     const net = await NetInfo.fetch();
