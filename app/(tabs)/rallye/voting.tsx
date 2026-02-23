@@ -206,7 +206,7 @@ export default function Voting({
                 borderWidth: selectedTeam === item.rt_id ? 2 : 0,
               }}
             >
-              {item.question_type === 'knowledge' ? (
+              {item.question_type === 'knowledge' || item.question_type === 'geocaching' ? (
                 <ThemedText
                   variant="title"
                   style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}

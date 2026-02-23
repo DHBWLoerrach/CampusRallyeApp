@@ -158,6 +158,11 @@ export const translations = {
     'scoreboard.title': 'Endstand',
     'scoreboard.yourTeam': 'Dein Team: {{team}}',
     'scoreboard.yourTeamLabel': 'Dein Team:',
+    'geocaching.arrived': 'Ziel erreicht!',
+    'geocaching.calibrate': 'Bitte bewege dein Gerät in einer 8er-Bewegung, um den Kompass zu kalibrieren.',
+    'geocaching.error.noCoordinates': 'Für diese Frage sind keine Zielkoordinaten hinterlegt.',
+    'geocaching.error.locationDenied': 'Standortzugriff wurde verweigert. Dieser Fragetyp benötigt GPS.',
+    'geocaching.retryPermission': 'Standort erneut anfragen',
   },
   en: {
     'common.ok': 'OK',
@@ -314,6 +319,11 @@ export const translations = {
     'scoreboard.title': 'Final standings',
     'scoreboard.yourTeam': 'Your team: {{team}}',
     'scoreboard.yourTeamLabel': 'Your team:',
+    'geocaching.arrived': 'Destination reached!',
+    'geocaching.calibrate': 'Please move your device in a figure-8 motion to calibrate the compass.',
+    'geocaching.error.noCoordinates': 'No target coordinates are set for this question.',
+    'geocaching.error.locationDenied': 'Location access was denied. This question type requires GPS.',
+    'geocaching.retryPermission': 'Request location again',
   },
 } as const;
 

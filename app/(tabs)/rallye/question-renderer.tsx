@@ -16,6 +16,7 @@ import UploadPhotoQuestion from '@/components/rallye/questions/UploadPhotoQuesti
 import QRCodeQuestion from '@/components/rallye/questions/QRCodeQuestion';
 import MultipleChoiceQuestion from '@/components/rallye/questions/MultipleChoiceQuestion';
 import ImageQuestion from '@/components/rallye/questions/ImageQuestion';
+import GeocachingQuestion from '@/components/rallye/questions/GeocachingQuestion';
 import UIButton from '@/components/ui/UIButton';
 import { useLanguage } from '@/utils/LanguageContext';
 import { store$ } from '@/services/storage/Store';
@@ -26,6 +27,7 @@ const components: Record<string, any> = {
   qr_code: QRCodeQuestion,
   multiple_choice: MultipleChoiceQuestion,
   picture: ImageQuestion,
+  geocaching: GeocachingQuestion,
 };
 
 const SPRING_CONFIG = {
