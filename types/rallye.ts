@@ -3,7 +3,8 @@ export type QuestionType =
   | 'upload'
   | 'qr_code'
   | 'multiple_choice'
-  | 'picture';
+  | 'picture'
+  | 'geocaching';
 
 // UI mapping:
 // - 'tour' => "Campus Tour" (self-guided, no team required)
@@ -21,6 +22,8 @@ export const RALLYE_STATUSES = [
 
 export type RallyeStatus = (typeof RALLYE_STATUSES)[number];
 
+export type GeocachingInputType = 'text' | 'qr';
+
 export interface Question {
   id: number;
   question: string;
@@ -28,6 +31,10 @@ export interface Question {
   points: number;
   hint?: string | null;
   bucket_path?: string | null;
+  target_latitude?: number | null;
+  target_longitude?: number | null;
+  proximity_radius?: number | null;
+  geocaching_input_type?: GeocachingInputType | null;
 }
 
 export interface AnswerRow {
