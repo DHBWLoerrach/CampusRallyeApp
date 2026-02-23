@@ -3,6 +3,9 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { store$ } from '@/services/storage/Store';
 import RallyeIndex from '../index';
 
+// Keep this unit test focused on the CTA callback only.
+// We stub useEffect so RallyeIndex mount effects (question/answer/status loading)
+// do not schedule async state updates that are irrelevant to this assertion.
 jest.mock('react', () => {
   const actual = jest.requireActual('react');
   return {
