@@ -2,17 +2,18 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Text,
-  View,
   AppState,
   AppStateStatus,
+  View,
 } from 'react-native';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
-import RallyeSelectionModal from '@/components/ui/RallyeSelectionModal';
 import SelectionModal, { SelectionItem } from '@/components/ui/SelectionModal';
+import RallyePasswordSheet, {
+  isPasswordRequired,
+} from '@/components/ui/RallyePasswordSheet';
 import { CollapsibleHeroHeader } from '@/components/ui/CollapsibleHeroHeader';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
@@ -25,16 +26,11 @@ import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import {
   setCurrentRallye,
   getOrganizationsWithActiveRallyes,
-  getDepartmentsForOrganization,
-  getRallyesForDepartment,
-  getTourModeRallyeForOrganization,
-  getCampusEventsDepartment,
+  getOrganizationDashboardData,
   getSelectedOrganization as getStoredOrganization,
   setSelectedOrganization as storeSelectedOrganization,
   clearSelectedOrganization,
-  getSelectedDepartment as getStoredDepartment,
-  setSelectedDepartment as storeSelectedDepartment,
-  clearSelectedDepartment,
+  type OrganizationDashboardData,
   type RallyeRow,
 } from '@/services/storage/rallyeStorage';
 import {
@@ -42,12 +38,18 @@ import {
   teamExists,
   clearCurrentTeam,
 } from '@/services/storage/teamStorage';
-import { Organization, Department, Rallye } from '@/types/rallye';
+import { Organization } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
-// Types for selection phases
-type SelectionStep = 'organization' | 'department' | 'rallye';
-type RallyeModalContext = 'default' | 'campusEvents';
+type SelectionStep = 'organization' | 'dashboard';
+
+function createEmptyDashboardData(): OrganizationDashboardData {
+  return {
+    tourModeRallye: null,
+    campusEventsRallyes: [],
+    departmentEntries: [],
+  };
+}
 
 export default function Welcome() {
   const { isDarkMode } = useTheme();
@@ -63,28 +65,27 @@ export default function Welcome() {
   const [joining, setJoining] = useState(false);
   const [online, setOnline] = useState(true);
 
-  // States for hierarchical navigation
-  const [selectionStep, setSelectionStep] = useState<SelectionStep>('organization');
-  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
-  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+  const [selectionStep, setSelectionStep] = useState<SelectionStep>(
+    'organization'
+  );
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<Organization | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [tourModeRallye, setTourModeRallye] = useState<Rallye | null>(null);
-  const [campusEventsDepartment, setCampusEventsDepartment] = useState<Department | null>(null);
+  const [dashboardData, setDashboardData] = useState<OrganizationDashboardData>(
+    () => createEmptyDashboardData()
+  );
+  const [expandedDepartmentIds, setExpandedDepartmentIds] = useState<number[]>(
+    []
+  );
 
-  // Modal states
-  const [showRallyeModal, setShowRallyeModal] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
-  const [showDeptModal, setShowDeptModal] = useState(false);
-  const [activeRallyes, setActiveRallyes] = useState<Rallye[]>([]);
-  const [rallyeModalContext, setRallyeModalContext] =
-    useState<RallyeModalContext>('default');
+  const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
 
-  // Auto-Refresh refs
-  const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isInitializedRef = useRef<boolean>(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const AUTO_REFRESH_INTERVAL = 60000;
 
   const stateBackground = isDarkMode
@@ -95,298 +96,192 @@ export default function Welcome() {
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
 
-  // Initialization
-  useEffect(() => {
-    initializeSelection();
+  const applyDashboardData = useCallback((nextData: OrganizationDashboardData) => {
+    setDashboardData(nextData);
+    setExpandedDepartmentIds((currentExpandedIds) =>
+      currentExpandedIds.filter((departmentId) =>
+        nextData.departmentEntries.some(
+          (entry) => entry.department.id === departmentId
+        )
+      )
+    );
   }, []);
 
-  const initializeSelection = async () => {
+  const resetDashboard = useCallback(() => {
+    setDashboardData(createEmptyDashboardData());
+    setExpandedDepartmentIds([]);
+    setPasswordRallye(null);
+  }, []);
+
+  const loadDashboardData = useCallback(
+    async (organizationId: number) => {
+      const data = await getOrganizationDashboardData(organizationId);
+      applyDashboardData(data);
+    },
+    [applyDashboardData]
+  );
+
+  const initializeSelection = useCallback(async () => {
     setLoading(true);
     try {
       const savedOrg = await getStoredOrganization();
-      const savedDept = await getStoredDepartment();
+      const orgs = await getOrganizationsWithActiveRallyes();
+      setOrganizations(orgs);
+      setOnline(true);
 
-      if (savedOrg) {
-        const orgs = await getOrganizationsWithActiveRallyes();
-        setOrganizations(orgs);
-        setOnline(true);
+      const storedOrg = savedOrg
+        ? orgs.find((organization) => organization.id === savedOrg.id)
+        : null;
+      const autoSelectedOrg = orgs.length === 1 ? orgs[0] : null;
+      const organizationToSelect = storedOrg ?? autoSelectedOrg;
 
-        const orgStillValid = orgs.find(o => o.id === savedOrg.id);
-        if (orgStillValid) {
-          setSelectedOrganization(orgStillValid);
-          
-          const depts = await getDepartmentsForOrganization(orgStillValid.id);
-          setDepartments(depts);
-          const tourRallye = await getTourModeRallyeForOrganization(orgStillValid.id);
-          setTourModeRallye(tourRallye);
-          const campusEvents = await getCampusEventsDepartment(orgStillValid);
-          setCampusEventsDepartment(campusEvents);
-
-          if (savedDept) {
-            const deptStillValid = depts.find(d => d.id === savedDept.id);
-            if (deptStillValid) {
-              setSelectedDepartment(deptStillValid);
-              const rallyes = await getRallyesForDepartment(deptStillValid.id);
-              setActiveRallyes(rallyes);
-              setSelectionStep('rallye');
-            } else {
-              await clearSelectedDepartment();
-              setSelectionStep('department');
-            }
-          } else {
-            setSelectionStep('department');
-          }
-        } else {
-          await clearSelectedOrganization();
-          setSelectionStep('organization');
+      if (organizationToSelect) {
+        if (!storedOrg && autoSelectedOrg) {
+          Logger.debug(
+            'AutoSelect',
+            'Only one organization available, auto-selecting'
+          );
         }
+
+        setSelectedOrganization(organizationToSelect);
+        await storeSelectedOrganization(organizationToSelect);
+        await loadDashboardData(organizationToSelect.id);
+        setSelectionStep('dashboard');
       } else {
-        const orgs = await getOrganizationsWithActiveRallyes();
-        setOrganizations(orgs);
-        setOnline(true);
-        
-        // Auto-select if only one organization
-        if (orgs.length === 1) {
-          Logger.debug('AutoSelect', 'Only one organization available, auto-selecting');
-          const singleOrg = orgs[0];
-          setSelectedOrganization(singleOrg);
-          await storeSelectedOrganization(singleOrg);
-          
-          const depts = await getDepartmentsForOrganization(singleOrg.id);
-          setDepartments(depts);
-          const tourRallye = await getTourModeRallyeForOrganization(singleOrg.id);
-          setTourModeRallye(tourRallye);
-          const campusEvents = await getCampusEventsDepartment(singleOrg);
-          setCampusEventsDepartment(campusEvents);
-          
-          // Auto-select if only one department
-          if (depts.length === 1) {
-            Logger.debug('AutoSelect', 'Only one department available, auto-selecting');
-            const singleDept = depts[0];
-            setSelectedDepartment(singleDept);
-            await storeSelectedDepartment(singleDept);
-            const rallyes = await getRallyesForDepartment(singleDept.id);
-            setActiveRallyes(rallyes);
-            setSelectionStep('rallye');
-          } else {
-            setSelectionStep('department');
-          }
-        } else {
-          setSelectionStep('organization');
+        if (savedOrg) {
+          await clearSelectedOrganization();
         }
+        setSelectedOrganization(null);
+        resetDashboard();
+        setSelectionStep('organization');
       }
     } catch (error) {
       Logger.error('Welcome', 'Error initializing selection', error);
       setOnline(false);
       setSelectionStep('organization');
+    } finally {
+      setLoading(false);
+      isInitializedRef.current = true;
     }
-    setLoading(false);
-    isInitializedRef.current = true;
-  };
+  }, [loadDashboardData, resetDashboard]);
 
-  // Auto-refresh logic
+  useEffect(() => {
+    void initializeSelection();
+  }, [initializeSelection]);
+
   const refreshCurrentData = useCallback(async () => {
     if (loading || !isInitializedRef.current) return;
     if (store$.enabled.get()) return;
     if (appStateRef.current !== 'active') return;
-    if (showRallyeModal || showOrgModal || showDeptModal) return;
-
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    abortControllerRef.current = new AbortController();
+    if (showOrgModal || passwordRallye) return;
 
     try {
-      if (selectionStep === 'organization') {
-        const orgs = await getOrganizationsWithActiveRallyes();
-        setOrganizations(orgs);
-        setOnline(true);
-      } else if (selectionStep === 'department' && selectedOrganization) {
-        const orgs = await getOrganizationsWithActiveRallyes();
-        const orgStillValid = orgs.find(o => o.id === selectedOrganization.id);
-        
-        if (orgStillValid) {
-          const depts = await getDepartmentsForOrganization(selectedOrganization.id);
-          setDepartments(depts);
-          const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
-          setTourModeRallye(tourRallye);
-          const campusEvents = await getCampusEventsDepartment(orgStillValid);
-          setCampusEventsDepartment(campusEvents);
-          
-          if (depts.length === 0 && !tourRallye && !campusEvents) {
-            await clearSelectedOrganization();
-            setSelectedOrganization(null);
-            setOrganizations(orgs);
-            setCampusEventsDepartment(null);
-            setSelectionStep('organization');
-          }
-        } else {
-          await clearSelectedOrganization();
-          setSelectedOrganization(null);
-          setOrganizations(orgs);
-          setCampusEventsDepartment(null);
-          setSelectionStep('organization');
-        }
-      } else if (selectionStep === 'rallye' && selectedOrganization && selectedDepartment) {
-        const depts = await getDepartmentsForOrganization(selectedOrganization.id);
-        const deptStillValid = depts.find(d => d.id === selectedDepartment.id);
-        
-        if (deptStillValid) {
-          const rallyes = await getRallyesForDepartment(selectedDepartment.id);
-          setActiveRallyes(rallyes);
-          const tourRallye = await getTourModeRallyeForOrganization(selectedOrganization.id);
-          setTourModeRallye(tourRallye);
-          
-          if (rallyes.length === 0 && !tourRallye) {
-            await clearSelectedDepartment();
-            setSelectedDepartment(null);
-            setDepartments(depts);
-            setSelectionStep('department');
-          }
-        } else {
-          await clearSelectedDepartment();
-          setSelectedDepartment(null);
-          setDepartments(depts);
-          setSelectionStep('department');
-        }
+      const orgs = await getOrganizationsWithActiveRallyes();
+      setOrganizations(orgs);
+      setOnline(true);
+
+      if (selectionStep === 'organization') return;
+
+      if (!selectedOrganization) {
+        setSelectionStep('organization');
+        return;
       }
+
+      const orgStillValid = orgs.find(
+        (organization) => organization.id === selectedOrganization.id
+      );
+
+      if (!orgStillValid) {
+        await clearSelectedOrganization();
+        setSelectedOrganization(null);
+        resetDashboard();
+        setSelectionStep('organization');
+        return;
+      }
+
+      setSelectedOrganization(orgStillValid);
+      await loadDashboardData(orgStillValid.id);
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') return;
       Logger.error('AutoRefresh', 'Error refreshing data', error);
     }
-  }, [selectionStep, selectedOrganization, selectedDepartment, loading, showRallyeModal, showOrgModal, showDeptModal]);
+  }, [
+    loading,
+    showOrgModal,
+    passwordRallye,
+    selectionStep,
+    selectedOrganization,
+    loadDashboardData,
+    resetDashboard,
+  ]);
 
-  // Auto-refresh setup
   useEffect(() => {
     const initialSyncTimeout = setTimeout(() => {
       if (isInitializedRef.current) {
-        refreshCurrentData();
+        void refreshCurrentData();
       }
     }, 2000);
 
     refreshIntervalRef.current = setInterval(() => {
-      refreshCurrentData();
+      void refreshCurrentData();
     }, AUTO_REFRESH_INTERVAL);
 
-    const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
-      if (appStateRef.current.match(/inactive|background/) && nextAppState === 'active') {
-        refreshCurrentData();
+    const appStateSubscription = AppState.addEventListener(
+      'change',
+      (nextAppState) => {
+        if (
+          appStateRef.current.match(/inactive|background/) &&
+          nextAppState === 'active'
+        ) {
+          void refreshCurrentData();
+        }
+        appStateRef.current = nextAppState;
       }
-      appStateRef.current = nextAppState;
-    });
+    );
 
     return () => {
       clearTimeout(initialSyncTimeout);
       if (refreshIntervalRef.current) {
         clearInterval(refreshIntervalRef.current);
       }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
       appStateSubscription.remove();
     };
   }, [refreshCurrentData]);
 
-  // Handler for organization selection
-  const handleOrganizationSelect = async (org: Organization) => {
-    setSelectedOrganization(org);
+  const handleOrganizationSelect = async (organization: Organization) => {
+    setSelectedOrganization(organization);
     setLoading(true);
     try {
-      await storeSelectedOrganization(org);
-      
-      const depts = await getDepartmentsForOrganization(org.id);
-      setDepartments(depts);
-      
-      const tourRallye = await getTourModeRallyeForOrganization(org.id);
-      setTourModeRallye(tourRallye);
-      
-      const campusEvents = await getCampusEventsDepartment(org);
-      setCampusEventsDepartment(campusEvents);
-      
-      if (depts.length === 1) {
-        const singleDept = depts[0];
-        setSelectedDepartment(singleDept);
-        await storeSelectedDepartment(singleDept);
-        const rallyes = await getRallyesForDepartment(singleDept.id);
-        setActiveRallyes(rallyes);
-        setSelectionStep('rallye');
-      } else {
-        setSelectionStep('department');
-      }
+      await storeSelectedOrganization(organization);
+      await loadDashboardData(organization.id);
+      setSelectionStep('dashboard');
     } catch (error) {
-      Logger.error('Welcome', 'Error loading departments', error);
+      Logger.error('Welcome', 'Error loading organization dashboard', error);
       Alert.alert(t('common.errorTitle'), t('welcome.departmentLoadError'));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // Handler for department selection
-  const handleDepartmentSelect = async (dept: Department) => {
-    setSelectedDepartment(dept);
-    setLoading(true);
-    try {
-      await storeSelectedDepartment(dept);
-      
-      const rallyes = await getRallyesForDepartment(dept.id);
-      setActiveRallyes(rallyes);
-      setSelectionStep('rallye');
-    } catch (error) {
-      Logger.error('Welcome', 'Error loading rallyes', error);
-      Alert.alert(t('common.errorTitle'), t('welcome.rallyeLoadError'));
-    }
-    setLoading(false);
-  };
-
-  // Handler for back navigation
   const handleBack = async () => {
-    if (selectionStep === 'rallye') {
-      // Always go back to department selection first
-      await clearSelectedDepartment();
-      setSelectedDepartment(null);
-      setActiveRallyes([]);
-      setSelectionStep('department');
-    } else if (selectionStep === 'department') {
-      await clearSelectedOrganization();
-      setSelectedOrganization(null);
-      setSelectedDepartment(null);
-      setDepartments([]);
-      setTourModeRallye(null);
-      setCampusEventsDepartment(null);
-      setSelectionStep('organization');
-    }
+    if (selectionStep !== 'dashboard') return;
+    await clearSelectedOrganization();
+    setSelectedOrganization(null);
+    resetDashboard();
+    setSelectionStep('organization');
   };
 
-  // Handler for tour mode
   const handleTourModeSubmit = async () => {
-    if (!tourModeRallye) {
+    if (!dashboardData.tourModeRallye) {
       Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
       return;
     }
     store$.team.set(null);
     store$.reset();
-    store$.rallye.set(tourModeRallye);
-    await setCurrentRallye(tourModeRallye);
+    store$.rallye.set(dashboardData.tourModeRallye);
+    await setCurrentRallye(dashboardData.tourModeRallye);
     store$.enabled.set(true);
   };
 
-  // Handler for Campus Events selection
-  const handleCampusEventsSelect = async () => {
-    if (!campusEventsDepartment) return;
-
-    setLoading(true);
-    try {
-      const rallyes = await getRallyesForDepartment(campusEventsDepartment.id);
-      setActiveRallyes(rallyes);
-      setRallyeModalContext('campusEvents');
-      setShowRallyeModal(true);
-    } catch (error) {
-      Logger.error('Welcome', 'Error loading campus events rallyes', error);
-      Alert.alert(t('common.errorTitle'), t('welcome.rallyeLoadError'));
-    }
-    setLoading(false);
-  };
-
-  // Handler for joining a rallye (new API)
   const joinRallye = async (rallye: RallyeRow): Promise<boolean> => {
     if (joining) return false;
     setJoining(true);
@@ -396,7 +291,6 @@ export default function Welcome() {
       store$.rallye.set(rallye);
       await setCurrentRallye(rallye);
 
-      // Rehydrate previously created team for this rallye (if any)
       try {
         const existingTeam = await getCurrentTeam(rallye.id);
         if (existingTeam) {
@@ -410,15 +304,19 @@ export default function Welcome() {
             store$.team.set(existingTeam);
           }
         }
-      } catch (rehydrateErr) {
-        Logger.error('Welcome', 'Error rehydrating team after join', rehydrateErr);
+      } catch (rehydrateError) {
+        Logger.error(
+          'Welcome',
+          'Error rehydrating team after join',
+          rehydrateError
+        );
         store$.team.set(null);
       }
 
       store$.enabled.set(true);
       return true;
-    } catch (e) {
-      Logger.error('Welcome', 'Error joining rallye', e);
+    } catch (error) {
+      Logger.error('Welcome', 'Error joining rallye', error);
       Alert.alert(t('common.errorTitle'), t('welcome.participationStartError'));
       return false;
     } finally {
@@ -426,49 +324,79 @@ export default function Welcome() {
     }
   };
 
-  // Handler for organization selection from modal
+  const handleRallyePress = async (rallye: RallyeRow) => {
+    if (joining) return;
+    if (isPasswordRequired(rallye)) {
+      setPasswordRallye(rallye);
+      return;
+    }
+    await joinRallye(rallye);
+  };
+
+  const toggleDepartmentExpansion = (departmentId: number) => {
+    setExpandedDepartmentIds((currentExpandedIds) => {
+      if (currentExpandedIds.includes(departmentId)) {
+        return currentExpandedIds.filter((id) => id !== departmentId);
+      }
+      return [...currentExpandedIds, departmentId];
+    });
+  };
+
   const handleOrgModalSelect = (item: SelectionItem) => {
-    const org = organizations.find(o => o.id === item.id);
-    if (org) {
+    const organization = organizations.find((org) => org.id === item.id);
+    if (organization) {
       setShowOrgModal(false);
-      handleOrganizationSelect(org);
+      void handleOrganizationSelect(organization);
     }
   };
 
-  // Handler for department selection from modal
-  const handleDeptModalSelect = (item: SelectionItem) => {
-    const dept = departments.find(d => d.id === item.id);
-    if (dept) {
-      setShowDeptModal(false);
-      handleDepartmentSelect(dept);
-    }
-  };
-
-  // Loading content
   const LoadingContent = () => (
-    <View style={[globalStyles.welcomeStyles.offline, { backgroundColor: stateBackground }]}>
+    <View
+      style={[
+        globalStyles.welcomeStyles.offline,
+        { backgroundColor: stateBackground },
+      ]}
+    >
       <ActivityIndicator size="large" color={Colors.dhbwRed} />
-      <ThemedText variant="body" style={[globalStyles.welcomeStyles.text, s.muted, { marginTop: 16 }]}>
+      <ThemedText
+        variant="body"
+        style={[globalStyles.welcomeStyles.text, s.muted, { marginTop: 16 }]}
+      >
         {t('common.loading')}
       </ThemedText>
     </View>
   );
 
-  // Offline content
   const OfflineContent = () => (
-    <View style={[globalStyles.welcomeStyles.offline, { backgroundColor: stateBackground }]}>
-      <ThemedText variant="body" style={[globalStyles.welcomeStyles.text, s.muted, { marginBottom: 20 }]}>
+    <View
+      style={[
+        globalStyles.welcomeStyles.offline,
+        { backgroundColor: stateBackground },
+      ]}
+    >
+      <ThemedText
+        variant="body"
+        style={[
+          globalStyles.welcomeStyles.text,
+          s.muted,
+          { marginBottom: 20 },
+        ]}
+      >
         {t('welcome.offline')}
       </ThemedText>
-      <UIButton icon="rotate" onPress={initializeSelection}>
+      <UIButton icon="rotate" onPress={() => void initializeSelection()}>
         {t('common.refresh')}
       </UIButton>
     </View>
   );
 
-  // Phase 1: Organization selection
   const OrganizationContent = () => (
-    <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
+    <View
+      style={[
+        globalStyles.welcomeStyles.container,
+        { backgroundColor: stateBackground },
+      ]}
+    >
       {organizations.length === 0 && (
         <Card
           containerStyle={compactCardStyle}
@@ -481,17 +409,20 @@ export default function Welcome() {
         <>
           <ThemedText
             variant="bodySmall"
-            style={[s.muted, { textAlign: 'left', width: '100%', marginBottom: 8 }]}
+            style={[
+              s.muted,
+              { textAlign: 'left', width: '100%', marginBottom: 8 },
+            ]}
           >
             {t('welcome.selectLocation.description')}
           </ThemedText>
-          {organizations.map(org => (
+          {organizations.map((organization) => (
             <Card
-              key={org.id}
+              key={organization.id}
               containerStyle={organizationCardStyle}
-              title={org.name}
+              title={organization.name}
               icon="building.2"
-              onPress={() => handleOrganizationSelect(org)}
+              onPress={() => void handleOrganizationSelect(organization)}
             />
           ))}
         </>
@@ -515,112 +446,18 @@ export default function Welcome() {
     </View>
   );
 
-  // Phase 2: Department selection
-  // Filter out the campus events department so it doesn't appear twice
-  const selectableDepartments = campusEventsDepartment
-    ? departments.filter(d => d.id !== campusEventsDepartment.id)
-    : departments;
-  const hasDepartmentsWithRallyes = selectableDepartments.length > 0;
-  const hasNoContent = !hasDepartmentsWithRallyes && !tourModeRallye && !campusEventsDepartment;
+  const hasDashboardContent =
+    !!dashboardData.tourModeRallye ||
+    dashboardData.campusEventsRallyes.length > 0 ||
+    dashboardData.departmentEntries.length > 0;
 
-  const DepartmentContent = () => (
-    <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
-      {hasDepartmentsWithRallyes && (
-        <Card
-          containerStyle={compactCardStyle}
-          title={t('welcome.selectDepartment.title')}
-          description={t('welcome.selectDepartment.description')}
-          icon="graduationcap"
-        >
-          <UIButton
-            onPress={() => setShowDeptModal(true)}
-            style={ctaButtonStyle}
-            textStyle={ctaButtonTextStyle}
-          >
-            {t('welcome.selectDepartment.button')}
-          </UIButton>
-        </Card>
-      )}
-      {campusEventsDepartment && (
-        <Card
-          containerStyle={compactCardStyle}
-          title={t('welcome.campusEvents.title')}
-          description={t('welcome.campusEvents.description')}
-          icon="party.popper"
-        >
-          <UIButton
-            onPress={handleCampusEventsSelect}
-            style={ctaButtonStyle}
-            textStyle={ctaButtonTextStyle}
-          >
-            {t('welcome.campusEvents.button')}
-          </UIButton>
-        </Card>
-      )}
-      {tourModeRallye && (
-        <Card
-          containerStyle={compactCardStyle}
-          title={t('welcome.explore.title')}
-          description={t('welcome.explore.description')}
-          icon="binoculars"
-        >
-          <UIButton outline onPress={handleTourModeSubmit}>
-            {t('welcome.explore.start')}
-          </UIButton>
-        </Card>
-      )}
-      {hasNoContent && (
-        <View style={{ alignItems: 'center', padding: 20 }}>
-          <ThemedText variant="body" style={[s.text, { textAlign: 'center', marginBottom: 16 }]}>
-            {t('welcome.noContent')}
-          </ThemedText>
-          <UIButton icon="arrow.backward" onPress={handleBack}>
-            {t('common.back')}
-          </UIButton>
-        </View>
-      )}
-    </View>
-  );
-
-  // Phase 3: Rallye selection
-  const hasActiveRallyes = activeRallyes.length > 0;
-  const isCampusEventsSelection = Boolean(
-    selectedDepartment && campusEventsDepartment && selectedDepartment.id === campusEventsDepartment.id
-  );
-
-  const RallyeContent = () => (
-    <View style={[globalStyles.welcomeStyles.container, { backgroundColor: stateBackground }]}>
-      {/* Department name display with dividers */}
-      {selectedDepartment && (
-        <View style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          width: '100%',
-          marginBottom: 16,
-          paddingHorizontal: 8,
-        }}>
-          <View style={{
-            flex: 1,
-            height: 1,
-            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(92, 105, 113, 0.4)',
-          }} />
-          <Text style={{
-            paddingHorizontal: 12,
-            fontSize: 15,
-            fontWeight: '500',
-            color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.dhbwGray,
-          }}>
-            {selectedDepartment.name}
-          </Text>
-          <View style={{
-            flex: 1,
-            height: 1,
-            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(92, 105, 113, 0.4)',
-          }} />
-        </View>
-      )}
-
-      {/* Resume card */}
+  const DashboardContent = () => (
+    <View
+      style={[
+        globalStyles.welcomeStyles.container,
+        { backgroundColor: stateBackground },
+      ]}
+    >
       {resumeAvailable && resumeRallye && resumeTeam && (
         <Card
           containerStyle={compactCardStyle}
@@ -666,55 +503,137 @@ export default function Welcome() {
         </Card>
       )}
 
-      {/* Join rallye card */}
-      {hasActiveRallyes && (
-        <Card
-          containerStyle={compactCardStyle}
-          title={t('welcome.join.title')}
-          description={t('welcome.join.description')}
-          icon="mappin.and.ellipse"
-        >
-          <UIButton
-            disabled={joining}
-            onPress={() => {
-              setRallyeModalContext('default');
-              setShowRallyeModal(true);
-            }}
-            style={ctaButtonStyle}
-            textStyle={ctaButtonTextStyle}
-          >
-            {t('welcome.join.select')}
-          </UIButton>
-        </Card>
-      )}
-
-      {/* Tour mode card */}
-      {tourModeRallye && !isCampusEventsSelection && (
+      {dashboardData.tourModeRallye && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.explore.title')}
           description={t('welcome.explore.description')}
           icon="binoculars"
         >
-          <UIButton outline onPress={handleTourModeSubmit}>
+          <UIButton outline onPress={() => void handleTourModeSubmit()}>
             {t('welcome.explore.start')}
           </UIButton>
         </Card>
       )}
 
-      {/* No rallyes available */}
-      {!hasActiveRallyes && !tourModeRallye && (
+      {dashboardData.campusEventsRallyes.length > 0 && (
         <Card
           containerStyle={compactCardStyle}
-          title={t('welcome.noRallyes.title')}
-          description={t('welcome.noRallyes.description')}
-          icon="info.circle"
-        />
+          title={t('welcome.campusEvents.title')}
+          description={t('welcome.campusEvents.description')}
+          icon="party.popper"
+        >
+          {dashboardData.campusEventsRallyes.map((rallye, index) => (
+            <View
+              key={rallye.id}
+              style={index > 0 ? { marginTop: 10 } : undefined}
+            >
+              <UIButton
+                disabled={joining}
+                onPress={() => void handleRallyePress(rallye as RallyeRow)}
+                style={ctaButtonStyle}
+                textStyle={ctaButtonTextStyle}
+              >
+                {rallye.name}
+              </UIButton>
+            </View>
+          ))}
+        </Card>
+      )}
+
+      {dashboardData.departmentEntries.length > 0 && (
+        <>
+          <ThemedText
+            variant="bodySmall"
+            style={[
+              s.muted,
+              { textAlign: 'left', width: '100%', marginBottom: 8 },
+            ]}
+          >
+            {t('welcome.selectDepartment.description')}
+          </ThemedText>
+          {dashboardData.departmentEntries.map((entry) => {
+            const rallyes = entry.rallyes as RallyeRow[];
+            const multipleRallyes = rallyes.length > 1;
+            const expanded = expandedDepartmentIds.includes(entry.department.id);
+
+            return (
+              <Card
+                key={entry.department.id}
+                containerStyle={compactCardStyle}
+                title={entry.department.name}
+                description={
+                  multipleRallyes
+                    ? t('welcome.join.select')
+                    : rallyes[0]?.name ?? t('welcome.join.description')
+                }
+                icon="graduationcap"
+              >
+                {!multipleRallyes && rallyes[0] && (
+                  <UIButton
+                    disabled={joining}
+                    onPress={() => void handleRallyePress(rallyes[0])}
+                    style={ctaButtonStyle}
+                    textStyle={ctaButtonTextStyle}
+                  >
+                    {t('rallye.join')}
+                  </UIButton>
+                )}
+
+                {multipleRallyes && (
+                  <>
+                    <UIButton
+                      outline
+                      disabled={joining}
+                      onPress={() =>
+                        toggleDepartmentExpansion(entry.department.id)
+                      }
+                    >
+                      {expanded ? t('common.cancel') : t('welcome.join.select')}
+                    </UIButton>
+                    {expanded && (
+                      <View style={{ marginTop: 10 }}>
+                        {rallyes.map((rallye, index) => (
+                          <View
+                            key={rallye.id}
+                            style={index > 0 ? { marginTop: 8 } : undefined}
+                          >
+                            <UIButton
+                              disabled={joining}
+                              onPress={() => void handleRallyePress(rallye)}
+                              style={ctaButtonStyle}
+                              textStyle={ctaButtonTextStyle}
+                            >
+                              {rallye.name}
+                            </UIButton>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </>
+                )}
+              </Card>
+            );
+          })}
+        </>
+      )}
+
+      {!hasDashboardContent && (
+        <View style={{ alignItems: 'center', padding: 20 }}>
+          <ThemedText
+            variant="body"
+            style={[s.text, { textAlign: 'center', marginBottom: 16 }]}
+          >
+            {t('welcome.noContent')}
+          </ThemedText>
+          <UIButton icon="arrow.backward" onPress={() => void handleBack()}>
+            {t('common.back')}
+          </UIButton>
+        </View>
       )}
     </View>
   );
 
-  // Get header title based on selection
   const getHeaderTitle = () => {
     if (selectedOrganization) {
       return `${selectedOrganization.name} Campus Rallyes`;
@@ -722,18 +641,9 @@ export default function Welcome() {
     return 'Campus Rallyes';
   };
 
-  // Render current step
   const renderCurrentStep = () => {
-    switch (selectionStep) {
-      case 'organization':
-        return <OrganizationContent />;
-      case 'department':
-        return <DepartmentContent />;
-      case 'rallye':
-        return <RallyeContent />;
-      default:
-        return <OrganizationContent />;
-    }
+    if (selectionStep === 'organization') return <OrganizationContent />;
+    return <DashboardContent />;
   };
 
   return (
@@ -741,43 +651,31 @@ export default function Welcome() {
       heroImage={require('../assets/images/app/dhbw-campus-header.png')}
       logoImage={require('../assets/images/app/dhbw-logo.png')}
       title={getHeaderTitle()}
-      showBackButton={selectionStep !== 'organization'}
+      showBackButton={selectionStep === 'dashboard'}
       onBackPress={handleBack}
     >
       {loading && <LoadingContent />}
       {!loading && online && renderCurrentStep()}
       {!loading && !online && <OfflineContent />}
 
-      <RallyeSelectionModal
-        visible={showRallyeModal}
-        onClose={() => {
-          setShowRallyeModal(false);
-          setRallyeModalContext('default');
-        }}
-        activeRallyes={activeRallyes as RallyeRow[]}
-        onJoin={joinRallye}
-        joining={joining}
-        title={
-          rallyeModalContext === 'campusEvents'
-            ? t('welcome.campusEvents.modalTitle')
-            : undefined
-        }
-      />
       <SelectionModal
         visible={showOrgModal}
         onClose={() => setShowOrgModal(false)}
-        items={organizations.map(org => ({ id: org.id, name: org.name }))}
+        items={organizations.map((organization) => ({
+          id: organization.id,
+          name: organization.name,
+        }))}
         onSelect={handleOrgModalSelect}
         title={t('welcome.selectLocation.modalTitle')}
         emptyMessage={t('welcome.selectLocation.empty')}
       />
-      <SelectionModal
-        visible={showDeptModal}
-        onClose={() => setShowDeptModal(false)}
-        items={selectableDepartments.map(dept => ({ id: dept.id, name: dept.name }))}
-        onSelect={handleDeptModalSelect}
-        title={t('welcome.selectDepartment.modalTitle')}
-        emptyMessage={t('welcome.selectDepartment.empty')}
+
+      <RallyePasswordSheet
+        visible={!!passwordRallye}
+        rallye={passwordRallye}
+        joining={joining}
+        onClose={() => setPasswordRallye(null)}
+        onJoin={joinRallye}
       />
     </CollapsibleHeroHeader>
   );
