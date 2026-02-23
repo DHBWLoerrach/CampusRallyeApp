@@ -298,8 +298,7 @@ const RallyeIndex = observer(function RallyeIndex() {
                 variant="ghost"
                 icon="arrow-left"
                 onPress={() => {
-                  store$.reset();
-                  store$.enabled.set(false);
+                  void store$.leaveRallye();
                 }}
               >
                 {t('rallye.backToStart')}
