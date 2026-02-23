@@ -22,6 +22,7 @@ import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
+import { isPasswordRequired } from './RallyePasswordSheet';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -33,10 +34,6 @@ type Props = {
   joining?: boolean;
   title?: string;
 };
-
-function isPasswordRequired(r: RallyeRow) {
-  return !!(r.password ?? '').trim().length;
-}
 
 export default function RallyeSelectionModal({
   visible,
