@@ -18,6 +18,8 @@ import { Logger } from '@/utils/Logger';
 
 export type RallyeRow = RallyeStorageRow & { mode: RallyeMode };
 
+// Keep the constraint minimal: only fields required for persisted app usage.
+// Callers can pass richer DB rows; additional fields are preserved in the return type.
 function withMode<T extends RallyeStorageRow>(rallye: T, mode: RallyeMode): T & {
   mode: RallyeMode;
 } {
