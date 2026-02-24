@@ -61,7 +61,7 @@ Voraussetzungen für die Weiterentwicklung dieses Projekts sind folgende:
 1. In einem Terminal ins Verzeichnis des geclonten Repositories wechseln.
 
 1. Anschließend müssen mit npm die Abhängigkeiten bzw. npm-Pakete in NodeJS installiert werden:
-   `npm install`
+   `npm ci`
 
 1. Zum Schluss muss noch die Konfiguration zu Supabase angepasst werden. Dazu ist zunächst die Datei `.env` im Projektverzeichnis zu erstellen. In `.env` müssen zwei Einträge vorgenommen werden:
 
