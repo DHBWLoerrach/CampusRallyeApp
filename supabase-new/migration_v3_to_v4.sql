@@ -44,6 +44,35 @@ ALTER TABLE "public"."questions"
     ADD CONSTRAINT "questions_geocaching_input_type_check"
     CHECK ("geocaching_input_type" IS NULL OR "geocaching_input_type" IN ('text', 'qr'));
 
+-- Defaults entfernen: Geocaching-Spalten sollen nur bei type='geocaching' gesetzt sein
+ALTER TABLE "public"."questions"
+    ALTER COLUMN "proximity_radius" DROP DEFAULT;
+
+ALTER TABLE "public"."questions"
+    ALTER COLUMN "geocaching_input_type" DROP DEFAULT;
+
+-- Bestehende Nicht-Geocaching-Fragen aufräumen
+UPDATE "public"."questions"
+SET
+    "target_latitude" = NULL,
+    "target_longitude" = NULL,
+    "proximity_radius" = NULL,
+    "geocaching_input_type" = NULL
+WHERE "type" != 'geocaching';
+
+-- Constraint: Geocaching-Spalten dürfen NUR bei type='geocaching' gesetzt sein
+ALTER TABLE "public"."questions"
+    ADD CONSTRAINT "questions_geocaching_columns_only_check"
+    CHECK (
+        "type" = 'geocaching'
+        OR (
+            "target_latitude" IS NULL
+            AND "target_longitude" IS NULL
+            AND "proximity_radius" IS NULL
+            AND "geocaching_input_type" IS NULL
+        )
+    );
+
 COMMIT;
 
 -- ============================================================================

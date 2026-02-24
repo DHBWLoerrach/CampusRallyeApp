@@ -183,8 +183,8 @@ CREATE TABLE IF NOT EXISTS "public"."questions" (
     "bucket_path" "text",
     "target_latitude" double precision,
     "target_longitude" double precision,
-    "proximity_radius" integer DEFAULT 10,
-    "geocaching_input_type" "text" DEFAULT 'text'
+    "proximity_radius" integer,
+    "geocaching_input_type" "text"
 );
 
 
@@ -354,6 +354,18 @@ ALTER TABLE ONLY "public"."questions"
 ALTER TABLE ONLY "public"."questions"
     ADD CONSTRAINT "questions_geocaching_input_type_check"
     CHECK ("geocaching_input_type" IS NULL OR "geocaching_input_type" IN ('text', 'qr'));
+
+ALTER TABLE ONLY "public"."questions"
+    ADD CONSTRAINT "questions_geocaching_columns_only_check"
+    CHECK (
+        "type" = 'geocaching'
+        OR (
+            "target_latitude" IS NULL
+            AND "target_longitude" IS NULL
+            AND "proximity_radius" IS NULL
+            AND "geocaching_input_type" IS NULL
+        )
+    );
 
 
 ALTER TABLE ONLY "public"."rallye_team"

@@ -20,7 +20,10 @@ BEGIN
 END
 $$;
 
--- 2. Constraint entfernen
+-- 2. Constraints entfernen
+ALTER TABLE "public"."questions"
+    DROP CONSTRAINT IF EXISTS "questions_geocaching_columns_only_check";
+
 ALTER TABLE "public"."questions"
     DROP CONSTRAINT IF EXISTS "questions_geocaching_input_type_check";
 
