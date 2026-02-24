@@ -15,7 +15,9 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import Svg, { Path, Rect, Ellipse, Defs, LinearGradient, Stop } from 'react-native-svg';
 import * as Location from 'expo-location';
+import { DeviceMotion } from 'expo-sensors';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useSelector } from '@legendapp/state/react';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
@@ -28,6 +30,7 @@ import { useLanguage } from '@/utils/LanguageContext';
 import { useKeyboard } from '@/utils/useKeyboard';
 import { confirmAnswer, confirm } from '@/utils/ConfirmAlert';
 import Colors from '@/utils/Colors';
+import Logger from '@/utils/Logger';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
@@ -51,6 +54,13 @@ const ARROW_SPRING = {
   damping: 14,
   mass: 1,
 } as const;
+
+/** Clamp a number to a range. */
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
+
+/** Normalize an angle to 0..360 range. */
+const normalizeDeg = (deg: number): number => ((deg % 360) + 360) % 360;
 
 // -- Types -------------------------------------------------------------------
 
@@ -83,8 +93,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const processingRef = useRef(false);
 
-  // Reanimated shared value for arrow rotation (degrees)
-  const arrowRotation = useSharedValue(0);
+  // Reanimated shared values for arrow
+  const arrowRotation = useSharedValue(0);  // compass rotation (Z-axis)
+  const tiltX = useSharedValue(0);           // device pitch compensation
+  const tiltY = useSharedValue(0);           // device roll compensation
 
   // Animated figure-8 illustration values
   const fig8X = useSharedValue(0);
@@ -94,6 +106,13 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // Refs for subscriptions
   const positionSubRef = useRef<Location.LocationSubscription | null>(null);
   const headingSubRef = useRef<Location.LocationSubscription | null>(null);
+  const deviceMotionSubRef = useRef<{ remove: () => void } | null>(null);
+  const lastPositionRef = useRef<{ latitude: number; longitude: number } | null>(null);
+  // On Android, DeviceMotion.alpha is more reliable for compass heading
+  const deviceMotionHeadingRef = useRef<number | null>(null);
+  // Delta accumulator to prevent 360° animation jumps (Reanimated issue #4353)
+  const prevRotationRef = useRef(0);
+  const rotationDeltaRef = useRef(0);
 
   // Target coordinates from question
   const targetLat = question.target_latitude;
@@ -115,15 +134,51 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     !isNaN(targetLat) &&
     !isNaN(targetLon);
 
-  // -- Arrow animated style ---------------------------------------------------
+  Logger.debug('Geocaching', `Init — target=(${targetLat}, ${targetLon}), radius=${radius}, inputType=${inputType}, hasCoords=${hasCoordinates}`);
+
+  // -- Arrow animated style (3D: stays horizontal relative to ground) --------
 
   const arrowStyle = useAnimatedStyle(() => ({
     transform: [
-      { perspective: 600 },
-      { rotateX: '25deg' },
+      { perspective: 1000 },
+      // Compensate device tilt so arrow appears to lie flat on the ground
+      { rotateX: `${tiltX.value}deg` },
+      { rotateY: `${tiltY.value}deg` },
+      // Point toward target
       { rotateZ: `${arrowRotation.value}deg` },
     ],
   }));
+
+  // -- Shared rotation updater (used by both iOS heading and Android DeviceMotion) --
+
+  const updateArrowRotation = useCallback((compassHeading: number) => {
+    const pos = lastPositionRef.current;
+    if (!pos) {
+      Logger.warn('Geocaching', 'No position cached yet — cannot compute bearing');
+      return;
+    }
+
+    const targetBearing = bearing(
+      pos.latitude,
+      pos.longitude,
+      targetLat!,
+      targetLon!,
+    );
+
+    // Normalize to -180..180
+    let rotation = normalizeDeg(targetBearing - compassHeading);
+    if (rotation > 180) rotation -= 360;
+
+    // Delta accumulator: prevent 360° animation jumps when crossing -180/180 boundary
+    const diff = rotation - prevRotationRef.current;
+    if (diff > 180) rotationDeltaRef.current -= 360;
+    else if (diff < -180) rotationDeltaRef.current += 360;
+    prevRotationRef.current = rotation;
+
+    const continuousRotation = rotation + rotationDeltaRef.current;
+    Logger.debug('Geocaching', `Arrow — bearing=${targetBearing.toFixed(1)}°, compass=${compassHeading.toFixed(1)}°, rot=${rotation.toFixed(1)}°, continuous=${continuousRotation.toFixed(1)}°`);
+    arrowRotation.value = withSpring(continuousRotation, ARROW_SPRING);
+  }, [arrowRotation, targetLat, targetLon]);
 
   // -- Location tracking ------------------------------------------------------
 
@@ -131,9 +186,25 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     if (!hasCoordinates) return;
 
     const { status } = await Location.requestForegroundPermissionsAsync();
+    Logger.debug('Geocaching', `Location permission status: ${status}`);
     if (status !== 'granted') {
+      Logger.warn('Geocaching', 'Location permission denied');
       setLocationDenied(true);
       return;
+    }
+
+    // Seed initial position immediately so heading callback can compute bearing
+    try {
+      const initialPos = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      lastPositionRef.current = {
+        latitude: initialPos.coords.latitude,
+        longitude: initialPos.coords.longitude,
+      };
+      Logger.debug('Geocaching', `Initial position seeded — lat=${initialPos.coords.latitude.toFixed(6)}, lon=${initialPos.coords.longitude.toFixed(6)}`);
+    } catch (e) {
+      Logger.warn('Geocaching', 'Could not seed initial position', e);
     }
 
     // Watch position
@@ -144,45 +215,69 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         timeInterval: 1_000,
       },
       (loc) => {
+        // Store position for bearing calculations in heading callback
+        lastPositionRef.current = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+        };
+
         const dist = haversineDistance(
           loc.coords.latitude,
           loc.coords.longitude,
           targetLat!,
           targetLon!,
         );
+        Logger.debug('Geocaching', `Position update — lat=${loc.coords.latitude.toFixed(6)}, lon=${loc.coords.longitude.toFixed(6)}, dist=${dist.toFixed(1)}m, accuracy=${loc.coords.accuracy?.toFixed(1)}m`);
         setDistance(dist);
 
         // Check proximity
         if (dist <= radius) {
+          Logger.info('Geocaching', `Arrived! dist=${dist.toFixed(1)}m <= radius=${radius}m → switching to answering phase`);
           setPhase('answering');
         }
       },
     );
 
     // Watch heading (compass)
+    // On iOS: watchHeadingAsync is reliable → compute rotation here
+    // On Android: only used for accuracy state; rotation computed in DeviceMotion listener
     headingSubRef.current = await Location.watchHeadingAsync((heading) => {
       setHeadingAccuracy(heading.accuracy);
 
-      if (heading.accuracy >= MIN_HEADING_ACCURACY) {
-        // Calculate desired arrow direction:
-        // bearing to target minus current compass heading
-        // This makes the arrow always point toward the target relative to phone orientation
-        // We need the latest position for bearing though —
-        // keep a ref to last known position
-        void Location.getLastKnownPositionAsync().then((pos) => {
-          if (!pos) return;
-          const targetBearing = bearing(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            targetLat!,
-            targetLon!,
-          );
-          const rotation = targetBearing - heading.trueHeading;
-          arrowRotation.value = withSpring(rotation, ARROW_SPRING);
-        });
+      // On Android: skip rotation computation here — done in DeviceMotion listener
+      if (Platform.OS === 'android') {
+        Logger.debug('Geocaching', `Heading (Android, info only) — true=${heading.trueHeading.toFixed(1)}°, mag=${heading.magHeading.toFixed(1)}°, acc=${heading.accuracy}`);
+        return;
       }
+
+      // iOS: use trueHeading, fall back to magHeading
+      const compassHeading = heading.trueHeading >= 0 ? heading.trueHeading : heading.magHeading;
+      Logger.debug('Geocaching', `Heading (iOS) — using=${compassHeading.toFixed(1)}°, true=${heading.trueHeading.toFixed(1)}°`);
+
+      updateArrowRotation(compassHeading);
     });
-  }, [arrowRotation, hasCoordinates, radius, targetLat, targetLon]);
+
+    // Watch device motion for tilt compensation + Android heading+rotation
+    DeviceMotion.setUpdateInterval(50); // 20 fps
+    deviceMotionSubRef.current = DeviceMotion.addListener(({ rotation: rot }) => {
+      if (!rot) return;
+
+      // On Android: derive compass heading from alpha and compute rotation HERE
+      // (watchHeadingAsync is unreliable on many Android devices)
+      if (Platform.OS === 'android') {
+        const heading = normalizeDeg(360 - (rot.alpha * 180) / Math.PI);
+        deviceMotionHeadingRef.current = heading;
+        updateArrowRotation(heading);
+      }
+
+      // Pitch/roll compensation: clamp to ±65° for pronounced tilt response
+      const pitchDeg = clamp((rot.beta * 180) / Math.PI, -65, 65);
+      const rollDeg = clamp((rot.gamma * 180) / Math.PI, -65, 65);
+      // Apply inverse tilt so arrow stays horizontal relative to ground
+      tiltX.value = withSpring(-pitchDeg, { stiffness: 200, damping: 18, mass: 0.6 });
+      tiltY.value = withSpring(rollDeg, { stiffness: 200, damping: 18, mass: 0.6 });
+    });
+  }, [tiltX, tiltY, hasCoordinates, radius, targetLat, targetLon, updateArrowRotation]);
 
   useEffect(() => {
     if (phase === 'navigating') {
@@ -192,6 +287,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     return () => {
       positionSubRef.current?.remove();
       headingSubRef.current?.remove();
+      deviceMotionSubRef.current?.remove();
     };
   }, [phase, startTracking]);
 
@@ -201,6 +297,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     if (headingAccuracy >= MIN_HEADING_ACCURACY) return;
 
     const timer = setTimeout(() => {
+      Logger.info('Geocaching', `Calibration auto-skipped after ${CALIBRATION_TIMEOUT_S}s (accuracy was ${headingAccuracy})`);
       setCalibrationSkipped(true);
     }, CALIBRATION_TIMEOUT_S * 1_000);
 
@@ -260,6 +357,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   const handleTextSubmit = async () => {
     const trimmed = answer.trim();
+    Logger.debug('Geocaching', `Text submit — answer="${trimmed}", answerKeyReady=${answerKeyReady}, correctText="${correctText}"`);
     if (!trimmed) {
       Alert.alert(t('common.errorTitle'), t('question.error.enterAnswer'));
       return;
@@ -276,6 +374,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
     setSubmitting(true);
     const isCorrect = trimmed.toLowerCase() === correctText;
+    Logger.info('Geocaching', `Text answer evaluated — isCorrect=${isCorrect}, points=${isCorrect ? question.points : 0}`);
     try {
       await submitAnswerAndAdvance({
         teamId: team?.id ?? null,
@@ -296,6 +395,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // -- QR scan handler --------------------------------------------------------
 
   const handleQRCode = ({ data }: { data: string }) => {
+    Logger.debug('Geocaching', `QR scanned — data="${data}", answerKeyReady=${answerKeyReady}`);
     if (processingRef.current) return;
     if (!answerKeyReady) {
       Alert.alert(
@@ -308,9 +408,11 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     setScanMode(false);
 
     if (correctText !== data.toLowerCase()) {
+      Logger.info('Geocaching', 'QR answer incorrect');
       Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
       setTimeout(() => { processingRef.current = false; }, 2_000);
     } else {
+      Logger.info('Geocaching', 'QR answer correct!');
       Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
         {
           text: t('common.next'),
@@ -342,6 +444,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // -- Surrender handler ------------------------------------------------------
 
   const handleSurrender = async () => {
+    Logger.info('Geocaching', 'Surrender initiated');
     const confirmed = await confirm({
       title: t('confirm.surrender.title'),
       message: t('confirm.surrender.message'),
@@ -425,6 +528,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   if (phase === 'navigating') {
     const showCalibration =
       headingAccuracy < MIN_HEADING_ACCURACY && !calibrationSkipped;
+    Logger.debug('Geocaching', `Render navigating — showCalibration=${showCalibration}, headingAccuracy=${headingAccuracy}, calibrationSkipped=${calibrationSkipped}, distance=${distance}`);
 
     return (
       <ThemedView
@@ -446,25 +550,44 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             </ThemedText>
           </InfoBox>
 
-          {/* Arrow + distance */}
-          <InfoBox mb={0} style={styles.arrowContainer}>
+          {/* Arrow + distance — override maxHeight so calibration ∞ is not clipped */}
+          <InfoBox mb={0} style={styles.arrowContainer} maxHeight={600}>
             {showCalibration ? (
               <View style={styles.calibrationOverlay}>
-                {/* Animated phone doing figure-8 */}
-                <Animated.View style={[styles.fig8Phone, fig8Style]}>
-                  <ThemedText style={styles.fig8PhoneIcon}>📱</ThemedText>
-                </Animated.View>
-                {/* Figure-8 path indicator */}
-                <ThemedText style={styles.fig8Path}>∞</ThemedText>
+                {/* Figure-8 track behind the phone */}
+                <View style={styles.fig8TrackContainer}>
+                  <Svg width={120} height={80} viewBox="0 0 120 80">
+                    <Path
+                      d="M60,40 C60,15 95,15 95,40 C95,65 60,65 60,40 C60,15 25,15 25,40 C25,65 60,65 60,40 Z"
+                      stroke="#CCCCCC"
+                      strokeWidth="2.5"
+                      strokeDasharray="6,4"
+                      fill="none"
+                    />
+                  </Svg>
+                  {/* Animated phone follows the figure-8 path */}
+                  <Animated.View style={[styles.fig8PhoneAbsolute, fig8Style]}>
+                    <Svg width={36} height={52} viewBox="0 0 36 52">
+                      <Rect x="2" y="2" width="32" height="48" rx="6" ry="6"
+                        fill="#37474F" stroke="#78909C" strokeWidth="1.5" />
+                      <Rect x="5" y="8" width="26" height="32" rx="2" ry="2"
+                        fill="#4FC3F7" />
+                      <Ellipse cx="18" cy="46" rx="3" ry="3" fill="#546E7A" />
+                    </Svg>
+                  </Animated.View>
+                </View>
                 <ThemedText
                   variant="body"
-                  style={[s.text, { textAlign: 'center', marginTop: 12 }]}
+                  style={[s.text, { textAlign: 'center', marginTop: 16 }]}
                 >
                   {t('geocaching.calibrate')}
                 </ThemedText>
                 <UIButton
                   color={Colors.dhbwGray}
-                  onPress={() => setCalibrationSkipped(true)}
+                  onPress={() => {
+                    Logger.info('Geocaching', 'User manually skipped calibration');
+                    setCalibrationSkipped(true);
+                  }}
                   style={{ marginTop: 16 }}
                 >
                   {t('geocaching.skipCalibration')}
@@ -472,7 +595,50 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
               </View>
             ) : (
               <Animated.View style={[styles.arrowWrapper, arrowStyle]}>
-                <ThemedText style={styles.arrowEmoji}>➤</ThemedText>
+                {/* 3D extruded navigation arrow */}
+                <Svg width={120} height={140} viewBox="0 0 120 140">
+                  <Defs>
+                    {/* Lit right face gradient */}
+                    <LinearGradient id="rightFace" x1="0.4" y1="0" x2="1" y2="0.8">
+                      <Stop offset="0" stopColor="#EF5350" />
+                      <Stop offset="0.6" stopColor="#E53935" />
+                      <Stop offset="1" stopColor="#D32F2F" />
+                    </LinearGradient>
+                    {/* Shadow left face gradient */}
+                    <LinearGradient id="leftFace" x1="0.6" y1="0" x2="0" y2="0.8">
+                      <Stop offset="0" stopColor="#C62828" />
+                      <Stop offset="0.5" stopColor="#B71C1C" />
+                      <Stop offset="1" stopColor="#8E0000" />
+                    </LinearGradient>
+                    {/* Side depth gradient */}
+                    <LinearGradient id="depthRight" x1="0" y1="0" x2="0" y2="1">
+                      <Stop offset="0" stopColor="#5D4037" />
+                      <Stop offset="1" stopColor="#3E2723" />
+                    </LinearGradient>
+                    <LinearGradient id="depthLeft" x1="0" y1="0" x2="0" y2="1">
+                      <Stop offset="0" stopColor="#4E342E" />
+                      <Stop offset="1" stopColor="#2C1810" />
+                    </LinearGradient>
+                  </Defs>
+                  {/* Drop shadow */}
+                  <Ellipse cx="62" cy="122" rx="34" ry="7" fill="rgba(0,0,0,0.12)" />
+                  {/* Right depth/side face (extruded bottom edge) */}
+                  <Path d="M108,85 L60,68 L60,80 L108,97" fill="url(#depthRight)" />
+                  {/* Left depth/side face (extruded bottom edge) */}
+                  <Path d="M12,85 L60,68 L60,80 L12,97" fill="url(#depthLeft)" />
+                  {/* Tip depth (right side) */}
+                  <Path d="M60,10 L108,85 L108,97 L60,22" fill="#4E342E" opacity={0.6} />
+                  {/* Tip depth (left side) */}
+                  <Path d="M60,10 L12,85 L12,97 L60,22" fill="#3E2723" opacity={0.6} />
+                  {/* Right wing — top face (lit) */}
+                  <Path d="M60,10 L108,85 L60,68 Z" fill="url(#rightFace)" />
+                  {/* Left wing — top face (shadow) */}
+                  <Path d="M60,10 L12,85 L60,68 Z" fill="url(#leftFace)" />
+                  {/* Center ridge highlight */}
+                  <Path d="M60,13 L60,66" stroke="rgba(255,255,255,0.45)" strokeWidth="2" />
+                  {/* Specular highlight on right wing */}
+                  <Path d="M63,20 L88,70 L63,60 Z" fill="rgba(255,255,255,0.10)" />
+                </Svg>
               </Animated.View>
             )}
 
@@ -659,17 +825,15 @@ const styles = StyleSheet.create({
   arrowContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 200,
+    minHeight: 280,
+    overflow: 'visible',
+    paddingVertical: 20,
   },
   arrowWrapper: {
     width: 120,
-    height: 120,
+    height: 140,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  arrowEmoji: {
-    fontSize: 80,
-    textAlign: 'center',
   },
   distanceText: {
     fontSize: 28,
@@ -681,19 +845,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
+    paddingBottom: 32,
   },
-  fig8Phone: {
-    marginBottom: 8,
+  fig8TrackContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 140,
+    height: 100,
   },
-  fig8PhoneIcon: {
-    fontSize: 48,
-    textAlign: 'center',
-  },
-  fig8Path: {
-    fontSize: 60,
-    color: '#BBBBBB',
-    textAlign: 'center',
-    marginTop: -20,
+  fig8PhoneAbsolute: {
+    position: 'absolute',
   },
   arrivedBadge: {
     fontSize: 16,
