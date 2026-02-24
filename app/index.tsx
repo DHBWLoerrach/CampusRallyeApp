@@ -519,6 +519,10 @@ export default function Welcome() {
 
       {dashboardData.departmentEntries.map((entry) => {
         const rallyes = entry.rallyes;
+        const singleRallye = rallyes.length === 1 ? rallyes[0] : null;
+        const rallyeTitle = singleRallye?.name?.trim() || entry.department.name;
+        const cardTitle = singleRallye ? rallyeTitle : entry.department.name;
+        const cardDescription = singleRallye ? entry.department.name : undefined;
         const multipleRallyes = rallyes.length > 1;
         const expanded = expandedDepartmentIds.includes(entry.department.id);
 
@@ -526,7 +530,8 @@ export default function Welcome() {
           <Card
             key={entry.department.id}
             containerStyle={departmentCardStyle}
-            title={entry.department.name}
+            title={cardTitle}
+            description={cardDescription}
             icon="graduationcap"
           >
             {!multipleRallyes && rallyes[0] && (

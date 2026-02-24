@@ -274,7 +274,8 @@ describe('Welcome', () => {
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
-    expect(queryByText('Department Rallye')).toBeNull();
+    expect(getByText('Department Rallye')).toBeTruthy();
+    expect(getByText('Test Dept')).toBeTruthy();
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
 
     await act(async () => {
@@ -307,6 +308,7 @@ describe('Welcome', () => {
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
+    expect(getByText('Protected Rallye')).toBeTruthy();
 
     await act(async () => {
       fireEvent.press(getByText('rallye.join'));
