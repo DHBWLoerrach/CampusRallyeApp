@@ -102,26 +102,13 @@ export default function Welcome() {
     },
   ];
   const departmentCardStyle = [dashboardCardStyle, { marginVertical: 4 }];
-  const departmentSectionStyle = {
-    width: '100%' as const,
-    borderWidth: 1,
-    borderColor: palette.borderSubtle,
-    borderRadius: 18,
-    paddingHorizontal: 6,
-    paddingTop: 10,
-    paddingBottom: 4,
-    marginBottom: 4,
-    backgroundColor: isDarkMode
-      ? 'rgba(255,255,255,0.01)'
-      : 'rgba(255,255,255,0.55)',
-  };
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
   const closeSelectionButtonStyle = [
     ctaButtonStyle,
     { backgroundColor: palette.surface1 },
   ];
-  const closeSelectionButtonTextStyle = { color: palette.textMuted };
+  const closeSelectionButtonTextStyle = { color: palette.text };
 
   const applyDashboardData = useCallback((nextData: OrganizationDashboardData) => {
     setDashboardData(nextData);
@@ -530,91 +517,67 @@ export default function Welcome() {
         </Card>
       )}
 
-      {dashboardData.departmentEntries.length > 0 && (
-        <View style={departmentSectionStyle}>
-          {dashboardData.departmentEntries.length > 1 && (
-            <ThemedText
-              variant="bodySmall"
-              style={[
-                s.text,
-                {
-                  textAlign: 'left',
-                  width: '100%',
-                  marginBottom: 4,
-                  paddingHorizontal: 6,
-                },
-              ]}
-            >
-              {t('welcome.selectDepartment.description')}
-            </ThemedText>
-          )}
-          {dashboardData.departmentEntries.map((entry) => {
-            const rallyes = entry.rallyes;
-            const multipleRallyes = rallyes.length > 1;
-            const expanded = expandedDepartmentIds.includes(entry.department.id);
+      {dashboardData.departmentEntries.map((entry) => {
+        const rallyes = entry.rallyes;
+        const multipleRallyes = rallyes.length > 1;
+        const expanded = expandedDepartmentIds.includes(entry.department.id);
 
-            return (
-              <Card
-                key={entry.department.id}
-                containerStyle={departmentCardStyle}
-                title={entry.department.name}
-                icon="graduationcap"
+        return (
+          <Card
+            key={entry.department.id}
+            containerStyle={departmentCardStyle}
+            title={entry.department.name}
+            icon="graduationcap"
+          >
+            {!multipleRallyes && rallyes[0] && (
+              <UIButton
+                disabled={joining}
+                onPress={() => void handleRallyePress(rallyes[0])}
+                style={ctaButtonStyle}
+                textStyle={ctaButtonTextStyle}
               >
-                {!multipleRallyes && rallyes[0] && (
-                  <UIButton
-                    disabled={joining}
-                    onPress={() => void handleRallyePress(rallyes[0])}
-                    style={ctaButtonStyle}
-                    textStyle={ctaButtonTextStyle}
-                  >
-                    {t('rallye.join')}
-                  </UIButton>
-                )}
+                {t('rallye.join')}
+              </UIButton>
+            )}
 
-                {multipleRallyes && (
-                  <>
-                    <UIButton
-                      disabled={joining}
-                      onPress={() =>
-                        toggleDepartmentExpansion(entry.department.id)
-                      }
-                      style={
-                        expanded ? closeSelectionButtonStyle : ctaButtonStyle
-                      }
-                      textStyle={
-                        expanded
-                          ? closeSelectionButtonTextStyle
-                          : ctaButtonTextStyle
-                      }
-                    >
-                      {expanded ? t('welcome.join.hide') : t('welcome.join.select')}
-                    </UIButton>
-                    {expanded && (
-                      <View style={{ marginTop: 10 }}>
-                        {rallyes.map((rallye, index) => (
-                          <View
-                            key={rallye.id}
-                            style={index > 0 ? { marginTop: 8 } : undefined}
-                          >
-                            <UIButton
-                              disabled={joining}
-                              onPress={() => void handleRallyePress(rallye)}
-                              style={ctaButtonStyle}
-                              textStyle={ctaButtonTextStyle}
-                            >
-                              {rallye.name}
-                            </UIButton>
-                          </View>
-                        ))}
+            {multipleRallyes && (
+              <>
+                <UIButton
+                  disabled={joining}
+                  onPress={() => toggleDepartmentExpansion(entry.department.id)}
+                  style={expanded ? closeSelectionButtonStyle : ctaButtonStyle}
+                  textStyle={
+                    expanded
+                      ? closeSelectionButtonTextStyle
+                      : ctaButtonTextStyle
+                  }
+                >
+                  {expanded ? t('welcome.join.hide') : t('welcome.join.select')}
+                </UIButton>
+                {expanded && (
+                  <View style={{ marginTop: 10 }}>
+                    {rallyes.map((rallye, index) => (
+                      <View
+                        key={rallye.id}
+                        style={index > 0 ? { marginTop: 8 } : undefined}
+                      >
+                        <UIButton
+                          disabled={joining}
+                          onPress={() => void handleRallyePress(rallye)}
+                          style={ctaButtonStyle}
+                          textStyle={ctaButtonTextStyle}
+                        >
+                          {rallye.name}
+                        </UIButton>
                       </View>
-                    )}
-                  </>
+                    ))}
+                  </View>
                 )}
-              </Card>
-            );
-          })}
-        </View>
-      )}
+              </>
+            )}
+          </Card>
+        );
+      })}
 
       {dashboardData.campusEventsRallyes.length > 0 && (
         <Card

@@ -362,7 +362,7 @@ describe('Welcome', () => {
     expect(getByText('Rallye B')).toBeTruthy();
   });
 
-  it('shows department section label when multiple departments are available', async () => {
+  it('does not show department section label when multiple departments are available', async () => {
     const rallyeA: Rallye = {
       id: 9,
       name: 'Rallye A',
@@ -398,9 +398,11 @@ describe('Welcome', () => {
       ],
     });
 
-    const { getByText } = render(<Welcome />);
+    const { getByText, queryByText } = render(<Welcome />);
     await waitFor(() => {
-      expect(getByText('welcome.selectDepartment.description')).toBeTruthy();
+      expect(getByText(mockDepartment.name)).toBeTruthy();
+      expect(getByText(secondDepartment.name)).toBeTruthy();
     });
+    expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
 });
