@@ -29,7 +29,6 @@ const TeamSetup = observer(function TeamSetup() {
         .single();
       if (error) throw error;
       if (data) {
-        store$.reset();
         store$.team.set(data);
         await setCurrentTeam(rallye.id, data);
         // Kurze Bestätigung via Bottom Sheet im Rallye-Screen
