@@ -1,3 +1,5 @@
+import { getLocales } from 'expo-localization';
+
 export type Language = 'de' | 'en';
 
 export const translations = {
@@ -340,10 +342,10 @@ export const translate = (
 
 export const resolveDeviceLanguage = (): Language => {
   try {
-    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-    if (locale?.toLowerCase().startsWith('de')) return 'de';
+    const locales = getLocales();
+    if (locales[0]?.languageCode?.toLowerCase().startsWith('de')) return 'de';
   } catch {
-    // Ignore and fall back to German.
+    // Fall back to English if native API unavailable.
   }
   return 'en';
 };
