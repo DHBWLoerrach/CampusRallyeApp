@@ -192,4 +192,112 @@ describe('Voting', () => {
     expect(getByText('Question 1')).toBeTruthy();
     expect(queryByText('Question 2')).toBeNull();
   });
+
+  it('renders geocaching answers as text (same as knowledge)', async () => {
+    mockRpc.mockImplementation((name: string) => {
+      if (name === 'get_voting_content') {
+        return Promise.resolve({
+          data: [
+            {
+              tq_question_id: 10,
+              tq_id: 'geo-1',
+              tq_team_id: 'team-1',
+              rt_id: 'team-1',
+              rt_team_name: 'Team A',
+              question_content: 'Find the landmark',
+              question_type: 'geocaching',
+              tq_team_answer: 'Geocaching Answer A',
+            },
+            {
+              tq_question_id: 10,
+              tq_id: 'geo-2',
+              tq_team_id: 'team-2',
+              rt_id: 'team-2',
+              rt_team_name: 'Team B',
+              question_content: 'Find the landmark',
+              question_type: 'geocaching',
+              tq_team_answer: 'Geocaching Answer B',
+            },
+          ],
+          error: null,
+        });
+      }
+      return Promise.resolve({ data: [], error: null });
+    });
+
+    const { getByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('Geocaching Answer A')).toBeTruthy();
+      expect(getByText('Geocaching Answer B')).toBeTruthy();
+    });
+  });
+
+  it('shows ended state when votingAllowed is false', () => {
+    const storeMock = jest.requireMock('@/services/storage/Store');
+    storeMock.store$.votingAllowed.get.mockReturnValue(false);
+
+    const { getByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    expect(getByText('voting.ended.title')).toBeTruthy();
+    expect(getByText('voting.ended.message')).toBeTruthy();
+
+    // Restore for subsequent tests
+    storeMock.store$.votingAllowed.get.mockReturnValue(true);
+  });
+
+  it('advances to next question after successful vote', async () => {
+    mockRpc.mockImplementation((name: string) => {
+      if (name === 'get_voting_content') {
+        return Promise.resolve({
+          data: [
+            {
+              tq_question_id: 1,
+              tq_id: 'vote-1',
+              tq_team_id: 'team-1',
+              rt_id: 'team-1',
+              rt_team_name: 'Team A',
+              question_content: 'Question 1',
+              question_type: 'knowledge',
+              tq_team_answer: 'Answer A',
+            },
+            {
+              tq_question_id: 2,
+              tq_id: 'vote-2',
+              tq_team_id: 'team-2',
+              rt_id: 'team-2',
+              rt_team_name: 'Team B',
+              question_content: 'Question 2',
+              question_type: 'knowledge',
+              tq_team_answer: 'Answer B',
+            },
+          ],
+          error: null,
+        });
+      }
+      if (name === 'increment_team_question_points') {
+        return Promise.resolve({ error: null });
+      }
+      return Promise.resolve({ data: [], error: null });
+    });
+
+    const { getByTestId, getByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('Question 1')).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId('vote-option-vote-1'));
+    fireEvent.press(getByText('voting.next'));
+
+    await waitFor(() => {
+      expect(getByText('Question 2')).toBeTruthy();
+    });
+  });
 });

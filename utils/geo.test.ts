@@ -63,4 +63,34 @@ describe('formatDistance', () => {
     expect(formatDistance(42.7)).toBe('43 m');
     expect(formatDistance(0.3)).toBe('0 m');
   });
+
+  it('formats zero distance', () => {
+    expect(formatDistance(0)).toBe('0 m');
+  });
+});
+
+describe('haversineDistance edge cases', () => {
+  it('handles southern hemisphere / negative coordinates', () => {
+    // Sydney to Melbourne (~714 km)
+    const dist = haversineDistance(-33.8688, 151.2093, -37.8136, 144.9631);
+    expect(dist).toBeGreaterThan(700_000);
+    expect(dist).toBeLessThan(750_000);
+  });
+
+  it('handles cross-hemisphere distances', () => {
+    // London to Cape Town (~9,600 km)
+    const dist = haversineDistance(51.5074, -0.1278, -33.9249, 18.4241);
+    expect(dist).toBeGreaterThan(9_000_000);
+    expect(dist).toBeLessThan(10_000_000);
+  });
+});
+
+describe('bearing edge cases', () => {
+  it('returns consistent bearing for identical points', () => {
+    // Both identical — bearing is undefined mathematically, but should not crash
+    const b = bearing(47.0, 7.0, 47.0, 7.0);
+    expect(typeof b).toBe('number');
+    expect(b).toBeGreaterThanOrEqual(0);
+    expect(b).toBeLessThan(360);
+  });
 });
