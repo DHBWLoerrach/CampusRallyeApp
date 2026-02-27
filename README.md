@@ -63,6 +63,10 @@ Voraussetzungen für die Weiterentwicklung dieses Projekts sind folgende:
 1. Anschließend müssen mit npm die Abhängigkeiten bzw. npm-Pakete in NodeJS installiert werden:
    `npm ci`
 
+   **Wichtig für das Team (macOS + Windows):**
+   Für das initiale Setup immer `npm ci` verwenden, nicht `npm install`.
+   So werden exakt die Versionen aus `package-lock.json` installiert und unnötige Lockfile-Änderungen zwischen Betriebssystemen reduziert.
+
 1. Zum Schluss muss noch die Konfiguration zu Supabase angepasst werden. Dazu ist zunächst die Datei `.env` im Projektverzeichnis zu erstellen. In `.env` müssen zwei Einträge vorgenommen werden:
 
 ```
@@ -84,6 +88,18 @@ Nun kann die App getestet und weiterentwickelt werden. Für das aktive Testen mu
 
 Die Anmeldedaten für die Teilnahme an einer Rallye in der App können aus den
 entsprechenden Tabellen in der Supabase-Instanz in Erfahrung gebracht werden.
+
+### Abhängigkeiten ändern (add/update/remove)
+
+`npm ci` ist für ein reproduzierbares Setup gedacht.
+Wenn Abhängigkeiten geändert werden sollen, erfolgt das bewusst mit `npm install` oder `npm uninstall`:
+
+- **Hinzufügen:** `npm install <paket>` (bzw. `npm install -D <paket>` für Dev-Dependencies)
+- **Aktualisieren:** `npm install <paket>@<version>` oder `npm update <paket>`
+- **Entfernen:** `npm uninstall <paket>`
+
+Dabei werden `package.json` und `package-lock.json` aktualisiert.
+Beide Dateien müssen gemeinsam committed werden.
 
 ### App mit Expo testen
 
