@@ -12,6 +12,11 @@ import { confirmAnswer } from '@/utils/ConfirmAlert';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
+import {
+  getAnswerText,
+  isAnswerMarkedCorrect,
+  isSameQuestionId,
+} from '@/utils/answerRows';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
@@ -34,7 +39,9 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
 
   const shuffleCache = useRef<{ key: string; data: AnswerRow[] } | null>(null);
   const options = useMemo(() => {
-    const filtered = answers.filter((a) => a.question_id === question.id);
+    const filtered = answers.filter((a) =>
+      isSameQuestionId(a.question_id, question.id)
+    );
     const key = `${question.id}:${filtered.map((f) => f.id).join(',')}`;
     if (shuffleCache.current && shuffleCache.current.key === key) {
       return shuffleCache.current.data;
@@ -50,10 +57,9 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
 
   const correctAnswer = useMemo(
     () =>
-      options
-        .find((o) => o.correct)
-        ?.text?.toLowerCase()
-        .trim() ?? '',
+      getAnswerText(options.find((o) => isAnswerMarkedCorrect(o)))
+        .toLowerCase()
+        .trim(),
     [options]
   );
 
@@ -83,6 +89,13 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
     const trimmed = answer.trim();
     if (!trimmed) {
       Alert.alert(t('common.errorTitle'), t('question.error.selectAnswer'));
+      return;
+    }
+    if (!correctAnswer) {
+      Alert.alert(
+        t('question.error.pleaseWaitTitle'),
+        t('question.error.answerLoading')
+      );
       return;
     }
     const confirmed = await confirmAnswer({ answer: trimmed, t });
@@ -115,7 +128,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
             </ThemedText>
           ) : (
             options.map((option, idx) => {
-              const optionText = option.text ?? '';
+              const optionText = getAnswerText(option);
               const isSelected = answer === optionText;
               return (
                 <Animated.View
@@ -166,8 +179,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
 
         <InfoBox mb={0}>
           <UIButton
-            color={answer ? Colors.dhbwRed : Colors.dhbwGray}
-            disabled={!answer || submitting}
+            color={answer && correctAnswer ? Colors.dhbwRed : Colors.dhbwGray}
+            disabled={!answer || !correctAnswer || submitting}
             loading={submitting}
             onPress={handleSubmit}
           >

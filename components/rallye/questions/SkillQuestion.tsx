@@ -7,6 +7,7 @@ import Colors from '@/utils/Colors';
 import { confirmAnswer } from '@/utils/ConfirmAlert';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import { useKeyboard } from '@/utils/useKeyboard';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
@@ -27,10 +28,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
 
   const team = store$.team.get();
   const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
-  const correct = answers.find(
-    (a) => a.question_id === question.id && a.correct
-  );
-  const correctText = (correct?.text ?? '').toLowerCase().trim();
+  const correctText = getAnswerKeyForQuestion(answers, question.id);
   const answerKeyReady = correctText.length > 0;
 
   const handlePersist = async () => {

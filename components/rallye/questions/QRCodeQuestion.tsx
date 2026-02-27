@@ -10,6 +10,7 @@ import Hint from '@/components/ui/Hint';
 import Colors from '@/utils/Colors';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { useLanguage } from '@/utils/LanguageContext';
+import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import { confirm } from '@/utils/ConfirmAlert';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
@@ -27,11 +28,7 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
 
   const team = store$.team.get();
   const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
-  const correct = (
-    answers.find((a) => a.question_id === question.id && a.correct)?.text || ''
-  )
-    .toLowerCase()
-    .trim();
+  const correct = getAnswerKeyForQuestion(answers, question.id);
   const answerKeyReady = correct.length > 0;
 
   const submitSurrender = async () => {
