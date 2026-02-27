@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "scheme": "rallyeapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "platforms": [
       "ios",
       "android"
@@ -57,7 +56,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "monochromeImage": "./assets/images/monochrome-icon.png"
       },
-      "edgeToEdgeEnabled": true,
       "package": "de.dhbwloe.loerrach.CampusRallyeApp"
     },
     "plugins": [
@@ -86,7 +84,8 @@
       "expo-localization"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "reactCompiler": true
     },
     "extra": {
       "eas": {
