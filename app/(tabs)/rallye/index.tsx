@@ -163,11 +163,29 @@ const RallyeIndex = observer(function RallyeIndex() {
         .in('id', filteredIds);
       if (questionsError) throw questionsError;
 
-      const mapped = (questionsData || []).map((q: any) => ({
-        ...q,
-        question: q.content,
-        question_type: q.type,
-      }));
+      // Fetch geocaching data from separate table and merge
+      const { data: geocachingData } = await supabase
+        .from('questions_geocaching')
+        .select('*')
+        .in('question_id', filteredIds);
+      const geocachingMap = new Map(
+        (geocachingData || []).map((g: any) => [g.question_id, g])
+      );
+
+      const mapped = (questionsData || []).map((q: any) => {
+        const geo = geocachingMap.get(q.id);
+        return {
+          ...q,
+          question: q.content,
+          question_type: q.type,
+          ...(geo && {
+            target_latitude: geo.target_latitude,
+            target_longitude: geo.target_longitude,
+            proximity_radius: geo.proximity_radius,
+            geocaching_input_type: geo.geocaching_input_type,
+          }),
+        };
+      });
 
       const ordered = orderQuestionsWithUploadsLast(mapped);
 
