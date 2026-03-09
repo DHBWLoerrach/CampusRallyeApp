@@ -11,11 +11,11 @@ import Animated, {
   useSharedValue,
   withRepeat,
   withSequence,
-  withSpring,
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import Svg, { Path, Rect, Ellipse, Defs, LinearGradient, Stop } from 'react-native-svg';
+import Svg, { Path, Rect, Ellipse } from 'react-native-svg';
+import Compass3DArrow from './Compass3DArrow';
 import * as Location from 'expo-location';
 import { DeviceMotion } from 'expo-sensors';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -47,17 +47,6 @@ const MIN_HEADING_ACCURACY = 1;
 
 /** Seconds before calibration is auto-skipped. */
 const CALIBRATION_TIMEOUT_S = 8;
-
-/** Spring config for smooth arrow rotation. */
-const ARROW_SPRING = {
-  stiffness: 120,
-  damping: 14,
-  mass: 1,
-} as const;
-
-/** Clamp a number to a range. */
-const clamp = (v: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, v));
 
 /** Normalize an angle to 0..360 range. */
 const normalizeDeg = (deg: number): number => ((deg % 360) + 360) % 360;
@@ -93,10 +82,11 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const processingRef = useRef(false);
 
-  // Reanimated shared values for arrow
-  const arrowRotation = useSharedValue(0);  // compass rotation (Z-axis)
-  const tiltX = useSharedValue(0);           // device pitch compensation
-  const tiltY = useSharedValue(0);           // device roll compensation
+  // Mutable ref for the 3D arrow angle — written by sensor callbacks, read by Canvas
+  const angleRef = useRef(0);
+  // Tilt refs — written by DeviceMotion, read by 3D camera
+  const tiltXRef = useRef(0);
+  const tiltYRef = useRef(0);
 
   // Animated figure-8 illustration values
   const fig8X = useSharedValue(0);
@@ -136,19 +126,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   Logger.debug('Geocaching', `Init — target=(${targetLat}, ${targetLon}), radius=${radius}, inputType=${inputType}, hasCoords=${hasCoordinates}`);
 
-  // -- Arrow animated style (3D: stays horizontal relative to ground) --------
-
-  const arrowStyle = useAnimatedStyle(() => ({
-    transform: [
-      { perspective: 1000 },
-      // Compensate device tilt so arrow appears to lie flat on the ground
-      { rotateX: `${tiltX.value}deg` },
-      { rotateY: `${tiltY.value}deg` },
-      // Point toward target
-      { rotateZ: `${arrowRotation.value}deg` },
-    ],
-  }));
-
   // -- Shared rotation updater (used by both iOS heading and Android DeviceMotion) --
 
   const updateArrowRotation = useCallback((compassHeading: number) => {
@@ -177,8 +154,8 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
     const continuousRotation = rotation + rotationDeltaRef.current;
     Logger.debug('Geocaching', `Arrow — bearing=${targetBearing.toFixed(1)}°, compass=${compassHeading.toFixed(1)}°, rot=${rotation.toFixed(1)}°, continuous=${continuousRotation.toFixed(1)}°`);
-    arrowRotation.value = withSpring(continuousRotation, ARROW_SPRING);
-  }, [arrowRotation, targetLat, targetLon]);
+    angleRef.current = continuousRotation;
+  }, [targetLat, targetLon]);
 
   // -- Location tracking ------------------------------------------------------
 
@@ -270,14 +247,11 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         updateArrowRotation(heading);
       }
 
-      // Pitch/roll compensation: clamp to ±65° for pronounced tilt response
-      const pitchDeg = clamp((rot.beta * 180) / Math.PI, -65, 65);
-      const rollDeg = clamp((rot.gamma * 180) / Math.PI, -65, 65);
-      // Apply inverse tilt so arrow stays horizontal relative to ground
-      tiltX.value = withSpring(-pitchDeg, { stiffness: 200, damping: 18, mass: 0.6 });
-      tiltY.value = withSpring(rollDeg, { stiffness: 200, damping: 18, mass: 0.6 });
+      // Feed device tilt into the 3D camera for perspective compensation
+      tiltXRef.current = (rot.beta * 180) / Math.PI;
+      tiltYRef.current = (rot.gamma * 180) / Math.PI;
     });
-  }, [tiltX, tiltY, hasCoordinates, radius, targetLat, targetLon, updateArrowRotation]);
+  }, [hasCoordinates, radius, targetLat, targetLon, updateArrowRotation]);
 
   useEffect(() => {
     if (phase === 'navigating') {
@@ -594,52 +568,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                 </UIButton>
               </View>
             ) : (
-              <Animated.View style={[styles.arrowWrapper, arrowStyle]}>
-                {/* 3D extruded navigation arrow */}
-                <Svg width={120} height={140} viewBox="0 0 120 140">
-                  <Defs>
-                    {/* Lit right face gradient */}
-                    <LinearGradient id="rightFace" x1="0.4" y1="0" x2="1" y2="0.8">
-                      <Stop offset="0" stopColor="#EF5350" />
-                      <Stop offset="0.6" stopColor="#E53935" />
-                      <Stop offset="1" stopColor="#D32F2F" />
-                    </LinearGradient>
-                    {/* Shadow left face gradient */}
-                    <LinearGradient id="leftFace" x1="0.6" y1="0" x2="0" y2="0.8">
-                      <Stop offset="0" stopColor="#C62828" />
-                      <Stop offset="0.5" stopColor="#B71C1C" />
-                      <Stop offset="1" stopColor="#8E0000" />
-                    </LinearGradient>
-                    {/* Side depth gradient */}
-                    <LinearGradient id="depthRight" x1="0" y1="0" x2="0" y2="1">
-                      <Stop offset="0" stopColor="#5D4037" />
-                      <Stop offset="1" stopColor="#3E2723" />
-                    </LinearGradient>
-                    <LinearGradient id="depthLeft" x1="0" y1="0" x2="0" y2="1">
-                      <Stop offset="0" stopColor="#4E342E" />
-                      <Stop offset="1" stopColor="#2C1810" />
-                    </LinearGradient>
-                  </Defs>
-                  {/* Drop shadow */}
-                  <Ellipse cx="62" cy="122" rx="34" ry="7" fill="rgba(0,0,0,0.12)" />
-                  {/* Right depth/side face (extruded bottom edge) */}
-                  <Path d="M108,85 L60,68 L60,80 L108,97" fill="url(#depthRight)" />
-                  {/* Left depth/side face (extruded bottom edge) */}
-                  <Path d="M12,85 L60,68 L60,80 L12,97" fill="url(#depthLeft)" />
-                  {/* Tip depth (right side) */}
-                  <Path d="M60,10 L108,85 L108,97 L60,22" fill="#4E342E" opacity={0.6} />
-                  {/* Tip depth (left side) */}
-                  <Path d="M60,10 L12,85 L12,97 L60,22" fill="#3E2723" opacity={0.6} />
-                  {/* Right wing — top face (lit) */}
-                  <Path d="M60,10 L108,85 L60,68 Z" fill="url(#rightFace)" />
-                  {/* Left wing — top face (shadow) */}
-                  <Path d="M60,10 L12,85 L60,68 Z" fill="url(#leftFace)" />
-                  {/* Center ridge highlight */}
-                  <Path d="M60,13 L60,66" stroke="rgba(255,255,255,0.45)" strokeWidth="2" />
-                  {/* Specular highlight on right wing */}
-                  <Path d="M63,20 L88,70 L63,60 Z" fill="rgba(255,255,255,0.10)" />
-                </Svg>
-              </Animated.View>
+              <Compass3DArrow angleRef={angleRef} tiltXRef={tiltXRef} tiltYRef={tiltYRef} />
             )}
 
             {distance != null && (
@@ -825,15 +754,8 @@ const styles = StyleSheet.create({
   arrowContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 280,
-    overflow: 'visible',
-    paddingVertical: 20,
-  },
-  arrowWrapper: {
-    width: 120,
-    height: 140,
-    alignItems: 'center',
-    justifyContent: 'center',
+    minHeight: 240,
+    paddingVertical: 8,
   },
   distanceText: {
     fontSize: 28,

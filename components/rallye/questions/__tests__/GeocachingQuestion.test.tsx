@@ -7,6 +7,15 @@ import { confirm } from '@/utils/ConfirmAlert';
 
 // -- Mocks -------------------------------------------------------------------
 
+// Replace the 3D canvas component with a simple View so Jest doesn't need WebGL
+jest.mock('@/components/rallye/questions/Compass3DArrow', () => {
+  const { View } = jest.requireActual('react-native');
+  return {
+    __esModule: true,
+    default: () => <View testID="compass-3d-arrow" />,
+  };
+});
+
 const mockSubmitAnswerAndAdvance = jest.fn();
 jest.mock('@/services/storage/answerSubmission', () => ({
   submitAnswerAndAdvance: (...args: unknown[]) =>
@@ -89,7 +98,7 @@ jest.mock('expo-camera', () => {
   };
 });
 
-// Mock react-native-svg
+// Mock react-native-svg (calibration illustration still uses Path, Rect, Ellipse)
 jest.mock('react-native-svg', () => {
   const { View } = jest.requireActual('react-native');
   const mock = (name: string) => {
@@ -103,9 +112,6 @@ jest.mock('react-native-svg', () => {
     Path: mock('Path'),
     Rect: mock('Rect'),
     Ellipse: mock('Ellipse'),
-    Defs: mock('Defs'),
-    LinearGradient: mock('LinearGradient'),
-    Stop: mock('Stop'),
   };
 });
 
