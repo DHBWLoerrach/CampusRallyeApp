@@ -133,6 +133,14 @@ export const translations = {
     'question.unknown.message':
       'Dieser Fragetyp wird aktuell nicht unterstützt: {{type}}',
     'question.skip': 'Frage überspringen',
+    'puzzle.error.loadFragments': 'Puzzle-Fragmente konnten nicht geladen werden.',
+    'puzzle.error.fragmentsIncompleteTitle': 'Fragmente fehlen',
+    'puzzle.error.fragmentsIncompleteMessage':
+      'Du musst erst alle Fragmente einsammeln, bevor du die Hauptfrage beantworten kannst.',
+    'puzzle.fragment.collect': 'Fragment einsammeln (Demo)',
+    'puzzle.fragment.demo': 'Demo: Fragment würde hier angezeigt.',
+    'puzzle.fragmentsRemaining': 'Noch {{count}} Fragment(e) ausstehend',
+    'puzzle.submit': 'Prüfen',
     'hint.confirm.title': 'Sicherheitsfrage',
     'hint.confirm.message':
       'Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch {{cost}} Punkt(e).',
@@ -289,6 +297,14 @@ export const translations = {
     'question.unknown.message':
       'This question type is not supported yet: {{type}}',
     'question.skip': 'Skip question',
+    'puzzle.error.loadFragments': 'Puzzle fragments could not be loaded.',
+    'puzzle.error.fragmentsIncompleteTitle': 'Fragments missing',
+    'puzzle.error.fragmentsIncompleteMessage':
+      'You must collect all fragments before you can answer the main question.',
+    'puzzle.fragment.collect': 'Collect fragment (Demo)',
+    'puzzle.fragment.demo': 'Demo: Fragment would be displayed here.',
+    'puzzle.fragmentsRemaining': '{{count}} fragment(s) remaining',
+    'puzzle.submit': 'Check',
     'hint.confirm.title': 'Security question',
     'hint.confirm.message':
       'Are you sure you want to receive a hint? This will cost you {{cost}} point(s).',

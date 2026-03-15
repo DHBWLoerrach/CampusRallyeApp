@@ -171,9 +171,17 @@ const RallyeIndex = observer(function RallyeIndex() {
 
       const ordered = orderQuestionsWithUploadsLast(mapped);
 
-      store$.questions.set(ordered);
-      store$.currentQuestion.set(ordered[0] || null);
-      store$.questionIndex.set(0);
+      // Only update questions if they actually changed or if this is the first load
+      const currentQuestions = store$.questions.get();
+      const questionsChanged = 
+        currentQuestions.length !== ordered.length ||
+        !ordered.every((q, i) => currentQuestions[i]?.id === q.id);
+
+      if (questionsChanged || currentQuestions.length === 0) {
+        store$.questions.set(ordered);
+        store$.questionIndex.set(0);
+        store$.currentQuestion.set(ordered[0] || null);
+      }
     } catch (err) {
       console.error('Fehler beim Laden der Fragen:', err);
       Alert.alert(
@@ -211,7 +219,12 @@ const RallyeIndex = observer(function RallyeIndex() {
 
   useEffect(() => {
     if (!rallyeId) return;
-    void loadQuestions();
+    // Only load questions if none are loaded yet
+    // This prevents re-shuffling during an active rallye session
+    const currentQuestions = store$.questions.get();
+    if (currentQuestions.length === 0) {
+      void loadQuestions();
+    }
   }, [loadQuestions, rallyeId]);
 
   useEffect(() => {
@@ -230,7 +243,8 @@ const RallyeIndex = observer(function RallyeIndex() {
       return;
     }
     if (rallye?.status === 'running') {
-      await loadQuestions();
+      // Don't reload questions during an active session to prevent re-shuffling
+      // Only reload answers and status
       await loadAnswers();
       await refreshStatus();
     } else {

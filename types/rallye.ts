@@ -3,7 +3,8 @@ export type QuestionType =
   | 'upload'
   | 'qr_code'
   | 'multiple_choice'
-  | 'picture';
+  | 'picture'
+  | 'puzzle';
 
 // UI mapping:
 // - 'tour' => "Campus Tour" (self-guided, no team required)
@@ -83,4 +84,25 @@ export interface Team {
   rallye_id?: number;
   points?: number;
   time_played?: string | null;
+}
+
+export interface PuzzleGroup {
+  id: number;
+  puzzle_question_id: number;
+  variant: 'visible' | 'hidden';
+  title?: string | null;
+  created_at: string;
+}
+
+export interface PuzzleFragment {
+  id: number;
+  group_id: number;
+  fragment_question_id: number;
+  order_index: number;
+  location_hint?: string | null;
+  created_at: string;
+}
+
+export interface PuzzleFragmentWithQuestion extends PuzzleFragment {
+  fragment_question: Question;
 }
