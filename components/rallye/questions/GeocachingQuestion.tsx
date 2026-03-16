@@ -416,7 +416,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     if (correctText !== data.toLowerCase()) {
       Logger.info('Geocaching', 'QR answer incorrect');
       Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
-      setTimeout(() => { processingRef.current = false; }, 2_000);
+      processingRef.current = false;
     } else {
       Logger.info('Geocaching', 'QR answer correct!');
       Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
