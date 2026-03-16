@@ -391,7 +391,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       });
       setAnswer('');
     } catch (e) {
-      console.error('Error submitting geocaching answer:', e);
+      Logger.error('Geocaching', 'Error submitting answer', e);
       Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
     } finally {
       setSubmitting(false);
@@ -433,7 +433,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                   answerText: data,
                 });
               } catch (e) {
-                console.error('Error submitting geocaching QR answer:', e);
+                Logger.error('Geocaching', 'Error submitting QR answer', e);
                 Alert.alert(
                   t('common.errorTitle'),
                   t('question.error.saveAnswer'),
@@ -470,7 +470,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         pointsAwarded: 0,
       });
     } catch (e) {
-      console.error('Error submitting surrender:', e);
+      Logger.error('Geocaching', 'Error submitting surrender', e);
       Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
     } finally {
       setSubmitting(false);
