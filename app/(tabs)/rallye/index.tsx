@@ -7,7 +7,7 @@ import { supabase } from '@/utils/Supabase';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useAppStyles } from '@/utils/AppStyles';
-import { orderQuestionsWithUploadsLast } from '@/utils/orderQuestions';
+import { orderQuestionsForSession } from '@/utils/orderQuestions';
 import { spacing } from '@/utils/spacing';
 import Preparation from '@/app/(tabs)/rallye/states/Preparation';
 import NoQuestions from '@/app/(tabs)/rallye/states/NoQuestions';
@@ -203,11 +203,17 @@ const RallyeIndex = observer(function RallyeIndex() {
         };
       });
 
-      const ordered = orderQuestionsWithUploadsLast(mapped);
+      const previousQuestions = store$.questions.get();
+      const previousCurrentQuestionId = store$.currentQuestion.get()?.id;
+      const ordered = orderQuestionsForSession(mapped, previousQuestions);
+      const nextQuestionIndex = previousCurrentQuestionId
+        ? ordered.findIndex((question) => question.id === previousCurrentQuestionId)
+        : 0;
+      const safeQuestionIndex = nextQuestionIndex >= 0 ? nextQuestionIndex : 0;
 
       store$.questions.set(ordered);
-      store$.currentQuestion.set(ordered[0] || null);
-      store$.questionIndex.set(0);
+      store$.currentQuestion.set(ordered[safeQuestionIndex] || null);
+      store$.questionIndex.set(safeQuestionIndex);
     } catch (err) {
       console.error('Fehler beim Laden der Fragen:', err);
       Alert.alert(

@@ -6,6 +6,7 @@ import { store$ } from '@/services/storage/Store';
 
 let mockTeam: { id: number; name: string } | null = null;
 let mockJoinQuestionIds = [{ question_id: 1 }];
+let mockAnsweredQuestionIds: { question_id: number }[] = [];
 let mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
 let mockGeocachingData: {
   data: any[] | null;
@@ -40,7 +41,9 @@ const mockFrom = jest.fn((table: string) => {
   if (table === 'team_questions') {
     return {
       select: jest.fn(() => ({
-        eq: jest.fn(() => Promise.resolve({ data: [], error: null })),
+        eq: jest.fn(() =>
+          Promise.resolve({ data: mockAnsweredQuestionIds, error: null })
+        ),
       })),
     };
   }
@@ -223,6 +226,7 @@ describe('RallyeIndex effects', () => {
     jest.clearAllMocks();
     mockTeam = null;
     mockJoinQuestionIds = [{ question_id: 1 }];
+    mockAnsweredQuestionIds = [];
     mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
     mockGeocachingData = { data: [], error: null };
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
@@ -279,5 +283,47 @@ describe('RallyeIndex effects', () => {
     expect(tableCallCount('questions_geocaching')).toBeGreaterThan(0);
     expect(store$.questions.set).not.toHaveBeenCalled();
     expect(store$.currentQuestion.set).not.toHaveBeenCalled();
+  });
+
+  it('preserves the active question order and selection when answered items disappear on refresh', async () => {
+    mockTeam = { id: 7, name: 'Team 7' };
+    mockJoinQuestionIds = [
+      { question_id: 1 },
+      { question_id: 2 },
+      { question_id: 3 },
+    ];
+    mockAnsweredQuestionIds = [{ question_id: 1 }];
+    mockQuestionsData = [
+      { id: 2, content: 'Q2', type: 'knowledge' },
+      { id: 3, content: 'Q3', type: 'multiple_choice' },
+    ];
+
+    (store$.questions.get as jest.Mock).mockImplementation(() => [
+      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+      { id: 3, question: 'Q3', question_type: 'multiple_choice', points: 1 },
+      { id: 2, question: 'Q2', question_type: 'knowledge', points: 1 },
+    ]);
+    (store$.currentQuestion.get as jest.Mock).mockImplementation(() => ({
+      id: 2,
+      question: 'Q2',
+      question_type: 'knowledge',
+      points: 1,
+    }));
+
+    render(<RallyeIndex />);
+
+    await waitFor(() => {
+      expect(store$.questions.set).toHaveBeenCalled();
+      expect(store$.questionIndex.set).toHaveBeenCalledWith(1);
+    });
+
+    const orderedQuestions = (store$.questions.set as jest.Mock).mock.calls.at(-1)?.[0];
+    const currentQuestion = (store$.currentQuestion.set as jest.Mock).mock.calls.at(-1)?.[0];
+
+    expect(orderedQuestions.map((question: { id: number }) => question.id)).toEqual([
+      3,
+      2,
+    ]);
+    expect(currentQuestion?.id).toBe(2);
   });
 });

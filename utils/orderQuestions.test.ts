@@ -1,5 +1,8 @@
 import type { Question } from '@/types/rallye';
-import { orderQuestionsWithUploadsLast } from './orderQuestions';
+import {
+  orderQuestionsForSession,
+  orderQuestionsWithUploadsLast,
+} from './orderQuestions';
 
 const makeQuestion = (
   id: number,
@@ -85,5 +88,45 @@ describe('orderQuestionsWithUploadsLast', () => {
     const ordered = orderQuestionsWithUploadsLast(questions);
     expect(ordered[0].question_type).toBe('geocaching');
     expect(ordered[1].question_type).toBe('upload');
+  });
+});
+
+describe('orderQuestionsForSession', () => {
+  it('preserves the previous non-upload and upload order on refresh', () => {
+    const previousQuestions = [
+      makeQuestion(3, 'knowledge'),
+      makeQuestion(1, 'multiple_choice'),
+      makeQuestion(4, 'upload'),
+      makeQuestion(2, 'upload'),
+    ];
+    const nextQuestions = [
+      makeQuestion(2, 'upload'),
+      makeQuestion(1, 'multiple_choice'),
+      makeQuestion(4, 'upload'),
+      makeQuestion(3, 'knowledge'),
+    ];
+
+    const ordered = orderQuestionsForSession(nextQuestions, previousQuestions);
+
+    expect(ordered.map((question) => question.id)).toEqual([3, 1, 4, 2]);
+  });
+
+  it('appends newly loaded questions at the end of their existing group', () => {
+    const previousQuestions = [
+      makeQuestion(3, 'knowledge'),
+      makeQuestion(1, 'multiple_choice'),
+      makeQuestion(4, 'upload'),
+    ];
+    const nextQuestions = [
+      makeQuestion(5, 'knowledge'),
+      makeQuestion(4, 'upload'),
+      makeQuestion(1, 'multiple_choice'),
+      makeQuestion(6, 'upload'),
+      makeQuestion(3, 'knowledge'),
+    ];
+
+    const ordered = orderQuestionsForSession(nextQuestions, previousQuestions);
+
+    expect(ordered.map((question) => question.id)).toEqual([3, 1, 5, 4, 6]);
   });
 });
