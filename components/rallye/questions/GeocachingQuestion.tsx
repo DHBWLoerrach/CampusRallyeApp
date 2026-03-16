@@ -680,12 +680,23 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   if (!cameraPermission.granted) {
     return (
       <ThemedView variant="background" style={globalStyles.default.container}>
-        <ThemedText style={{ textAlign: 'center', marginBottom: 10 }}>
-          {t('question.camera.needAccess')}
-        </ThemedText>
-        <UIButton onPress={requestCameraPermission}>
-          {t('question.camera.allow')}
-        </UIButton>
+        <VStack style={{ width: '100%', alignItems: 'center' }} gap={2}>
+          <InfoBox mb={0}>
+            <ThemedText style={{ textAlign: 'center' }}>
+              {t('question.camera.needAccess')}
+            </ThemedText>
+          </InfoBox>
+          <InfoBox mb={0}>
+            <UIButton onPress={requestCameraPermission}>
+              {t('question.camera.allow')}
+            </UIButton>
+          </InfoBox>
+          <InfoBox mb={0}>
+            <UIButton color={Colors.dhbwGray} onPress={handleSurrender}>
+              {t('common.surrender')}
+            </UIButton>
+          </InfoBox>
+        </VStack>
       </ThemedView>
     );
   }

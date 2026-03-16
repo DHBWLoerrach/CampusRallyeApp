@@ -248,6 +248,7 @@ describe('GeocachingQuestion', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCameraPermissions.mockReturnValue([{ granted: true }, jest.fn()]);
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     setupLocationMocks();
   });
@@ -510,6 +511,47 @@ describe('GeocachingQuestion', () => {
     });
 
     expect(getByText('question.qr.scan')).toBeTruthy();
+  });
+
+  it('allows surrender when camera access is denied in qr mode', async () => {
+    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
+    mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
+
+    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
+      cb({
+        coords: {
+          latitude: qrQuestion.target_latitude!,
+          longitude: qrQuestion.target_longitude!,
+          accuracy: 5,
+        },
+      });
+      return { remove: jest.fn() };
+    });
+
+    const { getByText } = render(
+      <GeocachingQuestion question={qrQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('question.camera.needAccess')).toBeTruthy();
+    });
+
+    expect(getByText('common.surrender')).toBeTruthy();
+
+    fireEvent.press(getByText('common.surrender'));
+
+    await waitFor(() => {
+      expect(confirm).toHaveBeenCalled();
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
+        expect.objectContaining({
+          teamId: 1,
+          questionId: 42,
+          answeredCorrectly: false,
+          pointsAwarded: 0,
+        })
+      );
+    });
   });
 
   // -- Hint -------------------------------------------------------------------
