@@ -47,7 +47,7 @@ export default function TimerHeader({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <IconSymbol name="clock" size={16} color={palette.text} />
-      <ThemedText variant="label">
+      <ThemedText variant="label" style={{ fontVariant: ['tabular-nums'] }}>
         {two(t.h)}:{two(t.m)}:{two(t.s)}
       </ThemedText>
     </View>

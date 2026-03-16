@@ -1,9 +1,9 @@
 import { Tabs } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import LogoutButton from '@/components/ui/LogoutButton';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
 import RallyeHeader from '@/components/rallye/RallyeHeader';
+import RallyeHeaderActions from '@/components/rallye/RallyeHeaderActions';
 
 const ICON_SIZE = 28;
 
@@ -14,8 +14,16 @@ export default function TabLayout() {
     <Tabs
       initialRouteName="rallye"
       screenOptions={{
-        headerRight: () => <LogoutButton />,
+        headerLeft: () => <RallyeHeader />,
+        headerTitle: () => null,
+        headerRight: () => <RallyeHeaderActions />,
         headerStyle: { backgroundColor: palette.surface1 },
+        headerLeftContainerStyle: {
+          paddingLeft: 16,
+        },
+        headerRightContainerStyle: {
+          paddingRight: 8,
+        },
         headerTitleStyle: { color: palette.text },
         headerTintColor: palette.text,
         tabBarStyle: {
@@ -29,7 +37,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="rallye"
         options={{
-          headerTitle: () => <RallyeHeader />,
           tabBarLabel: 'Rallye',
           tabBarIcon: ({ color }) => (
             <IconSymbol name="map" size={ICON_SIZE} color={color} />
