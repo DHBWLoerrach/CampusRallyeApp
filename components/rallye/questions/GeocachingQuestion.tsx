@@ -97,6 +97,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const positionSubRef = useRef<Location.LocationSubscription | null>(null);
   const headingSubRef = useRef<Location.LocationSubscription | null>(null);
   const deviceMotionSubRef = useRef<{ remove: () => void } | null>(null);
+  const trackingSessionRef = useRef(0);
   const lastPositionRef = useRef<{ latitude: number; longitude: number } | null>(null);
   // On Android, DeviceMotion.alpha is more reliable for compass heading
   const deviceMotionHeadingRef = useRef<number | null>(null);
@@ -159,10 +160,24 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   // -- Location tracking ------------------------------------------------------
 
+  const stopTracking = useCallback(() => {
+    positionSubRef.current?.remove();
+    headingSubRef.current?.remove();
+    deviceMotionSubRef.current?.remove();
+    positionSubRef.current = null;
+    headingSubRef.current = null;
+    deviceMotionSubRef.current = null;
+  }, []);
+
   const startTracking = useCallback(async () => {
     if (!hasCoordinates) return;
+    const sessionId = trackingSessionRef.current + 1;
+    trackingSessionRef.current = sessionId;
+    const isStale = () => trackingSessionRef.current !== sessionId;
+    stopTracking();
 
     const { status } = await Location.requestForegroundPermissionsAsync();
+    if (isStale()) return;
     Logger.debug('Geocaching', `Location permission status: ${status}`);
     if (status !== 'granted') {
       Logger.warn('Geocaching', 'Location permission denied');
@@ -175,6 +190,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       const initialPos = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
+      if (isStale()) return;
       lastPositionRef.current = {
         latitude: initialPos.coords.latitude,
         longitude: initialPos.coords.longitude,
@@ -185,13 +201,14 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     }
 
     // Watch position
-    positionSubRef.current = await Location.watchPositionAsync(
+    const positionSub = await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.BestForNavigation,
         distanceInterval: 1,
         timeInterval: 1_000,
       },
       (loc) => {
+        if (isStale()) return;
         // Store position for bearing calculations in heading callback
         lastPositionRef.current = {
           latitude: loc.coords.latitude,
@@ -214,11 +231,17 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         }
       },
     );
+    if (isStale()) {
+      positionSub.remove();
+      return;
+    }
+    positionSubRef.current = positionSub;
 
     // Watch heading (compass)
     // On iOS: watchHeadingAsync is reliable → compute rotation here
     // On Android: only used for accuracy state; rotation computed in DeviceMotion listener
-    headingSubRef.current = await Location.watchHeadingAsync((heading) => {
+    const headingSub = await Location.watchHeadingAsync((heading) => {
+      if (isStale()) return;
       setHeadingAccuracy(heading.accuracy);
 
       // On Android: skip rotation computation here — done in DeviceMotion listener
@@ -233,10 +256,16 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
       updateArrowRotation(compassHeading);
     });
+    if (isStale()) {
+      headingSub.remove();
+      return;
+    }
+    headingSubRef.current = headingSub;
 
     // Watch device motion for tilt compensation + Android heading+rotation
     DeviceMotion.setUpdateInterval(50); // 20 fps
-    deviceMotionSubRef.current = DeviceMotion.addListener(({ rotation: rot }) => {
+    const deviceMotionSub = DeviceMotion.addListener(({ rotation: rot }) => {
+      if (isStale()) return;
       if (!rot) return;
 
       // On Android: derive compass heading from alpha and compute rotation HERE
@@ -251,7 +280,12 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       tiltXRef.current = (rot.beta * 180) / Math.PI;
       tiltYRef.current = (rot.gamma * 180) / Math.PI;
     });
-  }, [hasCoordinates, radius, targetLat, targetLon, updateArrowRotation]);
+    if (isStale()) {
+      deviceMotionSub.remove();
+      return;
+    }
+    deviceMotionSubRef.current = deviceMotionSub;
+  }, [hasCoordinates, radius, stopTracking, targetLat, targetLon, updateArrowRotation]);
 
   useEffect(() => {
     if (phase === 'navigating') {
@@ -259,11 +293,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     }
 
     return () => {
-      positionSubRef.current?.remove();
-      headingSubRef.current?.remove();
-      deviceMotionSubRef.current?.remove();
+      trackingSessionRef.current += 1;
+      stopTracking();
     };
-  }, [phase, startTracking]);
+  }, [phase, startTracking, stopTracking]);
 
   // Auto-skip calibration after timeout
   useEffect(() => {

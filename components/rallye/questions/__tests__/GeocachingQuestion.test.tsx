@@ -56,6 +56,8 @@ const mockWatchPositionAsync = jest.fn();
 const mockWatchHeadingAsync = jest.fn();
 const mockGetCurrentPositionAsync = jest.fn();
 const mockRequestForegroundPermissionsAsync = jest.fn();
+const mockDeviceMotionAddListener = jest.fn(() => ({ remove: jest.fn() }));
+const mockDeviceMotionSetUpdateInterval = jest.fn();
 
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: (...args: unknown[]) =>
@@ -75,8 +77,9 @@ jest.mock('expo-location', () => ({
 // Mock expo-sensors (DeviceMotion)
 jest.mock('expo-sensors', () => ({
   DeviceMotion: {
-    setUpdateInterval: jest.fn(),
-    addListener: jest.fn(() => ({ remove: jest.fn() })),
+    setUpdateInterval: (...args: unknown[]) =>
+      mockDeviceMotionSetUpdateInterval(...args),
+    addListener: (...args: unknown[]) => mockDeviceMotionAddListener(...args),
   },
 }));
 
@@ -596,5 +599,38 @@ describe('GeocachingQuestion', () => {
 
     expect(positionRemove).toHaveBeenCalled();
     expect(headingRemove).toHaveBeenCalled();
+  });
+
+  it('removes a late position subscription that resolves after unmount', async () => {
+    let resolvePositionSubscription:
+      | ((value: { remove: jest.Mock }) => void)
+      | null = null;
+    const latePositionRemove = jest.fn();
+
+    mockWatchPositionAsync.mockImplementation(
+      () =>
+        new Promise<{ remove: jest.Mock }>((resolve) => {
+          resolvePositionSubscription = resolve;
+        })
+    );
+
+    const { unmount } = render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(mockWatchPositionAsync).toHaveBeenCalled();
+    });
+
+    unmount();
+
+    resolvePositionSubscription?.({ remove: latePositionRemove });
+
+    await waitFor(() => {
+      expect(latePositionRemove).toHaveBeenCalled();
+    });
+
+    expect(mockWatchHeadingAsync).not.toHaveBeenCalled();
+    expect(mockDeviceMotionAddListener).not.toHaveBeenCalled();
   });
 });
