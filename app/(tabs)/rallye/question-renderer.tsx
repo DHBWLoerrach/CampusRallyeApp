@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, {
   interpolate,
@@ -44,6 +44,17 @@ export default function QuestionRenderer({ question }: { question: any }) {
   const [frontQuestion, setFrontQuestion] = useState(question);
   const [backQuestion, setBackQuestion] = useState<any | null>(null);
   const flip = useSharedValue(0); // 0 (front) ↔ 180 (back)
+
+  // Stable callbacks for runOnJS — avoids anonymous closures on the UI thread
+  const onFlipToBack = useCallback(() => {
+    setIsFlipped(true);
+    setFrontQuestion(null);
+  }, []);
+
+  const onFlipToFront = useCallback(() => {
+    setIsFlipped(false);
+    setBackQuestion(null);
+  }, []);
 
   // Front face rotates 0→180; back face 180→360
   const frontStyle = useAnimatedStyle(() => {
@@ -93,22 +104,16 @@ export default function QuestionRenderer({ question }: { question: any }) {
       // Prepare back with next question and flip to back (180)
       setBackQuestion(question);
       flip.value = withSpring(180, SPRING_CONFIG, () =>
-        runOnJS(() => {
-          setIsFlipped(true);
-          setFrontQuestion(null);
-        })()
+        runOnJS(onFlipToBack)()
       );
     } else {
       // Prepare front with next question and flip to front (0)
       setFrontQuestion(question);
       flip.value = withSpring(0, SPRING_CONFIG, () =>
-        runOnJS(() => {
-          setIsFlipped(false);
-          setBackQuestion(null);
-        })()
+        runOnJS(onFlipToFront)()
       );
     }
-  }, [backQuestion?.id, flip, frontQuestion?.id, isFlipped, question]);
+  }, [backQuestion?.id, flip, frontQuestion?.id, isFlipped, onFlipToBack, onFlipToFront, question]);
 
   const renderQuestion = (q: any) => {
     const type = q?.question_type;
