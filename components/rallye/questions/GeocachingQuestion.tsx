@@ -431,6 +431,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                   questionId: question.id,
                   answeredCorrectly: true,
                   pointsAwarded: question.points,
+                  answerText: data,
                 });
               } catch (e) {
                 console.error('Error submitting geocaching QR answer:', e);

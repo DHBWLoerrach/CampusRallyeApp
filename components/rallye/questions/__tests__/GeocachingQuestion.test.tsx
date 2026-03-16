@@ -56,8 +56,10 @@ const mockWatchPositionAsync = jest.fn();
 const mockWatchHeadingAsync = jest.fn();
 const mockGetCurrentPositionAsync = jest.fn();
 const mockRequestForegroundPermissionsAsync = jest.fn();
-const mockDeviceMotionAddListener = jest.fn(() => ({ remove: jest.fn() }));
-const mockDeviceMotionSetUpdateInterval = jest.fn();
+const mockDeviceMotionAddListener = jest.fn(
+  (_listener: unknown) => ({ remove: jest.fn() })
+);
+const mockDeviceMotionSetUpdateInterval = jest.fn((_interval: number) => {});
 
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: (...args: unknown[]) =>
@@ -77,9 +79,9 @@ jest.mock('expo-location', () => ({
 // Mock expo-sensors (DeviceMotion)
 jest.mock('expo-sensors', () => ({
   DeviceMotion: {
-    setUpdateInterval: (...args: unknown[]) =>
-      mockDeviceMotionSetUpdateInterval(...args),
-    addListener: (...args: unknown[]) => mockDeviceMotionAddListener(...args),
+    setUpdateInterval: (interval: number) =>
+      mockDeviceMotionSetUpdateInterval(interval),
+    addListener: (listener: unknown) => mockDeviceMotionAddListener(listener),
   },
 }));
 
@@ -557,6 +559,66 @@ describe('GeocachingQuestion', () => {
     });
   });
 
+  it('stores the scanned QR value as answer text', async () => {
+    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const storeMock = jest.requireMock('@/services/storage/Store');
+    const scannedValue = 'Secret Code';
+
+    storeMock.store$.answers.get.mockReturnValue([
+      { question_id: 42, text: 'secret code', correct: true },
+    ]);
+    mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
+
+    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
+      cb({
+        coords: {
+          latitude: qrQuestion.target_latitude!,
+          longitude: qrQuestion.target_longitude!,
+          accuracy: 5,
+        },
+      });
+      return { remove: jest.fn() };
+    });
+
+    const { getByText, getByTestId } = render(
+      <GeocachingQuestion question={qrQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('question.qr.scan')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('question.qr.scan'));
+    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+      data: scannedValue,
+    });
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'common.ok',
+        'question.qr.correctMessage',
+        expect.any(Array)
+      );
+    });
+
+    const buttons = alertSpy.mock.calls.at(-1)?.[2] as
+      | { onPress?: () => void }[]
+      | undefined;
+    buttons?.[0]?.onPress?.();
+
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
+        expect.objectContaining({
+          teamId: 1,
+          questionId: 42,
+          answeredCorrectly: true,
+          pointsAwarded: 10,
+          answerText: scannedValue,
+        })
+      );
+    });
+  });
+
   // -- Hint -------------------------------------------------------------------
 
   it('shows hint in answer phase when hint is provided', async () => {
@@ -602,8 +664,9 @@ describe('GeocachingQuestion', () => {
   });
 
   it('removes a late position subscription that resolves after unmount', async () => {
+    type ResolvePositionSubscription = (value: { remove: jest.Mock }) => void;
     let resolvePositionSubscription:
-      | ((value: { remove: jest.Mock }) => void)
+      | ResolvePositionSubscription
       | null = null;
     const latePositionRemove = jest.fn();
 
@@ -624,7 +687,12 @@ describe('GeocachingQuestion', () => {
 
     unmount();
 
-    resolvePositionSubscription?.({ remove: latePositionRemove });
+    if (!resolvePositionSubscription) {
+      throw new Error('Expected position subscription resolver');
+    }
+    (
+      resolvePositionSubscription as ResolvePositionSubscription
+    )({ remove: latePositionRemove });
 
     await waitFor(() => {
       expect(latePositionRemove).toHaveBeenCalled();
