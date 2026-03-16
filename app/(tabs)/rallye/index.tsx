@@ -323,9 +323,6 @@ const RallyeIndex = observer(function RallyeIndex() {
             globalStyles.default.container,
             { paddingBottom: spacing(2) },
           ]}
-          refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-          }
         >
           <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
             {(rallye?.name ? `${rallye.name} • ` : '') +

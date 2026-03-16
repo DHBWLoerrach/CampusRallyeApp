@@ -3,6 +3,12 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { store$ } from '@/services/storage/Store';
 import RallyeIndex from '../index';
 
+const mockScreenScrollView = jest.fn(
+  ({ children }: { children: React.ReactNode; [key: string]: unknown }) => (
+    <>{children}</>
+  )
+);
+
 // Keep this unit test focused on the CTA callback only.
 // We stub useEffect so RallyeIndex mount effects (question/answer/status loading)
 // do not schedule async state updates that are irrelevant to this assertion.
@@ -62,11 +68,12 @@ jest.mock('@/utils/GlobalStyles', () => ({
 }));
 
 jest.mock('@/components/ui/Screen', () => {
-  const { View } = jest.requireActual('react-native');
   return {
-    ScreenScrollView: ({ children }: { children: React.ReactNode }) => (
-      <View>{children}</View>
-    ),
+    ScreenScrollView: (props: {
+      children: React.ReactNode;
+      [key: string]: unknown;
+    }) =>
+      mockScreenScrollView(props),
   };
 });
 
@@ -174,5 +181,24 @@ describe('RallyeIndex', () => {
     expect(store$.leaveRallye).toHaveBeenCalledTimes(1);
     expect(store$.reset).not.toHaveBeenCalled();
     expect(store$.enabled.set).not.toHaveBeenCalled();
+  });
+
+  it('does not expose pull-to-refresh while answering questions', () => {
+    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
+    (store$.questions.get as jest.Mock).mockReturnValue([
+      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+    ]);
+    (store$.currentQuestion.get as jest.Mock).mockReturnValue({
+      id: 1,
+      question: 'Q1',
+      question_type: 'knowledge',
+      points: 1,
+    });
+
+    render(<RallyeIndex />);
+
+    const activeQuestionViewProps = mockScreenScrollView.mock.calls.at(-1)?.[0];
+
+    expect(activeQuestionViewProps?.refreshControl).toBeUndefined();
   });
 });
