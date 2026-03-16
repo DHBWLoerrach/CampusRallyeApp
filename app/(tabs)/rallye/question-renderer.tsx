@@ -93,13 +93,19 @@ export default function QuestionRenderer({ question }: { question: any }) {
       // Prepare back with next question and flip to back (180)
       setBackQuestion(question);
       flip.value = withSpring(180, SPRING_CONFIG, () =>
-        runOnJS(setIsFlipped)(true)
+        runOnJS(() => {
+          setIsFlipped(true);
+          setFrontQuestion(null);
+        })()
       );
     } else {
       // Prepare front with next question and flip to front (0)
       setFrontQuestion(question);
       flip.value = withSpring(0, SPRING_CONFIG, () =>
-        runOnJS(setIsFlipped)(false)
+        runOnJS(() => {
+          setIsFlipped(false);
+          setBackQuestion(null);
+        })()
       );
     }
   }, [backQuestion?.id, flip, frontQuestion?.id, isFlipped, question]);
@@ -145,13 +151,17 @@ export default function QuestionRenderer({ question }: { question: any }) {
   return (
     <Animated.View style={{ flex: 1 }}>
       {/* Front face */}
-      <Animated.View style={frontStyle}>
-        {renderQuestion(frontQuestion)}
-      </Animated.View>
+      {frontQuestion ? (
+        <Animated.View style={frontStyle}>
+          {renderQuestion(frontQuestion)}
+        </Animated.View>
+      ) : null}
       {/* Back face */}
-      <Animated.View style={backStyle}>
-        {renderQuestion(backQuestion ?? frontQuestion)}
-      </Animated.View>
+      {backQuestion ? (
+        <Animated.View style={backStyle}>
+          {renderQuestion(backQuestion)}
+        </Animated.View>
+      ) : null}
     </Animated.View>
   );
 }

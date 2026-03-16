@@ -139,13 +139,16 @@ describe('QuestionRenderer', () => {
   ])('renders %s question type as %s component', (type, componentName) => {
     const question = { id: 1, question_type: type, question: 'Q1', points: 5 };
 
-    const { getAllByText } = render(<QuestionRenderer question={question} />);
+    const { getByText, queryAllByText } = render(
+      <QuestionRenderer question={question} />
+    );
 
-    // Front + Back face both render the component
-    expect(getAllByText(componentName).length).toBeGreaterThanOrEqual(1);
+    expect(getByText(componentName)).toBeTruthy();
+    expect(queryAllByText(componentName)).toHaveLength(1);
     expect(mockComponents[type]).toHaveBeenCalledWith(
       expect.objectContaining({ question })
     );
+    expect(mockComponents[type]).toHaveBeenCalledTimes(1);
   });
 
   it('shows unknown type fallback with skip button for invalid type', () => {
