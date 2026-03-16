@@ -37,6 +37,14 @@ const SPRING_CONFIG = {
   overshootClamping: false,
 } as const;
 
+const overlayStyle = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+} as const;
+
 export default function QuestionRenderer({ question }: { question: any }) {
   const { t } = useLanguage();
   // Flip animation using two faces, based on components/ui/Card.tsx pattern
@@ -84,11 +92,6 @@ export default function QuestionRenderer({ question }: { question: any }) {
       zIndex: isFlipped ? 1 : 0,
       pointerEvents: isFlipped ? 'auto' : 'none',
       backfaceVisibility: 'hidden',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
     } as const;
   }, [isFlipped]);
 
@@ -155,15 +158,21 @@ export default function QuestionRenderer({ question }: { question: any }) {
 
   return (
     <Animated.View style={{ flex: 1 }}>
-      {/* Front face */}
+      {/* Front face — overlay when back is active */}
       {frontQuestion ? (
-        <Animated.View style={frontStyle}>
+        <Animated.View
+          testID="question-face-front"
+          style={[frontStyle, isFlipped && overlayStyle]}
+        >
           {renderQuestion(frontQuestion)}
         </Animated.View>
       ) : null}
-      {/* Back face */}
+      {/* Back face — overlay when front is active */}
       {backQuestion ? (
-        <Animated.View style={backStyle}>
+        <Animated.View
+          testID="question-face-back"
+          style={[backStyle, !isFlipped && overlayStyle]}
+        >
           {renderQuestion(backQuestion)}
         </Animated.View>
       ) : null}

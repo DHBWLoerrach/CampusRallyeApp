@@ -1,6 +1,30 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
-import QuestionRenderer from '../question-renderer';
+import { act, render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
+
+const springCallbacks: (() => void)[] = [];
+
+jest.mock('react-native-reanimated', () => {
+  const actual = jest.requireActual('react-native-reanimated/mock');
+  return {
+    __esModule: true,
+    ...actual,
+    default: actual.default,
+    runOnJS: (fn: unknown) => fn,
+    withSpring: (
+      toValue: unknown,
+      _config?: unknown,
+      callback?: () => void
+    ) => {
+      if (callback) {
+        springCallbacks.push(callback);
+      }
+      return toValue;
+    },
+  };
+});
+
+const QuestionRenderer = jest.requireActual('../question-renderer').default;
 
 // -- Mocks -------------------------------------------------------------------
 
@@ -127,6 +151,7 @@ jest.mock('@/components/rallye/questions/GeocachingQuestion', () => ({
 describe('QuestionRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    springCallbacks.length = 0;
   });
 
   it.each([
@@ -171,5 +196,43 @@ describe('QuestionRenderer', () => {
     const { getAllByText } = render(<QuestionRenderer question={question} />);
 
     expect(getAllByText('question.unknown.title').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('keeps the new question visible after flip completes', () => {
+    const q1 = { id: 1, question_type: 'knowledge', question: 'Q1', points: 5 };
+    const q2 = { id: 2, question_type: 'picture', question: 'Q2', points: 5 };
+
+    const { getByTestId, getByText, queryByTestId, queryByText, rerender } = render(
+      <QuestionRenderer question={q1} />
+    );
+
+    // New question triggers flip — both faces mounted during animation
+    rerender(<QuestionRenderer question={q2} />);
+    expect(getByText('SkillQuestion')).toBeTruthy();
+    expect(getByText('ImageQuestion')).toBeTruthy();
+
+    const frontFaceDuringFlip = StyleSheet.flatten(
+      getByTestId('question-face-front').props.style
+    );
+    const backFaceDuringFlip = StyleSheet.flatten(
+      getByTestId('question-face-back').props.style
+    );
+
+    expect(frontFaceDuringFlip?.position).toBeUndefined();
+    expect(backFaceDuringFlip?.position).toBe('absolute');
+
+    // Animation completes — old face unmounts, new question stays visible
+    act(() => {
+      springCallbacks.at(-1)?.();
+    });
+
+    expect(getByText('ImageQuestion')).toBeTruthy();
+    expect(queryByText('SkillQuestion')).toBeNull();
+    expect(queryByTestId('question-face-front')).toBeNull();
+
+    const activeFaceAfterFlip = StyleSheet.flatten(
+      getByTestId('question-face-back').props.style
+    );
+    expect(activeFaceAfterFlip?.position).toBeUndefined();
   });
 });
