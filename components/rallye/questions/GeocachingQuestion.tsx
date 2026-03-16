@@ -125,7 +125,9 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     !isNaN(targetLat) &&
     !isNaN(targetLon);
 
-  Logger.debug('Geocaching', `Init — target=(${targetLat}, ${targetLon}), radius=${radius}, inputType=${inputType}, hasCoords=${hasCoordinates}`);
+  useEffect(() => {
+    Logger.debug('Geocaching', `Init — target=(${targetLat}, ${targetLon}), radius=${radius}, inputType=${inputType}, hasCoords=${hasCoordinates}`);
+  }, [targetLat, targetLon, radius, inputType, hasCoordinates]);
 
   // -- Shared rotation updater (used by both iOS heading and Android DeviceMotion) --
 
@@ -154,7 +156,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     prevRotationRef.current = rotation;
 
     const continuousRotation = rotation + rotationDeltaRef.current;
-    Logger.debug('Geocaching', `Arrow — bearing=${targetBearing.toFixed(1)}°, compass=${compassHeading.toFixed(1)}°, rot=${rotation.toFixed(1)}°, continuous=${continuousRotation.toFixed(1)}°`);
     angleRef.current = continuousRotation;
   }, [targetLat, targetLon]);
 
@@ -221,7 +222,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
           targetLat!,
           targetLon!,
         );
-        Logger.debug('Geocaching', `Position update — lat=${loc.coords.latitude.toFixed(6)}, lon=${loc.coords.longitude.toFixed(6)}, dist=${dist.toFixed(1)}m, accuracy=${loc.coords.accuracy?.toFixed(1)}m`);
         setDistance(dist);
 
         // Check proximity
@@ -246,14 +246,11 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
       // On Android: skip rotation computation here — done in DeviceMotion listener
       if (Platform.OS === 'android') {
-        Logger.debug('Geocaching', `Heading (Android, info only) — true=${heading.trueHeading.toFixed(1)}°, mag=${heading.magHeading.toFixed(1)}°, acc=${heading.accuracy}`);
         return;
       }
 
       // iOS: use trueHeading, fall back to magHeading
       const compassHeading = heading.trueHeading >= 0 ? heading.trueHeading : heading.magHeading;
-      Logger.debug('Geocaching', `Heading (iOS) — using=${compassHeading.toFixed(1)}°, true=${heading.trueHeading.toFixed(1)}°`);
-
       updateArrowRotation(compassHeading);
     });
     if (isStale()) {
@@ -536,7 +533,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   if (phase === 'navigating') {
     const showCalibration =
       headingAccuracy < MIN_HEADING_ACCURACY && !calibrationSkipped;
-    Logger.debug('Geocaching', `Render navigating — showCalibration=${showCalibration}, headingAccuracy=${headingAccuracy}, calibrationSkipped=${calibrationSkipped}, distance=${distance}`);
 
     return (
       <ThemedView
