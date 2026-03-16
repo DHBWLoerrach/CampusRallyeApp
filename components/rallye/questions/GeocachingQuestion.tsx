@@ -132,6 +132,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // -- Shared rotation updater (used by both iOS heading and Android DeviceMotion) --
 
   const updateArrowRotation = useCallback((compassHeading: number) => {
+    if (targetLat == null || targetLon == null) return;
     const pos = lastPositionRef.current;
     if (!pos) {
       Logger.warn('Geocaching', 'No position cached yet — cannot compute bearing');
@@ -141,8 +142,8 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     const targetBearing = bearing(
       pos.latitude,
       pos.longitude,
-      targetLat!,
-      targetLon!,
+      targetLat,
+      targetLon,
     );
 
     // Normalize to -180..180
@@ -216,11 +217,12 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
           longitude: loc.coords.longitude,
         };
 
+        if (targetLat == null || targetLon == null) return;
         const dist = haversineDistance(
           loc.coords.latitude,
           loc.coords.longitude,
-          targetLat!,
-          targetLon!,
+          targetLat,
+          targetLon,
         );
         setDistance(dist);
 
