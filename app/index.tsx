@@ -77,6 +77,7 @@ export default function Welcome() {
   const [expandedDepartmentIds, setExpandedDepartmentIds] = useState<number[]>(
     []
   );
+  const [campusEventsExpanded, setCampusEventsExpanded] = useState(false);
 
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
@@ -102,26 +103,13 @@ export default function Welcome() {
     },
   ];
   const departmentCardStyle = [dashboardCardStyle, { marginVertical: 4 }];
-  const departmentSectionStyle = {
-    width: '100%' as const,
-    borderWidth: 1,
-    borderColor: palette.borderSubtle,
-    borderRadius: 18,
-    paddingHorizontal: 6,
-    paddingTop: 10,
-    paddingBottom: 4,
-    marginBottom: 4,
-    backgroundColor: isDarkMode
-      ? 'rgba(255,255,255,0.01)'
-      : 'rgba(255,255,255,0.55)',
-  };
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
   const closeSelectionButtonStyle = [
     ctaButtonStyle,
     { backgroundColor: palette.surface1 },
   ];
-  const closeSelectionButtonTextStyle = { color: palette.textMuted };
+  const closeSelectionButtonTextStyle = { color: palette.text };
 
   const applyDashboardData = useCallback((nextData: OrganizationDashboardData) => {
     setDashboardData(nextData);
@@ -137,6 +125,7 @@ export default function Welcome() {
   const resetDashboard = useCallback(() => {
     setDashboardData(createEmptyDashboardData());
     setExpandedDepartmentIds([]);
+    setCampusEventsExpanded(false);
     setPasswordRallye(null);
   }, []);
 
@@ -293,6 +282,7 @@ export default function Welcome() {
     if (selectionStep !== 'dashboard') return;
     await clearSelectedOrganization();
     setSelectedOrganization(null);
+    setCampusEventsExpanded(false);
     resetDashboard();
     setSelectionStep('organization');
   };
@@ -367,6 +357,10 @@ export default function Welcome() {
       }
       return [...currentExpandedIds, departmentId];
     });
+  };
+
+  const toggleCampusEventsExpansion = () => {
+    setCampusEventsExpanded((expanded) => !expanded);
   };
 
   const handleOrgModalSelect = (item: SelectionItem) => {
@@ -530,114 +524,143 @@ export default function Welcome() {
         </Card>
       )}
 
-      {dashboardData.departmentEntries.length > 0 && (
-        <View style={departmentSectionStyle}>
-          {dashboardData.departmentEntries.length > 1 && (
-            <ThemedText
-              variant="bodySmall"
-              style={[
-                s.text,
-                {
-                  textAlign: 'left',
-                  width: '100%',
-                  marginBottom: 4,
-                  paddingHorizontal: 6,
-                },
-              ]}
-            >
-              {t('welcome.selectDepartment.description')}
-            </ThemedText>
-          )}
-          {dashboardData.departmentEntries.map((entry) => {
-            const rallyes = entry.rallyes;
-            const multipleRallyes = rallyes.length > 1;
-            const expanded = expandedDepartmentIds.includes(entry.department.id);
+      {dashboardData.departmentEntries.map((entry) => {
+        const rallyes = entry.rallyes;
+        const singleRallye = rallyes.length === 1 ? rallyes[0] : null;
+        const rallyeTitle = singleRallye?.name?.trim() || entry.department.name;
+        const cardTitle = singleRallye ? rallyeTitle : entry.department.name;
+        const cardDescription = singleRallye ? entry.department.name : undefined;
+        const multipleRallyes = rallyes.length > 1;
+        const expanded = expandedDepartmentIds.includes(entry.department.id);
 
-            return (
-              <Card
-                key={entry.department.id}
-                containerStyle={departmentCardStyle}
-                title={entry.department.name}
-                icon="graduationcap"
-              >
-                {!multipleRallyes && rallyes[0] && (
-                  <UIButton
-                    disabled={joining}
-                    onPress={() => void handleRallyePress(rallyes[0])}
-                    style={ctaButtonStyle}
-                    textStyle={ctaButtonTextStyle}
-                  >
-                    {t('rallye.join')}
-                  </UIButton>
-                )}
-
-                {multipleRallyes && (
-                  <>
-                    <UIButton
-                      disabled={joining}
-                      onPress={() =>
-                        toggleDepartmentExpansion(entry.department.id)
-                      }
-                      style={
-                        expanded ? closeSelectionButtonStyle : ctaButtonStyle
-                      }
-                      textStyle={
-                        expanded
-                          ? closeSelectionButtonTextStyle
-                          : ctaButtonTextStyle
-                      }
-                    >
-                      {expanded ? t('welcome.join.hide') : t('welcome.join.select')}
-                    </UIButton>
-                    {expanded && (
-                      <View style={{ marginTop: 10 }}>
-                        {rallyes.map((rallye, index) => (
-                          <View
-                            key={rallye.id}
-                            style={index > 0 ? { marginTop: 8 } : undefined}
-                          >
-                            <UIButton
-                              disabled={joining}
-                              onPress={() => void handleRallyePress(rallye)}
-                              style={ctaButtonStyle}
-                              textStyle={ctaButtonTextStyle}
-                            >
-                              {rallye.name}
-                            </UIButton>
-                          </View>
-                        ))}
-                      </View>
-                    )}
-                  </>
-                )}
-              </Card>
-            );
-          })}
-        </View>
-      )}
-
-      {dashboardData.campusEventsRallyes.length > 0 && (
-        <Card
-          containerStyle={dashboardCardStyle}
-          title={t('welcome.campusEvents.title')}
-          icon="party.popper"
-        >
-          {dashboardData.campusEventsRallyes.map((rallye, index) => (
-            <View
-              key={rallye.id}
-              style={index > 0 ? { marginTop: 8 } : undefined}
-            >
+        return (
+          <Card
+            key={entry.department.id}
+            containerStyle={departmentCardStyle}
+            title={cardTitle}
+            description={cardDescription}
+            icon="graduationcap"
+          >
+            {!multipleRallyes && rallyes[0] && (
               <UIButton
                 disabled={joining}
-                onPress={() => void handleRallyePress(rallye)}
+                onPress={() => void handleRallyePress(rallyes[0])}
                 style={ctaButtonStyle}
                 textStyle={ctaButtonTextStyle}
               >
-                {rallye.name}
+                {t('rallye.join')}
               </UIButton>
-            </View>
-          ))}
-        </Card>
+            )}
+
+            {multipleRallyes && (
+              <>
+                <UIButton
+                  disabled={joining}
+                  onPress={() => toggleDepartmentExpansion(entry.department.id)}
+                  style={expanded ? closeSelectionButtonStyle : ctaButtonStyle}
+                  textStyle={
+                    expanded
+                      ? closeSelectionButtonTextStyle
+                      : ctaButtonTextStyle
+                  }
+                >
+                  {expanded ? t('welcome.join.hide') : t('welcome.join.select')}
+                </UIButton>
+                {expanded && (
+                  <View style={{ marginTop: 10 }}>
+                    {rallyes.map((rallye, index) => (
+                      <View
+                        key={rallye.id}
+                        style={index > 0 ? { marginTop: 8 } : undefined}
+                      >
+                        <UIButton
+                          disabled={joining}
+                          onPress={() => void handleRallyePress(rallye)}
+                          style={ctaButtonStyle}
+                          textStyle={ctaButtonTextStyle}
+                        >
+                          {rallye.name}
+                        </UIButton>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
+          </Card>
+        );
+      })}
+
+      {dashboardData.campusEventsRallyes.length > 0 && (
+        (() => {
+          const singleCampusEventRallye = dashboardData.campusEventsRallyes.length === 1
+            ? dashboardData.campusEventsRallyes[0]
+            : null;
+          const campusEventsTitle = t('welcome.campusEvents.title');
+          const campusEventTitle =
+            singleCampusEventRallye?.name?.trim() || campusEventsTitle;
+
+          if (singleCampusEventRallye) {
+            return (
+              <Card
+                containerStyle={dashboardCardStyle}
+                title={campusEventTitle}
+                icon="party.popper"
+              >
+                <UIButton
+                  disabled={joining}
+                  onPress={() => void handleRallyePress(singleCampusEventRallye)}
+                  style={ctaButtonStyle}
+                  textStyle={ctaButtonTextStyle}
+                >
+                  {t('rallye.join')}
+                </UIButton>
+              </Card>
+            );
+          }
+
+          return (
+            <Card
+              containerStyle={dashboardCardStyle}
+              title={campusEventsTitle}
+              icon="party.popper"
+            >
+              <UIButton
+                disabled={joining}
+                onPress={toggleCampusEventsExpansion}
+                style={campusEventsExpanded ? closeSelectionButtonStyle : ctaButtonStyle}
+                textStyle={
+                  campusEventsExpanded
+                    ? closeSelectionButtonTextStyle
+                    : ctaButtonTextStyle
+                }
+              >
+                {campusEventsExpanded
+                  ? t('welcome.join.hide')
+                  : t('welcome.join.select')}
+              </UIButton>
+              {campusEventsExpanded && (
+                <View style={{ marginTop: 10 }}>
+                  {dashboardData.campusEventsRallyes.map((rallye, index) => (
+                    <View
+                      key={rallye.id}
+                      style={index > 0 ? { marginTop: 8 } : undefined}
+                    >
+                      <UIButton
+                        disabled={joining}
+                        onPress={() => void handleRallyePress(rallye)}
+                        style={ctaButtonStyle}
+                        textStyle={ctaButtonTextStyle}
+                      >
+                        {rallye.name}
+                      </UIButton>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </Card>
+          );
+        })()
       )}
 
       {dashboardData.tourModeRallye && (

@@ -213,7 +213,7 @@ describe('Welcome', () => {
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
 
-  it('renders campus events as direct rallye actions and joins directly', async () => {
+  it('renders single campus event as direct join action and joins directly', async () => {
     const campusRallye: Rallye = {
       id: 11,
       name: 'Campus Event Rallye',
@@ -235,16 +235,72 @@ describe('Welcome', () => {
     const { getByText, queryByText } = render(<Welcome />);
 
     await waitFor(() => {
-      expect(getByText('welcome.campusEvents.title')).toBeTruthy();
       expect(getByText(campusRallye.name)).toBeTruthy();
+      expect(getByText('rallye.join')).toBeTruthy();
     });
+    expect(queryByText('welcome.campusEvents.title')).toBeNull();
     expect(queryByText('welcome.campusEvents.description')).toBeNull();
 
     await act(async () => {
-      fireEvent.press(getByText(campusRallye.name));
+      fireEvent.press(getByText('rallye.join'));
     });
 
     expect(mockedSetCurrentRallye).toHaveBeenCalledWith(campusRallye);
+    expect(store$.enabled.set).toHaveBeenCalledWith(true);
+  });
+
+  it('renders multiple campus events behind selection and joins directly', async () => {
+    const campusRallyeA: Rallye = {
+      id: 12,
+      name: 'Campus Event Rallye A',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const campusRallyeB: Rallye = {
+      id: 13,
+      name: 'Campus Event Rallye B',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetOrganizationDashboardData.mockResolvedValue({
+      tourModeRallye: null,
+      campusEventsRallyes: [campusRallyeA, campusRallyeB],
+      departmentEntries: [],
+    });
+    mockedSetCurrentRallye.mockResolvedValue();
+
+    const { getByText, queryByText } = render(<Welcome />);
+
+    await waitFor(() => {
+      expect(getByText('welcome.campusEvents.title')).toBeTruthy();
+      expect(getByText('welcome.join.select')).toBeTruthy();
+    });
+    expect(queryByText(campusRallyeA.name)).toBeNull();
+    expect(queryByText(campusRallyeB.name)).toBeNull();
+    expect(queryByText('rallye.join')).toBeNull();
+    expect(queryByText('welcome.campusEvents.description')).toBeNull();
+
+    await act(async () => {
+      fireEvent.press(getByText('welcome.join.select'));
+    });
+
+    expect(getByText('welcome.join.hide')).toBeTruthy();
+    expect(getByText(campusRallyeA.name)).toBeTruthy();
+    expect(getByText(campusRallyeB.name)).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(getByText(campusRallyeB.name));
+    });
+
+    expect(mockedSetCurrentRallye).toHaveBeenCalledWith(campusRallyeB);
     expect(store$.enabled.set).toHaveBeenCalledWith(true);
   });
 
@@ -274,7 +330,8 @@ describe('Welcome', () => {
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
-    expect(queryByText('Department Rallye')).toBeNull();
+    expect(getByText('Department Rallye')).toBeTruthy();
+    expect(getByText('Test Dept')).toBeTruthy();
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
 
     await act(async () => {
@@ -307,6 +364,7 @@ describe('Welcome', () => {
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
+    expect(getByText('Protected Rallye')).toBeTruthy();
 
     await act(async () => {
       fireEvent.press(getByText('rallye.join'));
@@ -362,7 +420,7 @@ describe('Welcome', () => {
     expect(getByText('Rallye B')).toBeTruthy();
   });
 
-  it('shows department section label when multiple departments are available', async () => {
+  it('does not show department section label when multiple departments are available', async () => {
     const rallyeA: Rallye = {
       id: 9,
       name: 'Rallye A',
@@ -398,9 +456,11 @@ describe('Welcome', () => {
       ],
     });
 
-    const { getByText } = render(<Welcome />);
+    const { getByText, queryByText } = render(<Welcome />);
     await waitFor(() => {
-      expect(getByText('welcome.selectDepartment.description')).toBeTruthy();
+      expect(getByText(mockDepartment.name)).toBeTruthy();
+      expect(getByText(secondDepartment.name)).toBeTruthy();
     });
+    expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
 });

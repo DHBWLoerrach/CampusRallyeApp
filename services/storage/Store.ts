@@ -82,30 +82,6 @@ export const store$ = observable({
   currentQuestion: () =>
     store$.questions.get()[store$.questionIndex.get()],
 
-  currentAnswer: () => {
-    const current = store$.currentQuestion();
-    if (!current) return null;
-    const answers = store$.answers.get();
-    return answers.filter(
-      (a) => a.question_id === current.id && a.correct === true
-    )[0];
-  },
-
-  currentMultipleChoiceAnswers: () => {
-    const current = store$.currentQuestion();
-    if (!current) return null;
-    const answers = store$.answers.get();
-    const filtered = answers.filter((a) => a.question_id === current.id);
-    const shuffleArray = <T,>(array: T[]): T[] => {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    };
-    return shuffleArray(filtered);
-  },
-
   gotoNextQuestion: async () => {
     if (store$.questions.get().length === 0) return;
     let nextIndex = store$.questionIndex.get() + 1;

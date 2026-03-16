@@ -1,5 +1,5 @@
 import { supabase } from '@/utils/Supabase';
-import { File } from 'expo-file-system/next';
+import { File } from 'expo-file-system';
 import { enqueueSaveAnswer } from './offlineOutbox';
 
 export type SaveAnswerResult = { status: 'sent' | 'queued' };

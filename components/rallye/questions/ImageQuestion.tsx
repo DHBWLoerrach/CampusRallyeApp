@@ -7,6 +7,7 @@ import Colors from '@/utils/Colors';
 import { confirmAnswer } from '@/utils/ConfirmAlert';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
+import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import { supabase } from '@/utils/Supabase';
 import { useKeyboard } from '@/utils/useKeyboard';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
@@ -35,16 +36,7 @@ export default function ImageQuestion({ question }: QuestionProps) {
 
   const team = store$.team.get();
   const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
-  const correct = useMemo(
-    () =>
-      (
-        answers.find((a) => a.question_id === question.id && a.correct)?.text ||
-        ''
-      )
-        .toLowerCase()
-        .trim(),
-    [answers, question.id]
-  );
+  const correct = getAnswerKeyForQuestion(answers, question.id);
   const answerKeyReady = correct.length > 0;
 
   const handlePersist = async () => {
