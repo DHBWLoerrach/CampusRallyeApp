@@ -163,14 +163,22 @@ const RallyeIndex = observer(function RallyeIndex() {
         .in('id', filteredIds);
       if (questionsError) throw questionsError;
 
-      // Fetch geocaching data from separate table and merge
-      const { data: geocachingData } = await supabase
-        .from('questions_geocaching')
-        .select('*')
-        .in('question_id', filteredIds);
-      const geocachingMap = new Map(
-        (geocachingData || []).map((g: any) => [g.question_id, g])
-      );
+      const geocachingQuestionIds = (questionsData || [])
+        .filter((q: any) => q.type === 'geocaching')
+        .map((q: any) => q.id);
+
+      let geocachingMap = new Map<number, any>();
+      if (geocachingQuestionIds.length > 0) {
+        // Fetch geocaching metadata only for geocaching questions.
+        const { data: geocachingData, error: geocachingError } = await supabase
+          .from('questions_geocaching')
+          .select('*')
+          .in('question_id', geocachingQuestionIds);
+        if (geocachingError) throw geocachingError;
+        geocachingMap = new Map(
+          (geocachingData || []).map((g: any) => [g.question_id, g])
+        );
+      }
 
       const mapped = (questionsData || []).map((q: any) => {
         const geo = geocachingMap.get(q.id);

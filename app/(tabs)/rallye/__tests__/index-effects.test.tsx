@@ -1,15 +1,27 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import { render, waitFor } from '@testing-library/react-native';
 import RallyeIndex from '../index';
+import { store$ } from '@/services/storage/Store';
 
 let mockTeam: { id: number; name: string } | null = null;
+let mockJoinQuestionIds = [{ question_id: 1 }];
+let mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
+let mockGeocachingData: {
+  data: any[] | null;
+  error: Error | null;
+} = {
+  data: [],
+  error: null,
+};
+
 const mockFrom = jest.fn((table: string) => {
   if (table === 'join_rallye_questions') {
     return {
       select: jest.fn(() => ({
         eq: jest.fn(() =>
           Promise.resolve({
-            data: [{ question_id: 1 }],
+            data: mockJoinQuestionIds,
             error: null,
           })
         ),
@@ -38,10 +50,18 @@ const mockFrom = jest.fn((table: string) => {
       select: jest.fn(() => ({
         in: jest.fn(() =>
           Promise.resolve({
-            data: [{ id: 1, content: 'Q1', type: 'knowledge' }],
+            data: mockQuestionsData,
             error: null,
           })
         ),
+      })),
+    };
+  }
+
+  if (table === 'questions_geocaching') {
+    return {
+      select: jest.fn(() => ({
+        in: jest.fn(() => Promise.resolve(mockGeocachingData)),
       })),
     };
   }
@@ -197,9 +217,19 @@ function tableCallCount(table: string) {
 }
 
 describe('RallyeIndex effects', () => {
+  let alertSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockTeam = null;
+    mockJoinQuestionIds = [{ question_id: 1 }];
+    mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
+    mockGeocachingData = { data: [], error: null };
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
   });
 
   it('reuses cached question ids and does not re-fetch answers/status on team change', async () => {
@@ -227,5 +257,27 @@ describe('RallyeIndex effects', () => {
     expect(tableCallCount('join_rallye_questions')).toBe(
       questionJoinCallsAfterMount
     );
+  });
+
+  it('shows a load error instead of silently loading geocaching without metadata', async () => {
+    mockJoinQuestionIds = [{ question_id: 2 }];
+    mockQuestionsData = [{ id: 2, content: 'Geo', type: 'geocaching' }];
+    mockGeocachingData = {
+      data: null,
+      error: new Error('questions_geocaching failed'),
+    };
+
+    render(<RallyeIndex />);
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'common.errorTitle',
+        'rallye.error.loadQuestions'
+      );
+    });
+
+    expect(tableCallCount('questions_geocaching')).toBeGreaterThan(0);
+    expect(store$.questions.set).not.toHaveBeenCalled();
+    expect(store$.currentQuestion.set).not.toHaveBeenCalled();
   });
 });
