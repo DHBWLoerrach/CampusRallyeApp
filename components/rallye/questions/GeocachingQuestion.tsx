@@ -359,6 +359,12 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     ],
   }));
 
+  useEffect(() => {
+    if (!scanMode) {
+      processingRef.current = false;
+    }
+  }, [scanMode]);
+
   // -- Answer submission (text) -----------------------------------------------
 
   const handleTextSubmit = async () => {
@@ -416,7 +422,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     if (correctText !== data.toLowerCase()) {
       Logger.info('Geocaching', 'QR answer incorrect');
       Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
-      processingRef.current = false;
     } else {
       Logger.info('Geocaching', 'QR answer correct!');
       Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [

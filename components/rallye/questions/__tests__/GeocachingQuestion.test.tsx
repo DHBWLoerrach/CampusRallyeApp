@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'react-native';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import GeocachingQuestion from '../GeocachingQuestion';
 import { Question } from '@/types/rallye';
 import { confirm } from '@/utils/ConfirmAlert';
@@ -617,6 +617,50 @@ describe('GeocachingQuestion', () => {
         })
       );
     });
+  });
+
+  it('ignores duplicate incorrect QR scan events while the camera is closing', async () => {
+    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const storeMock = jest.requireMock('@/services/storage/Store');
+
+    storeMock.store$.answers.get.mockReturnValue([
+      { question_id: 42, text: 'secret code', correct: true },
+    ]);
+
+    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
+      cb({
+        coords: {
+          latitude: qrQuestion.target_latitude!,
+          longitude: qrQuestion.target_longitude!,
+          accuracy: 5,
+        },
+      });
+      return { remove: jest.fn() };
+    });
+
+    const { getByText, getByTestId } = render(
+      <GeocachingQuestion question={qrQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('question.qr.scan')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('question.qr.scan'));
+
+    const camera = getByTestId('camera-view');
+    act(() => {
+      camera.props.onBarcodeScanned({ data: 'wrong code' });
+      camera.props.onBarcodeScanned({ data: 'wrong code' });
+    });
+
+    expect(
+      alertSpy.mock.calls.filter(
+        ([title, message]) =>
+          title === 'common.errorTitle' && message === 'question.qr.incorrect'
+      )
+    ).toHaveLength(1);
+    expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
   });
 
   // -- Hint -------------------------------------------------------------------
