@@ -23,6 +23,14 @@ import UIButton from '@/components/ui/UIButton';
 import { ScreenScrollView } from '@/components/ui/Screen';
 import type { RallyeStatus } from '@/types/rallye';
 
+interface GeocachingMetadata {
+  question_id: number;
+  target_latitude: number;
+  target_longitude: number;
+  proximity_radius: number;
+  geocaching_input_type: 'text' | 'qr';
+}
+
 function isPreparation(status?: RallyeStatus) {
   return status === 'preparing';
 }
@@ -167,7 +175,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         .filter((q: any) => q.type === 'geocaching')
         .map((q: any) => q.id);
 
-      let geocachingMap = new Map<number, any>();
+      let geocachingMap = new Map<number, GeocachingMetadata>();
       if (geocachingQuestionIds.length > 0) {
         // Fetch geocaching metadata only for geocaching questions.
         const { data: geocachingData, error: geocachingError } = await supabase
@@ -176,7 +184,7 @@ const RallyeIndex = observer(function RallyeIndex() {
           .in('question_id', geocachingQuestionIds);
         if (geocachingError) throw geocachingError;
         geocachingMap = new Map(
-          (geocachingData || []).map((g: any) => [g.question_id, g])
+          (geocachingData || []).map((g: GeocachingMetadata) => [g.question_id, g] as const)
         );
       }
 
