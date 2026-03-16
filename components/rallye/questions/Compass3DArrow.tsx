@@ -181,16 +181,16 @@ function TiltCamera({ tiltXRef, tiltYRef }: Pick<Props, 'tiltXRef' | 'tiltYRef'>
   const smoothY = useRef(0);
 
   useFrame(({ camera }, delta) => {
-    // Exponentially smooth the tilt values for fluid motion
-    const factor = 1 - Math.exp(-5 * delta);
-    smoothX.current += (tiltXRef.current - smoothX.current) * factor;
-    smoothY.current += (tiltYRef.current - smoothY.current) * factor;
-
     if (!initialized.current) {
       smoothX.current = tiltXRef.current;
       smoothY.current = tiltYRef.current;
       initialized.current = true;
     }
+
+    // Exponentially smooth the tilt values for fluid motion
+    const factor = 1 - Math.exp(-5 * delta);
+    smoothX.current += (tiltXRef.current - smoothX.current) * factor;
+    smoothY.current += (tiltYRef.current - smoothY.current) * factor;
 
     // Convert clamped tilt degrees to camera orbital offset
     const pitchRad = clamp(smoothX.current, -50, 50) * (Math.PI / 180) * 0.35;
