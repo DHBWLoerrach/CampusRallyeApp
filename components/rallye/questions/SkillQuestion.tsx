@@ -9,7 +9,7 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import { useKeyboard } from '@/utils/useKeyboard';
-import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
+import { submitAnswerAndAdvance, submitAnswerOnly } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
@@ -19,7 +19,7 @@ import Hint from '@/components/ui/Hint';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 
-export default function SkillQuestion({ question }: QuestionProps) {
+export default function SkillQuestion({ question, onAnswered }: QuestionProps) {
   const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
@@ -37,7 +37,8 @@ export default function SkillQuestion({ question }: QuestionProps) {
     const trimmed = answer.trim();
     const isCorrect = trimmed.toLowerCase() === correctText;
     try {
-      await submitAnswerAndAdvance({
+      const submitFn = onAnswered ? submitAnswerOnly : submitAnswerAndAdvance;
+      await submitFn({
         teamId: team?.id ?? null,
         questionId: question.id,
         answeredCorrectly: isCorrect,
@@ -45,6 +46,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
         answerText: trimmed,
       });
       setAnswer('');
+      onAnswered?.();
     } catch (e) {
       console.error('Error submitting answer:', e);
       Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));

@@ -4,7 +4,9 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { QuestionProps } from '@/types/rallye';
 import {
   submitAnswerAndAdvance,
+  submitAnswerOnly,
   submitPhotoAnswerAndAdvance,
+  submitPhotoAnswerOnly,
 } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
 import Hint from '@/components/ui/Hint';
@@ -199,7 +201,7 @@ function ImagePreview({
   );
 }
 
-export default function UploadPhotoQuestion({ question }: QuestionProps) {
+export default function UploadPhotoQuestion({ question, onAnswered }: QuestionProps) {
   const [picture, setPicture] = useState<Picture | null>(null);
   const [sending, setSending] = useState(false);
   const cameraRef = useRef<CameraView | null>(null);
@@ -220,12 +222,14 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const submitSurrender = async () => {
     setPicture(null);
     try {
-      await submitAnswerAndAdvance({
+      const submitFn = onAnswered ? submitAnswerOnly : submitAnswerAndAdvance;
+      await submitFn({
         teamId: team?.id ?? null,
         questionId: question.id,
         answeredCorrectly: false,
         pointsAwarded: 0,
       });
+      onAnswered?.();
     } catch (error) {
       console.error('Error surrendering:', error);
       Alert.alert(t('common.errorTitle'), t('question.error.surrender'));
@@ -302,16 +306,19 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
     setSending(true);
     try {
       if (!team?.id) {
-        await submitAnswerAndAdvance({
+        const submitFn = onAnswered ? submitAnswerOnly : submitAnswerAndAdvance;
+        await submitFn({
           teamId: null,
           questionId: question.id,
           answeredCorrectly: true,
           pointsAwarded: question.points,
         });
+        onAnswered?.();
         return;
       }
 
-      const result = await submitPhotoAnswerAndAdvance({
+      const photoFn = onAnswered ? submitPhotoAnswerOnly : submitPhotoAnswerAndAdvance;
+      const result = await photoFn({
         teamId: team.id,
         questionId: question.id,
         pointsAwarded: question.points,
@@ -319,6 +326,8 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
       });
       if (result.status === 'requires_online') {
         Alert.alert(t('common.offline'), t('question.photo.offlineMessage'));
+      } else {
+        onAnswered?.();
       }
     } catch (e) {
       console.error('Error submitting photo answer:', e);

@@ -28,7 +28,9 @@ const mockFrom = jest.fn((table: string) => {
   if (table === 'team_questions') {
     return {
       select: jest.fn(() => ({
-        eq: jest.fn(() => Promise.resolve({ data: [], error: null })),
+        eq: jest.fn(() => ({
+          in: jest.fn(() => Promise.resolve({ data: [], error: null })),
+        })),
       })),
     };
   }

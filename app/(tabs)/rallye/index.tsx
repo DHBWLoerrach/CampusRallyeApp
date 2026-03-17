@@ -140,7 +140,8 @@ const RallyeIndex = observer(function RallyeIndex() {
         const { data: answeredData, error: answeredError } = await supabase
           .from('team_questions')
           .select('question_id')
-          .eq('team_id', teamId);
+          .eq('team_id', teamId)
+          .in('question_id', questionIds);
         if (answeredError) throw answeredError;
         answeredIds = (answeredData || []).map((row: any) => row.question_id);
       }

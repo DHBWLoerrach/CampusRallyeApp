@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import {
   QuestionProps,
   AnswerRow,
-  PuzzleGroup,
   PuzzleFragmentWithQuestion,
   Question,
+  QuestionType,
 } from '@/types/rallye';
 import { useAppStyles } from '@/utils/AppStyles';
 import Colors from '@/utils/Colors';
@@ -24,14 +24,28 @@ import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
+import SkillQuestion from '@/components/rallye/questions/SkillQuestion';
+import MultipleChoiceQuestion from '@/components/rallye/questions/MultipleChoiceQuestion';
+import QRCodeQuestion from '@/components/rallye/questions/QRCodeQuestion';
+import ImageQuestion from '@/components/rallye/questions/ImageQuestion';
+import UploadPhotoQuestion from '@/components/rallye/questions/UploadPhotoQuestion';
+
+const fragmentComponents: Partial<Record<QuestionType, React.ComponentType<QuestionProps>>> = {
+  knowledge: SkillQuestion,
+  upload: UploadPhotoQuestion,
+  qr_code: QRCodeQuestion,
+  multiple_choice: MultipleChoiceQuestion,
+  picture: ImageQuestion,
+};
 
 export default function PuzzleQuestion({ question }: QuestionProps) {
   const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [loadingFragments, setLoadingFragments] = useState(true);
-  const [puzzleGroup, setPuzzleGroup] = useState<PuzzleGroup | null>(null);
   const [fragments, setFragments] = useState<PuzzleFragmentWithQuestion[]>([]);
+  const [completedFragmentIds, setCompletedFragmentIds] = useState<Set<number>>(new Set());
+  const [activeFragmentIndex, setActiveFragmentIndex] = useState<number | null>(null);
   const s = useAppStyles();
 
   const team = store$.team.get();
@@ -39,7 +53,13 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
   const correctText = getAnswerKeyForQuestion(answers, question.id);
   const answerKeyReady = correctText.length > 0;
 
-  // Load puzzle configuration and fragments
+  const allFragmentsCompleted = !team || fragments.length === 0 ||
+    fragments.every(f => completedFragmentIds.has(f.fragment_question_id));
+  const remainingCount = fragments.filter(
+    f => !completedFragmentIds.has(f.fragment_question_id)
+  ).length;
+
+  // Load puzzle configuration, fragments, and their answers
   useEffect(() => {
     let mounted = true;
 
@@ -54,8 +74,6 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
 
         if (groupError) throw groupError;
         if (!mounted || !groupData) return;
-
-        setPuzzleGroup(groupData);
 
         // Load fragments with their questions
         const { data: fragmentsData, error: fragmentsError } = await supabase
@@ -98,9 +116,42 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
         }));
 
         setFragments(fragmentsWithQuestions);
+
+        // Load answers for fragment questions and merge into store
+        if (fragmentQuestionIds.length > 0) {
+          const { data: fragmentAnswers } = await supabase
+            .from('answers')
+            .select('*')
+            .in('question_id', fragmentQuestionIds);
+          if (mounted && fragmentAnswers && fragmentAnswers.length > 0) {
+            const currentAnswers = store$.answers.get() as AnswerRow[];
+            const existingIds = new Set(currentAnswers.map(a => a.id));
+            const newAnswers = fragmentAnswers.filter(
+              (a: any) => !existingIds.has(a.id)
+            );
+            if (newAnswers.length > 0) {
+              store$.answers.set([...currentAnswers, ...newAnswers]);
+            }
+          }
+        }
+
+        // Check which fragments are already completed
+        const teamId = store$.team.get()?.id;
+        if (teamId && fragmentQuestionIds.length > 0) {
+          const { data: completedData } = await supabase
+            .from('team_questions')
+            .select('question_id')
+            .eq('team_id', teamId)
+            .in('question_id', fragmentQuestionIds);
+          if (mounted && completedData) {
+            setCompletedFragmentIds(
+              new Set(completedData.map((r: any) => r.question_id))
+            );
+          }
+        }
       } catch (error) {
         console.error('Error loading puzzle data:', error);
-        Alert.alert(t('common.errorTitle'), 'Puzzle-Fragmente konnten nicht geladen werden.');
+        Alert.alert(t('common.errorTitle'), t('puzzle.error.loadFragments'));
       } finally {
         if (mounted) setLoadingFragments(false);
       }
@@ -112,6 +163,11 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
       mounted = false;
     };
   }, [question.id, t]);
+
+  const handleFragmentAnswered = (fragmentQuestionId: number) => {
+    setCompletedFragmentIds(prev => new Set([...prev, fragmentQuestionId]));
+    setActiveFragmentIndex(null);
+  };
 
   const handlePersist = async () => {
     if (submitting) return;
@@ -136,6 +192,13 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
   };
 
   const handleSubmit = async () => {
+    if (!allFragmentsCompleted) {
+      Alert.alert(
+        t('puzzle.error.fragmentsIncompleteTitle'),
+        t('puzzle.error.fragmentsIncompleteMessage')
+      );
+      return;
+    }
     const trimmed = answer.trim();
     if (!trimmed) {
       Alert.alert(t('common.errorTitle'), t('question.error.enterAnswer'));
@@ -166,6 +229,46 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
     );
   }
 
+  // Render active fragment question
+  if (activeFragmentIndex !== null) {
+    const fragment = fragments[activeFragmentIndex];
+    const FragmentCmp = fragmentComponents[fragment.fragment_question.question_type];
+
+    if (!FragmentCmp) {
+      // Unsupported fragment type — gracefully fall back to puzzle overview
+      return (
+        <View style={{ flex: 1, padding: 16 }}>
+          <UIButton
+            icon="arrow-left"
+            color={Colors.dhbwGray}
+            onPress={() => setActiveFragmentIndex(null)}
+          >
+            {t('puzzle.backToPuzzle')}
+          </UIButton>
+        </View>
+      );
+    }
+
+    return (
+      <View style={{ flex: 1 }}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 }}>
+          <UIButton
+            icon="arrow-left"
+            color={Colors.dhbwGray}
+            onPress={() => setActiveFragmentIndex(null)}
+          >
+            {t('puzzle.backToPuzzle')}
+          </UIButton>
+        </View>
+        <FragmentCmp
+          key={fragment.fragment_question_id}
+          question={fragment.fragment_question}
+          onAnswered={() => handleFragmentAnswered(fragment.fragment_question_id)}
+        />
+      </View>
+    );
+  }
+
   return (
     <ThemedScrollView
       variant="background"
@@ -191,18 +294,23 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
               variant="body"
               style={[s.text, { fontWeight: '600', marginBottom: 12 }]}
             >
-              Aufgaben ({fragments.length}):
+              {t('puzzle.fragment.tasks', { count: fragments.length })}
             </ThemedText>
             {fragments.map((fragment, index) => {
-              const isCompleted = false; // TODO: Track completion
+              const isCompleted = completedFragmentIds.has(fragment.fragment_question_id);
               return (
-                <View
+                <Pressable
                   key={fragment.id}
+                  onPress={() => {
+                    if (!isCompleted) setActiveFragmentIndex(index);
+                  }}
+                  disabled={isCompleted}
                   style={{
                     marginBottom: index < fragments.length - 1 ? 12 : 0,
                     paddingBottom: index < fragments.length - 1 ? 12 : 0,
                     borderBottomWidth: index < fragments.length - 1 ? 1 : 0,
                     borderBottomColor: Colors.lightGray,
+                    opacity: isCompleted ? 0.6 : 1,
                   }}
                 >
                   <View
@@ -252,11 +360,35 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
                           📍 {fragment.location_hint}
                         </ThemedText>
                       )}
+                      {!isCompleted && (
+                        <ThemedText
+                          variant="body"
+                          style={{ color: Colors.dhbwRed, fontSize: 13, marginTop: 4 }}
+                        >
+                          {t('puzzle.fragment.answer')} →
+                        </ThemedText>
+                      )}
+                      {isCompleted && (
+                        <ThemedText
+                          variant="body"
+                          style={{ color: Colors.dhbwRed, fontSize: 13, marginTop: 4 }}
+                        >
+                          ✓ {t('puzzle.fragment.completed')}
+                        </ThemedText>
+                      )}
                     </View>
                   </View>
-                </View>
+                </Pressable>
               );
             })}
+          </InfoBox>
+        )}
+
+        {fragments.length > 0 && !allFragmentsCompleted && (
+          <InfoBox mb={0}>
+            <ThemedText variant="body" style={[s.text, { textAlign: 'center' }]}>
+              {t('puzzle.fragmentsRemaining', { count: remainingCount })}
+            </ThemedText>
           </InfoBox>
         )}
 
@@ -266,7 +398,7 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
             placeholder={t('question.placeholder.answer')}
             value={answer}
             onChangeText={setAnswer}
-            editable={!submitting}
+            editable={!submitting && allFragmentsCompleted}
             returnKeyType="send"
             blurOnSubmit
             onSubmitEditing={handleSubmit}
@@ -276,10 +408,10 @@ export default function PuzzleQuestion({ question }: QuestionProps) {
         <InfoBox mb={0}>
           <UIButton
             onPress={handleSubmit}
-            disabled={submitting || !answer.trim()}
+            disabled={submitting || !answer.trim() || !allFragmentsCompleted}
             loading={submitting}
             color={
-              answer.trim() && answerKeyReady
+              answer.trim() && answerKeyReady && allFragmentsCompleted
                 ? Colors.dhbwRed
                 : Colors.dhbwGray
             }

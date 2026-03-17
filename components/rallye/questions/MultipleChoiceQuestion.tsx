@@ -17,7 +17,7 @@ import {
   isAnswerMarkedCorrect,
   isSameQuestionId,
 } from '@/utils/answerRows';
-import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
+import { submitAnswerAndAdvance, submitAnswerOnly } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
@@ -26,7 +26,7 @@ import Hint from '@/components/ui/Hint';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 
-function MultipleChoiceQuestion({ question }: QuestionProps) {
+function MultipleChoiceQuestion({ question, onAnswered }: QuestionProps) {
   const { isDarkMode } = useTheme();
   const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
@@ -69,7 +69,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
     const trimmed = answer.trim();
     const isCorrect = trimmed.toLowerCase() === correctAnswer;
     try {
-      await submitAnswerAndAdvance({
+      const submitFn = onAnswered ? submitAnswerOnly : submitAnswerAndAdvance;
+      await submitFn({
         teamId: team?.id ?? null,
         questionId: question.id,
         answeredCorrectly: isCorrect,
@@ -77,6 +78,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
         answerText: trimmed,
       });
       setAnswer('');
+      onAnswered?.();
     } catch (e) {
       console.error('Error submitting answer:', e);
       Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));

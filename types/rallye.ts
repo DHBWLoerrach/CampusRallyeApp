@@ -44,6 +44,7 @@ export interface AnswerRow {
 
 export interface QuestionProps {
   question: Question;
+  onAnswered?: () => void;
 }
 
 export interface Organization {

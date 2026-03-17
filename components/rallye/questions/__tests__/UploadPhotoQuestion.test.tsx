@@ -11,7 +11,11 @@ const mockSubmitPhotoAnswerAndAdvance = jest.fn();
 jest.mock('@/services/storage/answerSubmission', () => ({
   submitAnswerAndAdvance: (...args: unknown[]) =>
     mockSubmitAnswerAndAdvance(...args),
+  submitAnswerOnly: (...args: unknown[]) =>
+    mockSubmitAnswerAndAdvance(...args),
   submitPhotoAnswerAndAdvance: (...args: unknown[]) =>
+    mockSubmitPhotoAnswerAndAdvance(...args),
+  submitPhotoAnswerOnly: (...args: unknown[]) =>
     mockSubmitPhotoAnswerAndAdvance(...args),
 }));
 

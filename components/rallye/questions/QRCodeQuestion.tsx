@@ -8,7 +8,7 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
 import Colors from '@/utils/Colors';
-import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
+import { submitAnswerAndAdvance, submitAnswerOnly } from '@/services/storage/answerSubmission';
 import { useLanguage } from '@/utils/LanguageContext';
 import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import { confirm } from '@/utils/ConfirmAlert';
@@ -18,7 +18,7 @@ import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 
-export default function QRCodeQuestion({ question }: QuestionProps) {
+export default function QRCodeQuestion({ question, onAnswered }: QuestionProps) {
   const cameraRef = useRef<CameraView | null>(null);
   const processingRef = useRef(false);
   const [scanMode, setScanMode] = useState(false);
@@ -34,12 +34,14 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const submitSurrender = async () => {
     setScanMode(false);
     try {
-      await submitAnswerAndAdvance({
+      const submitFn = onAnswered ? submitAnswerOnly : submitAnswerAndAdvance;
+      await submitFn({
         teamId: team?.id ?? null,
         questionId: question.id,
         answeredCorrectly: false,
         pointsAwarded: 0,
       });
+      onAnswered?.();
     } catch (e) {
       console.error('Error submitting surrender:', e);
       Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
@@ -79,12 +81,14 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
             onPress: () => {
               void (async () => {
                 try {
-                  await submitAnswerAndAdvance({
+                  const submitFn = onAnswered ? submitAnswerOnly : submitAnswerAndAdvance;
+                  await submitFn({
                     teamId: team?.id ?? null,
                     questionId: question.id,
                     answeredCorrectly: true,
                     pointsAwarded: question.points,
                   });
+                  onAnswered?.();
                 } catch (e) {
                   console.error('Error submitting QR answer:', e);
                   Alert.alert(
