@@ -1,7 +1,16 @@
 /* eslint-disable react/no-unknown-property */
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber/native';
-import * as THREE from 'three';
+import type {
+  ExtrudeGeometryOptions,
+  Group,
+  Shape,
+} from 'three';
+
+// Match @react-three/fiber/native's CommonJS resolution to avoid
+// Metro loading both the CJS and ESM Three.js builds.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const THREE: typeof import('three') = require('three');
 
 // -- Types -------------------------------------------------------------------
 
@@ -27,7 +36,7 @@ interface Props {
  *
  * Normalized to a ~1.3-unit-tall shape centered on origin.
  */
-function createChevronShape(): THREE.Shape {
+function createChevronShape(): Shape {
   // Scale factor chosen so the shape fills ~1.3 world units tall
   const s = 1.3 / 75;
   const cx = 60;
@@ -95,7 +104,7 @@ const clamp = (v: number, min: number, max: number) =>
 // -- Arrow mesh --------------------------------------------------------------
 
 function ArrowMesh({ angleRef, tiltXRef, tiltYRef }: Props) {
-  const groupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<Group>(null);
   const initialized = useRef(false);
   // Smoothed tilt values for level compensation
   const smoothPitch = useRef(0);
@@ -104,7 +113,7 @@ function ArrowMesh({ angleRef, tiltXRef, tiltYRef }: Props) {
   // Build geometry once
   const geometry = useMemo(() => {
     const shape = createChevronShape();
-    const extrudeSettings: THREE.ExtrudeGeometryOptions = {
+    const extrudeSettings: ExtrudeGeometryOptions = {
       depth: 0.18,
       bevelEnabled: true,
       bevelThickness: 0.10,
