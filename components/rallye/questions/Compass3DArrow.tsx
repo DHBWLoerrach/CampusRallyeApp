@@ -12,6 +12,52 @@ import type {
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const THREE: typeof import('three') = require('three');
 
+type RendererProps = NonNullable<ConstructorParameters<typeof THREE.WebGLRenderer>[0]>;
+type ExpoGlContext = WebGLRenderingContext & {
+  __campusRallyePixelStoreiPatched?: boolean;
+};
+type ExpoCanvas = RendererProps['canvas'] & {
+  __campusRallyeGetContextPatched?: boolean;
+  getContext: (contextId?: string, contextAttributes?: { antialias?: boolean }) => ExpoGlContext;
+};
+
+const UNSUPPORTED_EXPO_PIXEL_STORE_PARAMS = new Set([
+  0x9241, // UNPACK_PREMULTIPLY_ALPHA_WEBGL
+  0x9243, // UNPACK_COLORSPACE_CONVERSION_WEBGL
+]);
+
+function patchExpoGlContext(glContext: ExpoGlContext) {
+  if (glContext.__campusRallyePixelStoreiPatched) return;
+
+  const originalPixelStorei = glContext.pixelStorei.bind(glContext);
+
+  glContext.pixelStorei = ((pname: number, param: number) => {
+    // Expo GL currently ignores these unpack flags and logs a warning for each call.
+    if (UNSUPPORTED_EXPO_PIXEL_STORE_PARAMS.has(pname)) return;
+    originalPixelStorei(pname, param);
+  }) as typeof glContext.pixelStorei;
+
+  glContext.__campusRallyePixelStoreiPatched = true;
+}
+
+function createExpoRenderer(defaultProps: RendererProps) {
+  const canvas = defaultProps.canvas as ExpoCanvas;
+
+  if (!canvas.__campusRallyeGetContextPatched) {
+    const originalGetContext = canvas.getContext.bind(canvas);
+
+    canvas.getContext = ((contextId?: string, contextAttributes?: { antialias?: boolean }) => {
+      const glContext = originalGetContext(contextId, contextAttributes);
+      patchExpoGlContext(glContext);
+      return glContext;
+    }) as ExpoCanvas['getContext'];
+
+    canvas.__campusRallyeGetContextPatched = true;
+  }
+
+  return new THREE.WebGLRenderer(defaultProps);
+}
+
 // -- Types -------------------------------------------------------------------
 
 interface Props {
@@ -228,8 +274,8 @@ export default function Compass3DArrow({ angleRef, tiltXRef, tiltYRef }: Props) 
     <Canvas
       style={{ width: 200, height: 200 }}
       camera={{ position: [0, 2.6, 2.4], fov: 40 }}
-      gl={{ alpha: true, antialias: true }}
-      shadows
+      gl={createExpoRenderer}
+      shadows="percentage"
       onCreated={({ gl }) => {
         gl.setClearColor(0x000000, 0);
       }}
