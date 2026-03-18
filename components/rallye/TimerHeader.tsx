@@ -33,6 +33,8 @@ export default function TimerHeader({
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
   useEffect(() => {
+    if (!endTime) return;
+
     const id = setInterval(() => {
       const next = calculateTimeRemaining(endTime);
       setT(next);
