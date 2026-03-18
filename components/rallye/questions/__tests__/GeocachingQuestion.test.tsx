@@ -508,6 +508,66 @@ describe('GeocachingQuestion', () => {
     expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
   });
 
+  it('ignores submit-editing events while a text submission is already in flight', async () => {
+    const storeMock = jest.requireMock('@/services/storage/Store');
+    storeMock.store$.answers.get.mockReturnValue([
+      { question_id: 42, text: 'secret code', correct: true },
+    ]);
+
+    let resolveSubmit: (value: { status: 'sent' }) => void = () => {};
+    mockSubmitAnswerAndAdvance.mockImplementation(
+      () =>
+        new Promise<{ status: 'sent' }>((resolve) => {
+          resolveSubmit = resolve;
+        })
+    );
+
+    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
+      cb({
+        coords: {
+          latitude: baseQuestion.target_latitude,
+          longitude: baseQuestion.target_longitude,
+          accuracy: 5,
+        },
+      });
+      return { remove: jest.fn() };
+    });
+
+    const { getByText, getByPlaceholderText } = render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(getByText(/geocaching\.arrived/)).toBeTruthy();
+    });
+
+    const input = getByPlaceholderText('question.placeholder.answer');
+    fireEvent.changeText(input, 'secret code');
+
+    await act(async () => {
+      fireEvent(input, 'submitEditing', {
+        nativeEvent: { text: 'secret code' },
+      });
+      await Promise.resolve();
+    });
+
+    expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      fireEvent(input, 'submitEditing', {
+        nativeEvent: { text: 'secret code' },
+      });
+      await Promise.resolve();
+    });
+
+    expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveSubmit({ status: 'sent' });
+      await Promise.resolve();
+    });
+  });
+
   // -- Surrender --------------------------------------------------------------
 
   it('submits surrender with 0 points', async () => {

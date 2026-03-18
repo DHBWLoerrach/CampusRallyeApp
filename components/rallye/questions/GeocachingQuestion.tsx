@@ -366,6 +366,8 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // -- Answer submission (text) -----------------------------------------------
 
   const handleTextSubmit = async () => {
+    if (submitting) return;
+
     const trimmed = answer.trim();
     Logger.debug('Geocaching', `Text submit — answer="${trimmed}", answerKeyReady=${answerKeyReady}, correctText="${correctText}"`);
     if (!trimmed) {
