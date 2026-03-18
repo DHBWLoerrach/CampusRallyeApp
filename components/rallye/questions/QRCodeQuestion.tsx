@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { QuestionProps, AnswerRow } from '@/types/rallye';
@@ -21,6 +21,7 @@ import { useAppStyles } from '@/utils/AppStyles';
 export default function QRCodeQuestion({ question }: QuestionProps) {
   const cameraRef = useRef<CameraView | null>(null);
   const processingRef = useRef(false);
+  const submittingRef = useRef(false);
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const { t } = useLanguage();
@@ -69,40 +70,46 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
     }
     processingRef.current = true;
     setScanMode(false);
-    try {
-      if (correct !== data.toLowerCase()) {
-        Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
-      } else {
-        Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
-          {
-            text: t('common.next'),
-            onPress: () => {
-              void (async () => {
-                try {
-                  await submitAnswerAndAdvance({
-                    teamId: team?.id ?? null,
-                    questionId: question.id,
-                    answeredCorrectly: true,
-                    pointsAwarded: question.points,
-                  });
-                } catch (e) {
-                  console.error('Error submitting QR answer:', e);
-                  Alert.alert(
-                    t('common.errorTitle'),
-                    t('question.error.saveAnswer')
-                  );
-                }
-              })();
-            },
-          },
-        ]);
-      }
-    } finally {
-      setTimeout(() => {
-        processingRef.current = false;
-      }, 2000);
+    if (correct !== data.toLowerCase().trim()) {
+      Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
+      return;
     }
+
+    Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
+      {
+        text: t('common.next'),
+        onPress: () => {
+          processingRef.current = true;
+          submittingRef.current = true;
+          void (async () => {
+            try {
+              await submitAnswerAndAdvance({
+                teamId: team?.id ?? null,
+                questionId: question.id,
+                answeredCorrectly: true,
+                pointsAwarded: question.points,
+              });
+            } catch (e) {
+              console.error('Error submitting QR answer:', e);
+              Alert.alert(
+                t('common.errorTitle'),
+                t('question.error.saveAnswer')
+              );
+            } finally {
+              submittingRef.current = false;
+              processingRef.current = false;
+            }
+          })();
+        },
+      },
+    ]);
   };
+
+  useEffect(() => {
+    if (!scanMode && !submittingRef.current) {
+      processingRef.current = false;
+    }
+  }, [scanMode]);
 
   if (!permission) return <View />;
 
