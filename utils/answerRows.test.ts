@@ -23,6 +23,18 @@ describe('answerRows helpers', () => {
         content: 'Mensa',
       } as Partial<AnswerRow>)
     ).toBe('Mensa');
+    expect(
+      getAnswerText({
+        text: '',
+        answer: 'Belchenstrasse',
+      } as Partial<AnswerRow>)
+    ).toBe('Belchenstrasse');
+    expect(
+      getAnswerText({
+        text: '   ',
+        content: 'Mensa',
+      } as Partial<AnswerRow>)
+    ).toBe('Mensa');
     expect(getAnswerText(null)).toBe('');
     expect(getAnswerText(undefined)).toBe('');
   });

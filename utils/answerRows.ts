@@ -11,10 +11,14 @@ export function getAnswerText(
   answer: Partial<AnswerRow> | null | undefined
 ): string {
   if (!answer) return '';
-  if (typeof answer.text === 'string') return answer.text;
-  if (typeof answer.answer === 'string') return answer.answer;
-  if (typeof answer.content === 'string') return answer.content;
-  return '';
+  const candidates = [answer.text, answer.answer, answer.content];
+  const nonEmpty = candidates.find(
+    (value): value is string =>
+      typeof value === 'string' && value.trim().length > 0
+  );
+  if (nonEmpty) return nonEmpty;
+
+  return candidates.find((value): value is string => typeof value === 'string') ?? '';
 }
 
 export function isSameQuestionId(
