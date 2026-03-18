@@ -35,6 +35,13 @@ export default function TimerHeader({
   useEffect(() => {
     if (!endTime) return;
 
+    const next = calculateTimeRemaining(endTime);
+    setT(next);
+    if (next.totalMs <= 0) {
+      store$.timeExpired.set(true);
+      return;
+    }
+
     const id = setInterval(() => {
       const next = calculateTimeRemaining(endTime);
       setT(next);
