@@ -391,6 +391,49 @@ describe('GeocachingQuestion', () => {
     });
   });
 
+  it('accepts fallback answer fields and normalized correct flags for text answers', async () => {
+    const storeMock = jest.requireMock('@/services/storage/Store');
+    storeMock.store$.answers.get.mockReturnValue([
+      { question_id: '42', answer: 'secret code', is_correct: 'true' },
+    ]);
+
+    mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
+
+    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
+      cb({
+        coords: {
+          latitude: baseQuestion.target_latitude,
+          longitude: baseQuestion.target_longitude,
+          accuracy: 5,
+        },
+      });
+      return { remove: jest.fn() };
+    });
+
+    const { getByText, getByPlaceholderText } = render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(getByText(/geocaching\.arrived/)).toBeTruthy();
+    });
+
+    fireEvent.changeText(getByPlaceholderText('question.placeholder.answer'), 'secret code');
+    fireEvent.press(getByText('question.submit'));
+
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
+        expect.objectContaining({
+          teamId: 1,
+          questionId: 42,
+          answeredCorrectly: true,
+          pointsAwarded: 10,
+          answerText: 'secret code',
+        })
+      );
+    });
+  });
+
   it('submits incorrect text answer with 0 points', async () => {
     const storeMock = jest.requireMock('@/services/storage/Store');
     storeMock.store$.answers.get.mockReturnValue([
@@ -615,6 +658,48 @@ describe('GeocachingQuestion', () => {
           pointsAwarded: 10,
           answerText: scannedValue,
         })
+      );
+    });
+  });
+
+  it('accepts scanned QR values with trailing whitespace', async () => {
+    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const storeMock = jest.requireMock('@/services/storage/Store');
+
+    storeMock.store$.answers.get.mockReturnValue([
+      { question_id: 42, text: 'secret code', correct: true },
+    ]);
+    mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
+
+    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
+      cb({
+        coords: {
+          latitude: qrQuestion.target_latitude!,
+          longitude: qrQuestion.target_longitude!,
+          accuracy: 5,
+        },
+      });
+      return { remove: jest.fn() };
+    });
+
+    const { getByText, getByTestId } = render(
+      <GeocachingQuestion question={qrQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('question.qr.scan')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('question.qr.scan'));
+    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+      data: 'Secret Code \n',
+    });
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith(
+        'common.ok',
+        'question.qr.correctMessage',
+        expect.any(Array)
       );
     });
   });

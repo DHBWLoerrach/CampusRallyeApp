@@ -29,6 +29,7 @@ import { useAppStyles } from '@/utils/AppStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useKeyboard } from '@/utils/useKeyboard';
 import { confirmAnswer, confirm } from '@/utils/ConfirmAlert';
+import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import Colors from '@/utils/Colors';
 import Logger from '@/utils/Logger';
 import ThemedView from '@/components/themed/ThemedView';
@@ -112,10 +113,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const inputType = question.geocaching_input_type ?? 'text';
 
   // Correct answer key (for text or QR verification)
-  const correctAnswer = answers.find(
-    (a) => a.question_id === question.id && a.correct
-  );
-  const correctText = (correctAnswer?.text ?? '').toLowerCase().trim();
+  const correctText = getAnswerKeyForQuestion(answers, question.id);
   const answerKeyReady = correctText.length > 0;
 
   // Validate that question has coordinates
@@ -419,7 +417,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     processingRef.current = true;
     setScanMode(false);
 
-    if (correctText !== data.toLowerCase()) {
+    if (correctText !== data.toLowerCase().trim()) {
       Logger.info('Geocaching', 'QR answer incorrect');
       Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
     } else {
