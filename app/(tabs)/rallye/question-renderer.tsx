@@ -106,15 +106,17 @@ export default function QuestionRenderer({ question }: { question: any }) {
     if (!isFlipped) {
       // Prepare back with next question and flip to back (180)
       setBackQuestion(question);
-      flip.value = withSpring(180, SPRING_CONFIG, () =>
-        runOnJS(onFlipToBack)()
-      );
+      flip.value = withSpring(180, SPRING_CONFIG, (finished) => {
+        if (!finished) return;
+        runOnJS(onFlipToBack)();
+      });
     } else {
       // Prepare front with next question and flip to front (0)
       setFrontQuestion(question);
-      flip.value = withSpring(0, SPRING_CONFIG, () =>
-        runOnJS(onFlipToFront)()
-      );
+      flip.value = withSpring(0, SPRING_CONFIG, (finished) => {
+        if (!finished) return;
+        runOnJS(onFlipToFront)();
+      });
     }
   }, [backQuestion?.id, flip, frontQuestion?.id, isFlipped, onFlipToBack, onFlipToFront, question]);
 

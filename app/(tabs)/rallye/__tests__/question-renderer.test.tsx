@@ -2,7 +2,7 @@ import React from 'react';
 import { act, render } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 
-const springCallbacks: (() => void)[] = [];
+const springCallbacks: ((finished?: boolean) => void)[] = [];
 
 jest.mock('react-native-reanimated', () => {
   const actual = jest.requireActual('react-native-reanimated/mock');
@@ -14,7 +14,7 @@ jest.mock('react-native-reanimated', () => {
     withSpring: (
       toValue: unknown,
       _config?: unknown,
-      callback?: () => void
+      callback?: (finished?: boolean) => void
     ) => {
       if (callback) {
         springCallbacks.push(callback);
@@ -223,7 +223,7 @@ describe('QuestionRenderer', () => {
 
     // Animation completes — old face unmounts, new question stays visible
     act(() => {
-      springCallbacks.at(-1)?.();
+      springCallbacks.at(-1)?.(true);
     });
 
     expect(getByText('ImageQuestion')).toBeTruthy();
@@ -234,5 +234,27 @@ describe('QuestionRenderer', () => {
       getByTestId('question-face-back').props.style
     );
     expect(activeFaceAfterFlip?.position).toBeUndefined();
+  });
+
+  it('keeps both faces mounted when a flip spring is canceled', () => {
+    const q1 = { id: 1, question_type: 'knowledge', question: 'Q1', points: 5 };
+    const q2 = { id: 2, question_type: 'picture', question: 'Q2', points: 5 };
+
+    const { getByTestId, getByText, rerender } = render(
+      <QuestionRenderer question={q1} />
+    );
+
+    rerender(<QuestionRenderer question={q2} />);
+    expect(getByText('SkillQuestion')).toBeTruthy();
+    expect(getByText('ImageQuestion')).toBeTruthy();
+
+    act(() => {
+      springCallbacks.at(-1)?.(false);
+    });
+
+    expect(getByTestId('question-face-front')).toBeTruthy();
+    expect(getByTestId('question-face-back')).toBeTruthy();
+    expect(getByText('SkillQuestion')).toBeTruthy();
+    expect(getByText('ImageQuestion')).toBeTruthy();
   });
 });
