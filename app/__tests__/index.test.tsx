@@ -1,5 +1,6 @@
 import React, { type ReactNode } from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { AppState } from 'react-native';
 import Welcome from '../index';
 import {
   setCurrentRallye,
@@ -16,6 +17,7 @@ import { store$ } from '@/services/storage/Store';
 import type { Rallye } from '@/types/rallye';
 
 let mockPasswordSheetProps: any;
+const mockAppStateSubscriptionRemove = jest.fn();
 
 jest.mock('@/components/ui/CollapsibleHeroHeader', () => {
   const { View } = jest.requireActual('react-native');
@@ -171,7 +173,17 @@ describe('Welcome', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
     mockPasswordSheetProps = null;
+    Object.defineProperty(AppState, 'currentState', {
+      configurable: true,
+      value: 'active',
+    });
+    jest.spyOn(AppState, 'addEventListener').mockImplementation(
+      () => ({
+        remove: mockAppStateSubscriptionRemove,
+      })
+    );
 
     mockedGetSelectedOrganization.mockResolvedValue(null);
     mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
@@ -182,6 +194,11 @@ describe('Welcome', () => {
     });
     mockedGetCurrentTeam.mockResolvedValue(null);
     mockedTeamExists.mockResolvedValue('missing');
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('shows tour mode when dashboard has only tour mode rallye', async () => {
@@ -462,5 +479,141 @@ describe('Welcome', () => {
       expect(getByText(secondDepartment.name)).toBeTruthy();
     });
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
+  });
+
+  it('performs one delayed sync without falling into a 2-second refresh loop', async () => {
+    jest.useFakeTimers();
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+
+    render(<Welcome />);
+
+    await waitFor(() => {
+      expect(mockedGetOrganizationsWithActiveRallyes).toHaveBeenCalledTimes(1);
+      expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(2000);
+    });
+
+    await waitFor(() => {
+      expect(mockedGetOrganizationsWithActiveRallyes).toHaveBeenCalledTimes(2);
+      expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(2);
+    });
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(2000);
+    });
+
+    expect(mockedGetOrganizationsWithActiveRallyes).toHaveBeenCalledTimes(2);
+    expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows newly added rallyes after the delayed sync without manual refresh', async () => {
+    jest.useFakeTimers();
+
+    const newRallye: Rallye = {
+      id: 99,
+      name: 'New Rallye',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetOrganizationDashboardData
+      .mockResolvedValueOnce({
+        tourModeRallye: null,
+        campusEventsRallyes: [],
+        departmentEntries: [],
+      })
+      .mockResolvedValueOnce({
+        tourModeRallye: null,
+        campusEventsRallyes: [],
+        departmentEntries: [{ department: mockDepartment, rallyes: [newRallye] }],
+      });
+
+    const { queryByText, getByText } = render(<Welcome />);
+
+    await waitFor(() => {
+      expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(1);
+    });
+
+    expect(queryByText(newRallye.name)).toBeNull();
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(2000);
+    });
+
+    await waitFor(() => {
+      expect(getByText(newRallye.name)).toBeTruthy();
+    });
+  });
+
+  it('keeps the currently selected organization when more organizations become available', async () => {
+    jest.useFakeTimers();
+
+    const secondOrganization = {
+      id: 2,
+      name: 'Second Org',
+      default_rallye_id: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const initialRallye: Rallye = {
+      id: 201,
+      name: 'Initial Rallye',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const refreshedRallye: Rallye = {
+      id: 202,
+      name: 'Refreshed Rallye',
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetOrganizationsWithActiveRallyes
+      .mockResolvedValueOnce([mockOrganization])
+      .mockResolvedValueOnce([mockOrganization, secondOrganization]);
+    mockedGetOrganizationDashboardData
+      .mockResolvedValueOnce({
+        tourModeRallye: null,
+        campusEventsRallyes: [],
+        departmentEntries: [{ department: mockDepartment, rallyes: [initialRallye] }],
+      })
+      .mockResolvedValueOnce({
+        tourModeRallye: null,
+        campusEventsRallyes: [],
+        departmentEntries: [{ department: mockDepartment, rallyes: [refreshedRallye] }],
+      });
+
+    const { getByText } = render(<Welcome />);
+
+    await waitFor(() => {
+      expect(getByText(initialRallye.name)).toBeTruthy();
+    });
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(2000);
+    });
+
+    await waitFor(() => {
+      expect(getByText(refreshedRallye.name)).toBeTruthy();
+    });
+
+    expect(mockedGetOrganizationDashboardData).toHaveBeenNthCalledWith(
+      2,
+      mockOrganization.id
+    );
   });
 });

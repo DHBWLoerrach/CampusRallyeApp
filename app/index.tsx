@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useEffectEvent } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -42,6 +42,7 @@ import { Organization } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
 type SelectionStep = 'organization' | 'dashboard';
+const AUTO_REFRESH_INTERVAL = 60000;
 
 function createEmptyDashboardData(): OrganizationDashboardData {
   return {
@@ -82,12 +83,9 @@ export default function Welcome() {
   const [showOrgModal, setShowOrgModal] = useState(false);
   const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
 
-  const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
-    null
-  );
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isInitializedRef = useRef<boolean>(false);
-  const AUTO_REFRESH_INTERVAL = 60000;
+  const initialSyncScheduledRef = useRef<boolean>(false);
 
   const stateBackground = isDarkMode
     ? Colors.darkMode.background
@@ -185,7 +183,7 @@ export default function Welcome() {
     void initializeSelection();
   }, [initializeSelection]);
 
-  const refreshCurrentData = useCallback(async () => {
+  const refreshCurrentData = useEffectEvent(async () => {
     if (loading || !isInitializedRef.current) return;
     if (store$.enabled.get()) return;
     if (appStateRef.current !== 'active') return;
@@ -215,29 +213,45 @@ export default function Welcome() {
         return;
       }
 
-      setSelectedOrganization(orgStillValid);
+      setSelectedOrganization((currentOrganization) => {
+        if (
+          currentOrganization &&
+          currentOrganization.id === orgStillValid.id &&
+          currentOrganization.name === orgStillValid.name &&
+          currentOrganization.default_rallye_id === orgStillValid.default_rallye_id &&
+          currentOrganization.created_at === orgStillValid.created_at
+        ) {
+          return currentOrganization;
+        }
+
+        return orgStillValid;
+      });
       await loadDashboardData(orgStillValid.id);
     } catch (error) {
       Logger.error('AutoRefresh', 'Error refreshing data', error);
     }
-  }, [
-    loading,
-    showOrgModal,
-    passwordRallye,
-    selectionStep,
-    selectedOrganization,
-    loadDashboardData,
-    resetDashboard,
-  ]);
+  });
 
+  // Effect Events are intentionally non-reactive and must stay out of deps.
   useEffect(() => {
+    if (loading || !isInitializedRef.current || initialSyncScheduledRef.current) {
+      return;
+    }
+
+    initialSyncScheduledRef.current = true;
+
     const initialSyncTimeout = setTimeout(() => {
-      if (isInitializedRef.current) {
-        void refreshCurrentData();
-      }
+      void refreshCurrentData();
     }, 2000);
 
-    refreshIntervalRef.current = setInterval(() => {
+    return () => {
+      clearTimeout(initialSyncTimeout);
+    };
+  }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Effect Events are intentionally non-reactive and must stay out of deps.
+  useEffect(() => {
+    const intervalId = setInterval(() => {
       void refreshCurrentData();
     }, AUTO_REFRESH_INTERVAL);
 
@@ -255,13 +269,10 @@ export default function Welcome() {
     );
 
     return () => {
-      clearTimeout(initialSyncTimeout);
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-      }
+      clearInterval(intervalId);
       appStateSubscription.remove();
     };
-  }, [refreshCurrentData]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOrganizationSelect = async (organization: Organization) => {
     setSelectedOrganization(organization);
