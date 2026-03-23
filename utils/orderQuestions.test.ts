@@ -86,4 +86,14 @@ describe('orderQuestionsWithUploadsLast', () => {
     expect(ordered[0].question_type).toBe('geocaching');
     expect(ordered[1].question_type).toBe('upload');
   });
+
+  it('includes nfc in the non-upload group', () => {
+    const questions = [
+      makeQuestion(1, 'nfc'),
+      makeQuestion(2, 'upload'),
+    ];
+    const ordered = orderQuestionsWithUploadsLast(questions);
+    expect(ordered[0].question_type).toBe('nfc');
+    expect(ordered[1].question_type).toBe('upload');
+  });
 });

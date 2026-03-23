@@ -4,7 +4,8 @@ export type QuestionType =
   | 'qr_code'
   | 'multiple_choice'
   | 'picture'
-  | 'geocaching';
+  | 'geocaching'
+  | 'nfc';
 
 // UI mapping:
 // - 'tour' => "Campus Tour" (self-guided, no team required)

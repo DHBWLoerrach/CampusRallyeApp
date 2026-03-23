@@ -16,3 +16,25 @@ jest.mock('@react-native-community/netinfo', () => ({
   ),
   addEventListener: jest.fn(),
 }));
+
+jest.mock('react-native-nfc-manager', () => ({
+  __esModule: true,
+  default: {
+    isSupported: jest.fn(async () => true),
+    start: jest.fn(async () => undefined),
+    requestTechnology: jest.fn(async () => undefined),
+    getTag: jest.fn(async () => ({
+      id: 'mock-tag-id',
+      ndefMessage: [{ payload: [2, 101, 110, 109, 111, 99, 107] }],
+    })),
+    cancelTechnologyRequest: jest.fn(async () => undefined),
+  },
+  NfcTech: {
+    Ndef: 'Ndef',
+  },
+  Ndef: {
+    text: {
+      decodePayload: jest.fn(() => 'mock'),
+    },
+  },
+}));

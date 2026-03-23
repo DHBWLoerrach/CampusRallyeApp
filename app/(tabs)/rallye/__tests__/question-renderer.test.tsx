@@ -64,6 +64,7 @@ for (const type of [
   'multiple_choice',
   'picture',
   'geocaching',
+  'nfc',
 ]) {
   mockComponents[type] = jest.fn(() => null);
 }
@@ -122,6 +123,15 @@ jest.mock('@/components/rallye/questions/GeocachingQuestion', () => ({
   },
 }));
 
+jest.mock('@/components/rallye/questions/NFCQuestion', () => ({
+  __esModule: true,
+  default: (props: any) => {
+    mockComponents.nfc(props);
+    const { Text } = jest.requireActual('react-native');
+    return <Text>NFCQuestion</Text>;
+  },
+}));
+
 // -- Tests --------------------------------------------------------------------
 
 describe('QuestionRenderer', () => {
@@ -136,6 +146,7 @@ describe('QuestionRenderer', () => {
     ['multiple_choice', 'MultipleChoiceQuestion'],
     ['picture', 'ImageQuestion'],
     ['geocaching', 'GeocachingQuestion'],
+    ['nfc', 'NFCQuestion'],
   ])('renders %s question type as %s component', (type, componentName) => {
     const question = { id: 1, question_type: type, question: 'Q1', points: 5 };
 
