@@ -2,8 +2,9 @@
 -- Migration: v3 → v4
 -- ============================================================================
 -- Änderungen:
---   1. Neuer ENUM-Wert 'geocaching' für question_type
+--   1. Neue ENUM-Werte 'geocaching' und 'nfc' für question_type
 --   2. Neue Tabelle questions_geocaching (1:1-Beziehung zu questions)
+--   3. NFC nutzt bewusst KEINE eigene Subtype-Tabelle (String-Vergleich via answers)
 -- ============================================================================
 
 -- ============================================================================
@@ -14,6 +15,7 @@
 -- im Supabase SQL Editor ausgeführt werden oder als separate Migration.
 
 ALTER TYPE "public"."question_type" ADD VALUE IF NOT EXISTS 'geocaching';
+ALTER TYPE "public"."question_type" ADD VALUE IF NOT EXISTS 'nfc';
 
 
 -- ============================================================================

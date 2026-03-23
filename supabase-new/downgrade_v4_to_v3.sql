@@ -1,20 +1,20 @@
 -- ============================================================================
 -- Downgrade: v4 → v3
 -- ============================================================================
--- Voraussetzung: Es dürfen KEINE Fragen mit type = 'geocaching' mehr
+-- Voraussetzung: Es dürfen KEINE Fragen mit type = 'geocaching' oder 'nfc' mehr
 -- existieren. Das Skript prüft dies und bricht bei Verstoß ab.
 -- ============================================================================
 
 BEGIN;
 
--- 1. Sicherstellen, dass keine Geocaching-Fragen mehr existieren
+-- 1. Sicherstellen, dass keine Geocaching- oder NFC-Fragen mehr existieren
 DO $$
 BEGIN
   IF EXISTS (
-    SELECT 1 FROM "public"."questions" WHERE "type" = 'geocaching'
+    SELECT 1 FROM "public"."questions" WHERE "type" IN ('geocaching', 'nfc')
   ) THEN
     RAISE EXCEPTION
-      'Downgrade abgebrochen: Es existieren noch Fragen mit type = ''geocaching''. '
+      'Downgrade abgebrochen: Es existieren noch Fragen mit type = ''geocaching'' oder ''nfc''. '
       'Bitte lösche oder ändere diese Fragen zuerst.';
   END IF;
 END
@@ -26,14 +26,14 @@ DROP TABLE IF EXISTS "public"."questions_geocaching";
 COMMIT;
 
 -- ============================================================================
--- 3. ENUM-Wert 'geocaching' entfernen
+-- 3. ENUM-Werte 'geocaching' und 'nfc' entfernen
 -- ============================================================================
 -- HINWEIS: PostgreSQL unterstützt kein ALTER TYPE ... REMOVE VALUE.
 -- Stattdessen wird der Typ neu erstellt und die Spalte umgestellt.
 -- Dies muss AUSSERHALB einer Transaktion laufen.
 -- ============================================================================
 
--- Neuen Typ ohne 'geocaching' anlegen
+-- Neuen Typ ohne 'geocaching' und 'nfc' anlegen
 CREATE TYPE "public"."question_type_v3" AS ENUM (
     'multiple_choice',
     'knowledge',

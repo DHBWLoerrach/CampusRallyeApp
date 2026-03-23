@@ -24,7 +24,8 @@ CREATE TYPE "public"."question_type" AS ENUM (
     'picture',
     'qr_code',
     'upload',
-    'geocaching'
+    'geocaching',
+    'nfc'
 );
 
 
