@@ -99,6 +99,27 @@ export const translations = {
     'rallye.error.noInternet': 'Keine Internetverbindung verfügbar',
     'teamSetup.message': 'Bilde ein Team, um an der Rallye teilzunehmen.',
     'teamSetup.button': 'Team bilden',
+    'teamSetup.auto.button': 'Teamname automatisch erstellen',
+    'teamSetup.auto.error.retryExhausted':
+      'Es konnte kein freier Teamname gefunden werden. Bitte gib einen Namen manuell ein.',
+    'teamSetup.auto.error.network':
+      'Netzwerkproblem beim Erstellen des Teams. Bitte versuche es erneut.',
+    'teamSetup.auto.error.unknown':
+      'Team konnte nicht erstellt werden. Bitte versuche es erneut.',
+    'teamSetup.manual.button': 'Teamname selbst vergeben',
+    'teamSetup.manual.label': 'Teamname',
+    'teamSetup.manual.placeholder': 'z. B. Campus Hawks',
+    'teamSetup.manual.helper':
+      '5 bis 20 Zeichen, nur ASCII, Buchstaben, Zahlen, Leerzeichen, Bindestrich und Unterstrich.',
+    'teamSetup.manual.submit': 'Mit diesem Namen starten',
+    'teamSetup.manual.error.invalid':
+      'Teamname muss 5 bis 20 Zeichen lang sein und darf nur Buchstaben, Zahlen, Leerzeichen, Bindestrich und Unterstrich enthalten.',
+    'teamSetup.manual.error.taken':
+      'Dieser Teamname ist bereits vergeben. Bitte wähle einen anderen.',
+    'teamSetup.manual.error.network':
+      'Netzwerkproblem beim Erstellen des Teams. Bitte versuche es erneut.',
+    'teamSetup.manual.error.unknown':
+      'Team konnte nicht erstellt werden. Bitte versuche es erneut.',
     'teamSetup.error.message':
       'Team konnte nicht erstellt werden. Bitte erneut versuchen.',
     'team.sheetTitle': 'Euer Team',
@@ -262,6 +283,27 @@ export const translations = {
     'rallye.error.noInternet': 'No internet connection available',
     'teamSetup.message': 'Create a team to participate in the rally.',
     'teamSetup.button': 'Create team',
+    'teamSetup.auto.button': 'Generate team name automatically',
+    'teamSetup.auto.error.retryExhausted':
+      'No available team name could be generated. Please enter a name manually.',
+    'teamSetup.auto.error.network':
+      'Network error while creating the team. Please try again.',
+    'teamSetup.auto.error.unknown':
+      'Team could not be created. Please try again.',
+    'teamSetup.manual.button': 'Choose team name manually',
+    'teamSetup.manual.label': 'Team name',
+    'teamSetup.manual.placeholder': 'e.g. Campus Hawks',
+    'teamSetup.manual.helper':
+      '5 to 20 characters, ASCII only, letters, numbers, spaces, hyphens, and underscores.',
+    'teamSetup.manual.submit': 'Start with this name',
+    'teamSetup.manual.error.invalid':
+      'Team name must be 5 to 20 characters long and may only contain letters, numbers, spaces, hyphens, and underscores.',
+    'teamSetup.manual.error.taken':
+      'This team name is already taken. Please choose another one.',
+    'teamSetup.manual.error.network':
+      'Network error while creating the team. Please try again.',
+    'teamSetup.manual.error.unknown':
+      'Team could not be created. Please try again.',
     'teamSetup.error.message': 'Team could not be created. Please try again.',
     'team.sheetTitle': 'Your Team',
     'question.submit': 'Submit answer',

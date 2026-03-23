@@ -1,45 +1,124 @@
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
-import { supabase } from '@/utils/Supabase';
 import { store$ } from '@/services/storage/Store';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
-import generateTeamName from '@/utils/RandomTeamNames';
-import { setCurrentTeam } from '@/services/storage/teamStorage';
+import ThemedTextInput from '@/components/themed/ThemedTextInput';
+import {
+  createTeamAuto,
+  createTeamManual,
+} from '@/services/storage/teamStorage';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import { Screen } from '@/components/ui/Screen';
 import { useLanguage } from '@/utils/LanguageContext';
+import Colors from '@/utils/Colors';
+import { TeamCreationError } from '@/services/storage/teamErrors';
+import { validateTeamName } from '@/services/storage/teamNameValidation';
+
+type ManualErrorKey =
+  | 'teamSetup.manual.error.invalid'
+  | 'teamSetup.manual.error.taken'
+  | 'teamSetup.manual.error.network'
+  | 'teamSetup.manual.error.unknown';
+
+type AutoErrorKey =
+  | 'teamSetup.auto.error.retryExhausted'
+  | 'teamSetup.auto.error.network'
+  | 'teamSetup.auto.error.unknown';
 
 const TeamSetup = observer(function TeamSetup() {
-  const [loading, setLoading] = useState(false);
+  const [loadingAuto, setLoadingAuto] = useState(false);
+  const [loadingManual, setLoadingManual] = useState(false);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualName, setManualName] = useState('');
+  const [manualTouched, setManualTouched] = useState(false);
+  const [manualErrorKey, setManualErrorKey] =
+    useState<ManualErrorKey | null>(null);
   const s = useAppStyles();
   const { t } = useLanguage();
   const rallye = useSelector(() => store$.rallye.get());
-  const createTeam = async () => {
-    if (!rallye) return;
-    setLoading(true);
-    const teamName = generateTeamName();
-    try {
-      const { data, error } = await supabase
-        .from('rallye_team')
-        .insert({ name: teamName, rallye_id: rallye.id })
-        .select()
-        .single();
-      if (error) throw error;
-      if (data) {
-        store$.reset();
-        store$.team.set(data);
-        await setCurrentTeam(rallye.id, data);
-        // Kurze Bestätigung via Bottom Sheet im Rallye-Screen
-        store$.showTeamNameSheet.set(true);
+
+  const validation = validateTeamName(manualName);
+  const hasManualValidationError = manualTouched && !validation.valid;
+  const combinedLoading = loadingAuto || loadingManual;
+  const canSubmitManual = !combinedLoading && validation.valid;
+
+  const finalizeTeamCreation = (team: any) => {
+    store$.reset();
+    store$.team.set(team);
+    store$.showTeamNameSheet.set(true);
+  };
+
+  const getManualErrorKey = (error: unknown): ManualErrorKey => {
+    if (error instanceof TeamCreationError) {
+      if (error.code === 'TEAM_NAME_INVALID') {
+        return 'teamSetup.manual.error.invalid';
       }
+      if (error.code === 'TEAM_NAME_TAKEN') {
+        return 'teamSetup.manual.error.taken';
+      }
+      if (error.code === 'TEAM_CREATE_NETWORK_ERROR') {
+        return 'teamSetup.manual.error.network';
+      }
+    }
+    return 'teamSetup.manual.error.unknown';
+  };
+
+  const getAutoErrorKey = (error: unknown): AutoErrorKey => {
+    if (error instanceof TeamCreationError) {
+      if (error.code === 'TEAM_AUTO_RETRY_EXHAUSTED') {
+        return 'teamSetup.auto.error.retryExhausted';
+      }
+      if (error.code === 'TEAM_CREATE_NETWORK_ERROR') {
+        return 'teamSetup.auto.error.network';
+      }
+    }
+    return 'teamSetup.auto.error.unknown';
+  };
+
+  const createAutoTeam = async () => {
+    if (!rallye) return;
+    setLoadingAuto(true);
+    try {
+      const createdTeam = await createTeamAuto(rallye.id, 5);
+      finalizeTeamCreation(createdTeam);
     } catch (e) {
-      console.error('Error creating team:', e);
-      Alert.alert(t('common.errorTitle'), t('teamSetup.error.message'));
+      Alert.alert(t('common.errorTitle'), t(getAutoErrorKey(e)));
     } finally {
-      setLoading(false);
+      setLoadingAuto(false);
+    }
+  };
+
+  const createManualTeam = async () => {
+    if (!rallye) return;
+
+    setManualTouched(true);
+    if (!validation.valid) {
+      setManualErrorKey('teamSetup.manual.error.invalid');
+      return;
+    }
+
+    setLoadingManual(true);
+    setManualErrorKey(null);
+    try {
+      const createdTeam = await createTeamManual(manualName, rallye.id);
+      finalizeTeamCreation(createdTeam);
+    } catch (e) {
+      setManualErrorKey(getManualErrorKey(e));
+    } finally {
+      setLoadingManual(false);
+    }
+  };
+
+  const onManualNameChange = (value: string) => {
+    setManualName(value);
+    if (!manualTouched) {
+      setManualTouched(true);
+    }
+    if (manualErrorKey) {
+      setManualErrorKey(null);
     }
   };
 
@@ -53,9 +132,58 @@ const TeamSetup = observer(function TeamSetup() {
           <ThemedText style={globalStyles.teamStyles.message}>
             {t('teamSetup.message')}
           </ThemedText>
-          <UIButton disabled={loading} onPress={createTeam}>
-            {t('teamSetup.button')}
+          <UIButton
+            disabled={combinedLoading}
+            loading={loadingAuto}
+            onPress={createAutoTeam}
+          >
+            {t('teamSetup.auto.button')}
           </UIButton>
+
+          <View style={styles.manualContainer}>
+            <UIButton
+              variant="secondary"
+              disabled={combinedLoading}
+              onPress={() => setShowManualInput((prev) => !prev)}
+            >
+              {t('teamSetup.manual.button')}
+            </UIButton>
+
+            {showManualInput ? (
+              <View style={styles.manualForm}>
+                <ThemedText style={styles.manualLabel}>
+                  {t('teamSetup.manual.label')}
+                </ThemedText>
+                <ThemedTextInput
+                  value={manualName}
+                  onChangeText={onManualNameChange}
+                  placeholder={t('teamSetup.manual.placeholder')}
+                  maxLength={20}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!combinedLoading}
+                  accessibilityLabel={t('teamSetup.manual.label')}
+                />
+                <ThemedText style={styles.manualHelper}>
+                  {t('teamSetup.manual.helper')}
+                </ThemedText>
+
+                {hasManualValidationError || manualErrorKey ? (
+                  <ThemedText style={styles.errorText}>
+                    {t(manualErrorKey ?? 'teamSetup.manual.error.invalid')}
+                  </ThemedText>
+                ) : null}
+
+                <UIButton
+                  disabled={!canSubmitManual}
+                  loading={loadingManual}
+                  onPress={createManualTeam}
+                >
+                  {t('teamSetup.manual.submit')}
+                </UIButton>
+              </View>
+            ) : null}
+          </View>
         </View>
       </View>
     </Screen>
@@ -63,3 +191,26 @@ const TeamSetup = observer(function TeamSetup() {
 });
 
 export default TeamSetup;
+
+const styles = StyleSheet.create({
+  manualContainer: {
+    marginTop: 12,
+  },
+  manualForm: {
+    marginTop: 12,
+    gap: 8,
+  },
+  manualLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.dhbwGray,
+  },
+  manualHelper: {
+    fontSize: 12,
+    color: Colors.mediumGray,
+  },
+  errorText: {
+    color: Colors.dhbwRed,
+    fontSize: 13,
+  },
+});
