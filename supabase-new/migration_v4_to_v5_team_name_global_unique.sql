@@ -31,35 +31,92 @@ ALTER TABLE public.rallye_team
   ALTER COLUMN rallye_id SET NOT NULL;
 
 -- Step 1: Normalize whitespace for all existing rows.
-UPDATE public.rallye_team
-SET name = regexp_replace(btrim(name), '\\s+', ' ', 'g')
-WHERE name IS DISTINCT FROM regexp_replace(btrim(name), '\\s+', ' ', 'g');
-
--- Step 2: Resolve global duplicates based on normalized name.
-WITH ranked AS (
+WITH sanitized AS (
   SELECT
     id,
-    regexp_replace(btrim(name), '\\s+', ' ', 'g') AS cleaned_name,
-    row_number() OVER (
-      PARTITION BY lower(regexp_replace(btrim(name), '\\s+', ' ', 'g'))
-      ORDER BY id
-    ) AS rn
+    regexp_replace(
+      regexp_replace(btrim(name), '\\s+', ' ', 'g'),
+      '[^A-Za-z0-9 _-]',
+      '',
+      'g'
+    ) AS cleaned_name
   FROM public.rallye_team
 ),
-renamed AS (
+prepared AS (
   SELECT
     id,
     CASE
-      WHEN rn = 1 THEN cleaned_name
-      ELSE left(cleaned_name, 20 - length('_' || rn::text)) || '_' || rn::text
-    END AS new_name
-  FROM ranked
+      WHEN cleaned_name = '' THEN 'TeamX'
+      WHEN length(cleaned_name) < 5 THEN rpad(cleaned_name, 5, 'X')
+      ELSE cleaned_name
+    END AS valid_name
+  FROM sanitized
 )
 UPDATE public.rallye_team t
-SET name = r.new_name
-FROM renamed r
-WHERE t.id = r.id
-  AND t.name IS DISTINCT FROM r.new_name;
+SET name = left(p.valid_name, 20)
+FROM prepared p
+WHERE t.id = p.id
+  AND t.name IS DISTINCT FROM left(p.valid_name, 20);
+
+-- Step 2: Resolve global duplicates deterministically.
+DO $$
+DECLARE
+  rec RECORD;
+  base_name text;
+  candidate text;
+  attempt integer;
+  suffix text;
+  max_base_len integer;
+BEGIN
+  FOR rec IN
+    SELECT id, name
+    FROM public.rallye_team
+    ORDER BY id
+  LOOP
+    base_name := left(rec.name, 20);
+
+    -- Keep the first team for each normalized name; rename later duplicates.
+    IF EXISTS (
+      SELECT 1
+      FROM public.rallye_team t2
+      WHERE t2.id < rec.id
+        AND lower(regexp_replace(btrim(t2.name), '\\s+', ' ', 'g')) =
+            lower(regexp_replace(btrim(base_name), '\\s+', ' ', 'g'))
+    ) THEN
+      attempt := 0;
+
+      LOOP
+        attempt := attempt + 1;
+
+        IF attempt = 1 THEN
+          suffix := '_' || rec.id::text;
+        ELSE
+          suffix := '_' || rec.id::text || '_' || attempt::text;
+        END IF;
+
+        max_base_len := 20 - length(suffix);
+        IF max_base_len < 1 THEN
+          candidate := 'T' || right(lpad(rec.id::text, 19, '0'), 19);
+        ELSE
+          candidate := left(base_name, max_base_len) || suffix;
+        END IF;
+
+        EXIT WHEN NOT EXISTS (
+          SELECT 1
+          FROM public.rallye_team t3
+          WHERE t3.id <> rec.id
+            AND lower(regexp_replace(btrim(t3.name), '\\s+', ' ', 'g')) =
+                lower(regexp_replace(btrim(candidate), '\\s+', ' ', 'g'))
+        );
+      END LOOP;
+
+      UPDATE public.rallye_team
+      SET name = candidate
+      WHERE id = rec.id;
+    END IF;
+  END LOOP;
+END
+$$;
 
 -- Enforce global uniqueness for normalized team names.
 CREATE UNIQUE INDEX IF NOT EXISTS rallye_team_name_global_norm_uniq
@@ -70,8 +127,7 @@ ON public.rallye_team (
 -- Enforce ASCII-only names with 5..20 chars for new/updated rows.
 ALTER TABLE public.rallye_team
   ADD CONSTRAINT rallye_team_name_ascii_len_check
-  CHECK (name ~ '^[A-Za-z0-9 _-]{5,20}$')
-  NOT VALID;
+  CHECK (name ~ '^[A-Za-z0-9 _-]{5,20}$');
 
 COMMIT;
 
