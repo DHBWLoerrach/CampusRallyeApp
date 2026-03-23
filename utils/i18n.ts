@@ -100,6 +100,9 @@ export const translations = {
     'teamSetup.message': 'Bilde ein Team, um an der Rallye teilzunehmen.',
     'teamSetup.button': 'Team bilden',
     'teamSetup.auto.button': 'Teamname automatisch erstellen',
+    'teamSetup.auto.generating': 'Teamname wird sicher generiert…',
+    'teamSetup.auto.generatingHint':
+      'Die Namenssuche läuft im Hintergrund, bis ein freier Name gefunden ist.',
     'teamSetup.auto.error.retryExhausted':
       'Es konnte kein freier Teamname gefunden werden. Bitte gib einen Namen manuell ein.',
     'teamSetup.auto.error.network':
@@ -284,6 +287,9 @@ export const translations = {
     'teamSetup.message': 'Create a team to participate in the rally.',
     'teamSetup.button': 'Create team',
     'teamSetup.auto.button': 'Generate team name automatically',
+    'teamSetup.auto.generating': 'Generating team name securely…',
+    'teamSetup.auto.generatingHint':
+      'Name discovery runs in the background until an available name is found.',
     'teamSetup.auto.error.retryExhausted':
       'No available team name could be generated. Please enter a name manually.',
     'teamSetup.auto.error.network':

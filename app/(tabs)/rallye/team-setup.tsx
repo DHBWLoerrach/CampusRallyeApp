@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
@@ -36,6 +36,10 @@ const TeamSetup = observer(function TeamSetup() {
   const [manualTouched, setManualTouched] = useState(false);
   const [manualErrorKey, setManualErrorKey] =
     useState<ManualErrorKey | null>(null);
+  const [autoCipherText, setAutoCipherText] = useState('');
+  const autoCipherTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
   const s = useAppStyles();
   const { t } = useLanguage();
   const rallye = useSelector(() => store$.rallye.get());
@@ -44,6 +48,37 @@ const TeamSetup = observer(function TeamSetup() {
   const hasManualValidationError = manualTouched && !validation.valid;
   const combinedLoading = loadingAuto || loadingManual;
   const canSubmitManual = !combinedLoading && validation.valid;
+
+  const buildCipherText = (length = 12): string => {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let value = '';
+    for (let i = 0; i < length; i += 1) {
+      value += alphabet[Math.floor(Math.random() * alphabet.length)];
+    }
+    return value;
+  };
+
+  const stopAutoCipherAnimation = () => {
+    if (autoCipherTimerRef.current) {
+      clearInterval(autoCipherTimerRef.current);
+      autoCipherTimerRef.current = null;
+    }
+    setAutoCipherText('');
+  };
+
+  const startAutoCipherAnimation = () => {
+    stopAutoCipherAnimation();
+    setAutoCipherText(buildCipherText());
+    autoCipherTimerRef.current = setInterval(() => {
+      setAutoCipherText(buildCipherText());
+    }, 110);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopAutoCipherAnimation();
+    };
+  }, []);
 
   const finalizeTeamCreation = (team: any) => {
     store$.reset();
@@ -80,6 +115,7 @@ const TeamSetup = observer(function TeamSetup() {
 
   const createAutoTeam = async () => {
     if (!rallye) return;
+    startAutoCipherAnimation();
     setLoadingAuto(true);
     try {
       const createdTeam = await createTeamAuto(rallye.id, 5);
@@ -88,6 +124,7 @@ const TeamSetup = observer(function TeamSetup() {
       Alert.alert(t('common.errorTitle'), t(getAutoErrorKey(e)));
     } finally {
       setLoadingAuto(false);
+      stopAutoCipherAnimation();
     }
   };
 
@@ -139,6 +176,20 @@ const TeamSetup = observer(function TeamSetup() {
           >
             {t('teamSetup.auto.button')}
           </UIButton>
+
+          {loadingAuto ? (
+            <View style={styles.autoGeneratingContainer}>
+              <ThemedText style={styles.autoGeneratingTitle}>
+                {t('teamSetup.auto.generating')}
+              </ThemedText>
+              <ThemedText style={styles.autoGeneratingCipher}>
+                {autoCipherText}
+              </ThemedText>
+              <ThemedText style={styles.autoGeneratingHint}>
+                {t('teamSetup.auto.generatingHint')}
+              </ThemedText>
+            </View>
+          ) : null}
 
           <View style={styles.manualContainer}>
             <UIButton
@@ -193,6 +244,27 @@ const TeamSetup = observer(function TeamSetup() {
 export default TeamSetup;
 
 const styles = StyleSheet.create({
+  autoGeneratingContainer: {
+    marginTop: 10,
+    marginBottom: 6,
+    alignItems: 'center',
+    gap: 2,
+  },
+  autoGeneratingTitle: {
+    fontSize: 13,
+    color: Colors.dhbwGray,
+    fontWeight: '600',
+  },
+  autoGeneratingCipher: {
+    fontSize: 16,
+    letterSpacing: 2,
+    color: Colors.dhbwRed,
+    fontWeight: '700',
+  },
+  autoGeneratingHint: {
+    fontSize: 12,
+    color: Colors.mediumGray,
+  },
   manualContainer: {
     marginTop: 12,
   },

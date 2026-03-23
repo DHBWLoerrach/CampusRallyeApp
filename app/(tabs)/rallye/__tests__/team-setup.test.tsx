@@ -107,6 +107,21 @@ describe('TeamSetup', () => {
     });
   });
 
+  it('shows auto-generating status while auto creation is running', async () => {
+    mockCreateTeamAuto.mockImplementation(
+      () => new Promise(() => undefined)
+    );
+
+    const { getByText } = render(<TeamSetup />);
+
+    fireEvent.press(getByText('teamSetup.auto.button'));
+
+    await waitFor(() => {
+      expect(getByText('teamSetup.auto.generating')).toBeTruthy();
+      expect(getByText('teamSetup.auto.generatingHint')).toBeTruthy();
+    });
+  });
+
   it('blocks manual submit for invalid names and shows validation error', async () => {
     const { getByText, getByTestId } = render(<TeamSetup />);
 
