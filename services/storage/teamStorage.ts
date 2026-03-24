@@ -51,7 +51,13 @@ async function insertTeam(teamName: string, rallyeId: number) {
     throw error;
   }
 
-  await setCurrentTeam(rallyeId, data);
+  try {
+    await setCurrentTeam(rallyeId, data);
+  } catch (storageError) {
+    // Team is already persisted remotely. Keep flow successful and recover from server state on next load.
+    console.warn('Failed to persist current team locally:', storageError);
+  }
+
   return data;
 }
 

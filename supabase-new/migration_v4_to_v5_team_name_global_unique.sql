@@ -35,7 +35,7 @@ WITH sanitized AS (
   SELECT
     id,
     regexp_replace(
-      regexp_replace(btrim(name), '\\s+', ' ', 'g'),
+      regexp_replace(btrim(name), E'\\s+', ' ', 'g'),
       '[^A-Za-z0-9 _-]',
       '',
       'g'
@@ -80,8 +80,8 @@ BEGIN
       SELECT 1
       FROM public.rallye_team t2
       WHERE t2.id < rec.id
-        AND lower(regexp_replace(btrim(t2.name), '\\s+', ' ', 'g')) =
-            lower(regexp_replace(btrim(base_name), '\\s+', ' ', 'g'))
+        AND lower(regexp_replace(btrim(t2.name), E'\\s+', ' ', 'g')) =
+          lower(regexp_replace(btrim(base_name), E'\\s+', ' ', 'g'))
     ) THEN
       attempt := 0;
 
@@ -105,8 +105,8 @@ BEGIN
           SELECT 1
           FROM public.rallye_team t3
           WHERE t3.id <> rec.id
-            AND lower(regexp_replace(btrim(t3.name), '\\s+', ' ', 'g')) =
-                lower(regexp_replace(btrim(candidate), '\\s+', ' ', 'g'))
+            AND lower(regexp_replace(btrim(t3.name), E'\\s+', ' ', 'g')) =
+              lower(regexp_replace(btrim(candidate), E'\\s+', ' ', 'g'))
         );
       END LOOP;
 
@@ -121,7 +121,7 @@ $$;
 -- Enforce global uniqueness for normalized team names.
 CREATE UNIQUE INDEX IF NOT EXISTS rallye_team_name_global_norm_uniq
 ON public.rallye_team (
-  lower(regexp_replace(btrim(name), '\\s+', ' ', 'g'))
+  lower(regexp_replace(btrim(name), E'\\s+', ' ', 'g'))
 );
 
 -- Enforce ASCII-only names with 5..20 chars for new/updated rows.
