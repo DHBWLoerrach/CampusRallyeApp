@@ -16,6 +16,7 @@ import { useLanguage } from '@/utils/LanguageContext';
 import Colors from '@/utils/Colors';
 import { TeamCreationError } from '@/services/storage/teamErrors';
 import { validateTeamName } from '@/services/storage/teamNameValidation';
+import type { Team } from '@/types/rallye';
 
 type ManualErrorKey =
   | 'teamSetup.manual.error.invalid'
@@ -80,7 +81,7 @@ const TeamSetup = observer(function TeamSetup() {
     };
   }, []);
 
-  const finalizeTeamCreation = (team: any) => {
+  const finalizeTeamCreation = (team: Team) => {
     store$.reset();
     store$.team.set(team);
     store$.showTeamNameSheet.set(true);
