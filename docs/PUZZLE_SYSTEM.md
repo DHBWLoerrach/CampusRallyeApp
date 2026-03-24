@@ -4,7 +4,7 @@
 
 Das Puzzle-System ermöglicht es, Schnitzeljagd-artige Fragen zu erstellen, bei denen Teams mehrere Fragment-Aufgaben sammeln müssen, bevor sie die Hauptfrage beantworten können.
 
-**Status:** Grundlegendes System implementiert. UI für Fragment-Sammlung noch ausstehend.
+**Status:** Fragment-System vollständig implementiert.
 
 ---
 
@@ -19,18 +19,16 @@ Definiert, welche Frage ein Puzzle ist und wie die Fragmente angezeigt werden.
 CREATE TABLE puzzle_groups (
   id SERIAL PRIMARY KEY,
   puzzle_question_id INT NOT NULL UNIQUE REFERENCES questions(id) ON DELETE CASCADE,
-  variant VARCHAR(20) NOT NULL CHECK (variant IN ('visible', 'hidden')),
-  title TEXT,
+  visible BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
 **Felder:**
 - `puzzle_question_id`: FK zur Hauptfrage in der `questions` Tabelle
-- `variant`: 
-  - `'visible'`: Hauptfrage ist von Anfang an sichtbar
-  - `'hidden'`: Hauptfrage erscheint erst nach Sammeln aller Fragmente
-- `title`: Optionaler Titel für das Puzzle (z.B. "Öffnungszeiten kombinieren")
+- `visible`: 
+  - `true`: Hauptfrage ist von Anfang an sichtbar
+  - `false`: Hauptfrage erscheint erst nach Beantworten aller Teilfragen
 
 #### `puzzle_fragments`
 Ordnet Fragment-Fragen einem Puzzle zu.
@@ -132,8 +130,8 @@ INSERT INTO answers (question_id, text, correct) VALUES
   (14, '22', true);
 
 -- 3. Puzzle-Gruppe erstellen
-INSERT INTO puzzle_groups (puzzle_question_id, variant, title) VALUES
-  (11, 'visible', 'Öffnungszeiten kombinieren');  -- ID 1
+INSERT INTO puzzle_groups (puzzle_question_id, visible)
+VALUES (11, true);  -- ID 1
 
 -- 4. Fragmente zuordnen
 INSERT INTO puzzle_fragments (group_id, fragment_question_id, order_index, location_hint) VALUES
@@ -155,8 +153,7 @@ INSERT INTO join_rallye_questions (rallye_id, question_id) VALUES
 export interface PuzzleGroup {
   id: number;
   puzzle_question_id: number;
-  variant: 'visible' | 'hidden';
-  title?: string | null;
+  visible: boolean;
   created_at: string;
 }
 
@@ -183,10 +180,14 @@ export interface PuzzleFragmentWithQuestion extends PuzzleFragment {
 **Datei:** `components/rallye/questions/PuzzleQuestion.tsx`
 
 **Aktueller Stand:**
-- Vereinfachte Version: Zeigt nur die Hauptfrage
-- Verwendet gleiche UI-Komponenten wie andere Fragetypen (InfoBox, ThemedTextInput, UIButton)
-- Antwort-Submit-Logik identisch zu SkillQuestion
-- Fragment-UI ist vorerst deaktiviert (TODO-Kommentare im Code)
+- Hauptfrage mit darunterliegender Teilfragen-Übersicht
+- Teilfragen werden **nacheinander** angezeigt (basierend auf `order_index`)
+- Nach Beantwortung einer Teilfrage erscheint Button "Zur nächsten Teilfrage"
+- Fortschrittsanzeige: "x von n beantwortet"
+- Jede Teilfrage öffnet die entsprechende Fragment-Komponente (SkillQuestion, QRCodeQuestion etc.)
+- Aufgeben möglich für Teilfragen und Hauptfrage
+- Bei `visible = false`: Hauptfrage erst sichtbar wenn alle Teilfragen beantwortet sind
+- Beantwortete Teilfragen zeigen die eigene Antwort des Teams + ✓/✗ je nach Korrektheit
 
 **Integration:**
 
@@ -345,8 +346,8 @@ const onRefresh = async () => {
 
 3. **Puzzle-Gruppe erstellen:**
    ```sql
-   INSERT INTO puzzle_groups (puzzle_question_id, variant, title)
-   VALUES (11, 'visible', 'Öffnungszeiten kombinieren');
+   INSERT INTO puzzle_groups (puzzle_question_id, visible)
+   VALUES (11, true);
    ```
 
 4. **Fragmente zuordnen:**
@@ -378,13 +379,16 @@ const onRefresh = async () => {
 - ✅ Punkte werden korrekt vergeben
 - ✅ Bug-Fix: Keine Duplikate mehr
 
-### Phase 2: Fragment-System (Ausstehend)
+### Phase 2: Fragment-System (✅ Abgeschlossen)
 
-- ⏳ Fragment-UI in PuzzleQuestion integrieren
-- ⏳ Fragment-Progress-Tracking via `team_questions`
-- ⏳ Fragment-Fragen als Modal/Navigation anzeigen
-- ⏳ Freischalt-Logik implementieren (variant: hidden/visible)
-- ⏳ Progress-Anzeige ("2 von 3 Fragmenten gesammelt")
+- ✅ Fragment-UI in PuzzleQuestion integriert
+- ✅ Fragment-Progress-Tracking via `team_questions`
+- ✅ Fragment-Fragen werden nacheinander angezeigt (order_index)
+- ✅ Freischalt-Logik implementiert (`visible: false/true`)
+- ✅ Progress-Anzeige ("x von n beantwortet")
+- ✅ Aufgeben für Teilfragen und Hauptfrage
+- ✅ Team-Antwort + Korrektheit in Übersicht angezeigt
+- ✅ Schema vereinfacht: `variant` → `visible boolean`, `title` entfernt
 
 ### Phase 3: Erweiterte Features (Optional)
 
@@ -409,9 +413,7 @@ const onRefresh = async () => {
 
 ### Bekannte Einschränkungen
 
-- Fragment-UI noch nicht verfügbar (Hauptfrage direkt beantwortbar)
-- Fragment-Tracking noch nicht implementiert
-- `variant` Feld wird aktuell noch nicht ausgewertet
+- Keine bekannten Einschränkungen.
 
 ---
 
@@ -464,6 +466,6 @@ WHERE question_id IN (13, 14);  -- Fragment-IDs
 
 ---
 
-**Datum:** 15. März 2026  
-**Version:** 1.0  
-**Status:** In Entwicklung (Phase 1 abgeschlossen)
+**Datum:** 22. März 2026  
+**Version:** 2.0  
+**Status:** Phase 1 & 2 abgeschlossen

@@ -6,7 +6,7 @@
 CREATE TABLE puzzle_groups (
   id SERIAL PRIMARY KEY,
   puzzle_question_id INT NOT NULL UNIQUE REFERENCES questions(id) ON DELETE CASCADE,
-  variant VARCHAR(20) NOT NULL CHECK (variant IN ('visible', 'hidden')),
+  visible BOOLEAN NOT NULL DEFAULT true,
   title TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -29,7 +29,7 @@ CREATE INDEX idx_puzzle_fragments_group ON puzzle_fragments(group_id);
 -- Kommentare für bessere Dokumentation
 COMMENT ON TABLE puzzle_groups IS 'Defines which questions are puzzles that require collecting fragments';
 COMMENT ON TABLE puzzle_fragments IS 'Links fragment questions to puzzle groups with ordering';
-COMMENT ON COLUMN puzzle_groups.variant IS 'visible: main question shown immediately, hidden: shown after all fragments collected';
+COMMENT ON COLUMN puzzle_groups.visible IS 'true: main question shown immediately, false: shown after all fragments collected';
 COMMENT ON COLUMN puzzle_fragments.order_index IS 'Display order of fragments (0-based)';
 COMMENT ON COLUMN puzzle_fragments.location_hint IS 'Optional hint text like "Bibliothek – Eingang"';
 
