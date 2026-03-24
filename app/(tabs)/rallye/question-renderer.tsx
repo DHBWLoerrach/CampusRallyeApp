@@ -17,6 +17,7 @@ import QRCodeQuestion from '@/components/rallye/questions/QRCodeQuestion';
 import MultipleChoiceQuestion from '@/components/rallye/questions/MultipleChoiceQuestion';
 import ImageQuestion from '@/components/rallye/questions/ImageQuestion';
 import PuzzleQuestion from '@/components/rallye/questions/PuzzleQuestion';
+import SortingQuestion from '@/components/rallye/questions/SortingQuestion';
 import UIButton from '@/components/ui/UIButton';
 import { useLanguage } from '@/utils/LanguageContext';
 import { store$ } from '@/services/storage/Store';
@@ -28,6 +29,7 @@ const components: Record<string, any> = {
   multiple_choice: MultipleChoiceQuestion,
   picture: ImageQuestion,
   puzzle: PuzzleQuestion,
+  sorting: SortingQuestion,
 };
 
 const SPRING_CONFIG = {

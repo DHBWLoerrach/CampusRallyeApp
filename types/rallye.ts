@@ -4,7 +4,8 @@ export type QuestionType =
   | 'qr_code'
   | 'multiple_choice'
   | 'picture'
-  | 'puzzle';
+  | 'puzzle'
+  | 'sorting';
 
 // UI mapping:
 // - 'tour' => "Campus Tour" (self-guided, no team required)
@@ -106,4 +107,24 @@ export interface PuzzleFragment {
 
 export interface PuzzleFragmentWithQuestion extends PuzzleFragment {
   fragment_question: Question;
+}
+
+export interface SortingGroup {
+  id: number;
+  sorting_question_id: number;
+  created_at: string;
+}
+
+export interface SortingPair {
+  id: number;
+  group_id: number;
+  created_at: string;
+}
+
+export interface SortingPairItem {
+  id: number;
+  pair_id: number;
+  item: string;
+  is_primary: boolean;
+  created_at: string;
 }
