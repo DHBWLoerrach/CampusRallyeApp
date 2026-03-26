@@ -57,6 +57,8 @@ export default function About() {
           Patrick Furtwängler, Marvin Obert (TIF21)
           {'\n\t'}
           Roman von Bosse, Leon Jegg (TIF22)
+          {'\n\t'}
+          Maria Happ, Tobias Maimone (TIF23)
         </ThemedText>
         <ThemedText style={globalStyles.informationStyles.paragraph}>
           {language === 'de'
