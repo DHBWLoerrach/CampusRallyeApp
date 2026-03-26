@@ -48,6 +48,7 @@ IMPORTANT: Stop after each step and wait for my “OK” before committing or mo
 
 Testing is supported with Jest (via `jest-expo`) and `@testing-library/react-native`.
 - Place tests alongside source (`*.test.ts` / `*.test.tsx`) or in `__tests__/`.
+- For Expo Router screens, layouts, and other files inside `app/`, prefer a nearby `__tests__/` folder over placing `*.test.*` files directly next to route files.
 - Prefer user-facing tests with Testing Library and avoid implementation details.
 - Use `npm test` for single runs and `npm run test:watch` for watch mode.
 - Mock native or Expo modules and side effects to keep tests deterministic.
