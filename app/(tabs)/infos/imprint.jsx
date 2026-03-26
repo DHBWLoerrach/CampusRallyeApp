@@ -1,133 +1,207 @@
-import { Linking, View } from 'react-native';
-import Colors from '@/utils/Colors';
-import { globalStyles } from '@/utils/GlobalStyles';
-import { useLanguage } from '@/utils/LanguageContext';
-import { useTheme } from '@/utils/ThemeContext';
+import React from 'react';
+import { Linking, StyleSheet, View } from 'react-native';
+import {
+  InfoCard,
+  InfoLinkCard,
+  InfoSectionHeader,
+  infoScreenStyles,
+} from '@/components/infos/InfoCard';
 import ThemedText from '@/components/themed/ThemedText';
 import { ScreenScrollView } from '@/components/ui/Screen';
+import Colors from '@/utils/Colors';
+import { useLanguage } from '@/utils/LanguageContext';
+import { useTheme } from '@/utils/ThemeContext';
+
+const DHBW_WEBSITE_URL = 'https://dhbw-loerrach.de';
+const MINISTRY_WEBSITE_URL = 'https://www.mwk.bwl.de';
+const DHBW_EMAIL = 'info@dhbw-loerrach.de';
+const MINISTRY_EMAIL = 'poststelle@mwk.bwl.de';
+const DHBW_PHONE_LABEL = '+49 7621 2071 - 0';
+const DHBW_PHONE_URL = 'tel:+49762120710';
+
+const CONTENT = {
+  de: {
+    heroEyebrow: 'Herausgeberin',
+    heroTitle: 'Duale Hochschule Baden-Württemberg Lörrach',
+    heroBody:
+      'Hangstraße 46-50\n79539 Lörrach',
+    phoneLabel: 'Telefon',
+    emailLabel: 'E-Mail',
+    websiteLabel: 'Website',
+    vatLabel: 'Umsatzsteuer-Identifikationsnummer',
+    vatValue: 'DE287664832',
+    businessIdLabel: 'Wirtschafts-Identifikationsnummer',
+    businessIdValue: 'DE287664832-00001',
+    legalLabel: 'Rechtsform',
+    legalTitle: 'Aufsicht und Anbieter',
+    legalText:
+      'Die Duale Hochschule Baden-Württemberg ist eine rechtsfähige Körperschaft des öffentlichen Rechts. Sie wird gesetzlich vertreten durch die Präsidentin der Dualen Hochschule Baden-Württemberg, Frau Prof. Dr. Martina Klärle. Gesetzlicher Vertreter des Hochschulstandorts Lörrach ist der Rektor Herr Prof. Gerhard Jäger.',
+    authorityLabel: 'Zuständige Aufsichtsbehörde',
+    authorityTitle: 'Ministerium für Wissenschaft, Forschung und Kunst',
+    authorityBody:
+      'Baden-Württemberg\nKönigstraße 46\n70173 Stuttgart\nTelefon: +49 711 279 0\nTelefax: +49 711 279 3081\npoststelle@mwk.bwl.de\nhttps://www.mwk.bwl.de',
+  },
+  en: {
+    heroEyebrow: 'Publisher',
+    heroTitle: 'Duale Hochschule Baden-Württemberg Lörrach',
+    heroBody:
+      'Hangstraße 46-50\n79539 Lörrach\nGermany',
+    phoneLabel: 'Phone',
+    emailLabel: 'Email',
+    websiteLabel: 'Website',
+    vatLabel: 'VAT identification number',
+    vatValue: 'DE287664832',
+    businessIdLabel: 'Business identification number',
+    businessIdValue: 'DE287664832-00001',
+    legalLabel: 'Legal status',
+    legalTitle: 'Supervision and provider',
+    legalText:
+      'The Duale Hochschule Baden-Württemberg is a legal entity under public law. It is legally represented by the President of the Duale Hochschule Baden-Württemberg, Prof. Dr. Martina Klärle. The legal representative of the Lörrach campus is Rector Prof. Gerhard Jäger.',
+    authorityLabel: 'Responsible supervisory authority',
+    authorityTitle: 'Ministry of Science, Research and Art',
+    authorityBody:
+      'Baden-Württemberg\nKönigstraße 46\n70173 Stuttgart\nGermany\nPhone: +49 711 279 0\nFax: +49 711 279 3081\npoststelle@mwk.bwl.de\nhttps://www.mwk.bwl.de',
+  },
+};
+
+const styles = StyleSheet.create({
+  heroCard: {
+    paddingTop: 0,
+    overflow: 'hidden',
+  },
+  heroAccent: {
+    height: 6,
+    marginHorizontal: -18,
+    marginBottom: 14,
+  },
+  heroHeader: {
+    gap: 6,
+  },
+  linkList: {
+    gap: 12,
+  },
+  legalGroup: {
+    gap: 14,
+  },
+  denseCard: {
+    padding: 14,
+  },
+});
 
 export default function Imprint() {
   const { isDarkMode } = useTheme();
   const { language } = useLanguage();
+  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const content = CONTENT[language];
 
   return (
-    <ScreenScrollView padding="none">
-      <View
+    <ScreenScrollView
+      padding="none"
+      contentContainerStyle={[
+        infoScreenStyles.content,
+        { backgroundColor: palette.background },
+      ]}
+    >
+      <InfoCard
         style={[
-          globalStyles.imprintStyles.texts.container,
+          styles.heroCard,
           {
-            backgroundColor: isDarkMode
-              ? Colors.darkMode.background
-              : Colors.lightMode.background,
+            backgroundColor: isDarkMode ? palette.surface1 : '#FFF6F7',
           },
         ]}
       >
-        <View style={globalStyles.imprintStyles.texts.block}>
-          <ThemedText>
-            Duale Hochschule Baden-Württemberg Lörrach
-            {'\n'}
-            Hangstraße 46-50
-            {'\n'}
-            79539 Lörrach
-            {'\n'}
-            Fon +49 7621 2071 - 0{'\n'}
-            info@dhbw-loerrach.de
-            {'\n'}
-            http://www.dhbw-loerrach.de
-            {'\n'}
-            {'\n'}
-            {language === 'de'
-              ? 'Umsatzsteuer-Identifikationsnummer gemäß §27a Umsatzsteuergesetz: DE287664832'
-              : 'VAT identification number according to §27a VAT Act: DE287664832'}
-          </ThemedText>
-        </View>
-        <View style={globalStyles.imprintStyles.texts.block}>
-          <ThemedText style={globalStyles.imprintStyles.texts.headline}>
-            {language === 'de'
-              ? 'Rechtsform und zuständige Aufsichtsbehörde'
-              : 'Legal form and responsible supervisory authority'}
-          </ThemedText>
-          <ThemedText>
-            {language === 'de'
-              ? 'Die Duale Hochschule Baden-Württemberg ist nach § 1 Abs. 1 DH-ErrichtG vom 12.12.2008 eine rechtsfähige Körperschaft des öffentlichen Rechts und zugleich staatliche Einrichtung. Die Duale Hochschule Baden-Württemberg Lörrach ist nach § 1 Abs. 2 DH-ErrichtG vom 12.12.2008 eine rechtlich unselbständige Untereinheit dieser Hochschule.'
-              : 'The Duale Hochschule Baden-Württemberg is a legal entity under public law and a state institution according to § 1 Abs. 1 DH-ErrichtG of 12.12.2008. The Duale Hochschule Baden-Württemberg Lörrach is a legally dependent subunit of this university according to § 1 Abs. 2 DH-ErrichtG of 12.12.2008.'}
-            {'\n'}
-            {'\n'}
-            {language === 'de'
-              ? 'Dienstanbieter im Sinne des TDG bzw. des MDStV ist als Träger der Dualen Hochschule das Land Baden-Württemberg vertreten durch die Ministerin für Wissenschaft, Forschung und Kunst Theresia Bauer, MdL.'
-              : 'Service provider in the sense of the TDG or the MDStV is the state of Baden-Württemberg, represented by the Minister for Science, Research and Art Theresia Bauer, MdL.'}
-            {'\n'}
-            {'\n'}
-            {language === 'de'
-              ? 'Zuständige Aufsichtsbehörde:'
-              : 'Responsible supervisory authority:'}
-            {'\n'}
-            {language === 'de'
-              ? 'Ministerium für Wissenschaft, Forschung und Kunst'
-              : 'Ministry of Science, Research and Art'}
-            {'\n'}
-            {language === 'de' ? 'Baden-Württemberg' : 'Baden-Württemberg'}
-            {'\n'}
-            {language === 'de' ? 'Königstraße 46' : 'Königstraße 46'}
-            {'\n'}
-            {language === 'de' ? '70173 Stuttgart' : '70173 Stuttgart\nGermany'}
-            {'\n'}
-            {language === 'de'
-              ? 'Telefon: +49 711 279 - 0'
-              : 'Phone: +49 711 279 - 0'}
-            {'\n'}
-            {language === 'de'
-              ? 'Telefax: +49 711 279 - 3081'
-              : 'Fax: +49 711 279 - 3081'}
-            {'\n'}
-            {language === 'de'
-              ? 'poststelle@mwk.bwl.de'
-              : 'poststelle@mwk.bwl.de'}
-            {'\n'}
-            {language === 'de'
-              ? 'http://www.mwk.bwl.de'
-              : 'http://www.mwk.bwl.de'}
-          </ThemedText>
-        </View>
-        <View style={globalStyles.imprintStyles.texts.block}>
-          <ThemedText style={globalStyles.imprintStyles.texts.headline}>
-            {language === 'de' ? 'Externe Links' : 'External links'}
-          </ThemedText>
-          <ThemedText>
-            {language === 'de'
-              ? 'Die Campus App enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben und für welche die DHBW Lörrach keine Gewähr übernehmen kann. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Es ist nicht auszuschließen, dass die Inhalte im Nachhinein von den jeweiligen Anbietern verändert werden. Sollten Sie der Ansicht sein, dass die verlinkten externen Seiten gegen geltendes Recht verstoßen oder sonst unangemessene Inhalte enthalten, teilen Sie uns dies bitte mit.'
-              : 'The Campus App contains links to external third-party websites, over whose content we have no influence and for which DHBW Lörrach cannot assume any liability. The respective provider or operator of the pages is always responsible for the content of the linked pages. The linked pages were checked for possible legal violations at the time of linking. Illegal content was not recognizable at the time of linking. It cannot be ruled out that the content will be changed by the respective providers afterwards. If you believe that the linked external pages violate applicable law or contain otherwise inappropriate content, please let us know.'}
-          </ThemedText>
-        </View>
-        <View style={globalStyles.imprintStyles.texts.block}>
-          <ThemedText style={globalStyles.imprintStyles.texts.headline}>
-            {language === 'de' ? 'Urheberrecht' : 'Copyright'}
-          </ThemedText>
-          <ThemedText>
-            {language === 'de'
-              ? 'Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden einer Urheberrechtsverletzung wird der Inhalte umgehend entfernt bzw. mit dem entsprechenden Urheberrechts-Vermerk kenntlich gemacht.'
-              : 'Insofar as the content on this site was not created by the operator, the copyrights of third parties are respected. In particular, third-party content is marked as such. If you still become aware of a copyright infringement, please let us know. If we become aware of a copyright infringement, we will remove the content immediately or mark it with the appropriate copyright notice.'}
-          </ThemedText>
-        </View>
-        <View style={globalStyles.imprintStyles.texts.block}>
-          <ThemedText style={globalStyles.imprintStyles.texts.headline}>
-            {language === 'de' ? 'Quellcode' : 'Source code'}
-          </ThemedText>
-          <ThemedText>
-            {language === 'de'
-              ? 'Der Quellcode dieser App wurde als Open Source Projekt angelegt'
-              : 'The source code of this app was created as an open source project'}
-          </ThemedText>
+        <View
+          style={[
+            styles.heroAccent,
+            { backgroundColor: Colors.dhbwRed },
+          ]}
+        />
+        <View style={styles.heroHeader}>
           <ThemedText
-            style={{ color: Colors.dhbwRed }}
-            onPress={() =>
-              Linking.openURL('https://github.com/DHBWLoerrach/CampusRallyeApp')
-            }
+            variant="caption"
+            style={[infoScreenStyles.eyebrow, { color: Colors.dhbwRed }]}
           >
-            https://github.com/DHBWLoerrach/CampusRallyeApp
+            {content.heroEyebrow}
+          </ThemedText>
+          <ThemedText variant="title">{content.heroTitle}</ThemedText>
+          <ThemedText selectable style={infoScreenStyles.bodyText}>
+            {content.heroBody}
           </ThemedText>
         </View>
-      </View>
+
+        <View style={styles.linkList}>
+          <InfoLinkCard
+            accessibilityLabel={content.phoneLabel}
+            label={content.phoneLabel}
+            onPress={() => {
+              void Linking.openURL(DHBW_PHONE_URL);
+            }}
+            value={DHBW_PHONE_LABEL}
+          />
+          <InfoLinkCard
+            accessibilityLabel={content.emailLabel}
+            label={content.emailLabel}
+            onPress={() => {
+              void Linking.openURL(`mailto:${DHBW_EMAIL}`);
+            }}
+            value={DHBW_EMAIL}
+          />
+          <InfoLinkCard
+            accessibilityLabel={content.websiteLabel}
+            label={content.websiteLabel}
+            onPress={() => {
+              void Linking.openURL(DHBW_WEBSITE_URL);
+            }}
+            value={DHBW_WEBSITE_URL}
+          />
+        </View>
+
+        <InfoCard style={styles.denseCard} tone="subtle">
+          <ThemedText variant="label">{content.vatLabel}</ThemedText>
+          <ThemedText selectable style={infoScreenStyles.bodyText}>
+            {content.vatValue}
+          </ThemedText>
+          <ThemedText variant="label">{content.businessIdLabel}</ThemedText>
+          <ThemedText selectable style={infoScreenStyles.bodyText}>
+            {content.businessIdValue}
+          </ThemedText>
+        </InfoCard>
+      </InfoCard>
+
+      <InfoCard>
+        <InfoSectionHeader
+          label={content.legalLabel}
+          title={content.legalTitle}
+        />
+        <View style={styles.legalGroup}>
+          <ThemedText style={infoScreenStyles.bodyText}>
+            {content.legalText}
+          </ThemedText>
+          <InfoCard style={styles.denseCard} tone="subtle">
+            <ThemedText variant="label">{content.authorityLabel}</ThemedText>
+            <ThemedText variant="bodyStrong">{content.authorityTitle}</ThemedText>
+            <ThemedText selectable style={infoScreenStyles.bodyText}>
+              {content.authorityBody}
+            </ThemedText>
+            <InfoLinkCard
+              accessibilityLabel={content.websiteLabel}
+              label={content.websiteLabel}
+              onPress={() => {
+                void Linking.openURL(MINISTRY_WEBSITE_URL);
+              }}
+              value={MINISTRY_WEBSITE_URL}
+            />
+            <InfoLinkCard
+              accessibilityLabel={`${content.authorityTitle} ${content.emailLabel}`}
+              label={content.emailLabel}
+              onPress={() => {
+                void Linking.openURL(`mailto:${MINISTRY_EMAIL}`);
+              }}
+              value={MINISTRY_EMAIL}
+            />
+          </InfoCard>
+        </View>
+      </InfoCard>
     </ScreenScrollView>
   );
 }
