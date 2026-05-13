@@ -57,10 +57,9 @@ describe('UIButton', () => {
   });
 
   it('exposes disabled and busy accessibility state when loading', () => {
-    const { getByRole } = render(
-      <UIButton loading>Saving</UIButton>,
-      { wrapper }
-    );
+    const { getByRole } = render(<UIButton loading>Saving</UIButton>, {
+      wrapper,
+    });
 
     const button = getByRole('button');
     expect(button.props.accessibilityState).toEqual(
@@ -70,7 +69,10 @@ describe('UIButton', () => {
 
   it('passes accessibilityLabel and accessibilityHint', () => {
     const { getByRole } = render(
-      <UIButton accessibilityLabel="Submit form" accessibilityHint="Sends answer">
+      <UIButton
+        accessibilityLabel="Submit form"
+        accessibilityHint="Sends answer"
+      >
         Submit
       </UIButton>,
       { wrapper }
@@ -82,10 +84,9 @@ describe('UIButton', () => {
   });
 
   it('applies reduced opacity when disabled', () => {
-    const { getByRole } = render(
-      <UIButton disabled>Off</UIButton>,
-      { wrapper }
-    );
+    const { getByRole } = render(<UIButton disabled>Off</UIButton>, {
+      wrapper,
+    });
 
     const button = getByRole('button');
     // Style is a function of pressed state; check that disabled sets opacity 0.55

@@ -20,7 +20,10 @@ jest.mock('react-native-worklets', () => ({
   runOnJS: (fn) => fn,
   runOnRuntime: (fn) => fn,
   runOnUI: (fn) => fn,
-  runOnUIAsync: (fn) => async (...args) => fn(...args),
+  runOnUIAsync:
+    (fn) =>
+    async (...args) =>
+      fn(...args),
   runOnUISync: (fn) => fn(),
   scheduleOnRN: (fn, ...args) => fn(...args),
   scheduleOnRuntime: (fn, ...args) => fn(...args),

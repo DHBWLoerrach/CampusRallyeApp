@@ -1,24 +1,25 @@
 /* eslint-disable react/no-unknown-property */
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber/native';
-import type {
-  ExtrudeGeometryOptions,
-  Group,
-  Shape,
-} from 'three';
+import type { ExtrudeGeometryOptions, Group, Shape } from 'three';
 
 // Match @react-three/fiber/native's CommonJS resolution to avoid
 // Metro loading both the CJS and ESM Three.js builds.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const THREE: typeof import('three') = require('three');
 
-type RendererProps = NonNullable<ConstructorParameters<typeof THREE.WebGLRenderer>[0]>;
+type RendererProps = NonNullable<
+  ConstructorParameters<typeof THREE.WebGLRenderer>[0]
+>;
 type ExpoGlContext = WebGLRenderingContext & {
   __campusRallyePixelStoreiPatched?: boolean;
 };
 type ExpoCanvas = RendererProps['canvas'] & {
   __campusRallyeGetContextPatched?: boolean;
-  getContext: (contextId?: string, contextAttributes?: { antialias?: boolean }) => ExpoGlContext;
+  getContext: (
+    contextId?: string,
+    contextAttributes?: { antialias?: boolean }
+  ) => ExpoGlContext;
 };
 
 const UNSUPPORTED_EXPO_PIXEL_STORE_PARAMS = new Set([
@@ -46,7 +47,10 @@ function createExpoRenderer(defaultProps: RendererProps) {
   if (!canvas.__campusRallyeGetContextPatched) {
     const originalGetContext = canvas.getContext.bind(canvas);
 
-    canvas.getContext = ((contextId?: string, contextAttributes?: { antialias?: boolean }) => {
+    canvas.getContext = ((
+      contextId?: string,
+      contextAttributes?: { antialias?: boolean }
+    ) => {
       const glContext = originalGetContext(contextId, contextAttributes);
       patchExpoGlContext(glContext);
       return glContext;
@@ -101,7 +105,11 @@ function createChevronShape(): Shape {
   const r = 0.12;
 
   // Helper: get a point that is `dist` along the line from `a` toward `b`
-  const toward = (a: { x: number; y: number }, b: { x: number; y: number }, dist: number) => {
+  const toward = (
+    a: { x: number; y: number },
+    b: { x: number; y: number },
+    dist: number
+  ) => {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const len = Math.sqrt(dx * dx + dy * dy);
@@ -162,7 +170,7 @@ function ArrowMesh({ angleRef, tiltXRef, tiltYRef }: Props) {
     const extrudeSettings: ExtrudeGeometryOptions = {
       depth: 0.18,
       bevelEnabled: true,
-      bevelThickness: 0.10,
+      bevelThickness: 0.1,
       bevelSize: 0.08,
       bevelSegments: 10,
     };
@@ -185,7 +193,7 @@ function ArrowMesh({ angleRef, tiltXRef, tiltYRef }: Props) {
         emissiveIntensity: 0.15,
         side: THREE.DoubleSide,
       }),
-    [],
+    []
   );
 
   useFrame((_, delta) => {
@@ -230,7 +238,10 @@ function ArrowMesh({ angleRef, tiltXRef, tiltYRef }: Props) {
 
 // -- Camera rig that responds to device tilt ---------------------------------
 
-function TiltCamera({ tiltXRef, tiltYRef }: Pick<Props, 'tiltXRef' | 'tiltYRef'>) {
+function TiltCamera({
+  tiltXRef,
+  tiltYRef,
+}: Pick<Props, 'tiltXRef' | 'tiltYRef'>) {
   const initialized = useRef(false);
   const smoothX = useRef(0);
   const smoothY = useRef(0);
@@ -259,7 +270,7 @@ function TiltCamera({ tiltXRef, tiltYRef }: Pick<Props, 'tiltXRef' | 'tiltYRef'>
     camera.position.set(
       Math.sin(rollRad) * baseZ,
       baseY - Math.sin(pitchRad) * 0.8,
-      Math.cos(rollRad) * baseZ * Math.cos(pitchRad * 0.5),
+      Math.cos(rollRad) * baseZ * Math.cos(pitchRad * 0.5)
     );
     camera.lookAt(0, 0, 0);
   });
@@ -269,7 +280,11 @@ function TiltCamera({ tiltXRef, tiltYRef }: Pick<Props, 'tiltXRef' | 'tiltYRef'>
 
 // -- Exported canvas component -----------------------------------------------
 
-export default function Compass3DArrow({ angleRef, tiltXRef, tiltYRef }: Props) {
+export default function Compass3DArrow({
+  angleRef,
+  tiltXRef,
+  tiltYRef,
+}: Props) {
   return (
     <Canvas
       style={{ width: 200, height: 200 }}
@@ -300,7 +315,11 @@ export default function Compass3DArrow({ angleRef, tiltXRef, tiltYRef }: Props) 
       />
 
       {/* Fill light from lower-left — subtle cool tone */}
-      <directionalLight position={[-3, 1, -2]} intensity={0.35} color="#90CAF9" />
+      <directionalLight
+        position={[-3, 1, -2]}
+        intensity={0.35}
+        color="#90CAF9"
+      />
 
       {/* Rim light from behind */}
       <directionalLight position={[0, 2, -4]} intensity={0.2} />
@@ -309,7 +328,11 @@ export default function Compass3DArrow({ angleRef, tiltXRef, tiltYRef }: Props) 
       <ArrowMesh angleRef={angleRef} tiltXRef={tiltXRef} tiltYRef={tiltYRef} />
 
       {/* Invisible ground plane that receives the arrow's shadow */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.15, 0]} receiveShadow>
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, -0.15, 0]}
+        receiveShadow
+      >
         <planeGeometry args={[6, 6]} />
         <shadowMaterial opacity={0.18} />
       </mesh>

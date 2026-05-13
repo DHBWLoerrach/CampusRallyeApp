@@ -16,7 +16,9 @@ import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 
-export function isPasswordRequired(rallye: Pick<RallyeRow, 'password'> | null | undefined) {
+export function isPasswordRequired(
+  rallye: Pick<RallyeRow, 'password'> | null | undefined
+) {
   return !!(rallye?.password ?? '').trim().length;
 }
 
@@ -87,10 +89,17 @@ export default function RallyePasswordSheet({
         <View
           style={[
             globalStyles.rallyeModal.modalContent,
-            { backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card },
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.card
+                : Colors.lightMode.card,
+            },
           ]}
         >
-          <ThemedText variant="title" style={globalStyles.rallyeModal.modalTitle}>
+          <ThemedText
+            variant="title"
+            style={globalStyles.rallyeModal.modalTitle}
+          >
             {rallye?.name ?? t('rallye.modal.activeTitle')}
           </ThemedText>
 
@@ -108,7 +117,10 @@ export default function RallyePasswordSheet({
             onSubmitEditing={() => void confirmAndJoin()}
           />
 
-          <ThemedText style={globalStyles.rallyeModal.passwordHelper} variant="muted">
+          <ThemedText
+            style={globalStyles.rallyeModal.passwordHelper}
+            variant="muted"
+          >
             {t('rallye.password.helper')}
           </ThemedText>
 

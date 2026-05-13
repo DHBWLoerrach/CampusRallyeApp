@@ -65,11 +65,7 @@ export const infoScreenStyles = StyleSheet.create({
   },
 });
 
-export function InfoCard({
-  children,
-  style,
-  tone = 'default',
-}: InfoCardProps) {
+export function InfoCard({ children, style, tone = 'default' }: InfoCardProps) {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const backgroundColor =
@@ -91,10 +87,7 @@ export function InfoCard({
   );
 }
 
-export function InfoSectionHeader({
-  label,
-  title,
-}: InfoSectionHeaderProps) {
+export function InfoSectionHeader({ label, title }: InfoSectionHeaderProps) {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 

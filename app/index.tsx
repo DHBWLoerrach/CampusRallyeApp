@@ -1,4 +1,10 @@
-import { useEffect, useState, useRef, useCallback, useEffectEvent } from 'react';
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useEffectEvent,
+} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -66,9 +72,8 @@ export default function Welcome() {
   const [joining, setJoining] = useState(false);
   const [online, setOnline] = useState(true);
 
-  const [selectionStep, setSelectionStep] = useState<SelectionStep>(
-    'organization'
-  );
+  const [selectionStep, setSelectionStep] =
+    useState<SelectionStep>('organization');
   const [selectedOrganization, setSelectedOrganization] =
     useState<Organization | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -109,16 +114,19 @@ export default function Welcome() {
   ];
   const closeSelectionButtonTextStyle = { color: palette.text };
 
-  const applyDashboardData = useCallback((nextData: OrganizationDashboardData) => {
-    setDashboardData(nextData);
-    setExpandedDepartmentIds((currentExpandedIds) =>
-      currentExpandedIds.filter((departmentId) =>
-        nextData.departmentEntries.some(
-          (entry) => entry.department.id === departmentId
+  const applyDashboardData = useCallback(
+    (nextData: OrganizationDashboardData) => {
+      setDashboardData(nextData);
+      setExpandedDepartmentIds((currentExpandedIds) =>
+        currentExpandedIds.filter((departmentId) =>
+          nextData.departmentEntries.some(
+            (entry) => entry.department.id === departmentId
+          )
         )
-      )
-    );
-  }, []);
+      );
+    },
+    []
+  );
 
   const resetDashboard = useCallback(() => {
     setDashboardData(createEmptyDashboardData());
@@ -218,7 +226,8 @@ export default function Welcome() {
           currentOrganization &&
           currentOrganization.id === orgStillValid.id &&
           currentOrganization.name === orgStillValid.name &&
-          currentOrganization.default_rallye_id === orgStillValid.default_rallye_id &&
+          currentOrganization.default_rallye_id ===
+            orgStillValid.default_rallye_id &&
           currentOrganization.created_at === orgStillValid.created_at
         ) {
           return currentOrganization;
@@ -234,7 +243,11 @@ export default function Welcome() {
 
   // Effect Events are intentionally non-reactive and must stay out of deps.
   useEffect(() => {
-    if (loading || !isInitializedRef.current || initialSyncScheduledRef.current) {
+    if (
+      loading ||
+      !isInitializedRef.current ||
+      initialSyncScheduledRef.current
+    ) {
       return;
     }
 
@@ -408,11 +421,7 @@ export default function Welcome() {
     >
       <ThemedText
         variant="body"
-        style={[
-          globalStyles.welcomeStyles.text,
-          s.muted,
-          { marginBottom: 20 },
-        ]}
+        style={[globalStyles.welcomeStyles.text, s.muted, { marginBottom: 20 }]}
       >
         {t('welcome.offline')}
       </ThemedText>
@@ -540,7 +549,9 @@ export default function Welcome() {
         const singleRallye = rallyes.length === 1 ? rallyes[0] : null;
         const rallyeTitle = singleRallye?.name?.trim() || entry.department.name;
         const cardTitle = singleRallye ? rallyeTitle : entry.department.name;
-        const cardDescription = singleRallye ? entry.department.name : undefined;
+        const cardDescription = singleRallye
+          ? entry.department.name
+          : undefined;
         const multipleRallyes = rallyes.length > 1;
         const expanded = expandedDepartmentIds.includes(entry.department.id);
 
@@ -602,11 +613,12 @@ export default function Welcome() {
         );
       })}
 
-      {dashboardData.campusEventsRallyes.length > 0 && (
+      {dashboardData.campusEventsRallyes.length > 0 &&
         (() => {
-          const singleCampusEventRallye = dashboardData.campusEventsRallyes.length === 1
-            ? dashboardData.campusEventsRallyes[0]
-            : null;
+          const singleCampusEventRallye =
+            dashboardData.campusEventsRallyes.length === 1
+              ? dashboardData.campusEventsRallyes[0]
+              : null;
           const campusEventsTitle = t('welcome.campusEvents.title');
           const campusEventTitle =
             singleCampusEventRallye?.name?.trim() || campusEventsTitle;
@@ -620,7 +632,9 @@ export default function Welcome() {
               >
                 <UIButton
                   disabled={joining}
-                  onPress={() => void handleRallyePress(singleCampusEventRallye)}
+                  onPress={() =>
+                    void handleRallyePress(singleCampusEventRallye)
+                  }
                   style={ctaButtonStyle}
                   textStyle={ctaButtonTextStyle}
                 >
@@ -639,7 +653,11 @@ export default function Welcome() {
               <UIButton
                 disabled={joining}
                 onPress={toggleCampusEventsExpansion}
-                style={campusEventsExpanded ? closeSelectionButtonStyle : ctaButtonStyle}
+                style={
+                  campusEventsExpanded
+                    ? closeSelectionButtonStyle
+                    : ctaButtonStyle
+                }
                 textStyle={
                   campusEventsExpanded
                     ? closeSelectionButtonTextStyle
@@ -671,8 +689,7 @@ export default function Welcome() {
               )}
             </Card>
           );
-        })()
-      )}
+        })()}
 
       {dashboardData.tourModeRallye && (
         <Card

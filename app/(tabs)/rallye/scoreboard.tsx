@@ -63,10 +63,7 @@ export default function Scoreboard() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    if (
-      !rallyeId ||
-      (rallyeStatus !== 'ranking' && rallyeStatus !== 'ended')
-    )
+    if (!rallyeId || (rallyeStatus !== 'ranking' && rallyeStatus !== 'ended'))
       return;
     (async () => {
       try {
@@ -216,10 +213,10 @@ export default function Scoreboard() {
                   {team.rank === 1
                     ? '🥇'
                     : team.rank === 2
-                    ? '🥈'
-                    : team.rank === 3
-                    ? '🥉'
-                    : team.rank}
+                      ? '🥈'
+                      : team.rank === 3
+                        ? '🥉'
+                        : team.rank}
                 </ThemedText>
                 <ThemedText
                   style={[

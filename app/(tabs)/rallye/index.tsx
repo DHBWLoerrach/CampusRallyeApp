@@ -184,7 +184,9 @@ const RallyeIndex = observer(function RallyeIndex() {
           .in('question_id', geocachingQuestionIds);
         if (geocachingError) throw geocachingError;
         geocachingMap = new Map(
-          (geocachingData || []).map((g: GeocachingMetadata) => [g.question_id, g] as const)
+          (geocachingData || []).map(
+            (g: GeocachingMetadata) => [g.question_id, g] as const
+          )
         );
       }
 
@@ -207,7 +209,9 @@ const RallyeIndex = observer(function RallyeIndex() {
       const previousCurrentQuestionId = store$.currentQuestion.get()?.id;
       const ordered = orderQuestionsForSession(mapped, previousQuestions);
       const nextQuestionIndex = previousCurrentQuestionId
-        ? ordered.findIndex((question) => question.id === previousCurrentQuestionId)
+        ? ordered.findIndex(
+            (question) => question.id === previousCurrentQuestionId
+          )
         : 0;
       const safeQuestionIndex = nextQuestionIndex >= 0 ? nextQuestionIndex : 0;
 

@@ -72,8 +72,7 @@ jest.mock('@/components/ui/Screen', () => {
     ScreenScrollView: (props: {
       children: React.ReactNode;
       [key: string]: unknown;
-    }) =>
-      mockScreenScrollView(props),
+    }) => mockScreenScrollView(props),
   };
 });
 

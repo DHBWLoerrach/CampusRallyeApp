@@ -16,7 +16,10 @@ jest.mock('@/utils/Logger', () => ({
 }));
 
 import { StorageKeys } from '../asyncStorage';
-import { getCurrentRallye, getOrganizationDashboardData } from '../rallyeStorage';
+import {
+  getCurrentRallye,
+  getOrganizationDashboardData,
+} from '../rallyeStorage';
 import { Logger } from '@/utils/Logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -33,7 +36,10 @@ type QueryContext = {
   single: boolean;
 };
 
-type TableHandler = (context: QueryContext) => { data: unknown; error: unknown };
+type TableHandler = (context: QueryContext) => {
+  data: unknown;
+  error: unknown;
+};
 
 function createQueryMock(table: string, handler: TableHandler) {
   let selectValue: string | null = null;
@@ -115,7 +121,9 @@ describe('rallyeStorage.getCurrentRallye', () => {
     const result = await getCurrentRallye();
 
     expect(result).toBeNull();
-    expect(AsyncStorage.getItem).toHaveBeenCalledWith(StorageKeys.CURRENT_RALLYE);
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith(
+      StorageKeys.CURRENT_RALLYE
+    );
     expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
       StorageKeys.CURRENT_RALLYE
     );
@@ -201,8 +209,7 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
       organization: ({ select, constraints, single }) => {
         expect(single).toBe(true);
         const orgIdFilter = constraints.find(
-          (constraint) =>
-            constraint.type === 'eq' && constraint.column === 'id'
+          (constraint) => constraint.type === 'eq' && constraint.column === 'id'
         );
         expect(orgIdFilter?.value).toBe(orgId);
 
@@ -212,7 +219,10 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
         if (select === 'id, name') {
           return { data: { id: orgId, name: orgName }, error: null };
         }
-        return { data: null, error: new Error(`Unexpected organization select ${select}`) };
+        return {
+          data: null,
+          error: new Error(`Unexpected organization select ${select}`),
+        };
       },
       department: ({ select, constraints, single }) => {
         expect(single).toBe(false);
@@ -308,19 +318,20 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
       id: 900,
       mode: 'tour',
     });
-    expect(result.campusEventsRallyes.map((rallye) => rallye.id)).toEqual([101]);
+    expect(result.campusEventsRallyes.map((rallye) => rallye.id)).toEqual([
+      101,
+    ]);
     expect(result.campusEventsRallyes[0].mode).toBe('department');
 
-    expect(result.departmentEntries.map((entry) => entry.department.id)).toEqual([
-      12,
-      13,
-    ]);
-    expect(result.departmentEntries[0].rallyes.map((rallye) => rallye.id)).toEqual([
-      201,
-    ]);
-    expect(result.departmentEntries[1].rallyes.map((rallye) => rallye.id)).toEqual([
-      301,
-    ]);
+    expect(
+      result.departmentEntries.map((entry) => entry.department.id)
+    ).toEqual([12, 13]);
+    expect(
+      result.departmentEntries[0].rallyes.map((rallye) => rallye.id)
+    ).toEqual([201]);
+    expect(
+      result.departmentEntries[1].rallyes.map((rallye) => rallye.id)
+    ).toEqual([301]);
     expect(result.departmentEntries[0].rallyes[0].mode).toBe('department');
   });
 
@@ -335,7 +346,10 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
         if (select === 'id, name') {
           return { data: { id: orgId, name: 'DHBW Mannheim' }, error: null };
         }
-        return { data: null, error: new Error(`Unexpected organization select ${select}`) };
+        return {
+          data: null,
+          error: new Error(`Unexpected organization select ${select}`),
+        };
       },
       department: () => ({ data: [], error: null }),
     });

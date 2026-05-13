@@ -18,7 +18,9 @@ export function getAnswerText(
   );
   if (nonEmpty) return nonEmpty;
 
-  return candidates.find((value): value is string => typeof value === 'string') ?? '';
+  return (
+    candidates.find((value): value is string => typeof value === 'string') ?? ''
+  );
 }
 
 export function isSameQuestionId(

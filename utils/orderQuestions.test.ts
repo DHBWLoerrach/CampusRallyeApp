@@ -38,14 +38,8 @@ describe('orderQuestionsWithUploadsLast', () => {
     expect(
       ordered.slice(0, uploadStart).every((q) => q.question_type !== 'upload')
     ).toBe(true);
-    expect(
-      ordered
-        .map((q) => q.id)
-        .sort((a, b) => a - b)
-    ).toEqual(
-      questions
-        .map((q) => q.id)
-        .sort((a, b) => a - b)
+    expect(ordered.map((q) => q.id).sort((a, b) => a - b)).toEqual(
+      questions.map((q) => q.id).sort((a, b) => a - b)
     );
   });
 
@@ -54,10 +48,7 @@ describe('orderQuestionsWithUploadsLast', () => {
   });
 
   it('handles all-upload input (all shuffled, no others group)', () => {
-    const questions = [
-      makeQuestion(1, 'upload'),
-      makeQuestion(2, 'upload'),
-    ];
+    const questions = [makeQuestion(1, 'upload'), makeQuestion(2, 'upload')];
     const ordered = orderQuestionsWithUploadsLast(questions);
     expect(ordered).toHaveLength(2);
     expect(ordered.every((q) => q.question_type === 'upload')).toBe(true);

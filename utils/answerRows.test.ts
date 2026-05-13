@@ -40,18 +40,18 @@ describe('answerRows helpers', () => {
   });
 
   it('accepts multiple correct flag formats', () => {
-    expect(
-      isAnswerMarkedCorrect({ correct: true } as Partial<AnswerRow>)
-    ).toBe(true);
+    expect(isAnswerMarkedCorrect({ correct: true } as Partial<AnswerRow>)).toBe(
+      true
+    );
     expect(
       isAnswerMarkedCorrect({ is_correct: 'true' } as Partial<AnswerRow>)
     ).toBe(true);
-    expect(
-      isAnswerMarkedCorrect({ correct: 1 } as Partial<AnswerRow>)
-    ).toBe(true);
-    expect(
-      isAnswerMarkedCorrect({ correct: 't' } as Partial<AnswerRow>)
-    ).toBe(true);
+    expect(isAnswerMarkedCorrect({ correct: 1 } as Partial<AnswerRow>)).toBe(
+      true
+    );
+    expect(isAnswerMarkedCorrect({ correct: 't' } as Partial<AnswerRow>)).toBe(
+      true
+    );
     expect(
       isAnswerMarkedCorrect({ correct: false } as Partial<AnswerRow>)
     ).toBe(false);

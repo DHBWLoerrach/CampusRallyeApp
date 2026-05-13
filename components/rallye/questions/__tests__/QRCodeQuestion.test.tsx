@@ -33,10 +33,7 @@ jest.mock('@/utils/ConfirmAlert', () => ({
   confirm: jest.fn(() => Promise.resolve(true)),
 }));
 
-const mockUseCameraPermissions = jest.fn(() => [
-  { granted: true },
-  jest.fn(),
-]);
+const mockUseCameraPermissions = jest.fn(() => [{ granted: true }, jest.fn()]);
 jest.mock('expo-camera', () => {
   const ReactActual = jest.requireActual('react');
   const { View } = jest.requireActual('react-native');

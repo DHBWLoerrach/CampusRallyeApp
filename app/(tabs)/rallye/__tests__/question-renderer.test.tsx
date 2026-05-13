@@ -186,7 +186,9 @@ describe('QuestionRenderer', () => {
 
     const { getAllByText } = render(<QuestionRenderer question={question} />);
 
-    expect(getAllByText('question.unknown.title').length).toBeGreaterThanOrEqual(1);
+    expect(
+      getAllByText('question.unknown.title').length
+    ).toBeGreaterThanOrEqual(1);
     expect(getAllByText('question.skip').length).toBeGreaterThanOrEqual(1);
   });
 
@@ -195,16 +197,17 @@ describe('QuestionRenderer', () => {
 
     const { getAllByText } = render(<QuestionRenderer question={question} />);
 
-    expect(getAllByText('question.unknown.title').length).toBeGreaterThanOrEqual(1);
+    expect(
+      getAllByText('question.unknown.title').length
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('keeps the new question visible after flip completes', () => {
     const q1 = { id: 1, question_type: 'knowledge', question: 'Q1', points: 5 };
     const q2 = { id: 2, question_type: 'picture', question: 'Q2', points: 5 };
 
-    const { getByTestId, getByText, queryByTestId, queryByText, rerender } = render(
-      <QuestionRenderer question={q1} />
-    );
+    const { getByTestId, getByText, queryByTestId, queryByText, rerender } =
+      render(<QuestionRenderer question={q1} />);
 
     // New question triggers flip — both faces mounted during animation
     rerender(<QuestionRenderer question={q2} />);

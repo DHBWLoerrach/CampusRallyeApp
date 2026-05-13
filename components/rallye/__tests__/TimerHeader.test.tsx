@@ -41,7 +41,9 @@ describe('TimerHeader', () => {
   });
 
   it('marks already expired rallyes immediately on mount', () => {
-    render(<TimerHeader endTime={new Date(Date.now() - 1_000).toISOString()} />);
+    render(
+      <TimerHeader endTime={new Date(Date.now() - 1_000).toISOString()} />
+    );
 
     expect(storeMock.store$.timeExpired.set).toHaveBeenCalledWith(true);
   });

@@ -51,7 +51,9 @@ export default function SelectionModal({
         <Text
           style={[
             globalStyles.rallyeModal.rallyeName,
-            { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+            {
+              color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text,
+            },
           ]}
         >
           {item.name}
@@ -82,7 +84,12 @@ export default function SelectionModal({
   );
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
       <View style={globalStyles.rallyeModal.modalContainer}>
         <View
           style={[
@@ -97,7 +104,11 @@ export default function SelectionModal({
           <Text
             style={[
               globalStyles.rallyeModal.modalTitle,
-              { color: isDarkMode ? Colors.darkMode.text : Colors.lightMode.text },
+              {
+                color: isDarkMode
+                  ? Colors.darkMode.text
+                  : Colors.lightMode.text,
+              },
             ]}
           >
             {title}
@@ -110,10 +121,17 @@ export default function SelectionModal({
             />
           ) : (
             <Text style={globalStyles.rallyeModal.noDataText}>
-              {emptyMessage || (language === 'de' ? 'Keine Einträge verfügbar' : 'No items available')}
+              {emptyMessage ||
+                (language === 'de'
+                  ? 'Keine Einträge verfügbar'
+                  : 'No items available')}
             </Text>
           )}
-          <UIButton onPress={onClose} style={ctaButtonStyle} textStyle={ctaButtonTextStyle}>
+          <UIButton
+            onPress={onClose}
+            style={ctaButtonStyle}
+            textStyle={ctaButtonTextStyle}
+          >
             {language === 'de' ? 'Abbrechen' : 'Cancel'}
           </UIButton>
         </View>

@@ -110,9 +110,7 @@ jest.mock('@/components/ui/Hint', () => {
   const { Text } = jest.requireActual('react-native');
   return {
     __esModule: true,
-    default: ({ hint }: { hint: string }) => (
-      <Text testID="hint">{hint}</Text>
-    ),
+    default: ({ hint }: { hint: string }) => <Text testID="hint">{hint}</Text>,
   };
 });
 
@@ -209,7 +207,10 @@ describe('UploadPhotoQuestion', () => {
     });
 
     it('renders hint when provided', () => {
-      const questionWithHint = { ...baseQuestion, hint: 'Look near the entrance' };
+      const questionWithHint = {
+        ...baseQuestion,
+        hint: 'Look near the entrance',
+      };
       const { getByTestId } = render(
         <UploadPhotoQuestion question={questionWithHint} />
       );
@@ -297,10 +298,7 @@ describe('UploadPhotoQuestion', () => {
 
   describe('Permission handling', () => {
     it('shows permission request UI when not granted', () => {
-      mockUseCameraPermissions.mockReturnValue([
-        { granted: false },
-        jest.fn(),
-      ]);
+      mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
 
       const { getByText } = render(
         <UploadPhotoQuestion question={baseQuestion} />

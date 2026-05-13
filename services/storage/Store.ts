@@ -1,5 +1,9 @@
 import { observable } from '@legendapp/state';
-import { clearCurrentRallye, getCurrentRallye, RallyeRow } from './rallyeStorage';
+import {
+  clearCurrentRallye,
+  getCurrentRallye,
+  RallyeRow,
+} from './rallyeStorage';
 import {
   getCurrentTeam,
   clearCurrentTeam,
@@ -10,11 +14,7 @@ import { startOutbox } from './offlineOutbox';
 import { AnswerRow, Question, Team } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
-export type SessionState =
-  | 'not_joined'
-  | 'playing'
-  | 'finished'
-  | 'voting';
+export type SessionState = 'not_joined' | 'playing' | 'finished' | 'voting';
 
 type SessionInputs = {
   enabled: boolean;
@@ -79,8 +79,7 @@ export const store$ = observable({
 
   isTourMode: () => store$.rallye.get()?.mode === 'tour',
 
-  currentQuestion: () =>
-    store$.questions.get()[store$.questionIndex.get()],
+  currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
 
   gotoNextQuestion: async () => {
     if (store$.questions.get().length === 0) return;
@@ -96,7 +95,10 @@ export const store$ = observable({
         const isTourMode = store$.isTourMode.get();
         if (rallye && team && !isTourMode) {
           await setTimePlayed(rallye.id, team.id);
-          Logger.info('Store', `Rallye finished, time_played set for team: ${team.id}`);
+          Logger.info(
+            'Store',
+            `Rallye finished, time_played set for team: ${team.id}`
+          );
         }
       } catch (err) {
         Logger.error('Store', 'Error setting time_played', err);
@@ -168,7 +170,7 @@ export const store$ = observable({
         const rallyeId = rallye.id;
         let loadTeam: Team | null = null;
         try {
-          loadTeam = await getCurrentTeam(rallyeId) as Team | null;
+          loadTeam = (await getCurrentTeam(rallyeId)) as Team | null;
         } catch (e) {
           console.error('Error loading stored team:', e);
         }

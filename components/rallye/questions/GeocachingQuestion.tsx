@@ -99,7 +99,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const headingSubRef = useRef<Location.LocationSubscription | null>(null);
   const deviceMotionSubRef = useRef<{ remove: () => void } | null>(null);
   const trackingSessionRef = useRef(0);
-  const lastPositionRef = useRef<{ latitude: number; longitude: number } | null>(null);
+  const lastPositionRef = useRef<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   // On Android, DeviceMotion.alpha is more reliable for compass heading
   const deviceMotionHeadingRef = useRef<number | null>(null);
   // Delta accumulator to prevent 360° animation jumps (Reanimated issue #4353)
@@ -124,39 +127,48 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     !isNaN(targetLon);
 
   useEffect(() => {
-    Logger.debug('Geocaching', `Init — target=(${targetLat}, ${targetLon}), radius=${radius}, inputType=${inputType}, hasCoords=${hasCoordinates}`);
+    Logger.debug(
+      'Geocaching',
+      `Init — target=(${targetLat}, ${targetLon}), radius=${radius}, inputType=${inputType}, hasCoords=${hasCoordinates}`
+    );
   }, [targetLat, targetLon, radius, inputType, hasCoordinates]);
 
   // -- Shared rotation updater (used by both iOS heading and Android DeviceMotion) --
 
-  const updateArrowRotation = useCallback((compassHeading: number) => {
-    if (targetLat == null || targetLon == null) return;
-    const pos = lastPositionRef.current;
-    if (!pos) {
-      Logger.warn('Geocaching', 'No position cached yet — cannot compute bearing');
-      return;
-    }
+  const updateArrowRotation = useCallback(
+    (compassHeading: number) => {
+      if (targetLat == null || targetLon == null) return;
+      const pos = lastPositionRef.current;
+      if (!pos) {
+        Logger.warn(
+          'Geocaching',
+          'No position cached yet — cannot compute bearing'
+        );
+        return;
+      }
 
-    const targetBearing = bearing(
-      pos.latitude,
-      pos.longitude,
-      targetLat,
-      targetLon,
-    );
+      const targetBearing = bearing(
+        pos.latitude,
+        pos.longitude,
+        targetLat,
+        targetLon
+      );
 
-    // Normalize to -180..180
-    let rotation = normalizeDeg(targetBearing - compassHeading);
-    if (rotation > 180) rotation -= 360;
+      // Normalize to -180..180
+      let rotation = normalizeDeg(targetBearing - compassHeading);
+      if (rotation > 180) rotation -= 360;
 
-    // Delta accumulator: prevent 360° animation jumps when crossing -180/180 boundary
-    const diff = rotation - prevRotationRef.current;
-    if (diff > 180) rotationDeltaRef.current -= 360;
-    else if (diff < -180) rotationDeltaRef.current += 360;
-    prevRotationRef.current = rotation;
+      // Delta accumulator: prevent 360° animation jumps when crossing -180/180 boundary
+      const diff = rotation - prevRotationRef.current;
+      if (diff > 180) rotationDeltaRef.current -= 360;
+      else if (diff < -180) rotationDeltaRef.current += 360;
+      prevRotationRef.current = rotation;
 
-    const continuousRotation = rotation + rotationDeltaRef.current;
-    angleRef.current = continuousRotation;
-  }, [targetLat, targetLon]);
+      const continuousRotation = rotation + rotationDeltaRef.current;
+      angleRef.current = continuousRotation;
+    },
+    [targetLat, targetLon]
+  );
 
   // -- Location tracking ------------------------------------------------------
 
@@ -195,7 +207,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         latitude: initialPos.coords.latitude,
         longitude: initialPos.coords.longitude,
       };
-      Logger.debug('Geocaching', `Initial position seeded — lat=${initialPos.coords.latitude.toFixed(6)}, lon=${initialPos.coords.longitude.toFixed(6)}`);
+      Logger.debug(
+        'Geocaching',
+        `Initial position seeded — lat=${initialPos.coords.latitude.toFixed(6)}, lon=${initialPos.coords.longitude.toFixed(6)}`
+      );
     } catch (e) {
       Logger.warn('Geocaching', 'Could not seed initial position', e);
     }
@@ -220,16 +235,19 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
           loc.coords.latitude,
           loc.coords.longitude,
           targetLat,
-          targetLon,
+          targetLon
         );
         setDistance(dist);
 
         // Check proximity
         if (dist <= radius) {
-          Logger.info('Geocaching', `Arrived! dist=${dist.toFixed(1)}m <= radius=${radius}m → switching to answering phase`);
+          Logger.info(
+            'Geocaching',
+            `Arrived! dist=${dist.toFixed(1)}m <= radius=${radius}m → switching to answering phase`
+          );
           setPhase('answering');
         }
-      },
+      }
     );
     if (isStale()) {
       positionSub.remove();
@@ -250,7 +268,8 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       }
 
       // iOS: use trueHeading, fall back to magHeading
-      const compassHeading = heading.trueHeading >= 0 ? heading.trueHeading : heading.magHeading;
+      const compassHeading =
+        heading.trueHeading >= 0 ? heading.trueHeading : heading.magHeading;
       updateArrowRotation(compassHeading);
     });
     if (isStale()) {
@@ -282,7 +301,14 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       return;
     }
     deviceMotionSubRef.current = deviceMotionSub;
-  }, [hasCoordinates, radius, stopTracking, targetLat, targetLon, updateArrowRotation]);
+  }, [
+    hasCoordinates,
+    radius,
+    stopTracking,
+    targetLat,
+    targetLon,
+    updateArrowRotation,
+  ]);
 
   useEffect(() => {
     if (phase === 'navigating') {
@@ -301,7 +327,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     if (headingAccuracy >= MIN_HEADING_ACCURACY) return;
 
     const timer = setTimeout(() => {
-      Logger.info('Geocaching', `Calibration auto-skipped after ${CALIBRATION_TIMEOUT_S}s (accuracy was ${headingAccuracy})`);
+      Logger.info(
+        'Geocaching',
+        `Calibration auto-skipped after ${CALIBRATION_TIMEOUT_S}s (accuracy was ${headingAccuracy})`
+      );
       setCalibrationSkipped(true);
     }, CALIBRATION_TIMEOUT_S * 1_000);
 
@@ -320,10 +349,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         withTiming(30, { duration: 800, easing: Easing.inOut(Easing.sin) }),
         withTiming(-30, { duration: 800, easing: Easing.inOut(Easing.sin) }),
         withTiming(30, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) })
       ),
       -1,
-      false,
+      false
     );
     // Vertical: figure-8 cross pattern
     fig8Y.value = withRepeat(
@@ -331,10 +360,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         withTiming(-20, { duration: 400, easing: Easing.inOut(Easing.sin) }),
         withTiming(20, { duration: 800, easing: Easing.inOut(Easing.sin) }),
         withTiming(-20, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) })
       ),
       -1,
-      false,
+      false
     );
     // Gentle tilt rotation
     fig8Rotate.value = withRepeat(
@@ -342,10 +371,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         withTiming(15, { duration: 800, easing: Easing.inOut(Easing.sin) }),
         withTiming(-15, { duration: 800, easing: Easing.inOut(Easing.sin) }),
         withTiming(15, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.sin) })
       ),
       -1,
-      false,
+      false
     );
   }, [calibrationSkipped, fig8Rotate, fig8X, fig8Y, headingAccuracy]);
 
@@ -369,7 +398,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     if (submitting) return;
 
     const trimmed = answer.trim();
-    Logger.debug('Geocaching', `Text submit — answer="${trimmed}", answerKeyReady=${answerKeyReady}, correctText="${correctText}"`);
+    Logger.debug(
+      'Geocaching',
+      `Text submit — answer="${trimmed}", answerKeyReady=${answerKeyReady}, correctText="${correctText}"`
+    );
     if (!trimmed) {
       Alert.alert(t('common.errorTitle'), t('question.error.enterAnswer'));
       return;
@@ -377,7 +409,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     if (!answerKeyReady) {
       Alert.alert(
         t('question.error.pleaseWaitTitle'),
-        t('question.error.answerLoading'),
+        t('question.error.answerLoading')
       );
       return;
     }
@@ -386,7 +418,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
     setSubmitting(true);
     const isCorrect = trimmed.toLowerCase() === correctText;
-    Logger.info('Geocaching', `Text answer evaluated — isCorrect=${isCorrect}, points=${isCorrect ? question.points : 0}`);
+    Logger.info(
+      'Geocaching',
+      `Text answer evaluated — isCorrect=${isCorrect}, points=${isCorrect ? question.points : 0}`
+    );
     try {
       await submitAnswerAndAdvance({
         teamId: team?.id ?? null,
@@ -407,12 +442,15 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // -- QR scan handler --------------------------------------------------------
 
   const handleQRCode = ({ data }: { data: string }) => {
-    Logger.debug('Geocaching', `QR scanned — data="${data}", answerKeyReady=${answerKeyReady}`);
+    Logger.debug(
+      'Geocaching',
+      `QR scanned — data="${data}", answerKeyReady=${answerKeyReady}`
+    );
     if (processingRef.current) return;
     if (!answerKeyReady) {
       Alert.alert(
         t('question.error.pleaseWaitTitle'),
-        t('question.error.qrLoading'),
+        t('question.error.qrLoading')
       );
       return;
     }
@@ -441,7 +479,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                 Logger.error('Geocaching', 'Error submitting QR answer', e);
                 Alert.alert(
                   t('common.errorTitle'),
-                  t('question.error.saveAnswer'),
+                  t('question.error.saveAnswer')
                 );
               } finally {
                 processingRef.current = false;
@@ -521,7 +559,12 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             </ThemedText>
           </InfoBox>
           <InfoBox mb={0}>
-            <UIButton onPress={() => { setLocationDenied(false); void startTracking(); }}>
+            <UIButton
+              onPress={() => {
+                setLocationDenied(false);
+                void startTracking();
+              }}
+            >
               {t('geocaching.retryPermission')}
             </UIButton>
           </InfoBox>
@@ -579,10 +622,26 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                   {/* Animated phone follows the figure-8 path */}
                   <Animated.View style={[styles.fig8PhoneAbsolute, fig8Style]}>
                     <Svg width={36} height={52} viewBox="0 0 36 52">
-                      <Rect x="2" y="2" width="32" height="48" rx="6" ry="6"
-                        fill="#37474F" stroke="#78909C" strokeWidth="1.5" />
-                      <Rect x="5" y="8" width="26" height="32" rx="2" ry="2"
-                        fill="#4FC3F7" />
+                      <Rect
+                        x="2"
+                        y="2"
+                        width="32"
+                        height="48"
+                        rx="6"
+                        ry="6"
+                        fill="#37474F"
+                        stroke="#78909C"
+                        strokeWidth="1.5"
+                      />
+                      <Rect
+                        x="5"
+                        y="8"
+                        width="26"
+                        height="32"
+                        rx="2"
+                        ry="2"
+                        fill="#4FC3F7"
+                      />
                       <Ellipse cx="18" cy="46" rx="3" ry="3" fill="#546E7A" />
                     </Svg>
                   </Animated.View>
@@ -596,7 +655,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                 <UIButton
                   color={Colors.dhbwGray}
                   onPress={() => {
-                    Logger.info('Geocaching', 'User manually skipped calibration');
+                    Logger.info(
+                      'Geocaching',
+                      'User manually skipped calibration'
+                    );
                     setCalibrationSkipped(true);
                   }}
                   style={{ marginTop: 16 }}
@@ -605,14 +667,15 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                 </UIButton>
               </View>
             ) : (
-              <Compass3DArrow angleRef={angleRef} tiltXRef={tiltXRef} tiltYRef={tiltYRef} />
+              <Compass3DArrow
+                angleRef={angleRef}
+                tiltXRef={tiltXRef}
+                tiltYRef={tiltYRef}
+              />
             )}
 
             {distance != null && (
-              <ThemedText
-                variant="title"
-                style={[s.text, styles.distanceText]}
-              >
+              <ThemedText variant="title" style={[s.text, styles.distanceText]}>
                 {formatDistance(distance)}
               </ThemedText>
             )}

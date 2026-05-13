@@ -53,14 +53,17 @@ export const translations = {
       'Möchtest du die gespeicherte Teilnahme wirklich löschen? Die Teamzuordnung auf diesem Gerät wird entfernt.',
     'welcome.clearParticipation.confirm': 'Löschen',
     'welcome.selectLocation.title': 'Standort auswählen',
-    'welcome.selectLocation.description': 'Wähle deinen Standort aus, um verfügbare Rallyes zu sehen',
+    'welcome.selectLocation.description':
+      'Wähle deinen Standort aus, um verfügbare Rallyes zu sehen',
     'welcome.selectLocation.button': 'Standort auswählen',
     'welcome.selectLocation.modalTitle': 'Standort auswählen',
     'welcome.selectLocation.empty': 'Keine Standorte verfügbar',
     'welcome.selectDepartment.description': 'Studiengang-Rallyes',
-    'welcome.noContent': 'Derzeit sind keine aktiven Rallyes für diesen Standort verfügbar.',
+    'welcome.noContent':
+      'Derzeit sind keine aktiven Rallyes für diesen Standort verfügbar.',
     'welcome.campusEvents.title': 'Campus-Events',
-    'welcome.departmentLoadError': 'Standortinhalte konnten nicht geladen werden.',
+    'welcome.departmentLoadError':
+      'Standortinhalte konnten nicht geladen werden.',
     'rallye.status.preparing': 'Noch nicht gestartet',
     'rallye.status.inactive': 'Inaktiv',
     'rallye.status.running': 'Gestartet',
@@ -161,9 +164,12 @@ export const translations = {
     'scoreboard.yourTeam': 'Dein Team: {{team}}',
     'scoreboard.yourTeamLabel': 'Dein Team:',
     'geocaching.arrived': 'Ziel erreicht!',
-    'geocaching.calibrate': 'Bitte bewege dein Gerät in einer 8er-Bewegung, um den Kompass zu kalibrieren.',
-    'geocaching.error.noCoordinates': 'Für diese Frage sind keine Zielkoordinaten hinterlegt.',
-    'geocaching.error.locationDenied': 'Standortzugriff wurde verweigert. Dieser Fragetyp benötigt GPS.',
+    'geocaching.calibrate':
+      'Bitte bewege dein Gerät in einer 8er-Bewegung, um den Kompass zu kalibrieren.',
+    'geocaching.error.noCoordinates':
+      'Für diese Frage sind keine Zielkoordinaten hinterlegt.',
+    'geocaching.error.locationDenied':
+      'Standortzugriff wurde verweigert. Dieser Fragetyp benötigt GPS.',
     'geocaching.retryPermission': 'Standort erneut anfragen',
     'geocaching.skipCalibration': 'Überspringen',
   },
@@ -201,8 +207,7 @@ export const translations = {
     'welcome.error': 'Something went wrong. Please try again.',
     'welcome.resume.title': 'Resume rallye',
     'welcome.resume.details': 'Rallye: {{rallye}}\nTeam: {{team}}',
-    'welcome.join.description':
-      'Select a rallye and join with your team',
+    'welcome.join.description': 'Select a rallye and join with your team',
     'welcome.join.select': 'Select rallye',
     'welcome.join.hide': 'Close selection',
     'welcome.explore.title': 'Explore Campus',
@@ -216,12 +221,14 @@ export const translations = {
       'Do you really want to clear the saved participation? The team assignment on this device will be removed.',
     'welcome.clearParticipation.confirm': 'Clear',
     'welcome.selectLocation.title': 'Select Location',
-    'welcome.selectLocation.description': 'Select your location to see available rallyes',
+    'welcome.selectLocation.description':
+      'Select your location to see available rallyes',
     'welcome.selectLocation.button': 'Select location',
     'welcome.selectLocation.modalTitle': 'Select Location',
     'welcome.selectLocation.empty': 'No locations available',
     'welcome.selectDepartment.description': 'Department rallyes',
-    'welcome.noContent': 'No active rallyes are currently available for this location.',
+    'welcome.noContent':
+      'No active rallyes are currently available for this location.',
     'welcome.campusEvents.title': 'Campus Events',
     'welcome.departmentLoadError': 'Location content could not be loaded.',
     'rallye.status.preparing': 'Not started',
@@ -323,9 +330,12 @@ export const translations = {
     'scoreboard.yourTeam': 'Your team: {{team}}',
     'scoreboard.yourTeamLabel': 'Your team:',
     'geocaching.arrived': 'Destination reached!',
-    'geocaching.calibrate': 'Please move your device in a figure-8 motion to calibrate the compass.',
-    'geocaching.error.noCoordinates': 'No target coordinates are set for this question.',
-    'geocaching.error.locationDenied': 'Location access was denied. This question type requires GPS.',
+    'geocaching.calibrate':
+      'Please move your device in a figure-8 motion to calibrate the compass.',
+    'geocaching.error.noCoordinates':
+      'No target coordinates are set for this question.',
+    'geocaching.error.locationDenied':
+      'Location access was denied. This question type requires GPS.',
     'geocaching.retryPermission': 'Request location again',
     'geocaching.skipCalibration': 'Skip',
   },

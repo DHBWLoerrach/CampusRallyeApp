@@ -161,8 +161,8 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
               {scanMode
                 ? t('question.qr.hideCamera')
                 : answerKeyReady
-                ? t('question.qr.scan')
-                : t('common.loading')}
+                  ? t('question.qr.scan')
+                  : t('common.loading')}
             </UIButton>
             <UIButton
               icon="face-frown-open"

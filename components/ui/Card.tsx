@@ -72,10 +72,15 @@ export default function Card({
         </>
       ) : (
         // Horizontal layout: icon left of title
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}
+        >
           <IconSymbol name={icon} size={iconSize} color={Colors.dhbwRed} />
           <ThemedText
-            style={[globalStyles.cardStyles.cardTitle, { marginLeft: 8, marginTop: 0, flex: 1 }]}
+            style={[
+              globalStyles.cardStyles.cardTitle,
+              { marginLeft: 8, marginTop: 0, flex: 1 },
+            ]}
             variant="bodyStrong"
           >
             {title}

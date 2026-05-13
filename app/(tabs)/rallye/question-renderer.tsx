@@ -118,7 +118,15 @@ export default function QuestionRenderer({ question }: { question: any }) {
         runOnJS(onFlipToFront)();
       });
     }
-  }, [backQuestion?.id, flip, frontQuestion?.id, isFlipped, onFlipToBack, onFlipToFront, question]);
+  }, [
+    backQuestion?.id,
+    flip,
+    frontQuestion?.id,
+    isFlipped,
+    onFlipToBack,
+    onFlipToFront,
+    question,
+  ]);
 
   const renderQuestion = (q: any) => {
     const type = q?.question_type;

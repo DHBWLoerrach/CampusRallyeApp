@@ -33,8 +33,9 @@ jest.mock('@/components/ui/CollapsibleHeroHeader', () => {
 
 jest.mock('@/components/ui/RallyePasswordSheet', () => ({
   __esModule: true,
-  isPasswordRequired: (rallye: { password?: string | null } | null | undefined) =>
-    !!(rallye?.password ?? '').trim().length,
+  isPasswordRequired: (
+    rallye: { password?: string | null } | null | undefined
+  ) => !!(rallye?.password ?? '').trim().length,
   default: (props: any) => {
     mockPasswordSheetProps = props;
     return null;
@@ -145,7 +146,9 @@ const mockedGetOrganizationDashboardData =
     typeof getOrganizationDashboardData
   >;
 const mockedGetSelectedOrganization =
-  getSelectedOrganization as jest.MockedFunction<typeof getSelectedOrganization>;
+  getSelectedOrganization as jest.MockedFunction<
+    typeof getSelectedOrganization
+  >;
 const mockedSetCurrentRallye = setCurrentRallye as jest.MockedFunction<
   typeof setCurrentRallye
 >;
@@ -179,14 +182,14 @@ describe('Welcome', () => {
       configurable: true,
       value: 'active',
     });
-    jest.spyOn(AppState, 'addEventListener').mockImplementation(
-      () => ({
-        remove: mockAppStateSubscriptionRemove,
-      })
-    );
+    jest.spyOn(AppState, 'addEventListener').mockImplementation(() => ({
+      remove: mockAppStateSubscriptionRemove,
+    }));
 
     mockedGetSelectedOrganization.mockResolvedValue(null);
-    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([mockOrganization]);
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([
+      mockOrganization,
+    ]);
     mockedGetOrganizationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
@@ -374,7 +377,9 @@ describe('Welcome', () => {
     mockedGetOrganizationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
-      departmentEntries: [{ department: mockDepartment, rallyes: [passwordRallye] }],
+      departmentEntries: [
+        { department: mockDepartment, rallyes: [passwordRallye] },
+      ],
     });
 
     const { getByText } = render(<Welcome />);
@@ -416,7 +421,9 @@ describe('Welcome', () => {
     mockedGetOrganizationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
-      departmentEntries: [{ department: mockDepartment, rallyes: [rallyeA, rallyeB] }],
+      departmentEntries: [
+        { department: mockDepartment, rallyes: [rallyeA, rallyeB] },
+      ],
     });
 
     const { getAllByText, queryByText, getByText } = render(<Welcome />);
@@ -533,7 +540,9 @@ describe('Welcome', () => {
       .mockResolvedValueOnce({
         tourModeRallye: null,
         campusEventsRallyes: [],
-        departmentEntries: [{ department: mockDepartment, rallyes: [newRallye] }],
+        departmentEntries: [
+          { department: mockDepartment, rallyes: [newRallye] },
+        ],
       });
 
     const { queryByText, getByText } = render(<Welcome />);
@@ -589,12 +598,16 @@ describe('Welcome', () => {
       .mockResolvedValueOnce({
         tourModeRallye: null,
         campusEventsRallyes: [],
-        departmentEntries: [{ department: mockDepartment, rallyes: [initialRallye] }],
+        departmentEntries: [
+          { department: mockDepartment, rallyes: [initialRallye] },
+        ],
       })
       .mockResolvedValueOnce({
         tourModeRallye: null,
         campusEventsRallyes: [],
-        departmentEntries: [{ department: mockDepartment, rallyes: [refreshedRallye] }],
+        departmentEntries: [
+          { department: mockDepartment, rallyes: [refreshedRallye] },
+        ],
       });
 
     const { getByText } = render(<Welcome />);

@@ -56,9 +56,9 @@ const mockWatchPositionAsync = jest.fn();
 const mockWatchHeadingAsync = jest.fn();
 const mockGetCurrentPositionAsync = jest.fn();
 const mockRequestForegroundPermissionsAsync = jest.fn();
-const mockDeviceMotionAddListener = jest.fn(
-  (_listener: unknown) => ({ remove: jest.fn() })
-);
+const mockDeviceMotionAddListener = jest.fn((_listener: unknown) => ({
+  remove: jest.fn(),
+}));
 const mockDeviceMotionSetUpdateInterval = jest.fn((_interval: number) => {});
 
 jest.mock('expo-location', () => ({
@@ -66,10 +66,8 @@ jest.mock('expo-location', () => ({
     mockRequestForegroundPermissionsAsync(...args),
   getCurrentPositionAsync: (...args: unknown[]) =>
     mockGetCurrentPositionAsync(...args),
-  watchPositionAsync: (...args: unknown[]) =>
-    mockWatchPositionAsync(...args),
-  watchHeadingAsync: (...args: unknown[]) =>
-    mockWatchHeadingAsync(...args),
+  watchPositionAsync: (...args: unknown[]) => mockWatchPositionAsync(...args),
+  watchHeadingAsync: (...args: unknown[]) => mockWatchHeadingAsync(...args),
   Accuracy: {
     Balanced: 3,
     BestForNavigation: 5,
@@ -86,10 +84,7 @@ jest.mock('expo-sensors', () => ({
 }));
 
 // Mock expo-camera
-const mockUseCameraPermissions = jest.fn(() => [
-  { granted: true },
-  jest.fn(),
-]);
+const mockUseCameraPermissions = jest.fn(() => [{ granted: true }, jest.fn()]);
 jest.mock('expo-camera', () => {
   const ReactActual = jest.requireActual('react');
   const { View } = jest.requireActual('react-native');
@@ -107,7 +102,9 @@ jest.mock('expo-camera', () => {
 jest.mock('react-native-svg', () => {
   const { View } = jest.requireActual('react-native');
   const mock = (name: string) => {
-    const Component = (props: any) => <View testID={`svg-${name}`} {...props} />;
+    const Component = (props: any) => (
+      <View testID={`svg-${name}`} {...props} />
+    );
     Component.displayName = name;
     return Component;
   };
@@ -265,7 +262,11 @@ describe('GeocachingQuestion', () => {
   // -- Rendering: missing coordinates ----------------------------------------
 
   it('shows error when question has no coordinates', () => {
-    const q = { ...baseQuestion, target_latitude: undefined, target_longitude: undefined } as any;
+    const q = {
+      ...baseQuestion,
+      target_latitude: undefined,
+      target_longitude: undefined,
+    } as any;
 
     const { getByText } = render(<GeocachingQuestion question={q} />);
 
@@ -319,17 +320,19 @@ describe('GeocachingQuestion', () => {
 
   it('shows text input after arrival (phase=answering)', async () => {
     // Simulate arrival by triggering the position callback with distance < radius
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      // Call with position very close to target
-      cb({
-        coords: {
-          latitude: baseQuestion.target_latitude,
-          longitude: baseQuestion.target_longitude,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        // Call with position very close to target
+        cb({
+          coords: {
+            latitude: baseQuestion.target_latitude,
+            longitude: baseQuestion.target_longitude,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByPlaceholderText } = render(
       <GeocachingQuestion question={baseQuestion} />
@@ -355,16 +358,18 @@ describe('GeocachingQuestion', () => {
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
     // Simulate arrival
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: baseQuestion.target_latitude,
-          longitude: baseQuestion.target_longitude,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: baseQuestion.target_latitude,
+            longitude: baseQuestion.target_longitude,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByPlaceholderText } = render(
       <GeocachingQuestion question={baseQuestion} />
@@ -399,16 +404,18 @@ describe('GeocachingQuestion', () => {
 
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: baseQuestion.target_latitude,
-          longitude: baseQuestion.target_longitude,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: baseQuestion.target_latitude,
+            longitude: baseQuestion.target_longitude,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByPlaceholderText } = render(
       <GeocachingQuestion question={baseQuestion} />
@@ -418,7 +425,10 @@ describe('GeocachingQuestion', () => {
       expect(getByText(/geocaching\.arrived/)).toBeTruthy();
     });
 
-    fireEvent.changeText(getByPlaceholderText('question.placeholder.answer'), 'secret code');
+    fireEvent.changeText(
+      getByPlaceholderText('question.placeholder.answer'),
+      'secret code'
+    );
     fireEvent.press(getByText('question.submit'));
 
     await waitFor(() => {
@@ -442,16 +452,18 @@ describe('GeocachingQuestion', () => {
 
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: baseQuestion.target_latitude,
-          longitude: baseQuestion.target_longitude,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: baseQuestion.target_latitude,
+            longitude: baseQuestion.target_longitude,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByPlaceholderText } = render(
       <GeocachingQuestion question={baseQuestion} />
@@ -479,16 +491,18 @@ describe('GeocachingQuestion', () => {
   });
 
   it('does not submit when text answer is empty', async () => {
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: baseQuestion.target_latitude,
-          longitude: baseQuestion.target_longitude,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: baseQuestion.target_latitude,
+            longitude: baseQuestion.target_longitude,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText } = render(
       <GeocachingQuestion question={baseQuestion} />
@@ -522,16 +536,18 @@ describe('GeocachingQuestion', () => {
         })
     );
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: baseQuestion.target_latitude,
-          longitude: baseQuestion.target_longitude,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: baseQuestion.target_latitude,
+            longitude: baseQuestion.target_longitude,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByPlaceholderText } = render(
       <GeocachingQuestion question={baseQuestion} />
@@ -597,22 +613,25 @@ describe('GeocachingQuestion', () => {
   // -- QR mode ----------------------------------------------------------------
 
   it('renders QR scanner button in answer phase with qr input type', async () => {
-    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const qrQuestion = {
+      ...baseQuestion,
+      geocaching_input_type: 'qr' as const,
+    };
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: qrQuestion.target_latitude!,
-          longitude: qrQuestion.target_longitude!,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
-
-    const { getByText } = render(
-      <GeocachingQuestion question={qrQuestion} />
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: qrQuestion.target_latitude!,
+            longitude: qrQuestion.target_longitude!,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
     );
+
+    const { getByText } = render(<GeocachingQuestion question={qrQuestion} />);
 
     await waitFor(() => {
       expect(getByText(/geocaching\.arrived/)).toBeTruthy();
@@ -622,24 +641,27 @@ describe('GeocachingQuestion', () => {
   });
 
   it('allows surrender when camera access is denied in qr mode', async () => {
-    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const qrQuestion = {
+      ...baseQuestion,
+      geocaching_input_type: 'qr' as const,
+    };
     mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: qrQuestion.target_latitude!,
-          longitude: qrQuestion.target_longitude!,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
-
-    const { getByText } = render(
-      <GeocachingQuestion question={qrQuestion} />
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: qrQuestion.target_latitude!,
+            longitude: qrQuestion.target_longitude!,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
     );
+
+    const { getByText } = render(<GeocachingQuestion question={qrQuestion} />);
 
     await waitFor(() => {
       expect(getByText('question.camera.needAccess')).toBeTruthy();
@@ -663,7 +685,10 @@ describe('GeocachingQuestion', () => {
   });
 
   it('stores the scanned QR value as answer text', async () => {
-    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const qrQuestion = {
+      ...baseQuestion,
+      geocaching_input_type: 'qr' as const,
+    };
     const storeMock = jest.requireMock('@/services/storage/Store');
     const scannedValue = 'Secret Code';
 
@@ -672,16 +697,18 @@ describe('GeocachingQuestion', () => {
     ]);
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: qrQuestion.target_latitude!,
-          longitude: qrQuestion.target_longitude!,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: qrQuestion.target_latitude!,
+            longitude: qrQuestion.target_longitude!,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByTestId } = render(
       <GeocachingQuestion question={qrQuestion} />
@@ -723,7 +750,10 @@ describe('GeocachingQuestion', () => {
   });
 
   it('accepts scanned QR values with trailing whitespace', async () => {
-    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const qrQuestion = {
+      ...baseQuestion,
+      geocaching_input_type: 'qr' as const,
+    };
     const storeMock = jest.requireMock('@/services/storage/Store');
 
     storeMock.store$.answers.get.mockReturnValue([
@@ -731,16 +761,18 @@ describe('GeocachingQuestion', () => {
     ]);
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: qrQuestion.target_latitude!,
-          longitude: qrQuestion.target_longitude!,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: qrQuestion.target_latitude!,
+            longitude: qrQuestion.target_longitude!,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByTestId } = render(
       <GeocachingQuestion question={qrQuestion} />
@@ -765,23 +797,28 @@ describe('GeocachingQuestion', () => {
   });
 
   it('ignores duplicate incorrect QR scan events while the camera is closing', async () => {
-    const qrQuestion = { ...baseQuestion, geocaching_input_type: 'qr' as const };
+    const qrQuestion = {
+      ...baseQuestion,
+      geocaching_input_type: 'qr' as const,
+    };
     const storeMock = jest.requireMock('@/services/storage/Store');
 
     storeMock.store$.answers.get.mockReturnValue([
       { question_id: 42, text: 'secret code', correct: true },
     ]);
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: qrQuestion.target_latitude!,
-          longitude: qrQuestion.target_longitude!,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: qrQuestion.target_latitude!,
+            longitude: qrQuestion.target_longitude!,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
 
     const { getByText, getByTestId } = render(
       <GeocachingQuestion question={qrQuestion} />
@@ -813,20 +850,20 @@ describe('GeocachingQuestion', () => {
   it('shows hint in answer phase when hint is provided', async () => {
     const qWithHint = { ...baseQuestion, hint: 'Look under the bench' };
 
-    mockWatchPositionAsync.mockImplementation(async (_opts: any, cb: Function) => {
-      cb({
-        coords: {
-          latitude: qWithHint.target_latitude!,
-          longitude: qWithHint.target_longitude!,
-          accuracy: 5,
-        },
-      });
-      return { remove: jest.fn() };
-    });
-
-    const { getByText } = render(
-      <GeocachingQuestion question={qWithHint} />
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: qWithHint.target_latitude!,
+            longitude: qWithHint.target_longitude!,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
     );
+
+    const { getByText } = render(<GeocachingQuestion question={qWithHint} />);
 
     await waitFor(() => {
       expect(getByText('Look under the bench')).toBeTruthy();
@@ -838,9 +875,7 @@ describe('GeocachingQuestion', () => {
   it('removes subscriptions on unmount', async () => {
     const { positionRemove, headingRemove } = setupLocationMocks();
 
-    const { unmount } = render(
-      <GeocachingQuestion question={baseQuestion} />
-    );
+    const { unmount } = render(<GeocachingQuestion question={baseQuestion} />);
 
     await waitFor(() => {
       expect(mockWatchPositionAsync).toHaveBeenCalled();
@@ -854,9 +889,7 @@ describe('GeocachingQuestion', () => {
 
   it('removes a late position subscription that resolves after unmount', async () => {
     type ResolvePositionSubscription = (value: { remove: jest.Mock }) => void;
-    let resolvePositionSubscription:
-      | ResolvePositionSubscription
-      | null = null;
+    let resolvePositionSubscription: ResolvePositionSubscription | null = null;
     const latePositionRemove = jest.fn();
 
     mockWatchPositionAsync.mockImplementation(
@@ -866,9 +899,7 @@ describe('GeocachingQuestion', () => {
         })
     );
 
-    const { unmount } = render(
-      <GeocachingQuestion question={baseQuestion} />
-    );
+    const { unmount } = render(<GeocachingQuestion question={baseQuestion} />);
 
     await waitFor(() => {
       expect(mockWatchPositionAsync).toHaveBeenCalled();
@@ -879,9 +910,9 @@ describe('GeocachingQuestion', () => {
     if (!resolvePositionSubscription) {
       throw new Error('Expected position subscription resolver');
     }
-    (
-      resolvePositionSubscription as ResolvePositionSubscription
-    )({ remove: latePositionRemove });
+    (resolvePositionSubscription as ResolvePositionSubscription)({
+      remove: latePositionRemove,
+    });
 
     await waitFor(() => {
       expect(latePositionRemove).toHaveBeenCalled();

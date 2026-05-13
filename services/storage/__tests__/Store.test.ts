@@ -138,7 +138,12 @@ describe('store$ observable', () => {
     it('sets allQuestionsAnswered when reaching the last question', async () => {
       store$.questions.set([{ id: 1 }, { id: 2 }] as any);
       store$.questionIndex.set(1); // last index
-      store$.rallye.set({ id: 1, name: 'R', status: 'active', mode: 'tour' } as any);
+      store$.rallye.set({
+        id: 1,
+        name: 'R',
+        status: 'active',
+        mode: 'tour',
+      } as any);
 
       await store$.gotoNextQuestion();
 
@@ -167,12 +172,22 @@ describe('store$ observable', () => {
 
   describe('isTourMode', () => {
     it('returns true when rallye mode is tour', () => {
-      store$.rallye.set({ id: 1, name: 'R', status: 'active', mode: 'tour' } as any);
+      store$.rallye.set({
+        id: 1,
+        name: 'R',
+        status: 'active',
+        mode: 'tour',
+      } as any);
       expect(store$.isTourMode.get()).toBe(true);
     });
 
     it('returns false when rallye mode is not tour', () => {
-      store$.rallye.set({ id: 1, name: 'R', status: 'active', mode: 'classic' } as any);
+      store$.rallye.set({
+        id: 1,
+        name: 'R',
+        status: 'active',
+        mode: 'classic',
+      } as any);
       expect(store$.isTourMode.get()).toBe(false);
     });
 

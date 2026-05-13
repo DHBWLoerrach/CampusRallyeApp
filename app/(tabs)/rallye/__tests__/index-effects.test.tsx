@@ -317,13 +317,16 @@ describe('RallyeIndex effects', () => {
       expect(store$.questionIndex.set).toHaveBeenCalledWith(1);
     });
 
-    const orderedQuestions = (store$.questions.set as jest.Mock).mock.calls.at(-1)?.[0];
-    const currentQuestion = (store$.currentQuestion.set as jest.Mock).mock.calls.at(-1)?.[0];
+    const orderedQuestions = (store$.questions.set as jest.Mock).mock.calls.at(
+      -1
+    )?.[0];
+    const currentQuestion = (
+      store$.currentQuestion.set as jest.Mock
+    ).mock.calls.at(-1)?.[0];
 
-    expect(orderedQuestions.map((question: { id: number }) => question.id)).toEqual([
-      3,
-      2,
-    ]);
+    expect(
+      orderedQuestions.map((question: { id: number }) => question.id)
+    ).toEqual([3, 2]);
     expect(currentQuestion?.id).toBe(2);
   });
 });

@@ -105,7 +105,9 @@ function PhotoCamera({
             <UIButton
               icon="camera-rotate"
               color={Colors.dhbwGray}
-              onPress={() => setFacing((c) => (c === 'back' ? 'front' : 'back'))}
+              onPress={() =>
+                setFacing((c) => (c === 'back' ? 'front' : 'back'))
+              }
             >
               {t('question.photo.switch')}
             </UIButton>

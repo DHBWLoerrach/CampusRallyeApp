@@ -1,13 +1,13 @@
 /**
  * Logger-Wrapper für Development
- * 
+ *
  * Dieser Logger gibt nur im Development-Modus (__DEV__) Logs aus.
  * In Production-Builds werden keine Logs ausgegeben.
- * 
+ *
  * Verwendung:
  * ```typescript
  * import { Logger } from '@/utils/Logger';
- * 
+ *
  * Logger.debug('Navigation', 'Zurück zur Organisations-Auswahl');
  * Logger.info('AutoRefresh', 'Daten aktualisiert');
  * Logger.warn('Storage', 'Alte Daten gefunden');
@@ -45,28 +45,32 @@ const config: LoggerConfig = {
 /**
  * Formatiert den Log-Output
  */
-const formatMessage = (level: LogLevel, tag: string, message: string): string => {
+const formatMessage = (
+  level: LogLevel,
+  tag: string,
+  message: string
+): string => {
   const parts: string[] = [];
-  
+
   if (config.showTimestamp) {
     const now = new Date();
-    const time = now.toLocaleTimeString('de-DE', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
+    const time = now.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
       second: '2-digit',
-      fractionalSecondDigits: 3 
+      fractionalSecondDigits: 3,
     });
     parts.push(`[${time}]`);
   }
-  
+
   parts.push(`[${level.toUpperCase()}]`);
-  
+
   if (config.showTag && tag) {
     parts.push(`[${tag}]`);
   }
-  
+
   parts.push(message);
-  
+
   return parts.join(' ');
 };
 

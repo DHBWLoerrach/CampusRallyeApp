@@ -147,8 +147,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                         borderColor: isSelected
                           ? Colors.dhbwRed
                           : isDarkMode
-                          ? Colors.darkMode.text
-                          : Colors.dhbwGray,
+                            ? Colors.darkMode.text
+                            : Colors.dhbwGray,
                       },
                     ]}
                     onPress={() => setAnswer(optionText)}
@@ -160,8 +160,8 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                           backgroundColor: isSelected
                             ? Colors.dhbwRed
                             : isDarkMode
-                            ? Colors.darkMode.card
-                            : Colors.lightMode.card,
+                              ? Colors.darkMode.card
+                              : Colors.lightMode.card,
                         },
                       ]}
                     />

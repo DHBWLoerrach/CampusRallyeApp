@@ -9,7 +9,10 @@ module.exports = defineConfig([
     ignores: ['dist/*'],
   },
   {
-    files: ['**/__tests__/**/*.{js,jsx,ts,tsx}', '**/*.{spec,test}.{js,jsx,ts,tsx}'],
+    files: [
+      '**/__tests__/**/*.{js,jsx,ts,tsx}',
+      '**/*.{spec,test}.{js,jsx,ts,tsx}',
+    ],
     languageOptions: {
       globals: {
         ...globals.jest,

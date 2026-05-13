@@ -1,5 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StorageKeys, getStorageItem, setStorageItem } from '@/services/storage/asyncStorage';
+import {
+  StorageKeys,
+  getStorageItem,
+  setStorageItem,
+} from '@/services/storage/asyncStorage';
 import {
   enqueueSaveAnswer,
   outbox$,
@@ -140,15 +144,17 @@ describe('offlineOutbox processOutbox', () => {
 
   it('normalizes legacy { data: { teamId, ... } } format', async () => {
     // Manually store a legacy queue item
-    const legacy = [{
-      type: 'SAVE_ANSWER',
-      data: {
-        teamId: 5,
-        questionId: 10,
-        answeredCorrectly: true,
-        points: 7,
+    const legacy = [
+      {
+        type: 'SAVE_ANSWER',
+        data: {
+          teamId: 5,
+          questionId: 10,
+          answeredCorrectly: true,
+          points: 7,
+        },
       },
-    }];
+    ];
     await setStorageItem(StorageKeys.OFFLINE_QUEUE, legacy);
 
     await processOutbox();
@@ -165,16 +171,18 @@ describe('offlineOutbox processOutbox', () => {
   });
 
   it('normalizes legacy { table: "team_questions", data: {...} } format', async () => {
-    const legacy = [{
-      table: 'team_questions',
-      data: {
-        team_id: 3,
-        question_id: 8,
-        correct: false,
-        points: 0,
-        team_answer: 'wrong',
+    const legacy = [
+      {
+        table: 'team_questions',
+        data: {
+          team_id: 3,
+          question_id: 8,
+          correct: false,
+          points: 0,
+          team_answer: 'wrong',
+        },
       },
-    }];
+    ];
     await setStorageItem(StorageKeys.OFFLINE_QUEUE, legacy);
 
     await processOutbox();
@@ -191,10 +199,12 @@ describe('offlineOutbox processOutbox', () => {
   });
 
   it('discards UPLOAD_PHOTO_ANSWER items', async () => {
-    const unsupported = [{
-      type: 'UPLOAD_PHOTO_ANSWER',
-      data: { something: true },
-    }];
+    const unsupported = [
+      {
+        type: 'UPLOAD_PHOTO_ANSWER',
+        data: { something: true },
+      },
+    ];
     await setStorageItem(StorageKeys.OFFLINE_QUEUE, unsupported);
 
     await processOutbox();

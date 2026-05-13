@@ -114,9 +114,24 @@ describe('Scoreboard', () => {
   it('displays medal emojis for top 3 teams', async () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [
-      { id: '1', name: 'Alpha', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T11:00:00Z' },
-      { id: '2', name: 'Beta', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T11:30:00Z' },
-      { id: '3', name: 'Gamma', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T12:00:00Z' },
+      {
+        id: '1',
+        name: 'Alpha',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T11:00:00Z',
+      },
+      {
+        id: '2',
+        name: 'Beta',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T11:30:00Z',
+      },
+      {
+        id: '3',
+        name: 'Gamma',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T12:00:00Z',
+      },
     ];
     mockPoints = [
       { team_id: '1', points: 30 },
@@ -125,7 +140,9 @@ describe('Scoreboard', () => {
     ];
 
     const { getByText } = render(<Scoreboard />);
-    await act(async () => { await flushPromises(); });
+    await act(async () => {
+      await flushPromises();
+    });
 
     expect(getByText('🥇')).toBeTruthy();
     expect(getByText('🥈')).toBeTruthy();
@@ -135,8 +152,18 @@ describe('Scoreboard', () => {
   it('sorts teams by points descending, then by time', async () => {
     mockRallye = { id: 1, name: 'R', status: 'ranking' };
     mockTeams = [
-      { id: '1', name: 'Slow', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T12:00:00Z' },
-      { id: '2', name: 'Fast', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T10:30:00Z' },
+      {
+        id: '1',
+        name: 'Slow',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T12:00:00Z',
+      },
+      {
+        id: '2',
+        name: 'Fast',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T10:30:00Z',
+      },
     ];
     // Same points — Fast should rank first due to shorter time
     mockPoints = [
@@ -145,7 +172,9 @@ describe('Scoreboard', () => {
     ];
 
     const { getAllByText } = render(<Scoreboard />);
-    await act(async () => { await flushPromises(); });
+    await act(async () => {
+      await flushPromises();
+    });
 
     // 🥇 should appear before 🥈
     const gold = getAllByText('🥇');
@@ -158,8 +187,18 @@ describe('Scoreboard', () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeam = { id: '2', name: 'MyTeam' };
     mockTeams = [
-      { id: '1', name: 'Other', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T11:00:00Z' },
-      { id: '2', name: 'MyTeam', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T11:00:00Z' },
+      {
+        id: '1',
+        name: 'Other',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T11:00:00Z',
+      },
+      {
+        id: '2',
+        name: 'MyTeam',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T11:00:00Z',
+      },
     ];
     mockPoints = [
       { team_id: '1', points: 20 },
@@ -167,7 +206,9 @@ describe('Scoreboard', () => {
     ];
 
     const { getByText, getAllByText } = render(<Scoreboard />);
-    await act(async () => { await flushPromises(); });
+    await act(async () => {
+      await flushPromises();
+    });
 
     // Own team label should be visible
     expect(getByText(/scoreboard\.yourTeamLabel/)).toBeTruthy();
@@ -178,14 +219,19 @@ describe('Scoreboard', () => {
   it('renders team points in the row', async () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [
-      { id: '1', name: 'Solo', created_at: '2024-01-01T10:00:00Z', time_played: '2024-01-01T11:00:00Z' },
+      {
+        id: '1',
+        name: 'Solo',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T11:00:00Z',
+      },
     ];
-    mockPoints = [
-      { team_id: '1', points: 42 },
-    ];
+    mockPoints = [{ team_id: '1', points: 42 }];
 
     const { getByText } = render(<Scoreboard />);
-    await act(async () => { await flushPromises(); });
+    await act(async () => {
+      await flushPromises();
+    });
 
     expect(getByText('Solo')).toBeTruthy();
     // Points 42 rendered in team row
