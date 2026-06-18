@@ -1,54 +1,78 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import TabLayout from '../_layout';
 
-type ScreenOptions = {
-  headerLeft?: () => React.ReactNode;
-  headerTitle?: () => React.ReactNode;
-  headerRight?: () => React.ReactNode;
+type NativeTabsProps = {
+  backgroundColor?: string;
+  children: React.ReactNode;
+  tintColor?: string;
 };
 
-let mockCapturedScreenOptions: ScreenOptions | undefined;
+type NativeTabTriggerProps = {
+  children: React.ReactNode;
+  name: string;
+};
 
-jest.mock('expo-router', () => ({
-  Tabs: Object.assign(
-    ({
-      screenOptions,
-      children,
-    }: {
-      screenOptions: ScreenOptions;
-      children: React.ReactNode;
-    }) => {
-      mockCapturedScreenOptions = screenOptions;
-      return <>{children}</>;
-    },
+jest.mock('expo-router/unstable-native-tabs', () => ({
+  NativeTabs: Object.assign(
+    jest.fn(({ children }: NativeTabsProps) => children),
     {
-      Screen: () => null,
+      Trigger: Object.assign(
+        jest.fn(({ children }: NativeTabTriggerProps) => children),
+        {
+          Icon: jest.fn(() => null),
+          Label: jest.fn(
+            ({ children }: { children: React.ReactNode }) => children
+          ),
+        }
+      ),
     }
   ),
 }));
+
+const mockNativeTabs = NativeTabs as unknown as jest.Mock;
+const mockNativeTabsTrigger = NativeTabs.Trigger as unknown as jest.Mock;
+const mockNativeTabsIcon = NativeTabs.Trigger.Icon as unknown as jest.Mock;
+const mockNativeTabsLabel = NativeTabs.Trigger.Label as unknown as jest.Mock;
 
 jest.mock('@/utils/ThemeContext', () => ({
   useTheme: () => ({ isDarkMode: false }),
 }));
 
-jest.mock('@/components/ui/IconSymbol', () => ({
-  IconSymbol: () => null,
-}));
-
-jest.mock('@/components/rallye/RallyeHeader', () => () => null);
-jest.mock('@/components/rallye/RallyeHeaderActions', () => () => null);
-
 describe('TabLayout', () => {
   beforeEach(() => {
-    mockCapturedScreenOptions = undefined;
+    mockNativeTabs.mockClear();
+    mockNativeTabsTrigger.mockClear();
+    mockNativeTabsIcon.mockClear();
+    mockNativeTabsLabel.mockClear();
   });
 
-  it('renders the team on the left and actions on the right', () => {
+  it('renders static native tabs for rallye and infos', () => {
     render(<TabLayout />);
 
-    expect(typeof mockCapturedScreenOptions?.headerLeft).toBe('function');
-    expect(typeof mockCapturedScreenOptions?.headerRight).toBe('function');
-    expect(mockCapturedScreenOptions?.headerTitle?.()).toBeNull();
+    expect(mockNativeTabs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        minimizeBehavior: 'onScrollDown',
+        tintColor: '#E2001A',
+      }),
+      undefined
+    );
+    expect(mockNativeTabsTrigger).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'rallye' }),
+      undefined
+    );
+    expect(mockNativeTabsTrigger).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'infos' }),
+      undefined
+    );
+    expect(mockNativeTabsLabel).toHaveBeenCalledWith(
+      expect.objectContaining({ children: 'Rallye' }),
+      undefined
+    );
+    expect(mockNativeTabsLabel).toHaveBeenCalledWith(
+      expect.objectContaining({ children: 'Infos' }),
+      undefined
+    );
   });
 });

@@ -1,59 +1,36 @@
-import { Tabs } from 'expo-router';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
-import RallyeHeader from '@/components/rallye/RallyeHeader';
-import RallyeHeaderActions from '@/components/rallye/RallyeHeaderActions';
-
-const ICON_SIZE = 28;
 
 export default function TabLayout() {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   return (
-    <Tabs
-      initialRouteName="rallye"
-      screenOptions={{
-        headerLeft: () => <RallyeHeader />,
-        headerTitle: () => null,
-        headerRight: () => <RallyeHeaderActions />,
-        headerStyle: { backgroundColor: palette.surface1 },
-        headerLeftContainerStyle: {
-          paddingLeft: 16,
-        },
-        headerRightContainerStyle: {
-          paddingRight: 8,
-        },
-        headerTitleStyle: { color: palette.text },
-        headerTintColor: palette.text,
-        tabBarStyle: {
-          backgroundColor: palette.surface1,
-          borderTopColor: palette.borderSubtle,
-        },
-        tabBarActiveTintColor: Colors.dhbwRed,
-        tabBarInactiveTintColor: palette.tabBarIcon,
+    <NativeTabs
+      backgroundColor={palette.surface1}
+      iconColor={{ default: palette.tabBarIcon, selected: Colors.dhbwRed }}
+      labelStyle={{
+        default: { color: palette.tabBarIcon },
+        selected: { color: Colors.dhbwRed },
       }}
+      minimizeBehavior="onScrollDown"
+      shadowColor={palette.borderSubtle}
+      tintColor={Colors.dhbwRed}
     >
-      <Tabs.Screen
-        name="rallye"
-        options={{
-          tabBarLabel: 'Rallye',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="map" size={ICON_SIZE} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="infos"
-        options={{
-          title: 'Informationen',
-          tabBarLabel: 'Infos',
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <IconSymbol name="info.circle" size={ICON_SIZE} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+      <NativeTabs.Trigger name="rallye">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'map', selected: 'map.fill' }}
+          md="map"
+        />
+        <NativeTabs.Trigger.Label>Rallye</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="infos">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'info.circle', selected: 'info.circle.fill' }}
+          md="info"
+        />
+        <NativeTabs.Trigger.Label>Infos</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }
