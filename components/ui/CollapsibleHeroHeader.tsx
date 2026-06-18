@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   imageContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   heroImage: {
     width: SCREEN_WIDTH,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   gradient: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   languageToggle: {
     position: 'absolute',

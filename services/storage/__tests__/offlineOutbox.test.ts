@@ -21,7 +21,7 @@ jest.mock('@/utils/Supabase', () => ({
 }));
 
 function flushPromises() {
-  return new Promise((resolve) => setImmediate(resolve));
+  return new Promise<void>((resolve) => setImmediate(() => resolve()));
 }
 
 function createDeferred<T>() {

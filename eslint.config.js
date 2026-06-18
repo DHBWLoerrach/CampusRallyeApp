@@ -9,6 +9,15 @@ module.exports = defineConfig([
     ignores: ['dist/*'],
   },
   {
+    rules: {
+      'react-hooks/immutability': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/static-components': 'off',
+    },
+  },
+  {
     files: [
       '**/__tests__/**/*.{js,jsx,ts,tsx}',
       '**/*.{spec,test}.{js,jsx,ts,tsx}',

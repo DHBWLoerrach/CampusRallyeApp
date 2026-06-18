@@ -2,7 +2,7 @@ import {
   DarkTheme as NavDark,
   DefaultTheme as NavLight,
   Theme,
-} from '@react-navigation/native';
+} from 'expo-router/react-navigation';
 import Colors, { ThemePalette } from './Colors';
 
 export function createNavigationTheme(
