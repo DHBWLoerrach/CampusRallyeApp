@@ -171,14 +171,6 @@ jest.mock('@/components/ui/VStack', () => {
   };
 });
 
-jest.mock('@/components/ui/TeamNameSheet', () => {
-  const { View } = jest.requireActual('react-native');
-  return {
-    __esModule: true,
-    default: () => <View />,
-  };
-});
-
 jest.mock('../states/Preparation', () => () => null);
 jest.mock('../states/NoQuestions', () => () => null);
 jest.mock('../team-setup', () => () => null);
@@ -205,7 +197,6 @@ jest.mock('@/services/storage/Store', () => ({
     questions: { get: jest.fn(() => []), set: jest.fn() },
     totalQuestions: { get: jest.fn(() => 0), set: jest.fn() },
     answeredCount: { get: jest.fn(() => 0), set: jest.fn() },
-    showTeamNameSheet: { get: jest.fn(() => false), set: jest.fn() },
     currentQuestion: { get: jest.fn(() => null), set: jest.fn() },
     points: { get: jest.fn(() => 0), set: jest.fn() },
     allQuestionsAnswered: { get: jest.fn(() => false), set: jest.fn() },

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { observer, useSelector } from '@legendapp/state/react';
 import { supabase } from '@/utils/Supabase';
 import { store$ } from '@/services/storage/Store';
@@ -16,6 +17,7 @@ const TeamSetup = observer(function TeamSetup() {
   const [loading, setLoading] = useState(false);
   const s = useAppStyles();
   const { t } = useLanguage();
+  const router = useRouter();
   const rallye = useSelector(() => store$.rallye.get());
   const createTeam = async () => {
     if (!rallye) return;
@@ -31,8 +33,8 @@ const TeamSetup = observer(function TeamSetup() {
       if (data) {
         store$.team.set(data);
         await setCurrentTeam(rallye.id, data);
-        // Kurze Bestätigung via Bottom Sheet im Rallye-Screen
-        store$.showTeamNameSheet.set(true);
+        // Briefly confirm the generated team name via the native sheet route.
+        router.push('/(tabs)/rallye/team-name-sheet');
       }
     } catch (e) {
       console.error('Error creating team:', e);

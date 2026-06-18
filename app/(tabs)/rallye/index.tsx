@@ -18,7 +18,6 @@ import QuestionRenderer from '@/app/(tabs)/rallye/question-renderer';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
-import TeamNameSheet from '@/components/ui/TeamNameSheet';
 import UIButton from '@/components/ui/UIButton';
 import { ScreenScrollView } from '@/components/ui/Screen';
 import type { RallyeStatus } from '@/types/rallye';
@@ -47,7 +46,6 @@ const RallyeIndex = observer(function RallyeIndex() {
   const qsLen = useSelector(() => store$.questions.get().length);
   const totalQuestions = useSelector(() => store$.totalQuestions.get());
   const answeredCount = useSelector(() => store$.answeredCount.get());
-  const showTeamNameSheet = useSelector(() => store$.showTeamNameSheet.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
   const points = useSelector(() => store$.points.get());
@@ -304,70 +302,105 @@ const RallyeIndex = observer(function RallyeIndex() {
   }
 
   if (!allQuestionsAnswered && questions.length === 0) {
-    return (
-      <>
-        <NoQuestions loading={loading} onRefresh={onRefresh} />
-        <TeamNameSheet
-          visible={!!showTeamNameSheet}
-          name={team?.name || ''}
-          onClose={() => store$.showTeamNameSheet.set(false)}
-        />
-      </>
-    );
+    return <NoQuestions loading={loading} onRefresh={onRefresh} />;
   }
 
   if (questions.length > 0 && !allQuestionsAnswered) {
     return (
-      <>
-        <ScreenScrollView
-          padding="none"
-          edges={[]}
-          contentContainerStyle={[
-            globalStyles.default.refreshContainer,
-            globalStyles.default.container,
-            { paddingBottom: spacing(2) },
-          ]}
-        >
-          <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
-            {(rallye?.name ? `${rallye.name} • ` : '') +
-              t('rallye.progress', {
-                current: isTourMode
-                  ? idx + 1
-                  : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
-                total: isTourMode ? qsLen : totalQuestions || qsLen,
-              })}
-          </ThemedText>
-          <QuestionRenderer question={currentQuestion} />
-        </ScreenScrollView>
-        <TeamNameSheet
-          visible={!!showTeamNameSheet}
-          name={team?.name || ''}
-          onClose={() => store$.showTeamNameSheet.set(false)}
-        />
-      </>
+      <ScreenScrollView
+        padding="none"
+        edges={[]}
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
+          globalStyles.default.container,
+          { paddingBottom: spacing(2) },
+        ]}
+      >
+        <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
+          {(rallye?.name ? `${rallye.name} • ` : '') +
+            t('rallye.progress', {
+              current: isTourMode
+                ? idx + 1
+                : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
+              total: isTourMode ? qsLen : totalQuestions || qsLen,
+            })}
+        </ThemedText>
+        <QuestionRenderer question={currentQuestion} />
+      </ScreenScrollView>
     );
   }
 
   if (allQuestionsAnswered && isTourMode) {
     // Exploration finished: show simple summary and back to welcome
     return (
-      <>
-        <ScreenScrollView
-          padding="none"
-          edges={['bottom']}
-          contentContainerStyle={[
-            globalStyles.default.refreshContainer,
-            globalStyles.rallyeStatesStyles.container,
-          ]}
-        >
-          <VStack style={{ width: '100%' }} gap={2}>
-            <InfoBox mb={2}>
-              <ThemedText
-                variant="title"
-                style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-              >
-                {t('rallye.allAnswered.title')}
-              </ThemedText>
+      <ScreenScrollView
+        padding="none"
+        edges={['bottom']}
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
+          globalStyles.rallyeStatesStyles.container,
+        ]}
+      >
+        <VStack style={{ width: '100%' }} gap={2}>
+          <InfoBox mb={2}>
+            <ThemedText
+              variant="title"
+              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+            >
+              {t('rallye.allAnswered.title')}
+            </ThemedText>
+            <ThemedText
+              variant="body"
+              style={[
+                globalStyles.rallyeStatesStyles.infoSubtitle,
+                s.muted,
+                { marginTop: 10 },
+              ]}
+            >
+              {t('rallye.pointsAchieved', { points })}
+            </ThemedText>
+          </InfoBox>
+          <InfoBox mb={2}>
+            <UIButton
+              variant="ghost"
+              icon="arrow-left"
+              onPress={() => {
+                void store$.leaveRallye();
+              }}
+            >
+              {t('rallye.backToStart')}
+            </UIButton>
+          </InfoBox>
+        </VStack>
+      </ScreenScrollView>
+    );
+  }
+
+  if (allQuestionsAnswered && !isTourMode) {
+    // Time up vs finished before end
+    return (
+      <ScreenScrollView
+        padding="none"
+        edges={['bottom']}
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
+          globalStyles.rallyeStatesStyles.container,
+        ]}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+        }
+      >
+        <VStack style={{ width: '100%' }} gap={2}>
+          <InfoBox mb={2}>
+            <ThemedText
+              variant="title"
+              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+            >
+              {timeExpired
+                ? t('rallye.timeUp')
+                : t('rallye.allAnswered.simple')}
+            </ThemedText>
+            {!timeExpired && team ? (
               <ThemedText
                 variant="body"
                 style={[
@@ -376,101 +409,36 @@ const RallyeIndex = observer(function RallyeIndex() {
                   { marginTop: 10 },
                 ]}
               >
-                {t('rallye.pointsAchieved', { points })}
+                {t('rallye.teamLabel', { team: team?.name ?? '' })}
               </ThemedText>
-            </InfoBox>
-            <InfoBox mb={2}>
-              <UIButton
-                variant="ghost"
-                icon="arrow-left"
-                onPress={() => {
-                  void store$.leaveRallye();
-                }}
-              >
-                {t('rallye.backToStart')}
-              </UIButton>
-            </InfoBox>
-          </VStack>
-        </ScreenScrollView>
-        <TeamNameSheet
-          visible={!!showTeamNameSheet}
-          name={team?.name || ''}
-          onClose={() => store$.showTeamNameSheet.set(false)}
-        />
-      </>
-    );
-  }
-
-  if (allQuestionsAnswered && !isTourMode) {
-    // Time up vs finished before end
-    return (
-      <>
-        <ScreenScrollView
-          padding="none"
-          edges={['bottom']}
-          contentContainerStyle={[
-            globalStyles.default.refreshContainer,
-            globalStyles.rallyeStatesStyles.container,
-          ]}
-          refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-          }
-        >
-          <VStack style={{ width: '100%' }} gap={2}>
-            <InfoBox mb={2}>
-              <ThemedText
-                variant="title"
-                style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-              >
-                {timeExpired
-                  ? t('rallye.timeUp')
-                  : t('rallye.allAnswered.simple')}
-              </ThemedText>
-              {!timeExpired && team ? (
-                <ThemedText
-                  variant="body"
-                  style={[
-                    globalStyles.rallyeStatesStyles.infoSubtitle,
-                    s.muted,
-                    { marginTop: 10 },
-                  ]}
-                >
-                  {t('rallye.teamLabel', { team: team?.name ?? '' })}
-                </ThemedText>
-              ) : null}
-              <ThemedText
-                variant="body"
-                style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
-              >
-                {t('rallye.pointsLabel', { points })}
-              </ThemedText>
-            </InfoBox>
-            <InfoBox>
-              <ThemedText
-                variant="body"
-                style={globalStyles.rallyeStatesStyles.meetingPoint}
-              >
-                {t('rallye.meetingPoint')}
-              </ThemedText>
-            </InfoBox>
-            <InfoBox mb={2}>
-              <UIButton
-                variant="ghost"
-                icon="rotate"
-                disabled={loading}
-                onPress={onRefresh}
-              >
-                {t('common.refresh')}
-              </UIButton>
-            </InfoBox>
-          </VStack>
-        </ScreenScrollView>
-        <TeamNameSheet
-          visible={!!showTeamNameSheet}
-          name={team?.name || ''}
-          onClose={() => store$.showTeamNameSheet.set(false)}
-        />
-      </>
+            ) : null}
+            <ThemedText
+              variant="body"
+              style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
+            >
+              {t('rallye.pointsLabel', { points })}
+            </ThemedText>
+          </InfoBox>
+          <InfoBox>
+            <ThemedText
+              variant="body"
+              style={globalStyles.rallyeStatesStyles.meetingPoint}
+            >
+              {t('rallye.meetingPoint')}
+            </ThemedText>
+          </InfoBox>
+          <InfoBox mb={2}>
+            <UIButton
+              variant="ghost"
+              icon="rotate"
+              disabled={loading}
+              onPress={onRefresh}
+            >
+              {t('common.refresh')}
+            </UIButton>
+          </InfoBox>
+        </VStack>
+      </ScreenScrollView>
     );
   }
 

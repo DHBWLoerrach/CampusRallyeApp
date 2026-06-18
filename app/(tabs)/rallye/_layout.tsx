@@ -57,6 +57,16 @@ export default function RallyeStackLayout() {
           />
         </Stack.Toolbar>
       </Stack.Screen>
+      <Stack.Screen
+        name="team-name-sheet"
+        options={{
+          contentStyle: { backgroundColor: 'transparent' },
+          headerShown: false,
+          presentation: 'formSheet',
+          sheetAllowedDetents: [0.22],
+          sheetGrabberVisible: true,
+        }}
+      />
     </Stack>
   );
 }

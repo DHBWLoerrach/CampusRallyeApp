@@ -12,6 +12,7 @@ type StackProps = {
 type StackScreenProps = {
   children?: React.ReactNode;
   name: string;
+  options?: Record<string, unknown>;
 };
 
 type StackToolbarProps = {
@@ -123,5 +124,23 @@ describe('RallyeStackLayout', () => {
       );
       expect(store$.leaveRallye).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('registers the team name confirmation as a native form sheet', () => {
+    render(<RallyeStackLayout />);
+
+    expect(mockStackScreen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'team-name-sheet',
+        options: expect.objectContaining({
+          contentStyle: { backgroundColor: 'transparent' },
+          headerShown: false,
+          presentation: 'formSheet',
+          sheetAllowedDetents: [0.22],
+          sheetGrabberVisible: true,
+        }),
+      }),
+      undefined
+    );
   });
 });

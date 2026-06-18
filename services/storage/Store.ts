@@ -66,7 +66,6 @@ export const store$ = observable({
   votingAllowed: true,
   timeExpired: false,
   teamDeleted: false,
-  showTeamNameSheet: false,
 
   // Derived session state for resume/flow decisions.
   sessionState: () =>
