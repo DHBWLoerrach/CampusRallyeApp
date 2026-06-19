@@ -1,0 +1,149 @@
+import React, * as MockReact from 'react';
+import { Pressable as MockPressable, Text as MockText } from 'react-native';
+import { render } from '@testing-library/react-native';
+import { Stack } from 'expo-router';
+import RootLayout from '../_layout';
+
+type StackProps = {
+  children: React.ReactNode;
+};
+
+type StackScreenProps = {
+  children?: React.ReactNode;
+  name: string;
+  options?: Record<string, unknown>;
+};
+
+const mockRouterReplace = jest.fn();
+
+jest.mock('expo-router', () => ({
+  Stack: Object.assign(jest.fn(({ children }: StackProps) => children), {
+    Screen: jest.fn(({ children }: StackScreenProps) => children ?? null),
+  }),
+  useRootNavigationState: () => ({ key: 'root' }),
+  useRouter: () => ({
+    replace: mockRouterReplace,
+  }),
+  useSegments: () => [],
+}));
+
+jest.mock('expo-router/react-navigation', () => ({
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+jest.mock('expo-font', () => ({
+  useFonts: () => [true, null],
+}));
+
+jest.mock('expo-splash-screen', () => ({
+  hideAsync: jest.fn(async () => undefined),
+  preventAutoHideAsync: jest.fn(async () => undefined),
+}));
+
+jest.mock('@legendapp/state/react', () => ({
+  useSelector: (selector: () => unknown) => selector(),
+}));
+
+jest.mock('@/services/storage/Store', () => ({
+  store$: {
+    currentQuestion: { get: jest.fn(() => null) },
+    enabled: { get: jest.fn(() => false) },
+    hydrated: { get: jest.fn(() => true) },
+    leaveRallye: jest.fn(),
+    question: { get: jest.fn(() => null) },
+    rallye: { get: jest.fn(() => null) },
+    team: { get: jest.fn(() => null) },
+  },
+}));
+
+jest.mock('@/utils/ThemeContext', () => {
+  return {
+    ThemeContext: MockReact.createContext({
+      isDarkMode: false,
+      mode: 'light',
+      setMode: jest.fn(),
+    }),
+    themeStore$: {
+      mode: {
+        get: jest.fn(() => 'light'),
+        set: jest.fn(),
+      },
+    },
+    useTheme: () => ({ isDarkMode: false }),
+  };
+});
+
+jest.mock('@/utils/LanguageContext', () => ({
+  LanguageProvider: ({ children }: { children: React.ReactNode }) => children,
+  useLanguage: () => ({ t: (key: string) => key }),
+}));
+
+jest.mock('@/utils/navigationTheme', () => ({
+  createNavigationTheme: jest.fn(() => ({})),
+}));
+
+jest.mock('@/utils/AppStyles', () => ({
+  useAppStyles: () => ({ muted: {}, text: {} }),
+}));
+
+jest.mock('@/components/themed/ThemedText', () => {
+  return function MockThemedText({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return <MockText>{children}</MockText>;
+  };
+});
+
+jest.mock('@/components/ui/UIButton', () => {
+  return function MockUIButton({
+    children,
+    onPress,
+  }: {
+    children: React.ReactNode;
+    onPress?: () => void;
+  }) {
+    return (
+      <MockPressable onPress={onPress}>
+        <MockText>{children}</MockText>
+      </MockPressable>
+    );
+  };
+});
+
+jest.mock('@/components/ui/ErrorBoundary', () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+const mockStackScreen = Stack.Screen as unknown as jest.Mock;
+
+describe('RootLayout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('registers the rallye password entry as a transparent modal instead of a form sheet', () => {
+    render(<RootLayout />);
+
+    expect(mockStackScreen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'rallye-password-sheet',
+        options: expect.objectContaining({
+          contentStyle: { backgroundColor: 'transparent' },
+          gestureEnabled: false,
+          presentation: 'transparentModal',
+        }),
+      }),
+      undefined
+    );
+
+    const passwordScreenOptions = mockStackScreen.mock.calls.find(
+      ([props]) => props.name === 'rallye-password-sheet'
+    )?.[0].options;
+
+    expect(passwordScreenOptions).not.toHaveProperty('sheetAllowedDetents');
+    expect(passwordScreenOptions).not.toHaveProperty('sheetGrabberVisible');
+  });
+});
