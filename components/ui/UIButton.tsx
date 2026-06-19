@@ -8,7 +8,7 @@ import {
   TextStyle,
   ViewStyle,
 } from 'react-native';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useTheme } from '@/utils/ThemeContext';
@@ -117,7 +117,12 @@ export default function UIButton({
       {loading ? (
         <ActivityIndicator size="small" color={contentColor} />
       ) : icon ? (
-        <FontAwesome6 name={icon} size={20} color={contentColor} />
+        <FontAwesome6
+          name={icon}
+          iconStyle="solid"
+          size={20}
+          color={contentColor}
+        />
       ) : null}
       <Text
         style={[

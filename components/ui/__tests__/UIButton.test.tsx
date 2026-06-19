@@ -1,7 +1,10 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import UIButton from '../UIButton';
 import { ThemeContext } from '@/utils/ThemeContext';
+
+jest.mock('@react-native-vector-icons/fontawesome6', () => jest.fn(() => null));
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeContext.Provider
@@ -81,6 +84,18 @@ describe('UIButton', () => {
     const button = getByRole('button');
     expect(button.props.accessibilityLabel).toBe('Submit form');
     expect(button.props.accessibilityHint).toBe('Sends answer');
+  });
+
+  it('renders FontAwesome6 icons with the solid style', () => {
+    render(<UIButton icon="rotate">Refresh</UIButton>, { wrapper });
+
+    expect(FontAwesome6).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'rotate',
+        iconStyle: 'solid',
+      }),
+      undefined
+    );
   });
 
   it('applies reduced opacity when disabled', () => {

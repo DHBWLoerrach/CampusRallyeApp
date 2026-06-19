@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert, TouchableOpacity } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { confirm } from '@/utils/ConfirmAlert';
