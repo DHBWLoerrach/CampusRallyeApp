@@ -9,7 +9,7 @@
 ## Zusammenfassung
 
 | Schweregrad | Anzahl |
-|-------------|--------|
+| ----------- | ------ |
 | Kritisch    | 0      |
 | Hoch        | 6      |
 | Mittel      | 23+    |
@@ -22,6 +22,8 @@
 **Datum:** 03.01.2026  
 **Scope:** `app/`, `components/` (TS/TSX/JS/JSX), JSX-Style-Props
 
+**Update 19.06.2026:** `components/ui/RallyeSelectionModal.tsx` existiert nicht mehr im Code. Stale Hinweise auf diese Komponente wurden aus den umsetzbaren Listen entfernt.
+
 Gefundene Duplikate (Inline-Objekte mit >=2 Vorkommen):
 
 - `{ width: '100%' }` (10x) in `components/rallye/questions/QRCodeQuestion.tsx:130`, `components/rallye/questions/UploadPhotoQuestion.tsx:61`, `app/(tabs)/rallye/index.tsx:273`, `app/(tabs)/rallye/states/Preparation.tsx:32`, `app/(tabs)/rallye/voting.tsx:127`
@@ -32,7 +34,6 @@ Gefundene Duplikate (Inline-Objekte mit >=2 Vorkommen):
 - `{ fontWeight: '700' }` (3x) in `app/(tabs)/rallye/scoreboard.tsx:141`, `app/(tabs)/rallye/scoreboard.tsx:185`, `app/(tabs)/rallye/scoreboard.tsx:211`
 - `{ backgroundColor: stateBackground }` (3x) in `app/index.tsx:160`, `app/index.tsx:179`, `app/index.tsx:200`
 - `{ backgroundColor }` (3x, Basis-Styles) in `components/themed/ThemedView.tsx:21`, `components/themed/ThemedScrollView.tsx:21`, `components/ui/Card.tsx:80`
-- `{ color: mutedTextColor }` (3x) in `components/ui/RallyeSelectionModal.tsx:205`, `components/ui/RallyeSelectionModal.tsx:285`, `components/ui/RallyeSelectionModal.tsx:335`
 - `{ backgroundColor: isDarkMode ? Colors.darkMode.background : Colors.lightMode.background }` (2x) in `app/(tabs)/infos/about.jsx:28`, `app/(tabs)/infos/imprint.jsx:18`
 - `{ color: Colors.dhbwRed }` (2x) in `app/(tabs)/infos/about.jsx:67`, `app/(tabs)/infos/imprint.jsx:122`
 - `{ backgroundColor: isDarkMode ? Colors.darkMode.card : Colors.lightMode.card }` (2x) in `app/(tabs)/infos/index.jsx:20`, `app/(tabs)/infos/index.jsx:35`
@@ -40,8 +41,6 @@ Gefundene Duplikate (Inline-Objekte mit >=2 Vorkommen):
 - `{ paddingBottom: keyboardHeight }` (2x) in `components/rallye/questions/ImageQuestion.tsx:102`, `components/rallye/questions/SkillQuestion.tsx:88`
 - `{ alignItems: 'stretch', flex: 0, flexGrow: 0 }` (2x) in `components/rallye/questions/ImageQuestion.tsx:107`, `components/rallye/questions/SkillQuestion.tsx:93`
 - `{ backgroundColor: palette.background }` (2x) in `components/ui/CollapsibleHeroHeader.tsx:129`, `components/ui/CollapsibleHeroHeader.tsx:195`
-- `{ color: headerTextColor }` (2x) in `components/ui/RallyeSelectionModal.tsx:265`, `components/ui/RallyeSelectionModal.tsx:324`
-- `{ backgroundColor: isDarkMode ? Colors.darkMode.borderSubtle : Colors.veryLightGray }` (2x) in `components/ui/RallyeSelectionModal.tsx:294`, `components/ui/RallyeSelectionModal.tsx:369`
 - `{ flex: 1, backgroundColor: palette.background }` (2x) in `components/ui/Screen.tsx:68`, `components/ui/Screen.tsx:121`
 
 Hinweis: Einige Duplikate sind Basis-Styles in UI-Komponenten (z. B. ThemedView/Screen) und könnten bewusst inline bleiben.
@@ -56,7 +55,7 @@ Hinweis: Einige Duplikate sind Basis-Styles in UI-Komponenten (z. B. ThemedView/
 Erkenntnisse:
 
 - Potenzielle Dark-Mode-Inkonsistenz: `globalStyles.teamStyles.title` und `globalStyles.teamStyles.message` setzen `color: Colors.dhbwGray` und werden in `app/(tabs)/rallye/team-setup.tsx` ohne `s.text`/`s.muted` genutzt. In Dark Mode wirkt das Grau ggf. zu dunkel/kontrastarm.
-- Einige Light-Mode-Farben sind in `utils/GlobalStyles.ts` hinterlegt, werden aber in Komponenten per `palette` überschrieben (z. B. `globalStyles.rallyeModal.*`, `scoreboardStyles.row`). Kein Bug, aber redundant.
+- Einige Light-Mode-Farben sind in `utils/GlobalStyles.ts` hinterlegt, werden aber in Komponenten per `palette` überschrieben (z. B. `scoreboardStyles.row`). Kein Bug, aber redundant. Der frühere `globalStyles.rallyeModal`-Block wurde mit der nativen Passwort-Sheet-Migration entfernt.
 - Hardcoded Overlays/Whites sind intentional (Hero/Overlay/CTA), z. B. `components/ui/CollapsibleHeroHeader.tsx` (Weiß + rgba-Overlay), `components/ui/TeamNameSheet.tsx` (Backdrop), `components/ui/Hint.tsx` (Icon-Farbe). Keine klaren Theme-Bugs.
 
 Vorschläge:
@@ -128,7 +127,6 @@ Vorschlag:
 - [ ] **MED-02:** Loading-State für Permission in `UploadPhotoQuestion.tsx`
 - [ ] **MED-03:** Loading-State für Voting-Daten in `voting.tsx`
 - [ ] **MED-04:** Loading/Placeholder für Bilder in `ImageQuestion.tsx`
-- [ ] **MED-05:** Loading-State in `RallyeSelectionModal.tsx`
 - [ ] **MED-06:** Error-Handler für Images in `voting.tsx`
 - [ ] **MED-07:** Error-Handler für Images in `ImageQuestion.tsx`
 - [ ] **MED-08:** Kamera-Fehler User-Feedback in `UploadPhotoQuestion.tsx`
@@ -156,7 +154,7 @@ Vorschlag:
 - [ ] **LOW-04:** Touch-Target-Größe in `Card.tsx`
 - [ ] **LOW-05:** Touch-Target-Größe in `CollapsibleHeroHeader.tsx`
 - [ ] **LOW-06:** Touch-Target-Größe in `MultipleChoiceQuestion.tsx`
-- [ ] **LOW-07:** Password autoFocus Timing in `RallyeSelectionModal.tsx`
+- [x] **LOW-07:** Password autoFocus Timing in `RallyePasswordSheet.tsx`
 - [ ] **LOW-08:** Countdown-Indikator in `TeamNameSheet.tsx`
 - [ ] **LOW-09:** Android Keyboard-Handling in `Screen.tsx`
 - [ ] **LOW-10:** AsyncStorage-Wrapper konsolidieren
@@ -171,7 +169,7 @@ Vorschlag:
 
 **Dateien:** `components/rallye/questions/UploadPhotoQuestion.tsx:111-274`
 
-**Problem:** `PhotoCamera` und `ImagePreview` sind als Funktionskomponenten *innerhalb* der Parent-Komponente definiert. Sie werden bei jedem Render neu erstellt.
+**Problem:** `PhotoCamera` und `ImagePreview` sind als Funktionskomponenten _innerhalb_ der Parent-Komponente definiert. Sie werden bei jedem Render neu erstellt.
 
 ```tsx
 // FALSCH - Komponente wird bei jedem Render neu erstellt
@@ -184,6 +182,7 @@ export default function UploadPhotoQuestion(...) {
 ```
 
 **Auswirkung:**
+
 - Kamera wird bei jedem Parent-Render neu gemountet
 - `facing`-State geht verloren
 - Flackern und schlechte Performance
@@ -211,6 +210,7 @@ export async function setStorageItem(key: string, value: any): Promise<void> {
 ```
 
 **Auswirkung:**
+
 - User-Antworten können verloren gehen ohne Feedback
 - Team-Zuweisungen nicht persistiert
 - Rallye-Status nicht gespeichert
@@ -237,10 +237,11 @@ export async function teamExists(rallyeId: number, teamId: number) {
 ```
 
 **In Store.ts:180-191:**
+
 ```typescript
 const exists = await teamExists(rallyeId, (loadTeam as any).id);
 if (exists === 'missing') {
-  await clearCurrentTeam(rallyeId);  // LÖSCHT LOKALE TEAM-DATEN!
+  await clearCurrentTeam(rallyeId); // LÖSCHT LOKALE TEAM-DATEN!
   store$.teamDeleted.set(true);
 }
 ```
@@ -270,6 +271,7 @@ export function processOutbox() {
 **Problem:** Parallel aufgerufene Syncs konnten sich überlappen; zudem konnte ein laufender Sync neu enqueued Items überschreiben.
 
 **Auswirkung:**
+
 - Doppelte Answer-Submissions
 - Verlorene Queue-Items
 - Inkonsistente Daten
@@ -304,6 +306,7 @@ export function processOutbox() {
 ### HIGH-01: KeyboardAvoidingView ohne `behavior` Prop
 
 **Dateien:**
+
 - `components/rallye/questions/ImageQuestion.tsx:91`
 - `components/rallye/questions/SkillQuestion.tsx:77`
 
@@ -316,8 +319,9 @@ export function processOutbox() {
 **Auswirkung:** Keyboard verdeckt Eingabefelder, User muss scrollen.
 
 **Lösung:**
+
 ```tsx
-<KeyboardAvoidingView 
+<KeyboardAvoidingView
   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 >
 ```
@@ -362,7 +366,7 @@ export function processOutbox() {
 <UIButton
   onPress={() => {
     console.error('Unknown question type:', { id: q?.id, type });
-    store$.gotoNextQuestion();  // Keine Answer gespeichert!
+    store$.gotoNextQuestion(); // Keine Answer gespeichert!
   }}
 >
   {t('question.skip')}
@@ -400,6 +404,7 @@ if (!allQuestionsAnswered && questions.length === 0) {
 **Problem:** Fehlerhafte Items werden ewig mit Exponential Backoff wiederholt.
 
 **Auswirkung:**
+
 - Batterie-Drain durch wiederholte Netzwerk-Calls
 - Sync-Badge zeigt ewig "Pending"
 - Stale Daten in Queue
@@ -412,13 +417,12 @@ if (!allQuestionsAnswered && questions.length === 0) {
 
 ### Fehlende Loading-States
 
-| Datei | Zeile | Problem |
-|-------|-------|---------|
-| `QRCodeQuestion.tsx` | 110 | Leere View während Permission lädt |
-| `UploadPhotoQuestion.tsx` | 69 | Leere View während Permission lädt |
-| `voting.tsx` | 73-78 | Kein Loading während Voting-Daten laden |
-| `ImageQuestion.tsx` | 124-131 | Kein Loading/Placeholder während Bild lädt |
-| `RallyeSelectionModal.tsx` | 69 | Kein Loading wenn Modal öffnet |
+| Datei                     | Zeile   | Problem                                    |
+| ------------------------- | ------- | ------------------------------------------ |
+| `QRCodeQuestion.tsx`      | 110     | Leere View während Permission lädt         |
+| `UploadPhotoQuestion.tsx` | 69      | Leere View während Permission lädt         |
+| `voting.tsx`              | 73-78   | Kein Loading während Voting-Daten laden    |
+| `ImageQuestion.tsx`       | 124-131 | Kein Loading/Placeholder während Bild lädt |
 
 **Lösung:** ActivityIndicator oder Skeleton-Loader anzeigen.
 
@@ -426,13 +430,13 @@ if (!allQuestionsAnswered && questions.length === 0) {
 
 ### Fehlende Error-Handler
 
-| Datei | Zeile | Problem |
-|-------|-------|---------|
-| `voting.tsx` | 216-231 | Kein `onError` für Image-Komponente |
-| `ImageQuestion.tsx` | 126-129 | Kein Fallback wenn Bild nicht lädt |
-| `UploadPhotoQuestion.tsx` | 140-147 | Kamera-Fehler nur geloggt |
-| `scoreboard.tsx` | 97-99 | Scoreboard-Fehler nicht angezeigt |
-| `teamStorage.ts` | 25-31 | `setTimePlayed` ignoriert Fehler |
+| Datei                     | Zeile   | Problem                             |
+| ------------------------- | ------- | ----------------------------------- |
+| `voting.tsx`              | 216-231 | Kein `onError` für Image-Komponente |
+| `ImageQuestion.tsx`       | 126-129 | Kein Fallback wenn Bild nicht lädt  |
+| `UploadPhotoQuestion.tsx` | 140-147 | Kamera-Fehler nur geloggt           |
+| `scoreboard.tsx`          | 97-99   | Scoreboard-Fehler nicht angezeigt   |
+| `teamStorage.ts`          | 25-31   | `setTimePlayed` ignoriert Fehler    |
 
 **Lösung:** User-Feedback bei Fehlern, Retry-Möglichkeiten.
 
@@ -440,14 +444,15 @@ if (!allQuestionsAnswered && questions.length === 0) {
 
 ### Lokalisierung/i18n
 
-| Datei | Zeile | Problem |
-|-------|-------|---------|
-| `infos/_layout.tsx` | 17-19 | Screen-Titel hardcoded Deutsch |
-| `app/(tabs)/_layout.tsx` | 33, 43 | Tab-Labels hardcoded |
-| `infos/index.jsx` | 29, 44 | Inline-Ternary statt `t()` |
-| `SyncStatusBadge.tsx` | 25-38 | `language === 'de'` statt `t()` |
+| Datei                    | Zeile  | Problem                         |
+| ------------------------ | ------ | ------------------------------- |
+| `infos/_layout.tsx`      | 17-19  | Screen-Titel hardcoded Deutsch  |
+| `app/(tabs)/_layout.tsx` | 33, 43 | Tab-Labels hardcoded            |
+| `infos/index.jsx`        | 29, 44 | Inline-Ternary statt `t()`      |
+| `SyncStatusBadge.tsx`    | 25-38  | `language === 'de'` statt `t()` |
 
 **Beispiel:**
+
 ```tsx
 // FALSCH
 <Stack.Screen name="imprint" options={{ title: 'Impressum' }} />
@@ -460,14 +465,14 @@ if (!allQuestionsAnswered && questions.length === 0) {
 
 ### Accessibility-Probleme
 
-| Datei | Problem |
-|-------|---------|
-| `SyncStatusBadge.tsx:24-38` | Keine `accessibilityRole`/`accessibilityLabel` |
-| Alle TextInputs | Fehlende `accessibilityLabel` und `accessibilityHint` |
-| `ImageQuestion.tsx:128` | Bild ohne Alt-Text |
-| `CollapsibleHeroHeader.tsx:134, 173` | Bilder ohne `accessibilityLabel` |
-| `QRCodeQuestion.tsx:142-146` | CameraView ohne Accessibility-Beschreibung |
-| `UploadPhotoQuestion.tsx:193-197` | Bild-Preview ohne Alt-Text |
+| Datei                                | Problem                                               |
+| ------------------------------------ | ----------------------------------------------------- |
+| `SyncStatusBadge.tsx:24-38`          | Keine `accessibilityRole`/`accessibilityLabel`        |
+| Alle TextInputs                      | Fehlende `accessibilityLabel` und `accessibilityHint` |
+| `ImageQuestion.tsx:128`              | Bild ohne Alt-Text                                    |
+| `CollapsibleHeroHeader.tsx:134, 173` | Bilder ohne `accessibilityLabel`                      |
+| `QRCodeQuestion.tsx:142-146`         | CameraView ohne Accessibility-Beschreibung            |
+| `UploadPhotoQuestion.tsx:193-197`    | Bild-Preview ohne Alt-Text                            |
 
 ---
 
@@ -498,7 +503,8 @@ store$.points.set(Math.max(0, currentPoints - HINT_COST));
 
 **Problem:** `usedHints` ist ein reines In-Memory-Objekt im Store. Es wird **nirgends** in AsyncStorage persistiert. Bei `store$.reset()` wird es zurückgesetzt.
 
-**Auswirkung:** 
+**Auswirkung:**
+
 - App schließen → Hints zurückgesetzt, aber Punkte wurden bereits abgezogen
 - App-Crash → User kann Hints "kostenlos" wiederverwenden
 - Inkonsistenter Zustand zwischen `usedHints` und `points`
@@ -528,11 +534,11 @@ return iconConfig?.source ?? DEFAULT_ICON;
 
 ### Lange Texte ohne Truncation
 
-| Datei | Zeile | Element |
-|-------|-------|---------|
-| `Card.tsx` | 55-65 | Title und Description |
-| `TeamNameSheet.tsx` | 73 | Team-Name |
-| `RallyeHeader.tsx` | 26-37 | Team-Name |
+| Datei               | Zeile | Element               |
+| ------------------- | ----- | --------------------- |
+| `Card.tsx`          | 55-65 | Title und Description |
+| `TeamNameSheet.tsx` | 73    | Team-Name             |
+| `RallyeHeader.tsx`  | 26-37 | Team-Name             |
 
 **Lösung:** `numberOfLines` und `ellipsizeMode` hinzufügen.
 
@@ -540,25 +546,25 @@ return iconConfig?.source ?? DEFAULT_ICON;
 
 ### Touch-Targets unter 44pt
 
-| Datei | Problem |
-|-------|---------|
-| `Card.tsx:91-105` | Kleine Karten könnten zu klein sein |
-| `CollapsibleHeroHeader.tsx:145-161` | Sprach-Toggle relativ klein |
+| Datei                                | Problem                             |
+| ------------------------------------ | ----------------------------------- |
+| `Card.tsx:91-105`                    | Kleine Karten könnten zu klein sein |
+| `CollapsibleHeroHeader.tsx:145-161`  | Sprach-Toggle relativ klein         |
 | `MultipleChoiceQuestion.tsx:126-161` | Checkbox-Bereich könnte größer sein |
 
 **Lösung:** `minHeight: 44` oder größere `hitSlop`.
 
 ---
 
-### Password autoFocus während Animation
+### Password autoFocus während Sheet-Präsentation
 
-**Datei:** `components/ui/RallyeSelectionModal.tsx:362-377`
+**Status:** Erledigt mit der nativen `RallyePasswordSheet`-Route.
 
-**Problem:** `autoFocus` auf Password-Input triggert während Flip-Animation.
+**Dateien:** `app/rallye-password-sheet.tsx`, `components/ui/RallyePasswordSheet.tsx`
 
-**Auswirkung:** Keyboard erscheint während Animation läuft - wirkt ruckelig.
+**Umsetzung:** Das frühere transparente Modal wurde durch eine native `formSheet`-Route ersetzt. Der Password-Input fokussiert verzögert nach der Sheet-Präsentation, um Fokus-/Keyboard-Flakiness während der Animation zu vermeiden.
 
-**Lösung:** `autoFocus` entfernen, manuell nach Animation fokussieren.
+**Rest-Risiko:** Android-Keyboard-Verhalten sollte bei UI-QA weiter manuell geprüft werden, da native Sheet-Detents plattformspezifisch abweichen können.
 
 ---
 
@@ -595,6 +601,7 @@ behavior={Platform.OS === 'ios' ? 'padding' : undefined}
 ### Doppelte AsyncStorage-Wrapper
 
 **Dateien:**
+
 - `services/storage/asyncStorage.ts` - `getStorageItem`/`setStorageItem`
 - `services/storage/LocalStorage.ts` - `getData`/`storeData`
 
@@ -605,6 +612,7 @@ Beide haben das gleiche Silent-Failure-Problem. Sollte konsolidiert werden.
 ### Type-Safety durch `as any`
 
 **Dateien mit häufigen `as any` Casts:**
+
 - `services/storage/Store.ts:41, 47, 57, etc.`
 - `components/ui/UIButton.tsx:77, 84-86, 106, 124, 129`
 - `components/ui/Hint.tsx:15-18`
@@ -621,7 +629,7 @@ Beide haben das gleiche Silent-Failure-Problem. Sollte konsolidiert werden.
 ```typescript
 currentMultipleChoiceAnswers: () => {
   // ...
-  return shuffleArray(filtered);  // Shuffled bei JEDEM Aufruf!
+  return shuffleArray(filtered); // Shuffled bei JEDEM Aufruf!
 };
 ```
 
@@ -647,16 +655,16 @@ Nach Fixes sollten folgende Szenarien getestet werden:
 
 ## Changelog
 
-| Datum | Änderung |
-|-------|----------|
-| 03.01.2026 | CRIT-02 Fix umgesetzt (Storage-Wrapper werfen Fehler) |
-| 03.01.2026 | CRIT-05 Fix umgesetzt (Voting zeigt Fehler-Alert, bleibt auf Frage) |
+| Datum      | Änderung                                                                             |
+| ---------- | ------------------------------------------------------------------------------------ |
+| 03.01.2026 | CRIT-02 Fix umgesetzt (Storage-Wrapper werfen Fehler)                                |
+| 03.01.2026 | CRIT-05 Fix umgesetzt (Voting zeigt Fehler-Alert, bleibt auf Frage)                  |
 | 03.01.2026 | CRIT-03 Fix umgesetzt (teamExists mit Unknown-Status, keine Löschung bei Netzfehler) |
-| 03.01.2026 | CRIT-04 Fix umgesetzt (Sync-Lock + Queue-Merge in offlineOutbox) |
-| 03.01.2026 | CRIT-01 Fix umgesetzt (UploadPhotoQuestion Komponenten ausgelagert) |
-| 03.01.2026 | Initiale Analyse erstellt |
-| 03.01.2026 | Revision durch Codex: CRIT-06→MED-22, HIGH-07→MED-23, CRIT-04 erweitert |
-| 03.01.2026 | Review durch Claude: MED-22 Beschreibung präzisiert (Bug: keine Persistenz) |
+| 03.01.2026 | CRIT-04 Fix umgesetzt (Sync-Lock + Queue-Merge in offlineOutbox)                     |
+| 03.01.2026 | CRIT-01 Fix umgesetzt (UploadPhotoQuestion Komponenten ausgelagert)                  |
+| 03.01.2026 | Initiale Analyse erstellt                                                            |
+| 03.01.2026 | Revision durch Codex: CRIT-06→MED-22, HIGH-07→MED-23, CRIT-04 erweitert              |
+| 03.01.2026 | Review durch Claude: MED-22 Beschreibung präzisiert (Bug: keine Persistenz)          |
 
 ---
 
