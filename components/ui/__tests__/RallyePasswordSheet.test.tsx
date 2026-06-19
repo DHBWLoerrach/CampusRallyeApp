@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Keyboard, ScrollView, View } from 'react-native';
 import { act, fireEvent, render } from '@testing-library/react-native';
 import RallyePasswordSheet, {
   isPasswordRequired,
@@ -51,6 +51,56 @@ describe('RallyePasswordSheet', () => {
     );
 
     expect(getByText(protectedRallye.name).props.numberOfLines).toBe(2);
+  });
+
+  it('keeps the content scrollable when the keyboard reduces available space', () => {
+    const { UNSAFE_getByType } = render(
+      <RallyePasswordSheet
+        rallye={protectedRallye}
+        onClose={jest.fn()}
+        onJoin={jest.fn()}
+      />
+    );
+
+    const scrollView = UNSAFE_getByType(ScrollView);
+    expect(scrollView.props.keyboardShouldPersistTaps).toBe('handled');
+    expect(scrollView.props.automaticallyAdjustKeyboardInsets).toBe(true);
+  });
+
+  it('marks the card as modal content for accessibility', () => {
+    const { UNSAFE_getAllByType } = render(
+      <RallyePasswordSheet
+        rallye={protectedRallye}
+        onClose={jest.fn()}
+        onJoin={jest.fn()}
+      />
+    );
+
+    const modalCard = UNSAFE_getAllByType(View).find(
+      (view) => view.props.accessibilityViewIsModal === true
+    );
+    expect(modalCard?.props.importantForAccessibility).toBe('yes');
+  });
+
+  it('dismisses the keyboard before closing from the backdrop', () => {
+    const onClose = jest.fn();
+    const dismissSpy = jest
+      .spyOn(Keyboard, 'dismiss')
+      .mockImplementation(() => undefined);
+    const { UNSAFE_getByProps } = render(
+      <RallyePasswordSheet
+        rallye={protectedRallye}
+        onClose={onClose}
+        onJoin={jest.fn()}
+      />
+    );
+
+    fireEvent.press(
+      UNSAFE_getByProps({ testID: 'rallye-password-backdrop' })
+    );
+
+    expect(dismissSpy).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('shows an alert when submitting without a password', () => {

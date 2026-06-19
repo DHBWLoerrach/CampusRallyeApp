@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
+  Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
 import UIButton from './UIButton';
 import Colors from '@/utils/Colors';
+import Constants from '@/utils/Constants';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import type { RallyeRow } from '@/services/storage/rallyeStorage';
@@ -42,6 +45,11 @@ export default function RallyePasswordSheet({
   const cancelTextColor = palette.textMuted ?? Colors.mediumGray;
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
+
+  const closeSheet = () => {
+    Keyboard.dismiss();
+    onClose();
+  };
 
   useEffect(() => {
     setPassword('');
@@ -82,96 +90,127 @@ export default function RallyePasswordSheet({
   return (
     <KeyboardAvoidingView
       behavior={process.env.EXPO_OS === 'ios' ? 'padding' : 'height'}
-      style={[
-        styles.container,
-        {
-          backgroundColor: isDarkMode
-            ? Colors.darkMode.card
-            : Colors.lightMode.card,
-        },
-      ]}
+      style={styles.overlay}
     >
-      <ScrollView
-        style={styles.contentScroll}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
-      >
-        <ThemedText variant="title" numberOfLines={2} style={styles.title}>
-          {rallye?.name ?? t('rallye.modal.activeTitle')}
-        </ThemedText>
-
-        <ThemedTextInput
-          autoFocus={autoFocusInput}
-          style={styles.passwordInput}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          placeholder={t('rallye.password.placeholder')}
-          accessibilityLabel={t('rallye.password.label')}
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="done"
-          onSubmitEditing={() => void confirmAndJoin()}
-        />
-
-        <ThemedText style={styles.passwordHelper} variant="muted">
-          {t('rallye.password.helper')}
-        </ThemedText>
-      </ScrollView>
+      <Pressable
+        testID="rallye-password-backdrop"
+        style={styles.backdrop}
+        onPress={closeSheet}
+        disabled={joining}
+        accessible={false}
+      />
 
       <View
         style={[
-          styles.separator,
+          styles.card,
           {
             backgroundColor: isDarkMode
-              ? Colors.darkMode.borderSubtle
-              : Colors.veryLightGray,
+              ? Colors.darkMode.card
+              : Colors.lightMode.card,
           },
         ]}
-      />
+        accessibilityViewIsModal
+        importantForAccessibility="yes"
+      >
+        <ScrollView
+          style={styles.contentScroll}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+        >
+          <ThemedText variant="title" numberOfLines={2} style={styles.title}>
+            {rallye?.name ?? t('rallye.modal.activeTitle')}
+          </ThemedText>
 
-      <View style={styles.footer}>
-        <UIButton
-          onPress={onClose}
-          variant="ghost"
-          style={styles.cancelButton}
-          textStyle={styles.cancelButtonText}
-          color={cancelTextColor}
-          disabled={joining}
-        >
-          {t('common.cancel')}
-        </UIButton>
-        <UIButton
-          onPress={() => void confirmAndJoin()}
-          size="dialog"
-          style={[styles.joinButton, ctaButtonStyle]}
-          textStyle={ctaButtonTextStyle}
-          loading={joining}
-        >
-          {t('rallye.password.join')}
-        </UIButton>
+          <ThemedTextInput
+            autoFocus={autoFocusInput}
+            style={styles.passwordInput}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            placeholder={t('rallye.password.placeholder')}
+            accessibilityLabel={t('rallye.password.label')}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="done"
+            onSubmitEditing={() => void confirmAndJoin()}
+          />
+
+          <ThemedText style={styles.passwordHelper} variant="muted">
+            {t('rallye.password.helper')}
+          </ThemedText>
+        </ScrollView>
+
+        <View
+          style={[
+            styles.separator,
+            {
+              backgroundColor: isDarkMode
+                ? Colors.darkMode.borderSubtle
+                : Colors.veryLightGray,
+            },
+          ]}
+        />
+
+        <View style={styles.footer}>
+          <UIButton
+            onPress={closeSheet}
+            variant="ghost"
+            style={styles.cancelButton}
+            textStyle={styles.cancelButtonText}
+            color={cancelTextColor}
+            disabled={joining}
+          >
+            {t('common.cancel')}
+          </UIButton>
+          <UIButton
+            onPress={() => void confirmAndJoin()}
+            size="dialog"
+            style={[styles.joinButton, ctaButtonStyle]}
+            textStyle={ctaButtonTextStyle}
+            loading={joining}
+          >
+            {t('rallye.password.join')}
+          </UIButton>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  overlay: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+  },
+  backdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  card: {
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '100%',
+    flexShrink: 1,
+    borderRadius: Constants.cornerRadius,
+    overflow: 'hidden',
+    paddingTop: 24,
   },
   contentScroll: {
-    flex: 1,
+    flexShrink: 1,
   },
   content: {
-    flexGrow: 1,
-    justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 28,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     marginBottom: 14,
     textAlign: 'left',
@@ -182,12 +221,13 @@ const styles = StyleSheet.create({
     height: 44,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.dhbwGray,
+    borderRadius: Constants.cornerRadius,
     paddingHorizontal: 12,
     marginBottom: 12,
   },
   passwordHelper: {
     textAlign: 'left',
-    marginBottom: 8,
+    marginBottom: 16,
     fontSize: 13,
   },
   separator: {
