@@ -13,11 +13,22 @@ import {
   getCurrentTeam,
   teamExists,
 } from '@/services/storage/teamStorage';
+import {
+  getRallyePasswordSheetSession,
+  setRallyePasswordSheetSession,
+} from '@/services/rallyePasswordSheetSession';
 import { store$ } from '@/services/storage/Store';
 import type { Rallye } from '@/types/rallye';
 
-let mockPasswordSheetProps: any;
+const mockRouterPush = jest.fn();
 const mockAppStateSubscriptionRemove = jest.fn();
+let mockPasswordSheetSession: unknown = null;
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
+}));
 
 jest.mock('@/components/ui/CollapsibleHeroHeader', () => {
   const { View } = jest.requireActual('react-native');
@@ -36,10 +47,16 @@ jest.mock('@/components/ui/RallyePasswordSheet', () => ({
   isPasswordRequired: (
     rallye: { password?: string | null } | null | undefined
   ) => !!(rallye?.password ?? '').trim().length,
-  default: (props: any) => {
-    mockPasswordSheetProps = props;
-    return null;
-  },
+}));
+
+jest.mock('@/services/rallyePasswordSheetSession', () => ({
+  clearRallyePasswordSheetSession: jest.fn(() => {
+    mockPasswordSheetSession = null;
+  }),
+  getRallyePasswordSheetSession: jest.fn(() => mockPasswordSheetSession),
+  setRallyePasswordSheetSession: jest.fn((session: unknown) => {
+    mockPasswordSheetSession = session;
+  }),
 }));
 
 jest.mock('@/components/ui/Card', () => {
@@ -154,6 +171,14 @@ const mockedTeamExists = teamExists as jest.MockedFunction<typeof teamExists>;
 const mockedClearCurrentTeam = clearCurrentTeam as jest.MockedFunction<
   typeof clearCurrentTeam
 >;
+const mockedSetRallyePasswordSheetSession =
+  setRallyePasswordSheetSession as jest.MockedFunction<
+    typeof setRallyePasswordSheetSession
+  >;
+const mockedGetRallyePasswordSheetSession =
+  getRallyePasswordSheetSession as jest.MockedFunction<
+    typeof getRallyePasswordSheetSession
+  >;
 
 describe('Welcome', () => {
   const mockOrganization = {
@@ -172,7 +197,7 @@ describe('Welcome', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
-    mockPasswordSheetProps = null;
+    mockPasswordSheetSession = null;
     Object.defineProperty(AppState, 'currentState', {
       configurable: true,
       value: 'active',
@@ -398,7 +423,7 @@ describe('Welcome', () => {
     expect(store$.team.set).toHaveBeenLastCalledWith(existingTeam);
   });
 
-  it('opens password sheet for department rallye with password', async () => {
+  it('opens password sheet route for department rallye with password', async () => {
     const passwordRallye: Rallye = {
       id: 6,
       name: 'Protected Rallye',
@@ -428,9 +453,49 @@ describe('Welcome', () => {
       fireEvent.press(getByText('rallye.join'));
     });
 
-    expect(mockPasswordSheetProps.visible).toBe(true);
-    expect(mockPasswordSheetProps.rallye).toEqual(passwordRallye);
+    expect(mockedSetRallyePasswordSheetSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rallye: passwordRallye,
+        onJoin: expect.any(Function),
+      })
+    );
+    expect(mockRouterPush).toHaveBeenCalledWith('/rallye-password-sheet');
+    expect(mockedGetRallyePasswordSheetSession).toHaveBeenCalled();
     expect(mockedSetCurrentRallye).not.toHaveBeenCalled();
+  });
+
+  it('does not stack password sheets on repeated protected rallye taps', async () => {
+    const passwordRallye: Rallye = {
+      id: 6,
+      name: 'Protected Rallye',
+      status: 'running',
+      password: 'secret',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetOrganizationDashboardData.mockResolvedValue({
+      tourModeRallye: null,
+      campusEventsRallyes: [],
+      departmentEntries: [
+        { department: mockDepartment, rallyes: [passwordRallye] },
+      ],
+    });
+
+    const { getByText } = render(<Welcome />);
+    await waitFor(() => {
+      expect(getByText('rallye.join')).toBeTruthy();
+    });
+
+    await act(async () => {
+      fireEvent.press(getByText('rallye.join'));
+      fireEvent.press(getByText('rallye.join'));
+    });
+
+    expect(mockedSetRallyePasswordSheetSession).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledTimes(1);
   });
 
   it('expands department card when multiple rallyes are available', async () => {

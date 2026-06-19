@@ -12,13 +12,12 @@ import {
   AppStateStatus,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
-import RallyePasswordSheet, {
-  isPasswordRequired,
-} from '@/components/ui/RallyePasswordSheet';
+import { isPasswordRequired } from '@/components/ui/RallyePasswordSheet';
 import { CollapsibleHeroHeader } from '@/components/ui/CollapsibleHeroHeader';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
@@ -43,6 +42,11 @@ import {
   teamExists,
   clearCurrentTeam,
 } from '@/services/storage/teamStorage';
+import {
+  clearRallyePasswordSheetSession,
+  getRallyePasswordSheetSession,
+  setRallyePasswordSheetSession,
+} from '@/services/rallyePasswordSheetSession';
 import { Organization } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
@@ -58,6 +62,7 @@ function createEmptyDashboardData(): OrganizationDashboardData {
 }
 
 export default function Welcome() {
+  const router = useRouter();
   const { isDarkMode } = useTheme();
   const { t } = useLanguage();
   const s = useAppStyles();
@@ -83,8 +88,6 @@ export default function Welcome() {
     []
   );
   const [campusEventsExpanded, setCampusEventsExpanded] = useState(false);
-
-  const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isInitializedRef = useRef<boolean>(false);
@@ -130,7 +133,7 @@ export default function Welcome() {
     setDashboardData(createEmptyDashboardData());
     setExpandedDepartmentIds([]);
     setCampusEventsExpanded(false);
-    setPasswordRallye(null);
+    clearRallyePasswordSheetSession();
   }, []);
 
   const loadDashboardData = useCallback(
@@ -193,7 +196,7 @@ export default function Welcome() {
     if (loading || !isInitializedRef.current) return;
     if (store$.enabled.get()) return;
     if (appStateRef.current !== 'active') return;
-    if (passwordRallye) return;
+    if (getRallyePasswordSheetSession()) return;
 
     try {
       const orgs = await getOrganizationsWithActiveRallyes();
@@ -366,7 +369,12 @@ export default function Welcome() {
   const handleRallyePress = async (rallye: RallyeRow) => {
     if (joining) return;
     if (isPasswordRequired(rallye)) {
-      setPasswordRallye(rallye);
+      if (getRallyePasswordSheetSession()) return;
+      setRallyePasswordSheetSession({
+        rallye,
+        onJoin: joinRallye,
+      });
+      router.push('/rallye-password-sheet');
       return;
     }
     await joinRallye(rallye);
@@ -720,14 +728,6 @@ export default function Welcome() {
       {loading && <LoadingContent />}
       {!loading && online && renderCurrentStep()}
       {!loading && !online && <OfflineContent />}
-
-      <RallyePasswordSheet
-        visible={!!passwordRallye}
-        rallye={passwordRallye}
-        joining={joining}
-        onClose={() => setPasswordRallye(null)}
-        onJoin={joinRallye}
-      />
     </CollapsibleHeroHeader>
   );
 }

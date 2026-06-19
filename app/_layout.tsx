@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, useColorScheme, View } from 'react-native';
 import { ThemeProvider } from 'expo-router/react-navigation';
 import {
-  Slot,
+  Stack,
   useRootNavigationState,
   useRouter,
   useSegments,
@@ -149,6 +149,7 @@ function RootNavigator() {
   const palette = isDark ? Colors.darkMode : Colors.lightMode;
 
   const isReady = hydrated && !!navState?.key && (fontsLoaded || !!fontError);
+  const useNativeFormSheet = process.env.EXPO_OS === 'ios';
 
   useEffect(() => {
     if (isReady) {
@@ -191,7 +192,24 @@ function RootNavigator() {
               <RootErrorFallback error={error} onReset={reset} />
             )}
           >
-            <Slot />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="rallye-password-sheet"
+                options={{
+                  contentStyle: { backgroundColor: 'transparent' },
+                  gestureEnabled: false,
+                  presentation: useNativeFormSheet ? 'formSheet' : 'modal',
+                  ...(useNativeFormSheet
+                    ? {
+                        sheetAllowedDetents: [0.42],
+                        sheetGrabberVisible: true,
+                      }
+                    : null),
+                }}
+              />
+            </Stack>
           </ErrorBoundary>
         </LanguageProvider>
       </ThemeContext.Provider>

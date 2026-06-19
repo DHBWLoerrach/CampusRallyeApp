@@ -31,18 +31,21 @@ let mockRallye: { status: string; end_time: string | null } | null = null;
 let mockIsTourMode = false;
 
 jest.mock('expo-router', () => ({
-  Stack: Object.assign(jest.fn(({ children }: StackProps) => children), {
-    Screen: jest.fn(({ children }: StackScreenProps) => children),
-    Toolbar: Object.assign(
-      jest.fn(({ children }: StackToolbarProps) => children),
-      {
-        Button: jest.fn(() => null),
-        View: jest.fn(({ children }: { children: React.ReactNode }) => (
-          <>{children}</>
-        )),
-      }
-    ),
-  }),
+  Stack: Object.assign(
+    jest.fn(({ children }: StackProps) => children),
+    {
+      Screen: jest.fn(({ children }: StackScreenProps) => children),
+      Toolbar: Object.assign(
+        jest.fn(({ children }: StackToolbarProps) => children),
+        {
+          Button: jest.fn(() => null),
+          View: jest.fn(({ children }: { children: React.ReactNode }) => (
+            <>{children}</>
+          )),
+        }
+      ),
+    }
+  ),
 }));
 
 const mockStack = Stack as unknown as jest.Mock;
