@@ -42,11 +42,6 @@ jest.mock('@/components/ui/RallyePasswordSheet', () => ({
   },
 }));
 
-jest.mock('@/components/ui/SelectionModal', () => ({
-  __esModule: true,
-  default: () => null,
-}));
-
 jest.mock('@/components/ui/Card', () => {
   const { Text, View } = jest.requireActual('react-native');
   return {
@@ -322,6 +317,47 @@ describe('Welcome', () => {
 
     expect(mockedSetCurrentRallye).toHaveBeenCalledWith(campusRallyeB);
     expect(store$.enabled.set).toHaveBeenCalledWith(true);
+  });
+
+  it('renders all organizations directly when more than three are available', async () => {
+    const secondOrganization = {
+      id: 2,
+      name: 'Second Org',
+      default_rallye_id: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const thirdOrganization = {
+      id: 3,
+      name: 'Third Org',
+      default_rallye_id: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+    const fourthOrganization = {
+      id: 4,
+      name: 'Fourth Org',
+      default_rallye_id: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([
+      mockOrganization,
+      secondOrganization,
+      thirdOrganization,
+      fourthOrganization,
+    ]);
+
+    const { getByText, queryByText } = render(<Welcome />);
+
+    await waitFor(() => {
+      expect(getByText('welcome.selectLocation.description')).toBeTruthy();
+    });
+
+    expect(getByText('Test Org')).toBeTruthy();
+    expect(getByText('Second Org')).toBeTruthy();
+    expect(getByText('Third Org')).toBeTruthy();
+    expect(getByText('Fourth Org')).toBeTruthy();
+    expect(queryByText('welcome.selectLocation.button')).toBeNull();
+    expect(queryByText('welcome.selectLocation.title')).toBeNull();
   });
 
   it('keeps local team when team existence is unknown during direct join', async () => {

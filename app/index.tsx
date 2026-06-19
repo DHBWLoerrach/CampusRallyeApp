@@ -16,7 +16,6 @@ import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
-import SelectionModal, { SelectionItem } from '@/components/ui/SelectionModal';
 import RallyePasswordSheet, {
   isPasswordRequired,
 } from '@/components/ui/RallyePasswordSheet';
@@ -85,7 +84,6 @@ export default function Welcome() {
   );
   const [campusEventsExpanded, setCampusEventsExpanded] = useState(false);
 
-  const [showOrgModal, setShowOrgModal] = useState(false);
   const [passwordRallye, setPasswordRallye] = useState<RallyeRow | null>(null);
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
@@ -195,7 +193,7 @@ export default function Welcome() {
     if (loading || !isInitializedRef.current) return;
     if (store$.enabled.get()) return;
     if (appStateRef.current !== 'active') return;
-    if (showOrgModal || passwordRallye) return;
+    if (passwordRallye) return;
 
     try {
       const orgs = await getOrganizationsWithActiveRallyes();
@@ -260,7 +258,7 @@ export default function Welcome() {
     return () => {
       clearTimeout(initialSyncTimeout);
     };
-  }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   // Effect Events are intentionally non-reactive and must stay out of deps.
   useEffect(() => {
@@ -285,7 +283,7 @@ export default function Welcome() {
       clearInterval(intervalId);
       appStateSubscription.remove();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleOrganizationSelect = async (organization: Organization) => {
     setSelectedOrganization(organization);
@@ -387,14 +385,6 @@ export default function Welcome() {
     setCampusEventsExpanded((expanded) => !expanded);
   };
 
-  const handleOrgModalSelect = (item: SelectionItem) => {
-    const organization = organizations.find((org) => org.id === item.id);
-    if (organization) {
-      setShowOrgModal(false);
-      void handleOrganizationSelect(organization);
-    }
-  };
-
   const LoadingContent = () => (
     <View
       style={[
@@ -446,7 +436,7 @@ export default function Welcome() {
           icon="info.circle"
         />
       )}
-      {organizations.length > 0 && organizations.length <= 3 && (
+      {organizations.length > 0 && (
         <>
           <ThemedText
             variant="bodySmall"
@@ -467,22 +457,6 @@ export default function Welcome() {
             />
           ))}
         </>
-      )}
-      {organizations.length > 3 && (
-        <Card
-          containerStyle={compactCardStyle}
-          title={t('welcome.selectLocation.title')}
-          description={t('welcome.selectLocation.description')}
-          icon="building.2"
-        >
-          <UIButton
-            onPress={() => setShowOrgModal(true)}
-            style={ctaButtonStyle}
-            textStyle={ctaButtonTextStyle}
-          >
-            {t('welcome.selectLocation.button')}
-          </UIButton>
-        </Card>
       )}
     </View>
   );
@@ -746,18 +720,6 @@ export default function Welcome() {
       {loading && <LoadingContent />}
       {!loading && online && renderCurrentStep()}
       {!loading && !online && <OfflineContent />}
-
-      <SelectionModal
-        visible={showOrgModal}
-        onClose={() => setShowOrgModal(false)}
-        items={organizations.map((organization) => ({
-          id: organization.id,
-          name: organization.name,
-        }))}
-        onSelect={handleOrgModalSelect}
-        title={t('welcome.selectLocation.modalTitle')}
-        emptyMessage={t('welcome.selectLocation.empty')}
-      />
 
       <RallyePasswordSheet
         visible={!!passwordRallye}

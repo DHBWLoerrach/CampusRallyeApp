@@ -55,8 +55,6 @@ export const translations = {
     'welcome.selectLocation.title': 'Standort auswählen',
     'welcome.selectLocation.description':
       'Wähle deinen Standort aus, um verfügbare Rallyes zu sehen',
-    'welcome.selectLocation.button': 'Standort auswählen',
-    'welcome.selectLocation.modalTitle': 'Standort auswählen',
     'welcome.selectLocation.empty': 'Keine Standorte verfügbar',
     'welcome.selectDepartment.description': 'Studiengang-Rallyes',
     'welcome.noContent':
@@ -223,8 +221,6 @@ export const translations = {
     'welcome.selectLocation.title': 'Select Location',
     'welcome.selectLocation.description':
       'Select your location to see available rallyes',
-    'welcome.selectLocation.button': 'Select location',
-    'welcome.selectLocation.modalTitle': 'Select Location',
     'welcome.selectLocation.empty': 'No locations available',
     'welcome.selectDepartment.description': 'Department rallyes',
     'welcome.noContent':
