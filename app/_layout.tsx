@@ -149,7 +149,6 @@ function RootNavigator() {
   const palette = isDark ? Colors.darkMode : Colors.lightMode;
 
   const isReady = hydrated && !!navState?.key && (fontsLoaded || !!fontError);
-  const useNativeFormSheet = process.env.EXPO_OS === 'ios';
 
   useEffect(() => {
     if (isReady) {
@@ -200,13 +199,8 @@ function RootNavigator() {
                 options={{
                   contentStyle: { backgroundColor: 'transparent' },
                   gestureEnabled: false,
-                  presentation: useNativeFormSheet ? 'formSheet' : 'modal',
-                  ...(useNativeFormSheet
-                    ? {
-                        sheetAllowedDetents: [0.42],
-                        sheetGrabberVisible: true,
-                      }
-                    : null),
+                  presentation: 'transparentModal',
+                  animation: 'fade',
                 }}
               />
             </Stack>
