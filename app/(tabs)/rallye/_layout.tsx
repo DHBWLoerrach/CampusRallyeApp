@@ -1,8 +1,9 @@
 import { Stack } from 'expo-router';
-import { View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import RallyeHeader from '@/components/rallye/RallyeHeader';
 import TimerHeader from '@/components/rallye/TimerHeader';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { store$ } from '@/services/storage/Store';
 import Colors from '@/utils/Colors';
 import { confirm } from '@/utils/ConfirmAlert';
@@ -46,16 +47,46 @@ export default function RallyeStackLayout() {
         headerTintColor: palette.text,
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Rallye' }}>
-        <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button
-            accessibilityHint={t('a11y.logoutButtonHint')}
-            accessibilityLabel={t('a11y.logoutButton')}
-            icon="rectangle.portrait.and.arrow.right"
-            onPress={handleLeaveRallye}
-            tintColor={palette.text}
-          />
-        </Stack.Toolbar>
+      <Stack.Screen
+        name="index"
+        options={{
+          title: 'Rallye',
+          // Android renders Stack.Toolbar as a floating bottom toolbar and
+          // ignores SF Symbol icons, so place the logout action in the header
+          // instead. iOS keeps the native trailing toolbar button below.
+          ...(Platform.OS === 'android'
+            ? {
+                headerRight: () => (
+                  <Pressable
+                    accessibilityHint={t('a11y.logoutButtonHint')}
+                    accessibilityLabel={t('a11y.logoutButton')}
+                    accessibilityRole="button"
+                    hitSlop={12}
+                    onPress={handleLeaveRallye}
+                    style={{ paddingRight: 16 }}
+                  >
+                    <IconSymbol
+                      name="rectangle.portrait.and.arrow.right"
+                      size={22}
+                      color={palette.text}
+                    />
+                  </Pressable>
+                ),
+              }
+            : {}),
+        }}
+      >
+        {Platform.OS === 'ios' ? (
+          <Stack.Toolbar placement="right">
+            <Stack.Toolbar.Button
+              accessibilityHint={t('a11y.logoutButtonHint')}
+              accessibilityLabel={t('a11y.logoutButton')}
+              icon="rectangle.portrait.and.arrow.right"
+              onPress={handleLeaveRallye}
+              tintColor={palette.text}
+            />
+          </Stack.Toolbar>
+        ) : null}
       </Stack.Screen>
       <Stack.Screen
         name="team-name-sheet"

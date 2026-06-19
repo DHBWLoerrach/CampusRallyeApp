@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import RallyeStackLayout from '../_layout';
 import { confirm } from '@/utils/ConfirmAlert';
@@ -80,8 +81,26 @@ jest.mock('@/utils/ConfirmAlert', () => ({
 
 jest.mock('@/components/rallye/RallyeHeader', () => () => null);
 jest.mock('@/components/rallye/TimerHeader', () => () => null);
+jest.mock('@/components/ui/IconSymbol', () => ({ IconSymbol: () => null }));
+
+type ScreenOptions = {
+  headerRight?: () => React.ReactElement;
+};
+
+const getIndexScreenOptions = (): ScreenOptions | undefined => {
+  const indexCall = mockStackScreen.mock.calls.find(
+    ([props]: [StackScreenProps]) => props.name === 'index'
+  );
+  return indexCall?.[0]?.options as ScreenOptions | undefined;
+};
+
+const setPlatform = (os: 'ios' | 'android') => {
+  Platform.OS = os;
+};
 
 describe('RallyeStackLayout', () => {
+  const originalPlatform = Platform.OS;
+
   beforeEach(() => {
     mockRallye = {
       status: 'running',
@@ -94,9 +113,14 @@ describe('RallyeStackLayout', () => {
     mockStackToolbarButton.mockClear();
     mockStackToolbarView.mockClear();
     jest.clearAllMocks();
+    setPlatform('ios');
   });
 
-  it('renders a native logout toolbar button', async () => {
+  afterEach(() => {
+    setPlatform(originalPlatform as 'ios' | 'android');
+  });
+
+  it('renders a native logout toolbar button on iOS', async () => {
     render(<RallyeStackLayout />);
 
     expect(mockStackToolbar).toHaveBeenCalledWith(
@@ -117,6 +141,34 @@ describe('RallyeStackLayout', () => {
       -1
     )?.[0] as StackToolbarButtonProps | undefined;
     buttonProps?.onPress?.();
+
+    await waitFor(() => {
+      expect(confirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'confirm.exit.title',
+          destructive: true,
+        })
+      );
+      expect(store$.leaveRallye).toHaveBeenCalledTimes(1);
+    });
+
+    // iOS uses the native toolbar, not a header button.
+    expect(getIndexScreenOptions()?.headerRight).toBeUndefined();
+  });
+
+  it('renders a header logout button on Android', async () => {
+    setPlatform('android');
+    render(<RallyeStackLayout />);
+
+    // The Android floating bottom toolbar is intentionally not used.
+    expect(mockStackToolbar).not.toHaveBeenCalled();
+    expect(mockStackToolbarButton).not.toHaveBeenCalled();
+
+    const headerRight = getIndexScreenOptions()?.headerRight;
+    expect(headerRight).toBeInstanceOf(Function);
+
+    const { getByLabelText } = render(headerRight!());
+    fireEvent.press(getByLabelText('a11y.logoutButton'));
 
     await waitFor(() => {
       expect(confirm).toHaveBeenCalledWith(
