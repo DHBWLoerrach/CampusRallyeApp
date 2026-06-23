@@ -1,7 +1,6 @@
 import { Stack } from 'expo-router';
-import { Platform, Pressable, View } from 'react-native';
+import { Platform, Pressable } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
-import RallyeHeader from '@/components/rallye/RallyeHeader';
 import TimerHeader from '@/components/rallye/TimerHeader';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { store$ } from '@/services/storage/Store';
@@ -35,11 +34,6 @@ export default function RallyeStackLayout() {
   return (
     <Stack
       screenOptions={{
-        headerLeft: () => (
-          <View style={{ paddingLeft: 16 }}>
-            <RallyeHeader />
-          </View>
-        ),
         headerTitle: () =>
           showTimer ? <TimerHeader endTime={rallye?.end_time} /> : null,
         headerStyle: { backgroundColor: palette.surface1 },
