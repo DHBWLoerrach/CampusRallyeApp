@@ -12,6 +12,7 @@ import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 import { Screen } from '@/components/ui/Screen';
+import RallyeContextBar from '@/components/rallye/RallyeContextBar';
 
 export default function Voting({
   onRefresh,
@@ -167,6 +168,7 @@ export default function Voting({
         ListHeaderComponent={() =>
           currentQuestion && currentQuestion.length > 0 ? (
             <View style={{ paddingTop: 10, paddingBottom: 30 }}>
+              <RallyeContextBar />
               <InfoBox mb={2}>
                 <ThemedText
                   variant="title"

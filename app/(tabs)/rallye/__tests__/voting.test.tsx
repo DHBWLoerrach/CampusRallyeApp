@@ -90,6 +90,8 @@ jest.mock('@/components/ui/Screen', () => {
   };
 });
 
+jest.mock('@/components/rallye/RallyeContextBar', () => () => null);
+
 describe('Voting', () => {
   let alertSpy: jest.SpyInstance;
   let consoleSpy: jest.SpyInstance;
