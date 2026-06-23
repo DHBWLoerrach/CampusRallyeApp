@@ -10,6 +10,7 @@ import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { ScreenScrollView } from '@/components/ui/Screen';
+import RallyeContextBar from '@/components/rallye/RallyeContextBar';
 
 type TeamRow = {
   id: string;
@@ -121,6 +122,7 @@ export default function Scoreboard() {
         { justifyContent: 'flex-start' },
       ]}
     >
+      <RallyeContextBar />
       <View
         style={[
           globalStyles.rallyeStatesStyles.infoBox,
