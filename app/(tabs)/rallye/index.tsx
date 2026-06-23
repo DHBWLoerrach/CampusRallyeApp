@@ -16,6 +16,7 @@ import Voting from '@/app/(tabs)/rallye/voting';
 import Scoreboard from '@/app/(tabs)/rallye/scoreboard';
 import QuestionRenderer from '@/app/(tabs)/rallye/question-renderer';
 import ThemedText from '@/components/themed/ThemedText';
+import RallyeContextBar from '@/components/rallye/RallyeContextBar';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import UIButton from '@/components/ui/UIButton';
@@ -316,14 +317,14 @@ const RallyeIndex = observer(function RallyeIndex() {
           { paddingBottom: spacing(2) },
         ]}
       >
+        <RallyeContextBar />
         <ThemedText variant="bodyStrong" style={{ marginBottom: 8 }}>
-          {(rallye?.name ? `${rallye.name} • ` : '') +
-            t('rallye.progress', {
-              current: isTourMode
-                ? idx + 1
-                : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
-              total: isTourMode ? qsLen : totalQuestions || qsLen,
-            })}
+          {t('rallye.progress', {
+            current: isTourMode
+              ? idx + 1
+              : Math.min((answeredCount || 0) + 1, totalQuestions || qsLen),
+            total: isTourMode ? qsLen : totalQuestions || qsLen,
+          })}
         </ThemedText>
         <QuestionRenderer question={currentQuestion} />
       </ScreenScrollView>

@@ -177,6 +177,7 @@ jest.mock('../team-setup', () => () => null);
 jest.mock('../voting', () => () => null);
 jest.mock('../scoreboard', () => () => null);
 jest.mock('../question-renderer', () => () => null);
+jest.mock('@/components/rallye/RallyeContextBar', () => () => null);
 
 jest.mock('@/services/storage/Store', () => ({
   store$: {
