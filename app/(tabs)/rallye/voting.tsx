@@ -165,10 +165,10 @@ export default function Voting({
         keyExtractor={(item) => `${item.tq_team_id}`}
         onRefresh={getVotingData}
         refreshing={loading}
-        ListHeaderComponent={() =>
-          currentQuestion && currentQuestion.length > 0 ? (
-            <View style={{ paddingTop: 10, paddingBottom: 30 }}>
-              <RallyeContextBar />
+        ListHeaderComponent={() => (
+          <View style={{ paddingTop: 10, paddingBottom: 30 }}>
+            <RallyeContextBar />
+            {currentQuestion && currentQuestion.length > 0 ? (
               <InfoBox mb={2}>
                 <ThemedText
                   variant="title"
@@ -187,9 +187,9 @@ export default function Voting({
                   {t('voting.instruction')}
                 </ThemedText>
               </InfoBox>
-            </View>
-          ) : null
-        }
+            ) : null}
+          </View>
+        )}
         renderItem={({ item }) => (
           <TouchableOpacity
             testID={`vote-option-${item.tq_id}`}
