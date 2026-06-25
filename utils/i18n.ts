@@ -92,6 +92,7 @@ export const translations = {
     'rallye.backToStart': 'Zurück zum Start',
     'rallye.timeUp': 'Zeit abgelaufen!',
     'rallye.teamLabel': 'Team: {{team}}',
+    'rallye.currentTeamLabel': 'Dein Team:',
     'rallye.pointsLabel': 'Punkte: {{points}}',
     'rallye.meetingPoint': 'Bitte kommt zum vereinbarten Treffpunkt',
     'rallye.noQuestions.title': 'Keine Fragen',
@@ -159,8 +160,6 @@ export const translations = {
     'voting.next': 'Nächste Abstimmung',
     'voting.error.submit': 'Abstimmung konnte nicht gespeichert werden.',
     'scoreboard.title': 'Endstand',
-    'scoreboard.yourTeam': 'Dein Team: {{team}}',
-    'scoreboard.yourTeamLabel': 'Dein Team:',
     'geocaching.arrived': 'Ziel erreicht!',
     'geocaching.calibrate':
       'Bitte bewege dein Gerät in einer 8er-Bewegung, um den Kompass zu kalibrieren.',
@@ -257,6 +256,7 @@ export const translations = {
     'rallye.backToStart': 'Back to start',
     'rallye.timeUp': 'Time up!',
     'rallye.teamLabel': 'Team: {{team}}',
+    'rallye.currentTeamLabel': 'Your team:',
     'rallye.pointsLabel': 'Points: {{points}}',
     'rallye.meetingPoint': 'Please come to the agreed meeting point.',
     'rallye.noQuestions.title': 'No questions',
@@ -323,8 +323,6 @@ export const translations = {
     'voting.next': 'Next vote',
     'voting.error.submit': 'Vote could not be saved.',
     'scoreboard.title': 'Final standings',
-    'scoreboard.yourTeam': 'Your team: {{team}}',
-    'scoreboard.yourTeamLabel': 'Your team:',
     'geocaching.arrived': 'Destination reached!',
     'geocaching.calibrate':
       'Please move your device in a figure-8 motion to calibrate the compass.',

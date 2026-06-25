@@ -18,8 +18,8 @@ jest.mock('@/utils/ThemeContext', () => ({
   useTheme: () => ({ isDarkMode: false }),
 }));
 
-jest.mock('@/components/ui/IconSymbol', () => ({
-  IconSymbol: () => null,
+jest.mock('@/utils/LanguageContext', () => ({
+  useLanguage: () => ({ t: (key: string) => key }),
 }));
 
 describe('RallyeContextBar', () => {
@@ -31,6 +31,15 @@ describe('RallyeContextBar', () => {
 
     expect(teamName.props.numberOfLines).toBeUndefined();
     expect(teamName.props.ellipsizeMode).toBeUndefined();
+  });
+
+  it('labels the current team explicitly', () => {
+    mockTeam = { name: 'Crimson Owls' };
+
+    const { getByText } = render(<RallyeContextBar />);
+
+    expect(getByText('rallye.currentTeamLabel')).toBeTruthy();
+    expect(getByText('Crimson Owls')).toBeTruthy();
   });
 
   it('renders nothing when no team exists', () => {

@@ -205,15 +205,14 @@ describe('Scoreboard', () => {
       { team_id: '2', points: 10 },
     ];
 
-    const { getByText, getAllByText } = render(<Scoreboard />);
+    const { getAllByText, getByText, queryByText } = render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
 
-    // Own team label should be visible
-    expect(getByText(/scoreboard\.yourTeamLabel/)).toBeTruthy();
-    // "MyTeam" appears twice: in the "your team" label and in the row
-    expect(getAllByText('MyTeam').length).toBeGreaterThanOrEqual(2);
+    expect(queryByText(/scoreboard\.yourTeamLabel/)).toBeNull();
+    expect(getByText('rallye.currentTeamLabel')).toBeTruthy();
+    expect(getAllByText('MyTeam').length).toBe(2);
   });
 
   it('renders team points in the row', async () => {

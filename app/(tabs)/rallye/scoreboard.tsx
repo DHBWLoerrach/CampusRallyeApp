@@ -155,21 +155,6 @@ export default function Scoreboard() {
               {rallye.name}
             </ThemedText>
           )}
-          {ourTeam ? (
-            <ThemedText
-              variant="body"
-              style={[
-                globalStyles.rallyeStatesStyles.infoSubtitle,
-                s.muted,
-                { marginTop: 10 },
-              ]}
-            >
-              {t('scoreboard.yourTeamLabel')}{' '}
-              <ThemedText variant="accent" style={{ fontWeight: '700' }}>
-                {ourTeam.name}
-              </ThemedText>
-            </ThemedText>
-          ) : null}
         </View>
 
         <ScrollView style={{ backgroundColor: palette.surface1 }}>
