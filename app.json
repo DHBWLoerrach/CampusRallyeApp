@@ -46,7 +46,8 @@
         "monochromeImage": "./assets/images/monochrome-icon.png"
       },
       "package": "de.dhbwloe.loerrach.CampusRallyeApp",
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "blockedPermissions": ["android.permission.ACTIVITY_RECOGNITION"]
     },
     "plugins": [
       "expo-router",
