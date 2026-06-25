@@ -97,6 +97,7 @@ export default function Imprint() {
   return (
     <ScreenScrollView
       padding="none"
+      edges={['bottom']}
       contentContainerStyle={[
         infoScreenStyles.content,
         { backgroundColor: palette.background },

@@ -182,6 +182,7 @@ export default function About() {
   return (
     <ScreenScrollView
       padding="none"
+      edges={['bottom']}
       contentContainerStyle={[
         infoScreenStyles.content,
         { backgroundColor: palette.background },
