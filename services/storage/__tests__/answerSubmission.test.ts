@@ -99,6 +99,27 @@ describe('submitAnswerAndAdvance', () => {
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 
+  it('ignores stale expiry state when the stored end time is still in the future', async () => {
+    mockTimeExpiredGet.mockReturnValue(true);
+    mockRallyeGet.mockReturnValue({
+      end_time: new Date(Date.now() + 40_000).toISOString(),
+    });
+
+    const result = await submitAnswerAndAdvance({
+      teamId: 42,
+      questionId: 7,
+      answeredCorrectly: true,
+      pointsAwarded: 3,
+      answerText: 'hello',
+    });
+
+    expect(result).toEqual({ status: 'sent' });
+    expect(mockTimeExpiredSet).toHaveBeenCalledWith(false);
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, true, 3, 'hello');
+    expect(mockPointsSet).toHaveBeenCalledWith(3);
+    expect(mockGotoNextQuestion).toHaveBeenCalled();
+  });
+
   it('does not add points when pointsAwarded is 0 (incorrect answer)', async () => {
     const result = await submitAnswerAndAdvance({
       teamId: 42,

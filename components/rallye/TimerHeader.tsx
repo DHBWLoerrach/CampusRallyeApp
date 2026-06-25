@@ -41,6 +41,7 @@ export default function TimerHeader({
       store$.timeExpired.set(true);
       return;
     }
+    store$.timeExpired.set(false);
 
     const id = setInterval(() => {
       const next = calculateTimeRemaining(endTime);

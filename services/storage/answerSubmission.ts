@@ -12,17 +12,17 @@ export type SubmitOutcome =
   | { status: 'expired' };
 
 function isRallyeTimeExpired() {
-  if (store$.timeExpired.get()) return true;
-
   const endTime = store$.rallye.get()?.end_time;
-  if (!endTime) return false;
+  if (!endTime) return store$.timeExpired.get();
 
   const endMs = new Date(endTime).getTime();
-  if (!Number.isFinite(endMs)) return false;
+  if (!Number.isFinite(endMs)) return store$.timeExpired.get();
 
   const expired = endMs <= Date.now();
   if (expired) {
     store$.timeExpired.set(true);
+  } else if (store$.timeExpired.get()) {
+    store$.timeExpired.set(false);
   }
   return expired;
 }

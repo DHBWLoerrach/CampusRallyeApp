@@ -47,4 +47,12 @@ describe('TimerHeader', () => {
 
     expect(storeMock.store$.timeExpired.set).toHaveBeenCalledWith(true);
   });
+
+  it('clears stale expiry state for future end times', () => {
+    render(
+      <TimerHeader endTime={new Date(Date.now() + 40_000).toISOString()} />
+    );
+
+    expect(storeMock.store$.timeExpired.set).toHaveBeenCalledWith(false);
+  });
 });

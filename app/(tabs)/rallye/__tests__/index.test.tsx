@@ -243,6 +243,37 @@ describe('RallyeIndex', () => {
     expect(mockQuestionRenderer).not.toHaveBeenCalled();
   });
 
+  it('keeps rendering active team questions when stale timeExpired has a future end time', () => {
+    (store$.rallye.get as jest.Mock).mockReturnValue({
+      id: 1,
+      name: 'Campus Rallye',
+      status: 'running',
+      mode: 'classic',
+      end_time: new Date(Date.now() + 40_000).toISOString(),
+    });
+    (store$.team.get as jest.Mock).mockReturnValue({ id: 2, name: 'Team A' });
+    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
+    (store$.timeExpired.get as jest.Mock).mockReturnValue(true);
+    (store$.isTourMode.get as jest.Mock).mockReturnValue(false);
+    (store$.questions.get as jest.Mock).mockReturnValue([
+      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+    ]);
+    (store$.currentQuestion.get as jest.Mock).mockReturnValue({
+      id: 1,
+      question: 'Q1',
+      question_type: 'knowledge',
+      points: 1,
+    });
+
+    render(<RallyeIndex />);
+
+    expect(mockQuestionRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        question: expect.objectContaining({ id: 1 }),
+      })
+    );
+  });
+
   it('keeps rendering active tour questions even if timeExpired is true', () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,

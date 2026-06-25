@@ -61,8 +61,16 @@ const RallyeIndex = observer(function RallyeIndex() {
   // callbacks and re-trigger the main data-loading effect.
   const rallyeId = rallye?.id;
   const teamId = team?.id;
+  const endTimeMs = rallye?.end_time
+    ? new Date(rallye.end_time).getTime()
+    : null;
+  const hasFutureEndTime =
+    typeof endTimeMs === 'number' &&
+    Number.isFinite(endTimeMs) &&
+    endTimeMs > Date.now();
+  const rallyeTimeExpired = timeExpired && !hasFutureEndTime;
   const teamRallyeFinished =
-    !isTourMode && (allQuestionsAnswered || timeExpired);
+    !isTourMode && (allQuestionsAnswered || rallyeTimeExpired);
   const questionIdsCacheRef = useRef<{
     rallyeId: number;
     ids: number[];
@@ -324,11 +332,11 @@ const RallyeIndex = observer(function RallyeIndex() {
               variant="title"
               style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
             >
-              {timeExpired
+              {rallyeTimeExpired
                 ? t('rallye.timeUp')
                 : t('rallye.allAnswered.simple')}
             </ThemedText>
-            {!timeExpired && team ? (
+            {!rallyeTimeExpired && team ? (
               <ThemedText
                 variant="body"
                 style={[
