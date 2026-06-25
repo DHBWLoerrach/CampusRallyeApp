@@ -51,7 +51,10 @@ const TeamSetup = observer(function TeamSetup() {
       </ThemedText>
       <View style={[globalStyles.teamStyles.container]}>
         <View style={[globalStyles.teamStyles.infoBox, s.infoBox]}>
-          <ThemedText style={globalStyles.teamStyles.message}>
+          <ThemedText
+            variant="bodyLarge"
+            style={globalStyles.teamStyles.message}
+          >
             {t('teamSetup.message')}
           </ThemedText>
           <UIButton disabled={loading} onPress={createTeam}>

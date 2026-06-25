@@ -197,9 +197,6 @@ export const globalStyles = createGroupedStyles({
       marginStart: 30,
       marginBottom: 20,
     },
-    answerText: {
-      fontSize: 20,
-    },
     innerSquare: {
       width: 24,
       height: 24,
@@ -383,7 +380,6 @@ export const globalStyles = createGroupedStyles({
       marginBottom: SCREEN_HEIGHT * 0.02,
     },
     message: {
-      fontSize: normalizeFont(18),
       color: Colors.dhbwGray,
       textAlign: 'center',
       marginBottom: SCREEN_HEIGHT * 0.02,

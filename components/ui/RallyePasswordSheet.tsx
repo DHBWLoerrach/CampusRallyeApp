@@ -118,7 +118,11 @@ export default function RallyePasswordSheet({
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
         >
-          <ThemedText variant="title" numberOfLines={2} style={styles.title}>
+          <ThemedText
+            variant="dialogTitle"
+            numberOfLines={2}
+            style={styles.title}
+          >
             {rallye?.name ?? t('rallye.modal.activeTitle')}
           </ThemedText>
 
@@ -210,8 +214,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
     marginBottom: 14,
     textAlign: 'left',
     alignSelf: 'stretch',

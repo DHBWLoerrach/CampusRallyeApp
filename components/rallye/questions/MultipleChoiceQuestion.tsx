@@ -123,7 +123,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
 
         <InfoBox mb={0}>
           {options.length === 0 ? (
-            <ThemedText style={globalStyles.multipleChoiceStyles.answerText}>
+            <ThemedText variant="optionText">
               {t('question.options.loading')}
             </ThemedText>
           ) : (
@@ -165,9 +165,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                         },
                       ]}
                     />
-                    <ThemedText
-                      style={globalStyles.multipleChoiceStyles.answerText}
-                    >
+                    <ThemedText variant="optionText">
                       {optionText}
                     </ThemedText>
                   </TouchableOpacity>

@@ -675,7 +675,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             )}
 
             {distance != null && (
-              <ThemedText variant="title" style={[s.text, styles.distanceText]}>
+              <ThemedText variant="metric" style={[s.text, styles.distanceText]}>
                 {formatDistance(distance)}
               </ThemedText>
             )}
@@ -869,8 +869,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   distanceText: {
-    fontSize: 28,
-    fontWeight: 'bold',
     marginTop: 16,
     textAlign: 'center',
   },
