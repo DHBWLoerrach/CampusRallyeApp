@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { Platform, Pressable } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
@@ -16,6 +17,14 @@ export default function RallyeStackLayout() {
   const isTourMode = useSelector(() => store$.isTourMode.get());
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const showTimer = rallye?.status === 'running' && !isTourMode;
+
+  useEffect(() => {
+    return () => {
+      if (!store$.enabled.get()) {
+        store$.clearRallyeSession();
+      }
+    };
+  }, []);
 
   const handleLeaveRallye = () => {
     void (async () => {

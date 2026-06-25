@@ -30,6 +30,7 @@ type StackToolbarButtonProps = {
 
 let mockRallye: { status: string; end_time: string | null } | null = null;
 let mockIsTourMode = false;
+let mockEnabled = true;
 
 jest.mock('expo-router', () => ({
   Stack: Object.assign(
@@ -61,6 +62,8 @@ jest.mock('@legendapp/state/react', () => ({
 
 jest.mock('@/services/storage/Store', () => ({
   store$: {
+    clearRallyeSession: jest.fn(),
+    enabled: { get: () => mockEnabled },
     rallye: { get: () => mockRallye },
     isTourMode: { get: () => mockIsTourMode },
     leaveRallye: jest.fn(),
@@ -106,6 +109,7 @@ describe('RallyeStackLayout', () => {
       end_time: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
     };
     mockIsTourMode = false;
+    mockEnabled = true;
     mockStack.mockClear();
     mockStackScreen.mockClear();
     mockStackToolbar.mockClear();
@@ -196,5 +200,22 @@ describe('RallyeStackLayout', () => {
       }),
       undefined
     );
+  });
+
+  it('clears rallye session on unmount after logout disables navigation', () => {
+    const { unmount } = render(<RallyeStackLayout />);
+
+    mockEnabled = false;
+    unmount();
+
+    expect(store$.clearRallyeSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not clear rallye session during regular unmounts', () => {
+    const { unmount } = render(<RallyeStackLayout />);
+
+    unmount();
+
+    expect(store$.clearRallyeSession).not.toHaveBeenCalled();
   });
 });

@@ -65,6 +65,7 @@ function RootErrorFallback({
       } catch (resetError) {
         console.error('Error during recovery:', resetError);
       } finally {
+        store$.clearRallyeSession();
         onReset();
         router.replace('/');
       }

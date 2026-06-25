@@ -118,6 +118,50 @@ describe('store$ observable', () => {
     });
   });
 
+  // -- leaveRallye ------------------------------------------------------------
+
+  describe('leaveRallye', () => {
+    it('disables an active session without clearing header state', async () => {
+      store$.enabled.set(true);
+      store$.resumeAvailable.set(true);
+      store$.rallye.set({
+        id: 1,
+        name: 'R',
+        status: 'running',
+      } as any);
+      store$.team.set({ id: 2, name: 'Team' } as any);
+      store$.questions.set([{ id: 3 }] as any);
+
+      await store$.leaveRallye();
+
+      expect(store$.enabled.get()).toBe(false);
+      expect(store$.resumeAvailable.get()).toBe(false);
+      expect(store$.rallye.get()).toMatchObject({ id: 1 });
+      expect(store$.team.get()).toMatchObject({ id: 2 });
+      expect(store$.questions.get()).toEqual([{ id: 3 }]);
+    });
+
+    it('clears rallye data immediately when no active session is mounted', async () => {
+      store$.enabled.set(false);
+      store$.resumeAvailable.set(true);
+      store$.rallye.set({
+        id: 1,
+        name: 'R',
+        status: 'running',
+      } as any);
+      store$.team.set({ id: 2, name: 'Team' } as any);
+      store$.questions.set([{ id: 3 }] as any);
+
+      await store$.leaveRallye();
+
+      expect(store$.enabled.get()).toBe(false);
+      expect(store$.resumeAvailable.get()).toBe(false);
+      expect(store$.rallye.get()).toBeNull();
+      expect(store$.team.get()).toBeNull();
+      expect(store$.questions.get()).toEqual([]);
+    });
+  });
+
   // -- gotoNextQuestion -------------------------------------------------------
 
   describe('gotoNextQuestion', () => {

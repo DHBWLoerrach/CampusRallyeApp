@@ -1,8 +1,9 @@
 import React, * as MockReact from 'react';
 import { Pressable as MockPressable, Text as MockText } from 'react-native';
-import { render } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Stack } from 'expo-router';
 import RootLayout from '../_layout';
+import { store$ } from '@/services/storage/Store';
 
 type StackProps = {
   children: React.ReactNode;
@@ -15,6 +16,8 @@ type StackScreenProps = {
 };
 
 const mockRouterReplace = jest.fn();
+let mockErrorBoundaryError: Error | null = null;
+const mockErrorBoundaryReset = jest.fn();
 
 jest.mock('expo-router', () => ({
   Stack: Object.assign(jest.fn(({ children }: StackProps) => children), {
@@ -46,6 +49,7 @@ jest.mock('@legendapp/state/react', () => ({
 
 jest.mock('@/services/storage/Store', () => ({
   store$: {
+    clearRallyeSession: jest.fn(),
     currentQuestion: { get: jest.fn(() => null) },
     enabled: { get: jest.fn(() => false) },
     hydrated: { get: jest.fn(() => true) },
@@ -114,7 +118,19 @@ jest.mock('@/components/ui/UIButton', () => {
 
 jest.mock('@/components/ui/ErrorBoundary', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => children,
+  default: ({
+    children,
+    fallback,
+  }: {
+    children: React.ReactNode;
+    fallback: (props: { error: Error; reset: () => void }) => React.ReactNode;
+  }) =>
+    mockErrorBoundaryError
+      ? fallback({
+          error: mockErrorBoundaryError,
+          reset: mockErrorBoundaryReset,
+        })
+      : children,
 }));
 
 const mockStackScreen = Stack.Screen as unknown as jest.Mock;
@@ -122,6 +138,7 @@ const mockStackScreen = Stack.Screen as unknown as jest.Mock;
 describe('RootLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockErrorBoundaryError = null;
   });
 
   it('registers the rallye password entry as a transparent modal instead of a form sheet', () => {
@@ -145,5 +162,19 @@ describe('RootLayout', () => {
 
     expect(passwordScreenOptions).not.toHaveProperty('sheetAllowedDetents');
     expect(passwordScreenOptions).not.toHaveProperty('sheetGrabberVisible');
+  });
+
+  it('clears rallye session state when recovering from the error fallback', async () => {
+    mockErrorBoundaryError = new Error('boom');
+
+    const { getByText } = render(<RootLayout />);
+    fireEvent.press(getByText('rallye.backToStart'));
+
+    await waitFor(() => {
+      expect(store$.leaveRallye).toHaveBeenCalledTimes(1);
+      expect(store$.clearRallyeSession).toHaveBeenCalledTimes(1);
+      expect(mockErrorBoundaryReset).toHaveBeenCalledTimes(1);
+      expect(mockRouterReplace).toHaveBeenCalledWith('/');
+    });
   });
 });

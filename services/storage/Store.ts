@@ -134,8 +134,15 @@ export const store$ = observable({
     store$.usedHints.set({});
   },
 
+  clearRallyeSession: () => {
+    store$.team.set(null);
+    store$.rallye.set(null);
+    store$.reset();
+  },
+
   leaveRallye: async () => {
     const rallye = store$.rallye.get();
+    const wasEnabled = store$.enabled.get();
     try {
       if (rallye?.id) {
         // Remove local device → team assignment for this rallye.
@@ -146,11 +153,11 @@ export const store$ = observable({
     } catch (e) {
       console.error('Error leaving rallye:', e);
     } finally {
-      store$.team.set(null);
-      store$.rallye.set(null);
-      store$.reset();
-      store$.resumeAvailable.set(false);
       store$.enabled.set(false);
+      store$.resumeAvailable.set(false);
+      if (!wasEnabled) {
+        store$.clearRallyeSession();
+      }
     }
   },
 
