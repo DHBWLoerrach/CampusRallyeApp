@@ -9,6 +9,11 @@ const scaleLineHeight = (size: number, ratio: number) =>
   Math.round(scaleFont(size) * ratio);
 
 export const TYPOGRAPHY = {
+  screenTitle: {
+    fontSize: scaleFont(24),
+    lineHeight: scaleLineHeight(24, 1.3),
+    fontWeight: '600',
+  },
   title: {
     fontSize: scaleFont(20),
     lineHeight: scaleLineHeight(20, 1.3),

@@ -378,10 +378,8 @@ export const globalStyles = createGroupedStyles({
       elevation: 5,
     },
     title: {
-      fontSize: normalizeFont(24),
       color: Colors.dhbwGray,
       textAlign: 'center',
-      fontWeight: '600',
       marginBottom: SCREEN_HEIGHT * 0.02,
     },
     message: {
