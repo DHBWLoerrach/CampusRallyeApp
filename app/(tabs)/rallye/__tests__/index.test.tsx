@@ -8,6 +8,7 @@ const mockScreenScrollView = jest.fn(
     <>{children}</>
   )
 );
+const mockQuestionRenderer = jest.fn((_props: unknown) => null);
 
 // Keep this unit test focused on the CTA callback only.
 // We stub useEffect so RallyeIndex mount effects (question/answer/status loading)
@@ -125,7 +126,10 @@ jest.mock('../states/NoQuestions', () => () => null);
 jest.mock('../team-setup', () => () => null);
 jest.mock('../voting', () => () => null);
 jest.mock('../scoreboard', () => () => null);
-jest.mock('../question-renderer', () => () => null);
+jest.mock(
+  '../question-renderer',
+  () => (props: unknown) => mockQuestionRenderer(props)
+);
 jest.mock('@/components/rallye/RallyeContextBar', () => () => null);
 
 jest.mock('@/services/storage/Store', () => ({
@@ -162,6 +166,24 @@ jest.mock('@/services/storage/Store', () => ({
 describe('RallyeIndex', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (store$.rallye.get as jest.Mock).mockReturnValue({
+      id: 1,
+      name: 'Tour Mode',
+      status: 'running',
+      mode: 'tour',
+      end_time: null,
+    });
+    (store$.team.get as jest.Mock).mockReturnValue(null);
+    (store$.questionIndex.get as jest.Mock).mockReturnValue(0);
+    (store$.questions.get as jest.Mock).mockReturnValue([]);
+    (store$.totalQuestions.get as jest.Mock).mockReturnValue(0);
+    (store$.answeredCount.get as jest.Mock).mockReturnValue(0);
+    (store$.currentQuestion.get as jest.Mock).mockReturnValue(null);
+    (store$.points.get as jest.Mock).mockReturnValue(12);
+    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(true);
+    (store$.timeExpired.get as jest.Mock).mockReturnValue(false);
+    (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
+    (store$.answers.get as jest.Mock).mockReturnValue([]);
   });
 
   it('calls leaveRallye when pressing back-to-start in tour completion state', () => {
@@ -191,5 +213,63 @@ describe('RallyeIndex', () => {
     const activeQuestionViewProps = mockScreenScrollView.mock.calls.at(-1)?.[0];
 
     expect(activeQuestionViewProps?.refreshControl).toBeUndefined();
+  });
+
+  it('shows the time-up state instead of active questions after team rallye expiry', () => {
+    (store$.rallye.get as jest.Mock).mockReturnValue({
+      id: 1,
+      name: 'Campus Rallye',
+      status: 'running',
+      mode: 'classic',
+      end_time: new Date(Date.now() - 1_000).toISOString(),
+    });
+    (store$.team.get as jest.Mock).mockReturnValue({ id: 2, name: 'Team A' });
+    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
+    (store$.timeExpired.get as jest.Mock).mockReturnValue(true);
+    (store$.isTourMode.get as jest.Mock).mockReturnValue(false);
+    (store$.questions.get as jest.Mock).mockReturnValue([
+      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+    ]);
+    (store$.currentQuestion.get as jest.Mock).mockReturnValue({
+      id: 1,
+      question: 'Q1',
+      question_type: 'knowledge',
+      points: 1,
+    });
+
+    const { getByText } = render(<RallyeIndex />);
+
+    expect(getByText('rallye.timeUp')).toBeTruthy();
+    expect(mockQuestionRenderer).not.toHaveBeenCalled();
+  });
+
+  it('keeps rendering active tour questions even if timeExpired is true', () => {
+    (store$.rallye.get as jest.Mock).mockReturnValue({
+      id: 1,
+      name: 'Campus Tour',
+      status: 'running',
+      mode: 'tour',
+      end_time: new Date(Date.now() - 1_000).toISOString(),
+    });
+    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
+    (store$.timeExpired.get as jest.Mock).mockReturnValue(true);
+    (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
+    (store$.questions.get as jest.Mock).mockReturnValue([
+      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+    ]);
+    (store$.currentQuestion.get as jest.Mock).mockReturnValue({
+      id: 1,
+      question: 'Q1',
+      question_type: 'knowledge',
+      points: 1,
+    });
+
+    render(<RallyeIndex />);
+
+    expect(mockQuestionRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        question: expect.objectContaining({ id: 1 }),
+      })
+    );
   });
 });
