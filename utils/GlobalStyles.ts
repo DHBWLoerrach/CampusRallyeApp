@@ -208,7 +208,11 @@ export const globalStyles = createGroupedStyles({
   qrCodeStyles: {
     camera: {
       width: '100%',
-      height: '100%',
+      // Use aspectRatio instead of height: '100%' so the camera gets a
+      // definite height independent of its parent. On Android a percentage
+      // height collapses to 0 when the parent has no definite height, leaving
+      // the camera invisible (iOS resolves this case more leniently).
+      aspectRatio: 1,
     },
     buttonRow: {
       flexDirection: 'column',
