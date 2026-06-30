@@ -165,7 +165,10 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
                         },
                       ]}
                     />
-                    <ThemedText variant="optionText">
+                    <ThemedText
+                      variant="optionText"
+                      style={globalStyles.multipleChoiceStyles.optionText}
+                    >
                       {optionText}
                     </ThemedText>
                   </TouchableOpacity>

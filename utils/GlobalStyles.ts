@@ -204,6 +204,10 @@ export const globalStyles = createGroupedStyles({
       borderWidth: 1,
       borderColor: Colors.dhbwGray,
     },
+    optionText: {
+      flexBasis: 'auto',
+      flexShrink: 1,
+    },
   },
   qrCodeStyles: {
     camera: {
