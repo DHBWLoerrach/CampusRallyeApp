@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Image, TouchableOpacity, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
@@ -14,6 +14,64 @@ import { useAppStyles } from '@/utils/AppStyles';
 import { Screen } from '@/components/ui/Screen';
 import RallyeContextBar from '@/components/rallye/RallyeContextBar';
 
+type QuestionJoinRow = {
+  question_id: number;
+  questions:
+    | {
+        id: number;
+        content: string | null;
+        type: string | null;
+      }
+    | {
+        id: number;
+        content: string | null;
+        type: string | null;
+      }[]
+    | null;
+};
+
+type RallyeTeamRow = {
+  id: number;
+  name?: string | null;
+  team_name?: string | null;
+};
+
+type TeamQuestionRow = {
+  question_id: number;
+  team_id: number;
+  team_answer: string | null;
+};
+
+type VotedQuestionRow = {
+  question_id: number;
+};
+
+type VotingCandidate = {
+  teamId: number;
+  teamName: string;
+  teamAnswer: string;
+};
+
+type VotingQuestionGroup = {
+  questionId: number;
+  questionContent: string;
+  questionType: string;
+  candidates: VotingCandidate[];
+};
+
+function normalizeQuestionRow(
+  row: QuestionJoinRow
+): Omit<VotingQuestionGroup, 'candidates'> | null {
+  const question = Array.isArray(row.questions) ? row.questions[0] : row.questions;
+  if (!question || typeof row.question_id !== 'number') return null;
+
+  return {
+    questionId: row.question_id,
+    questionContent: typeof question.content === 'string' ? question.content : '',
+    questionType: typeof question.type === 'string' ? question.type : 'knowledge',
+  };
+}
+
 export default function Voting({
   onRefresh,
   loading,
@@ -21,108 +79,164 @@ export default function Voting({
   onRefresh: () => void;
   loading: boolean;
 }) {
-  const [voting, setVoting] = useState<any[]>([]);
   const [teamCount, setTeamCount] = useState(0);
-  const [counter, setCounter] = useState(0);
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  const [selectedUpdateId, setSelectedUpdateId] = useState<string | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
   const [currentVotingIdx, setCurrentVotingIdx] = useState(0);
   const [sendingResult, setSendingResult] = useState(false);
+  const [votableQuestionGroups, setVotableQuestionGroups] = useState<
+    VotingQuestionGroup[]
+  >([]);
+  const submittingVoteRef = useRef(false);
   const rallye = useSelector(() => store$.rallye.get());
   const team = useSelector(() => store$.team.get());
-  const votingAllowed = useSelector(() => store$.votingAllowed.get());
   const s = useAppStyles();
   const { t } = useLanguage();
   const rallyeId = rallye?.id;
   const teamId = team?.id;
 
-  const getVotingData = useCallback(async () => {
+  const loadVotingData = useCallback(async () => {
     if (!rallyeId || !teamId) return;
+
     try {
-      const { data, error } = await supabase.rpc('get_voting_content', {
-        rallye_id_param: rallyeId,
-        own_team_id_param: teamId,
-      });
-      if (error) throw error;
-      setVoting(data || []);
-    } catch (e) {
-      console.error('Error fetching voting questions:', e);
+      const [questionResponse, teamResponse, votedQuestionResponse] =
+        await Promise.all([
+          supabase
+            .from('join_rallye_questions')
+            .select('question_id, questions!inner(id, content, type)')
+            .eq('rallye_id', rallyeId)
+            .eq('is_voting', true),
+          supabase.from('rallye_team').select('id, name').eq('rallye_id', rallyeId),
+          supabase.rpc('get_voted_voting_question_ids', {
+            rallye_id_param: rallyeId,
+            voting_team_id_param: teamId,
+          }),
+        ]);
+
+      if (questionResponse.error) throw questionResponse.error;
+      if (teamResponse.error) throw teamResponse.error;
+      if (votedQuestionResponse.error) throw votedQuestionResponse.error;
+
+      const questionRows = (questionResponse.data || []) as QuestionJoinRow[];
+      const teamRows = (teamResponse.data || []) as RallyeTeamRow[];
+      const votedQuestions = (votedQuestionResponse.data || []) as VotedQuestionRow[];
+
+      setTeamCount(teamRows.length);
+
+      const questions = questionRows
+        .map(normalizeQuestionRow)
+        .filter((row): row is Omit<VotingQuestionGroup, 'candidates'> => row !== null);
+      const otherTeams = teamRows.filter((candidate) => candidate.id !== teamId);
+      const candidateTeamIds = otherTeams.map((candidate) => candidate.id);
+
+      if (questions.length === 0 || candidateTeamIds.length === 0) {
+        setVotableQuestionGroups([]);
+        setCurrentVotingIdx(0);
+        setSelectedTeam(null);
+        return;
+      }
+
+      const { data: answerData, error: answerError } = await supabase
+        .from('team_questions')
+        .select('question_id, team_id, team_answer')
+        .in(
+          'question_id',
+          questions.map((question) => question.questionId)
+        )
+        .in('team_id', candidateTeamIds);
+      if (answerError) throw answerError;
+
+      const votedQuestionIds = new Set<number>(
+        votedQuestions.map((vote) => vote.question_id)
+      );
+      const teamNameById = new Map<number, string>();
+      for (const teamRow of otherTeams) {
+        const rawName =
+          typeof teamRow.name === 'string'
+            ? teamRow.name
+            : typeof teamRow.team_name === 'string'
+              ? teamRow.team_name
+              : '';
+        teamNameById.set(teamRow.id, rawName.trim() || `Team ${teamRow.id}`);
+      }
+
+      const groupedCandidates = new Map<number, VotingCandidate[]>();
+      for (const answer of (answerData || []) as TeamQuestionRow[]) {
+        const teamAnswer =
+          typeof answer.team_answer === 'string' ? answer.team_answer.trim() : '';
+        if (!teamAnswer) continue;
+
+        const teamName = teamNameById.get(answer.team_id);
+        if (!teamName) continue;
+
+        const existingForQuestion = groupedCandidates.get(answer.question_id) || [];
+        if (existingForQuestion.some((candidate) => candidate.teamId === answer.team_id))
+          continue;
+
+        existingForQuestion.push({
+          teamId: answer.team_id,
+          teamName,
+          teamAnswer,
+        });
+        groupedCandidates.set(answer.question_id, existingForQuestion);
+      }
+
+      const nextGroups = questions
+        .map((question) => ({
+          ...question,
+          candidates: groupedCandidates.get(question.questionId) || [],
+        }))
+        .filter((question) => !votedQuestionIds.has(question.questionId))
+        .filter((question) => question.candidates.length >= 2);
+
+      setVotableQuestionGroups(nextGroups);
+      setCurrentVotingIdx(0);
+      setSelectedTeam(null);
+    } catch (error) {
+      console.error('Error fetching voting questions:', error);
     }
   }, [rallyeId, teamId]);
 
-  const getCount = useCallback(async () => {
-    if (!rallyeId) return;
-    try {
-      const { data: count, error: countError } = await supabase
-        .from('voting')
-        .select('question_id')
-        .eq('rallye_id', rallyeId);
-      if (countError) throw countError;
-      setCounter((count || []).length);
-
-      const { data, error } = await supabase
-        .from('rallye_team')
-        .select('id')
-        .eq('rallye_id', rallyeId);
-      if (error) throw error;
-      setTeamCount((data || []).length);
-    } catch (e) {
-      console.error('Error fetching team count:', e);
-    }
-  }, [rallyeId]);
-
   useEffect(() => {
-    (async () => {
-      await getVotingData();
-      await getCount();
-    })();
-  }, [getCount, getVotingData]);
+    void loadVotingData();
+  }, [loadVotingData]);
 
-  const groupedQuestions = useMemo(() => {
-    const sorted = [...voting].sort(
-      (a, b) => a.tq_question_id - b.tq_question_id
-    );
-    const grouped: any[][] = [];
-    let current: number | null = null;
-    for (let i = 0; i < sorted.length; i++) {
-      if (current !== sorted[i].tq_question_id) {
-        current = sorted[i].tq_question_id;
-        grouped.push([]);
-      }
-      grouped[grouped.length - 1].push(sorted[i]);
-    }
-    return grouped;
-  }, [voting]);
+  const handleRefresh = useCallback(async () => {
+    await loadVotingData();
+    onRefresh();
+  }, [loadVotingData, onRefresh]);
 
   const currentQuestion = useMemo(
-    () => groupedQuestions[currentVotingIdx] || [],
-    [currentVotingIdx, groupedQuestions]
+    () => votableQuestionGroups[currentVotingIdx] || null,
+    [currentVotingIdx, votableQuestionGroups]
   );
-
-  useEffect(() => {
-    store$.votingAllowed.set(counter > currentVotingIdx);
-  }, [counter, currentVotingIdx]);
+  const votingAllowed = votableQuestionGroups.length > currentVotingIdx;
 
   const handleNextQuestion = async () => {
+    if (submittingVoteRef.current) return;
+    if (!rallyeId || !teamId || !currentQuestion || !selectedTeam) return;
+
+    submittingVoteRef.current = true;
     try {
-      if (!selectedUpdateId) return;
       setSendingResult(true);
-      const { error } = await supabase.rpc('increment_team_question_points', {
-        target_answer_id: selectedUpdateId,
+      const { error } = await supabase.rpc('cast_voting_vote', {
+        rallye_id_param: rallyeId,
+        question_id_param: currentQuestion.questionId,
+        voting_team_id_param: teamId,
+        voted_for_team_id_param: selectedTeam,
       });
       if (error) throw error;
-      setCurrentVotingIdx((i) => i + 1);
-      setSelectedUpdateId(null);
+      setCurrentVotingIdx((index) => index + 1);
       setSelectedTeam(null);
-    } catch (e) {
-      console.error('Error updating team question:', e);
+    } catch (error) {
+      console.error('Error saving vote:', error);
       Alert.alert(t('common.errorTitle'), t('voting.error.submit'));
     } finally {
       setSendingResult(false);
+      submittingVoteRef.current = false;
     }
   };
 
-  if (!votingAllowed || teamCount < 2) {
+  if (!votingAllowed || teamCount < 3) {
     return (
       <Screen padding="none" contentStyle={globalStyles.default.container}>
         <VStack style={{ width: '100%' }} gap={2}>
@@ -145,7 +259,7 @@ export default function Voting({
             </ThemedText>
           </InfoBox>
           <InfoBox mb={2}>
-            <UIButton icon="rotate" disabled={loading} onPress={onRefresh}>
+            <UIButton icon="rotate" disabled={loading} onPress={handleRefresh}>
               {t('common.refresh')}
             </UIButton>
           </InfoBox>
@@ -161,20 +275,20 @@ export default function Voting({
       contentStyle={[globalStyles.default.container, { flex: 1 }]}
     >
       <FlatList
-        data={currentQuestion}
-        keyExtractor={(item) => `${item.tq_team_id}`}
-        onRefresh={getVotingData}
+        data={currentQuestion?.candidates || []}
+        keyExtractor={(item) => `${currentQuestion?.questionId}-${item.teamId}`}
+        onRefresh={handleRefresh}
         refreshing={loading}
         ListHeaderComponent={() => (
           <View style={{ paddingTop: 10, paddingBottom: 30 }}>
             <RallyeContextBar />
-            {currentQuestion && currentQuestion.length > 0 ? (
+            {currentQuestion ? (
               <InfoBox mb={2}>
                 <ThemedText
                   variant="title"
                   style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
                 >
-                  {currentQuestion[0]?.question_content}
+                  {currentQuestion.questionContent}
                 </ThemedText>
                 <ThemedText
                   variant="body"
@@ -192,37 +306,32 @@ export default function Voting({
         )}
         renderItem={({ item }) => (
           <TouchableOpacity
-            testID={`vote-option-${item.tq_id}`}
-            onPress={() => {
-              setSelectedTeam(item.rt_id);
-              setSelectedUpdateId(item.tq_id);
-            }}
+            testID={`vote-option-${currentQuestion?.questionId}-${item.teamId}`}
+            onPress={() => setSelectedTeam(item.teamId)}
             activeOpacity={1.0}
-            style={{ alignItems: 'flex-start', paddingTop: 10 }}
+            style={{ alignItems: 'flex-start', paddingTop: 10, width: '100%' }}
           >
             <InfoBox
               mb={2}
               style={{
                 borderColor:
-                  selectedTeam === item.rt_id ? Colors.dhbwRed : 'transparent',
-                borderWidth: selectedTeam === item.rt_id ? 2 : 0,
+                  selectedTeam === item.teamId ? Colors.dhbwRed : 'transparent',
+                borderWidth: selectedTeam === item.teamId ? 2 : 0,
               }}
             >
-              {item.question_type === 'knowledge' ||
-              item.question_type === 'geocaching' ? (
+              {currentQuestion?.questionType === 'knowledge' ||
+              currentQuestion?.questionType === 'geocaching' ? (
                 <ThemedText
                   variant="title"
                   style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
                 >
-                  {item.tq_team_answer}
+                  {item.teamAnswer}
                 </ThemedText>
               ) : (
                 (() => {
                   const imageUri = `${
                     process.env.EXPO_PUBLIC_SUPABASE_URL
-                  }/storage/v1/object/public/upload-photos/${(
-                    item?.tq_team_answer || ''
-                  ).trim()}`;
+                  }/storage/v1/object/public/upload-photos/${item.teamAnswer.trim()}`;
                   return (
                     <Image
                       source={{ uri: imageUri }}
@@ -240,7 +349,7 @@ export default function Voting({
                 variant="body"
                 style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
               >
-                {item.rt_team_name}
+                {item.teamName}
               </ThemedText>
             </InfoBox>
           </TouchableOpacity>
