@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Image } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import Voting from '../voting';
 
@@ -470,6 +470,68 @@ describe('Voting', () => {
     await waitFor(() => {
       expect(getByText('Geocaching Answer A')).toBeTruthy();
       expect(getByText('Geocaching Answer B')).toBeTruthy();
+    });
+  });
+
+  it('renders upload answers as team choices without loading images', async () => {
+    fixtures.joinRows = [
+      {
+        rallye_id: 1,
+        question_id: 301,
+        is_voting: true,
+        questions: {
+          id: 301,
+          content: 'Best team photo',
+          type: 'upload',
+        },
+      },
+    ];
+    fixtures.answerRows = [
+      { question_id: 301, team_id: 3, team_answer: '3_301.jpg' },
+      { question_id: 301, team_id: 4, team_answer: '4_301.jpg' },
+    ];
+
+    const { getByText, UNSAFE_queryByType } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('Best team photo')).toBeTruthy();
+      expect(getByText('Team A')).toBeTruthy();
+      expect(getByText('Team B')).toBeTruthy();
+    });
+
+    expect(UNSAFE_queryByType(Image)).toBeNull();
+  });
+
+  it('renders non-upload voting answers as text', async () => {
+    fixtures.joinRows = [
+      {
+        rallye_id: 1,
+        question_id: 302,
+        is_voting: true,
+        questions: {
+          id: 302,
+          content: 'Best non-upload answer',
+          type: 'multiple_choice',
+        },
+      },
+    ];
+    fixtures.answerRows = [
+      { question_id: 302, team_id: 3, team_answer: 'Choice A' },
+      { question_id: 302, team_id: 4, team_answer: 'Choice B' },
+    ];
+
+    const { getByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('Best non-upload answer')).toBeTruthy();
+      expect(getByText('Choice A')).toBeTruthy();
+      expect(getByText('Choice B')).toBeTruthy();
+      expect(getByText('Team A')).toBeTruthy();
+      expect(getByText('Team B')).toBeTruthy();
     });
   });
 

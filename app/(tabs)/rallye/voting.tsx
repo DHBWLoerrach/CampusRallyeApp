@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Image, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import UIButton from '@/components/ui/UIButton';
@@ -70,6 +70,10 @@ function normalizeQuestionRow(
     questionContent: typeof question.content === 'string' ? question.content : '',
     questionType: typeof question.type === 'string' ? question.type : 'knowledge',
   };
+}
+
+function shouldShowAnswerInVoting(questionType: string) {
+  return questionType !== 'upload';
 }
 
 export default function Voting({
@@ -319,38 +323,30 @@ export default function Voting({
                 borderWidth: selectedTeam === item.teamId ? 2 : 0,
               }}
             >
-              {currentQuestion?.questionType === 'knowledge' ||
-              currentQuestion?.questionType === 'geocaching' ? (
+              {currentQuestion &&
+              shouldShowAnswerInVoting(currentQuestion.questionType) ? (
+                <>
+                  <ThemedText
+                    variant="title"
+                    style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+                  >
+                    {item.teamAnswer}
+                  </ThemedText>
+                  <ThemedText
+                    variant="body"
+                    style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
+                  >
+                    {item.teamName}
+                  </ThemedText>
+                </>
+              ) : (
                 <ThemedText
                   variant="title"
                   style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
                 >
-                  {item.teamAnswer}
+                  {item.teamName}
                 </ThemedText>
-              ) : (
-                (() => {
-                  const imageUri = `${
-                    process.env.EXPO_PUBLIC_SUPABASE_URL
-                  }/storage/v1/object/public/upload-photos/${item.teamAnswer.trim()}`;
-                  return (
-                    <Image
-                      source={{ uri: imageUri }}
-                      style={{
-                        width: '100%',
-                        height: 200,
-                        resizeMode: 'contain',
-                        marginBottom: 10,
-                      }}
-                    />
-                  );
-                })()
               )}
-              <ThemedText
-                variant="body"
-                style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
-              >
-                {item.teamName}
-              </ThemedText>
             </InfoBox>
           </TouchableOpacity>
         )}
