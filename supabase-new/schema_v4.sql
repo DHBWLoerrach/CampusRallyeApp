@@ -381,6 +381,10 @@ ALTER TABLE ONLY "public"."team_questions"
     ADD CONSTRAINT "teamQuestions_pkey" PRIMARY KEY ("id");
 
 
+ALTER TABLE ONLY "public"."team_questions"
+    ADD CONSTRAINT "team_questions_team_id_question_id_key" UNIQUE ("team_id", "question_id");
+
+
 
 ALTER TABLE ONLY "public"."voting"
     ADD CONSTRAINT "voting_pkey" PRIMARY KEY ("rallye_id", "question_id");

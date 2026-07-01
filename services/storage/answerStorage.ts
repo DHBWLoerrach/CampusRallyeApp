@@ -12,13 +12,16 @@ export async function saveAnswer(
   answer: string = ''
 ): Promise<SaveAnswerResult> {
   try {
-    const { error } = await supabase.from('team_questions').insert({
-      team_id: teamId,
-      question_id: questionId,
-      correct: answeredCorrectly,
-      points: points,
-      team_answer: answer,
-    });
+    const { error } = await supabase.from('team_questions').upsert(
+      {
+        team_id: teamId,
+        question_id: questionId,
+        correct: answeredCorrectly,
+        points: points,
+        team_answer: answer,
+      },
+      { onConflict: 'team_id,question_id', ignoreDuplicates: true }
+    );
     if (error) throw error;
     return { status: 'sent' };
   } catch (error) {

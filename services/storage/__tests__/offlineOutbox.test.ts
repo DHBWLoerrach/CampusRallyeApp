@@ -11,8 +11,7 @@ import {
 } from '@/services/storage/offlineOutbox';
 
 const mockFrom = jest.fn();
-const maybeSingleMock = jest.fn();
-const insertMock = jest.fn();
+const upsertMock = jest.fn();
 
 jest.mock('@/utils/Supabase', () => ({
   supabase: {
@@ -53,29 +52,33 @@ describe('offlineOutbox processOutbox', () => {
     outbox$.lastSyncedAt.set(0);
 
     mockFrom.mockReturnValue({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => ({ maybeSingle: maybeSingleMock })),
-        })),
-      })),
-      insert: insertMock,
+      upsert: upsertMock,
     });
 
-    maybeSingleMock.mockResolvedValue({ data: null, error: null });
-    insertMock.mockResolvedValue({ error: null });
+    upsertMock.mockResolvedValue({ error: null });
   });
 
   it('prevents overlapping sync runs', async () => {
     await enqueueSaveAnswer({ ...basePayload });
     const deferred = createDeferred<{ error: null }>();
-    insertMock.mockReturnValueOnce(deferred.promise);
+    upsertMock.mockReturnValueOnce(deferred.promise);
 
     const first = processOutbox();
     const second = processOutbox();
 
     await flushPromises();
     await flushPromises();
-    expect(insertMock).toHaveBeenCalledTimes(1);
+    expect(upsertMock).toHaveBeenCalledTimes(1);
+    expect(upsertMock).toHaveBeenCalledWith(
+      {
+        team_id: 1,
+        question_id: 2,
+        correct: true,
+        points: 3,
+        team_answer: 'answer',
+      },
+      { onConflict: 'team_id,question_id', ignoreDuplicates: true }
+    );
 
     deferred.resolve({ error: null });
     await Promise.all([first, second]);
@@ -84,12 +87,12 @@ describe('offlineOutbox processOutbox', () => {
   it('keeps items enqueued during an active sync', async () => {
     await enqueueSaveAnswer({ ...basePayload, question_id: 10 });
     const deferred = createDeferred<{ error: null }>();
-    insertMock.mockReturnValueOnce(deferred.promise);
+    upsertMock.mockReturnValueOnce(deferred.promise);
 
     const syncPromise = processOutbox();
     await flushPromises();
     await flushPromises();
-    expect(insertMock).toHaveBeenCalledTimes(1);
+    expect(upsertMock).toHaveBeenCalledTimes(1);
 
     await enqueueSaveAnswer({ ...basePayload, question_id: 11 });
 
@@ -105,7 +108,7 @@ describe('offlineOutbox processOutbox', () => {
     outbox$.online.set(false);
     await enqueueSaveAnswer({ ...basePayload });
     await processOutbox();
-    expect(insertMock).not.toHaveBeenCalled();
+    expect(upsertMock).not.toHaveBeenCalled();
 
     // Queue should still have the item
     const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
@@ -114,23 +117,12 @@ describe('offlineOutbox processOutbox', () => {
 
   it('processes an empty queue without errors', async () => {
     await processOutbox();
-    expect(insertMock).not.toHaveBeenCalled();
-  });
-
-  it('skips insert when row already exists (idempotency)', async () => {
-    await enqueueSaveAnswer({ ...basePayload });
-    maybeSingleMock.mockResolvedValueOnce({ data: { id: 99 }, error: null });
-
-    await processOutbox();
-
-    expect(insertMock).not.toHaveBeenCalled();
-    const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
-    expect(queue).toHaveLength(0);
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 
   it('increments attempts and sets lastError on failure', async () => {
     await enqueueSaveAnswer({ ...basePayload });
-    insertMock.mockResolvedValueOnce({ error: { message: 'db error' } });
+    upsertMock.mockResolvedValueOnce({ error: { message: 'db error' } });
 
     await processOutbox();
 
@@ -160,13 +152,14 @@ describe('offlineOutbox processOutbox', () => {
     await processOutbox();
 
     // Should have been normalized and processed
-    expect(insertMock).toHaveBeenCalledWith(
+    expect(upsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         team_id: 5,
         question_id: 10,
         correct: true,
         points: 7,
-      })
+      }),
+      { onConflict: 'team_id,question_id', ignoreDuplicates: true }
     );
   });
 
@@ -187,14 +180,15 @@ describe('offlineOutbox processOutbox', () => {
 
     await processOutbox();
 
-    expect(insertMock).toHaveBeenCalledWith(
+    expect(upsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         team_id: 3,
         question_id: 8,
         correct: false,
         points: 0,
         team_answer: 'wrong',
-      })
+      }),
+      { onConflict: 'team_id,question_id', ignoreDuplicates: true }
     );
   });
 
@@ -209,7 +203,7 @@ describe('offlineOutbox processOutbox', () => {
 
     await processOutbox();
 
-    expect(insertMock).not.toHaveBeenCalled();
+    expect(upsertMock).not.toHaveBeenCalled();
     // Queue should be empty after normalization dropped the item
     const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
     expect(queue).toHaveLength(0);

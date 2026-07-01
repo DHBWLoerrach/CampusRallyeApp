@@ -184,26 +184,16 @@ export function processOutbox() {
           }
 
           const p = action.payload;
-          // Idempotency: treat "already exists" as success.
-          const { data: existing, error: existingError } = await supabase
-            .from('team_questions')
-            .select('id')
-            .eq('team_id', p.team_id)
-            .eq('question_id', p.question_id)
-            .maybeSingle();
-          if (existingError) throw existingError;
-          if (existing) {
-            processedIds.add(action.id);
-            continue;
-          }
-
-          const { error } = await supabase.from('team_questions').insert({
-            team_id: p.team_id,
-            question_id: p.question_id,
-            correct: p.correct,
-            points: p.points,
-            team_answer: p.team_answer,
-          });
+          const { error } = await supabase.from('team_questions').upsert(
+            {
+              team_id: p.team_id,
+              question_id: p.question_id,
+              correct: p.correct,
+              points: p.points,
+              team_answer: p.team_answer,
+            },
+            { onConflict: 'team_id,question_id', ignoreDuplicates: true }
+          );
           if (error) throw error;
           processedIds.add(action.id);
         } catch (error: any) {
