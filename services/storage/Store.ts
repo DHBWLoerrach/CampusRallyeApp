@@ -63,7 +63,6 @@ export const store$ = observable({
   allQuestionsAnswered: false,
   answers: [] as AnswerRow[],
   team: null as Team | null,
-  votingAllowed: true,
   timeExpired: false,
   teamDeleted: false,
 
@@ -128,7 +127,6 @@ export const store$ = observable({
     store$.questions.set([]);
     store$.answers.set([]);
     store$.timeExpired.set(false);
-    store$.votingAllowed.set(true);
     store$.totalQuestions.set(0);
     store$.answeredCount.set(0);
     store$.usedHints.set({});

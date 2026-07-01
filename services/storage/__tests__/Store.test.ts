@@ -98,7 +98,6 @@ describe('store$ observable', () => {
       store$.questions.set([{ id: 1 }] as any);
       store$.answers.set([{ id: 1 }] as any);
       store$.timeExpired.set(true);
-      store$.votingAllowed.set(false);
       store$.totalQuestions.set(10);
       store$.answeredCount.set(5);
       store$.usedHints.set({ 1: true });
@@ -111,7 +110,6 @@ describe('store$ observable', () => {
       expect(store$.questions.get()).toEqual([]);
       expect(store$.answers.get()).toEqual([]);
       expect(store$.timeExpired.get()).toBe(false);
-      expect(store$.votingAllowed.get()).toBe(true);
       expect(store$.totalQuestions.get()).toBe(0);
       expect(store$.answeredCount.get()).toBe(0);
       expect(store$.usedHints.get()).toEqual({});
