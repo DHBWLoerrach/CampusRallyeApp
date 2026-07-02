@@ -675,7 +675,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             )}
 
             {distance != null && (
-              <ThemedText variant="metric" style={[s.text, styles.distanceText]}>
+              <ThemedText
+                variant="metric"
+                style={[s.text, styles.distanceText]}
+              >
                 {formatDistance(distance)}
               </ThemedText>
             )}

@@ -95,9 +95,7 @@ describe('RallyePasswordSheet', () => {
       />
     );
 
-    fireEvent.press(
-      UNSAFE_getByProps({ testID: 'rallye-password-backdrop' })
-    );
+    fireEvent.press(UNSAFE_getByProps({ testID: 'rallye-password-backdrop' }));
 
     expect(dismissSpy).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);

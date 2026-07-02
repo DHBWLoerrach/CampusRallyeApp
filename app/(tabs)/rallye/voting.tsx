@@ -62,13 +62,17 @@ type VotingQuestionGroup = {
 function normalizeQuestionRow(
   row: QuestionJoinRow
 ): Omit<VotingQuestionGroup, 'candidates'> | null {
-  const question = Array.isArray(row.questions) ? row.questions[0] : row.questions;
+  const question = Array.isArray(row.questions)
+    ? row.questions[0]
+    : row.questions;
   if (!question || typeof row.question_id !== 'number') return null;
 
   return {
     questionId: row.question_id,
-    questionContent: typeof question.content === 'string' ? question.content : '',
-    questionType: typeof question.type === 'string' ? question.type : 'knowledge',
+    questionContent:
+      typeof question.content === 'string' ? question.content : '',
+    questionType:
+      typeof question.type === 'string' ? question.type : 'knowledge',
   };
 }
 
@@ -109,7 +113,10 @@ export default function Voting({
             .select('question_id, questions!inner(id, content, type)')
             .eq('rallye_id', rallyeId)
             .eq('is_voting', true),
-          supabase.from('rallye_team').select('id, name').eq('rallye_id', rallyeId),
+          supabase
+            .from('rallye_team')
+            .select('id, name')
+            .eq('rallye_id', rallyeId),
           supabase.rpc('get_voted_voting_question_ids', {
             rallye_id_param: rallyeId,
             voting_team_id_param: teamId,
@@ -122,14 +129,19 @@ export default function Voting({
 
       const questionRows = (questionResponse.data || []) as QuestionJoinRow[];
       const teamRows = (teamResponse.data || []) as RallyeTeamRow[];
-      const votedQuestions = (votedQuestionResponse.data || []) as VotedQuestionRow[];
+      const votedQuestions = (votedQuestionResponse.data ||
+        []) as VotedQuestionRow[];
 
       setTeamCount(teamRows.length);
 
       const questions = questionRows
         .map(normalizeQuestionRow)
-        .filter((row): row is Omit<VotingQuestionGroup, 'candidates'> => row !== null);
-      const otherTeams = teamRows.filter((candidate) => candidate.id !== teamId);
+        .filter(
+          (row): row is Omit<VotingQuestionGroup, 'candidates'> => row !== null
+        );
+      const otherTeams = teamRows.filter(
+        (candidate) => candidate.id !== teamId
+      );
       const candidateTeamIds = otherTeams.map((candidate) => candidate.id);
 
       if (questions.length === 0 || candidateTeamIds.length === 0) {
@@ -166,14 +178,21 @@ export default function Voting({
       const groupedCandidates = new Map<number, VotingCandidate[]>();
       for (const answer of (answerData || []) as TeamQuestionRow[]) {
         const teamAnswer =
-          typeof answer.team_answer === 'string' ? answer.team_answer.trim() : '';
+          typeof answer.team_answer === 'string'
+            ? answer.team_answer.trim()
+            : '';
         if (!teamAnswer) continue;
 
         const teamName = teamNameById.get(answer.team_id);
         if (!teamName) continue;
 
-        const existingForQuestion = groupedCandidates.get(answer.question_id) || [];
-        if (existingForQuestion.some((candidate) => candidate.teamId === answer.team_id))
+        const existingForQuestion =
+          groupedCandidates.get(answer.question_id) || [];
+        if (
+          existingForQuestion.some(
+            (candidate) => candidate.teamId === answer.team_id
+          )
+        )
           continue;
 
         existingForQuestion.push({
@@ -334,7 +353,10 @@ export default function Voting({
                   </ThemedText>
                   <ThemedText
                     variant="body"
-                    style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
+                    style={[
+                      globalStyles.rallyeStatesStyles.infoSubtitle,
+                      s.muted,
+                    ]}
                   >
                     {item.teamName}
                   </ThemedText>

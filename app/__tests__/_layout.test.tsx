@@ -20,9 +20,12 @@ let mockErrorBoundaryError: Error | null = null;
 const mockErrorBoundaryReset = jest.fn();
 
 jest.mock('expo-router', () => ({
-  Stack: Object.assign(jest.fn(({ children }: StackProps) => children), {
-    Screen: jest.fn(({ children }: StackScreenProps) => children ?? null),
-  }),
+  Stack: Object.assign(
+    jest.fn(({ children }: StackProps) => children),
+    {
+      Screen: jest.fn(({ children }: StackScreenProps) => children ?? null),
+    }
+  ),
   useRootNavigationState: () => ({ key: 'root' }),
   useRouter: () => ({
     replace: mockRouterReplace,
@@ -91,11 +94,7 @@ jest.mock('@/utils/AppStyles', () => ({
 }));
 
 jest.mock('@/components/themed/ThemedText', () => {
-  return function MockThemedText({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) {
+  return function MockThemedText({ children }: { children: React.ReactNode }) {
     return <MockText>{children}</MockText>;
   };
 });

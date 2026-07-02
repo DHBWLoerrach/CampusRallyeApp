@@ -131,7 +131,11 @@ function baseFixtures(): Fixtures {
         rallye_id: 1,
         question_id: 999,
         is_voting: false,
-        questions: { id: 999, content: 'Non voting question', type: 'knowledge' },
+        questions: {
+          id: 999,
+          content: 'Non voting question',
+          type: 'knowledge',
+        },
       },
     ],
     teamRows: [
@@ -258,16 +262,21 @@ describe('Voting', () => {
       select: (columns: string) => createSelectBuilder(table, columns),
     }));
 
-    mockRpc.mockImplementation((name: string, params: Record<string, unknown>) => {
-      rpcCalls.push({ name, params });
-      if (name === 'get_voted_voting_question_ids') {
-        return Promise.resolve({ data: fixtures.votedQuestions, error: null });
+    mockRpc.mockImplementation(
+      (name: string, params: Record<string, unknown>) => {
+        rpcCalls.push({ name, params });
+        if (name === 'get_voted_voting_question_ids') {
+          return Promise.resolve({
+            data: fixtures.votedQuestions,
+            error: null,
+          });
+        }
+        if (name === 'cast_voting_vote') {
+          return Promise.resolve({ error: fixtures.voteError });
+        }
+        return Promise.resolve({ data: [], error: null });
       }
-      if (name === 'cast_voting_vote') {
-        return Promise.resolve({ error: fixtures.voteError });
-      }
-      return Promise.resolve({ data: [], error: null });
-    });
+    );
   });
 
   afterEach(() => {
@@ -354,7 +363,9 @@ describe('Voting', () => {
   it('shows end state when no votable questions remain', async () => {
     fixtures.votedQuestions = [{ question_id: 101 }, { question_id: 102 }];
 
-    const { getByText } = render(<Voting onRefresh={jest.fn()} loading={false} />);
+    const { getByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
 
     await waitFor(() => {
       expect(getByText('voting.ended.title')).toBeTruthy();
@@ -382,16 +393,21 @@ describe('Voting', () => {
     const votePromise = new Promise<{ error: null }>((resolve) => {
       resolveVote = resolve;
     });
-    mockRpc.mockImplementation((name: string, params: Record<string, unknown>) => {
-      rpcCalls.push({ name, params });
-      if (name === 'get_voted_voting_question_ids') {
-        return Promise.resolve({ data: fixtures.votedQuestions, error: null });
+    mockRpc.mockImplementation(
+      (name: string, params: Record<string, unknown>) => {
+        rpcCalls.push({ name, params });
+        if (name === 'get_voted_voting_question_ids') {
+          return Promise.resolve({
+            data: fixtures.votedQuestions,
+            error: null,
+          });
+        }
+        if (name === 'cast_voting_vote') {
+          return votePromise;
+        }
+        return Promise.resolve({ data: [], error: null });
       }
-      if (name === 'cast_voting_vote') {
-        return votePromise;
-      }
-      return Promise.resolve({ data: [], error: null });
-    });
+    );
 
     const { getByText, getByTestId, queryByText } = render(
       <Voting onRefresh={jest.fn()} loading={false} />
@@ -406,9 +422,9 @@ describe('Voting', () => {
     fireEvent.press(getByText('voting.next'));
 
     await waitFor(() => {
-      expect(rpcCalls.filter((call) => call.name === 'cast_voting_vote')).toHaveLength(
-        1
-      );
+      expect(
+        rpcCalls.filter((call) => call.name === 'cast_voting_vote')
+      ).toHaveLength(1);
     });
 
     resolveVote({ error: null });
@@ -541,7 +557,9 @@ describe('Voting', () => {
       { id: 3, rallye_id: 1, name: 'Team A' },
     ];
 
-    const { getByText } = render(<Voting onRefresh={jest.fn()} loading={false} />);
+    const { getByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
 
     await waitFor(() => {
       expect(getByText('voting.ended.title')).toBeTruthy();
