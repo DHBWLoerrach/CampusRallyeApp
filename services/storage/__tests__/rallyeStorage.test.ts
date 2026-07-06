@@ -106,6 +106,7 @@ describe('rallyeStorage.getCurrentRallye', () => {
     const invalidStoredRallye = {
       id: 42,
       name: 'Invalid Mode Rallye',
+      department_id: 11,
       status: 'running',
       mode: 'invalid-mode',
     };
@@ -140,6 +141,7 @@ describe('rallyeStorage.getCurrentRallye', () => {
     const missingModeRallye = {
       id: 99,
       name: 'Missing Mode Rallye',
+      department_id: 12,
       status: 'running',
     };
 
@@ -170,36 +172,21 @@ describe('rallyeStorage.getLocationDashboardData', () => {
     jest.clearAllMocks();
   });
 
-  it('returns tour mode, campus events, and department rallyes in one payload', async () => {
+  it('loads tour mode and department rallyes via rallye.department_id', async () => {
     const locId = 1;
-    const locName = 'DHBW Lörrach';
     const departments = [
       {
         id: 11,
-        name: locName,
-        location_id: locId,
-        created_at: '2024-01-01T00:00:00Z',
-      },
-      {
-        id: 12,
         name: 'Informatik',
         location_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
       {
-        id: 13,
+        id: 12,
         name: 'BWL',
         location_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
-    ];
-
-    const joins = [
-      { department_id: 11, rallye_id: 101 },
-      { department_id: 11, rallye_id: 102 },
-      { department_id: 12, rallye_id: 201 },
-      { department_id: 12, rallye_id: 202 },
-      { department_id: 13, rallye_id: 301 },
     ];
 
     useTableHandlers({
@@ -213,9 +200,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         if (select === 'default_rallye_id') {
           return { data: { default_rallye_id: 900 }, error: null };
         }
-        if (select === 'id, name') {
-          return { data: { id: locId, name: locName }, error: null };
-        }
+
         return {
           data: null,
           error: new Error(`Unexpected location select ${select}`),
@@ -231,27 +216,18 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         expect(locFilter?.value).toBe(locId);
         return { data: departments, error: null };
       },
-      join_department_rallye: ({ select, constraints, single }) => {
-        expect(single).toBe(false);
-        expect(select).toBe('department_id, rallye_id');
-        const departmentFilter = constraints.find(
-          (constraint) =>
-            constraint.type === 'in' && constraint.column === 'department_id'
-        );
-        expect(departmentFilter?.value).toEqual([11, 12, 13]);
-        return { data: joins, error: null };
-      },
-      rallye: ({ constraints, single }) => {
+      rallye: ({ select, constraints, single }) => {
         if (single) {
+          expect(select).toBe('*');
           const rallyeIdFilter = constraints.find(
-            (constraint) =>
-              constraint.type === 'eq' && constraint.column === 'id'
+            (constraint) => constraint.type === 'eq' && constraint.column === 'id'
           );
           expect(rallyeIdFilter?.value).toBe(900);
           return {
             data: {
               id: 900,
               name: 'Campus Tour',
+              department_id: 11,
               status: 'running',
               password: null,
               end_time: null,
@@ -261,11 +237,19 @@ describe('rallyeStorage.getLocationDashboardData', () => {
           };
         }
 
+        expect(select).toBe('*');
+        const departmentFilter = constraints.find(
+          (constraint) =>
+            constraint.type === 'in' && constraint.column === 'department_id'
+        );
+        expect(departmentFilter?.value).toEqual([11, 12]);
+
         return {
           data: [
             {
               id: 101,
-              name: 'Campus Event 1',
+              name: 'Info Rallye',
+              department_id: 11,
               status: 'running',
               password: null,
               end_time: null,
@@ -273,7 +257,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
             },
             {
               id: 102,
-              name: 'Campus Event Inactive',
+              name: 'Info Rallye Inactive',
+              department_id: 11,
               status: 'inactive',
               password: null,
               end_time: null,
@@ -281,23 +266,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
             },
             {
               id: 201,
-              name: 'Info Rallye',
-              status: 'running',
-              password: '',
-              end_time: null,
-              created_at: '2024-01-01T00:00:00Z',
-            },
-            {
-              id: 202,
-              name: 'Info Ended',
-              status: 'ended',
-              password: null,
-              end_time: null,
-              created_at: '2024-01-01T00:00:00Z',
-            },
-            {
-              id: 301,
               name: 'BWL Rallye',
+              department_id: 12,
               status: 'running',
               password: 'secret',
               end_time: null,
@@ -315,50 +285,72 @@ describe('rallyeStorage.getLocationDashboardData', () => {
       id: 900,
       mode: 'tour',
     });
-    expect(result.campusEventsRallyes.map((rallye) => rallye.id)).toEqual([
-      101,
+    expect(
+      result.departmentEntries.map((entry) => ({
+        departmentId: entry.department.id,
+        rallyeIds: entry.rallyes.map((rallye) => rallye.id),
+      }))
+    ).toEqual([
+      { departmentId: 11, rallyeIds: [101] },
+      { departmentId: 12, rallyeIds: [201] },
     ]);
-    expect(result.campusEventsRallyes[0].mode).toBe('department');
-
-    expect(
-      result.departmentEntries.map((entry) => entry.department.id)
-    ).toEqual([12, 13]);
-    expect(
-      result.departmentEntries[0].rallyes.map((rallye) => rallye.id)
-    ).toEqual([201]);
-    expect(
-      result.departmentEntries[1].rallyes.map((rallye) => rallye.id)
-    ).toEqual([301]);
     expect(result.departmentEntries[0].rallyes[0].mode).toBe('department');
+    expect(mockFrom).not.toHaveBeenCalledWith('join_department_rallye');
   });
 
-  it('returns empty lists when location has no departments', async () => {
-    const locId = 2;
+  it('skips active rallyes without department_id and logs warning', async () => {
+    const locId = 3;
 
     useTableHandlers({
       location: ({ select }) => {
         if (select === 'default_rallye_id') {
           return { data: { default_rallye_id: null }, error: null };
         }
-        if (select === 'id, name') {
-          return { data: { id: locId, name: 'DHBW Mannheim' }, error: null };
-        }
+
         return {
           data: null,
           error: new Error(`Unexpected location select ${select}`),
         };
       },
-      department: () => ({ data: [], error: null }),
+      department: () => ({
+        data: [
+          {
+            id: 10,
+            name: 'Informatik',
+            location_id: locId,
+            created_at: '2024-01-01T00:00:00Z',
+          },
+        ],
+        error: null,
+      }),
+      rallye: ({ single }) => {
+        if (single) {
+          return { data: null, error: null };
+        }
+        return {
+          data: [
+            {
+              id: 555,
+              name: 'Broken Rallye',
+              department_id: null,
+              status: 'running',
+              password: null,
+              end_time: null,
+              created_at: '2024-01-01T00:00:00Z',
+            },
+          ],
+          error: null,
+        };
+      },
     });
 
     const result = await getLocationDashboardData(locId);
 
-    expect(result).toEqual({
-      tourModeRallye: null,
-      campusEventsRallyes: [],
-      departmentEntries: [],
-    });
-    expect(mockFrom).not.toHaveBeenCalledWith('join_department_rallye');
-    expect(mockFrom).not.toHaveBeenCalledWith('rallye');
+    expect(result.departmentEntries).toEqual([]);
+    expect(Logger.warn).toHaveBeenCalledWith(
+      'RallyeStorage',
+      'Skipping active rallye without department_id in dashboard mapping',
+      { rallyeId: 555 }
+    );
   });
 });

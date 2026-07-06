@@ -25,13 +25,7 @@ export type LocationDepartmentEntry = {
 
 export type LocationDashboardData = {
   tourModeRallye: RallyeRow | null;
-  campusEventsRallyes: RallyeRow[];
   departmentEntries: LocationDepartmentEntry[];
-};
-
-type DepartmentRallyeJoin = {
-  department_id: number;
-  rallye_id: number;
 };
 
 // Keep the constraint minimal: only fields required for persisted app usage.
@@ -43,6 +37,12 @@ function withMode<T extends RallyeStorageRow>(
   mode: RallyeMode;
 } {
   return { ...rallye, mode };
+}
+
+function isActiveRallyeStatus(
+  status: RallyeStatus | null | undefined
+): boolean {
+  return !!status && status !== 'inactive' && status !== 'ended';
 }
 
 export async function getCurrentRallye(): Promise<RallyeRow | null> {
@@ -102,12 +102,6 @@ export async function getRallyeStatus(
   return data?.status ?? null;
 }
 
-function isActiveRallyeStatus(
-  status: RallyeStatus | null | undefined
-): boolean {
-  return !!status && status !== 'inactive' && status !== 'ended';
-}
-
 export async function getLocationDashboardData(
   locId: number
 ): Promise<LocationDashboardData> {
@@ -116,27 +110,10 @@ export async function getLocationDashboardData(
     `getLocationDashboardData called with locId: ${locId}`
   );
 
-  const [tourModeRallye, locationResult, departmentsResult] = await Promise.all(
-    [
-      getTourModeRallyeForLocation(locId),
-      supabase.from('location').select('id, name').eq('id', locId).single(),
-      supabase.from('department').select('*').eq('location_id', locId),
-    ]
-  );
-
-  const location = locationResult.data as Pick<Location, 'id' | 'name'> | null;
-  if (locationResult.error || !location) {
-    Logger.error(
-      'RallyeStorage',
-      'Error fetching location for dashboard data',
-      locationResult.error
-    );
-    return {
-      tourModeRallye,
-      campusEventsRallyes: [],
-      departmentEntries: [],
-    };
-  }
+  const [tourModeRallye, departmentsResult] = await Promise.all([
+    getTourModeRallyeForLocation(locId),
+    supabase.from('department').select('*').eq('location_id', locId),
+  ]);
 
   if (departmentsResult.error) {
     Logger.error(
@@ -146,7 +123,6 @@ export async function getLocationDashboardData(
     );
     return {
       tourModeRallye,
-      campusEventsRallyes: [],
       departmentEntries: [],
     };
   }
@@ -155,53 +131,15 @@ export async function getLocationDashboardData(
   if (departments.length === 0) {
     return {
       tourModeRallye,
-      campusEventsRallyes: [],
       departmentEntries: [],
     };
   }
 
   const departmentIds = departments.map((department) => department.id);
-  const { data: joins, error: joinsError } = await supabase
-    .from('join_department_rallye')
-    .select('department_id, rallye_id')
-    .in('department_id', departmentIds);
-
-  if (joinsError) {
-    Logger.error(
-      'RallyeStorage',
-      'Error fetching department rallye joins',
-      joinsError
-    );
-    return {
-      tourModeRallye,
-      campusEventsRallyes: [],
-      departmentEntries: [],
-    };
-  }
-
-  const typedJoins = (joins as DepartmentRallyeJoin[] | null) ?? [];
-  if (typedJoins.length === 0) {
-    return {
-      tourModeRallye,
-      campusEventsRallyes: [],
-      departmentEntries: [],
-    };
-  }
-
-  const rallyeIds = [...new Set(typedJoins.map((join) => join.rallye_id))];
-
-  if (rallyeIds.length === 0) {
-    return {
-      tourModeRallye,
-      campusEventsRallyes: [],
-      departmentEntries: [],
-    };
-  }
-
   const { data: rallyeRows, error: rallyeError } = await supabase
     .from('rallye')
     .select('*')
-    .in('id', rallyeIds);
+    .in('department_id', departmentIds);
 
   if (rallyeError) {
     Logger.error(
@@ -211,35 +149,27 @@ export async function getLocationDashboardData(
     );
     return {
       tourModeRallye,
-      campusEventsRallyes: [],
       departmentEntries: [],
     };
   }
 
-  const activeRallyesById = new Map<number, RallyeRow>();
+  const rallyesByDepartment = new Map<number, RallyeRow[]>();
   (rallyeRows as RallyeDbRow[] | null)?.forEach((rallye) => {
     if (!isActiveRallyeStatus(rallye.status)) return;
-    activeRallyesById.set(rallye.id, withMode(rallye, 'department'));
+    if (rallye.department_id == null) {
+      Logger.warn(
+        'RallyeStorage',
+        'Skipping active rallye without department_id in dashboard mapping',
+        { rallyeId: rallye.id }
+      );
+      return;
+    }
+    const current = rallyesByDepartment.get(rallye.department_id) ?? [];
+    current.push(withMode(rallye, 'department'));
+    rallyesByDepartment.set(rallye.department_id, current);
   });
-
-  const rallyesByDepartment = new Map<number, RallyeRow[]>();
-  typedJoins.forEach((join) => {
-    const rallye = activeRallyesById.get(join.rallye_id);
-    if (!rallye) return;
-    const current = rallyesByDepartment.get(join.department_id) ?? [];
-    current.push(rallye);
-    rallyesByDepartment.set(join.department_id, current);
-  });
-
-  const campusEventsDepartment =
-    departments.find((department) => department.name === location.name) ?? null;
-
-  const campusEventsRallyes = campusEventsDepartment
-    ? (rallyesByDepartment.get(campusEventsDepartment.id) ?? [])
-    : [];
 
   const departmentEntries = departments
-    .filter((department) => department.id !== campusEventsDepartment?.id)
     .map((department) => ({
       department,
       rallyes: rallyesByDepartment.get(department.id) ?? [],
@@ -248,12 +178,9 @@ export async function getLocationDashboardData(
 
   return {
     tourModeRallye,
-    campusEventsRallyes,
     departmentEntries,
   };
 }
-
-// --- Neue Funktionen für Mandantenfähigkeit ---
 
 /**
  * Lädt alle Lokationen, die:
@@ -263,63 +190,25 @@ export async function getLocationDashboardData(
 export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
   Logger.debug('RallyeStorage', 'getLocationsWithActiveRallyes called');
 
-  // Schritt 1: Hole alle Joins mit Rallye-Daten
-  const { data: allJoins, error: joinError } = await supabase.from(
-    'join_department_rallye'
-  ).select(`
-      department_id,
-      rallye_id,
-      rallye (
-        id,
-        status
-      )
-    `);
+  const { data: allRallyes, error: rallyeError } = await supabase
+    .from('rallye')
+    .select('id, status, department_id');
 
-  Logger.debug('RallyeStorage', 'join_department_rallye result', {
-    allJoins,
-    joinError,
-  });
-
-  if (joinError) {
-    Logger.error('RallyeStorage', 'Error fetching rallye joins', joinError);
+  if (rallyeError) {
+    Logger.error('RallyeStorage', 'Error fetching rallyes', rallyeError);
     return [];
   }
 
-  // Debug: Zeige alle Status-Werte
-  if (allJoins && allJoins.length > 0) {
-    const statusValues = allJoins.map((j: any) => ({
-      dept: j.department_id,
-      rallye: j.rallye_id,
-      status: j.rallye?.status,
-      rallyeObj: j.rallye,
-    }));
-    Logger.debug('RallyeStorage', 'All join status values:', statusValues);
-  }
-
-  // Filtere auf aktive Rallyes (status != 'inactive' und != 'ended')
-  const activeJoins =
-    allJoins?.filter((j: any) => {
-      const status = j.rallye?.status;
-      const isActive = status && status !== 'inactive' && status !== 'ended';
-      Logger.debug(
-        'RallyeStorage',
-        `Loc filter - dept=${j.department_id}, rallye=${j.rallye_id}, status=${status}, isActive=${isActive}`
-      );
-      return isActive;
-    }) ?? [];
-
-  Logger.debug(
-    'RallyeStorage',
-    `Active joins after filter: ${activeJoins.length}`
-  );
-
-  // Extrahiere eindeutige Department-IDs (falls vorhanden)
   const activeDepartmentIds = [
-    ...new Set(activeJoins.map((j: any) => j.department_id)),
+    ...new Set(
+      ((allRallyes as Pick<RallyeDbRow, 'status' | 'department_id'>[] | null) ??
+        [])
+        .filter((rallye) => isActiveRallyeStatus(rallye.status))
+        .map((rallye) => rallye.department_id)
+        .filter((departmentId): departmentId is number => departmentId != null)
+    ),
   ];
-  Logger.debug('RallyeStorage', 'Active department IDs:', activeDepartmentIds);
 
-  // Schritt 2: Hole die Departments und ihre Location-IDs (falls vorhanden)
   let locIdsWithActiveDepts: number[] = [];
   if (activeDepartmentIds.length > 0) {
     const { data: departments, error: deptError } = await supabase
@@ -336,17 +225,9 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
     }
   }
 
-  // Schritt 3: Hole alle Lokationen mit default_rallye_id (Tour-Mode)
-  // Supabase: .not('column', 'is', null) funktioniert nicht wie erwartet
-  // Stattdessen holen wir alle Orgs und filtern client-seitig
   const { data: allLocs, error: allLocsError } = await supabase
     .from('location')
     .select('id, default_rallye_id');
-
-  Logger.debug('RallyeStorage', 'location query result', {
-    allLocs,
-    allLocsError,
-  });
 
   if (allLocsError) {
     Logger.error('RallyeStorage', 'Error fetching all locations', allLocsError);
@@ -354,11 +235,10 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
 
   const locIdsWithTourMode = allLocs
     ? allLocs
-        .filter((o: any) => o.default_rallye_id !== null)
-        .map((o: any) => o.id)
+        .filter((location: any) => location.default_rallye_id !== null)
+        .map((location: any) => location.id)
     : [];
 
-  // Schritt 4: Kombiniere beide Listen (unique)
   const allLocIds = [
     ...new Set([...locIdsWithActiveDepts, ...locIdsWithTourMode]),
   ];
@@ -367,16 +247,10 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
     return [];
   }
 
-  // Schritt 5: Hole die Lokationen
   const { data: locations, error: locError } = await supabase
     .from('location')
     .select('*')
     .in('id', allLocIds);
-
-  Logger.debug('RallyeStorage', 'Final locations result', {
-    locations,
-    locError,
-  });
 
   if (locError) {
     Logger.error('RallyeStorage', 'Error fetching locations', locError);
@@ -397,67 +271,10 @@ export async function getDepartmentsForLocation(
     `getDepartmentsForLocation called with locId: ${locId}`
   );
 
-  // Schritt 1: Hole alle Joins mit Rallye-Daten
-  const { data: allJoins, error: joinError } = await supabase.from(
-    'join_department_rallye'
-  ).select(`
-      department_id,
-      rallye_id,
-      rallye (
-        id,
-        status
-      )
-    `);
-
-  Logger.debug('RallyeStorage', 'join_department_rallye for getDepartments', {
-    allJoins,
-    joinError,
-  });
-
-  if (joinError) {
-    Logger.error('RallyeStorage', 'Error fetching rallye joins', joinError);
-    return [];
-  }
-
-  // Filtere auf aktive Rallyes
-  const activeJoins =
-    allJoins?.filter((j: any) => {
-      const status = j.rallye?.status;
-      const isActive = status && status !== 'inactive' && status !== 'ended';
-      Logger.debug(
-        'RallyeStorage',
-        `Join dept=${j.department_id} rallye=${j.rallye_id}: status=${status}, isActive=${isActive}`
-      );
-      return isActive;
-    }) ?? [];
-
-  Logger.debug('RallyeStorage', `Active joins count: ${activeJoins.length}`);
-
-  if (activeJoins.length === 0) {
-    Logger.debug(
-      'RallyeStorage',
-      'No active joins found, returning empty departments'
-    );
-    return [];
-  }
-
-  // Extrahiere eindeutige Department-IDs mit aktiven Rallyes
-  const activeDepartmentIds = [
-    ...new Set(activeJoins.map((j: any) => j.department_id)),
-  ];
-  Logger.debug('RallyeStorage', 'Active department IDs:', activeDepartmentIds);
-
-  // Schritt 2: Hole die Departments dieser Lokation, die in der aktiven Liste sind
   const { data: departments, error: deptError } = await supabase
     .from('department')
     .select('*')
-    .eq('location_id', locId)
-    .in('id', activeDepartmentIds);
-
-  Logger.debug('RallyeStorage', `Departments for location ${locId}:`, {
-    departments,
-    deptError,
-  });
+    .eq('location_id', locId);
 
   if (deptError) {
     Logger.error(
@@ -468,7 +285,36 @@ export async function getDepartmentsForLocation(
     return [];
   }
 
-  return (departments as Department[]) ?? [];
+  const typedDepartments = (departments as Department[] | null) ?? [];
+  if (typedDepartments.length === 0) {
+    return [];
+  }
+
+  const departmentIds = typedDepartments.map((department) => department.id);
+  const { data: rallyes, error: rallyeError } = await supabase
+    .from('rallye')
+    .select('id, status, department_id')
+    .in('department_id', departmentIds);
+
+  if (rallyeError) {
+    Logger.error(
+      'RallyeStorage',
+      'Error fetching rallyes for departments',
+      rallyeError
+    );
+    return [];
+  }
+
+  const activeDepartmentIds = new Set<number>(
+    ((rallyes as Pick<RallyeDbRow, 'status' | 'department_id'>[] | null) ?? [])
+      .filter((rallye) => isActiveRallyeStatus(rallye.status))
+      .map((rallye) => rallye.department_id)
+      .filter((departmentId): departmentId is number => departmentId != null)
+  );
+
+  return typedDepartments.filter((department) =>
+    activeDepartmentIds.has(department.id)
+  );
 }
 
 /**
@@ -482,48 +328,10 @@ export async function getRallyesForDepartment(
     `getRallyesForDepartment called with deptId: ${deptId}`
   );
 
-  // Hole alle Rallye-IDs, die diesem Department zugeordnet sind
-  const { data: joins, error: joinError } = await supabase
-    .from('join_department_rallye')
-    .select('rallye_id')
-    .eq('department_id', deptId);
-
-  Logger.debug('RallyeStorage', 'join_department_rallye result for dept', {
-    deptId,
-    joins,
-    joinError,
-  });
-
-  if (joinError) {
-    Logger.error(
-      'RallyeStorage',
-      'Error fetching rallye joins for department',
-      joinError
-    );
-    return [];
-  }
-
-  if (!joins || joins.length === 0) {
-    Logger.debug(
-      'RallyeStorage',
-      `No rallye joins found for deptId: ${deptId}`
-    );
-    return [];
-  }
-
-  const rallyeIds = joins.map((j: any) => j.rallye_id);
-  Logger.debug('RallyeStorage', `Rallye IDs for dept ${deptId}:`, rallyeIds);
-
-  // Hole die Rallyes
   const { data: allRallyes, error: rallyeError } = await supabase
     .from('rallye')
     .select('*')
-    .in('id', rallyeIds);
-
-  Logger.debug('RallyeStorage', 'All rallyes fetched:', {
-    allRallyes,
-    rallyeError,
-  });
+    .eq('department_id', deptId);
 
   if (rallyeError) {
     Logger.error(
@@ -534,79 +342,12 @@ export async function getRallyesForDepartment(
     return [];
   }
 
-  // Filtere nach aktivem Status client-seitig
   const activeRallyes =
-    allRallyes?.filter((r: any) => {
-      const isActive =
-        r.status && r.status !== 'inactive' && r.status !== 'ended';
-      Logger.debug(
-        'RallyeStorage',
-        `Rallye ${r.id} (${r.name}): status=${r.status}, isActive=${isActive}`
-      );
-      return isActive;
-    }) ?? [];
+    (allRallyes as RallyeDbRow[] | null)?.filter((rallye) =>
+      isActiveRallyeStatus(rallye.status)
+    ) ?? [];
 
-  Logger.debug(
-    'RallyeStorage',
-    `Active rallyes for dept ${deptId}:`,
-    activeRallyes
-  );
-
-  return activeRallyes.map((r: RallyeDbRow) =>
-    withMode(r, 'department')
-  ) as Rallye[];
-}
-
-/**
- * Findet ein Department das den gleichen Namen wie den Standort hat
- * und mindestens eine aktive Rallye hat.
- * Wird für "Campus Events" verwendet.
- */
-export async function getCampusEventsDepartment(
-  loc: Location
-): Promise<Department | null> {
-  Logger.debug(
-    'RallyeStorage',
-    `getCampusEventsDepartment called for location: ${loc.name}`
-  );
-
-  // Schritt 1: Suche Department mit gleichem Namen wie Location
-  const { data: matchingDept, error: deptError } = await supabase
-    .from('department')
-    .select('*')
-    .eq('location_id', loc.id)
-    .eq('name', loc.name)
-    .single();
-
-  if (deptError || !matchingDept) {
-    Logger.debug(
-      'RallyeStorage',
-      `No department with name "${loc.name}" found for location ${loc.id}`
-    );
-    return null;
-  }
-
-  Logger.debug(
-    'RallyeStorage',
-    `Found matching department: ${matchingDept.id}`
-  );
-
-  // Schritt 2: Prüfe ob dieses Department aktive Rallyes hat
-  const rallyes = await getRallyesForDepartment(matchingDept.id);
-
-  if (rallyes.length === 0) {
-    Logger.debug(
-      'RallyeStorage',
-      `Department "${loc.name}" has no active rallyes`
-    );
-    return null;
-  }
-
-  Logger.debug(
-    'RallyeStorage',
-    `Department "${loc.name}" has ${rallyes.length} active rallye(s)`
-  );
-  return matchingDept as Department;
+  return activeRallyes.map((rallye) => withMode(rallye, 'department')) as Rallye[];
 }
 
 /**
@@ -616,7 +357,6 @@ export async function getCampusEventsDepartment(
 export async function getTourModeRallyeForLocation(
   locId: number
 ): Promise<Rallye | null> {
-  // Schritt 1: Hole die default_rallye_id der Lokation
   const { data: location, error: locError } = await supabase
     .from('location')
     .select('default_rallye_id')
@@ -633,11 +373,9 @@ export async function getTourModeRallyeForLocation(
   }
 
   if (!location?.default_rallye_id) {
-    // Keine Tour-Mode Rallye konfiguriert
     return null;
   }
 
-  // Schritt 2: Hole die Rallye
   const { data: rallye, error: rallyeError } = await supabase
     .from('rallye')
     .select('*')
@@ -653,8 +391,7 @@ export async function getTourModeRallyeForLocation(
     return null;
   }
 
-  // Prüfe client-seitig, ob die Rallye aktiv ist
-  if (!rallye || rallye.status === 'inactive' || rallye.status === 'ended') {
+  if (!rallye || !isActiveRallyeStatus(rallye.status)) {
     return null;
   }
 

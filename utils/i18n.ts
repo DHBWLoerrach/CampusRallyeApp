@@ -56,10 +56,9 @@ export const translations = {
     'welcome.selectLocation.description':
       'Wähle deinen Standort aus, um verfügbare Rallyes zu sehen',
     'welcome.selectLocation.empty': 'Keine Standorte verfügbar',
-    'welcome.selectDepartment.description': 'Studiengang-Rallyes',
+    'welcome.selectDepartment.description': 'Bereichs-Rallyes',
     'welcome.noContent':
       'Derzeit sind keine aktiven Rallyes für diesen Standort verfügbar.',
-    'welcome.campusEvents.title': 'Campus-Events',
     'welcome.departmentLoadError':
       'Standortinhalte konnten nicht geladen werden.',
     'rallye.status.preparing': 'Noch nicht gestartet',
@@ -224,7 +223,6 @@ export const translations = {
     'welcome.selectDepartment.description': 'Department rallyes',
     'welcome.noContent':
       'No active rallyes are currently available for this location.',
-    'welcome.campusEvents.title': 'Campus Events',
     'welcome.departmentLoadError': 'Location content could not be loaded.',
     'rallye.status.preparing': 'Not started',
     'rallye.status.inactive': 'Inactive',

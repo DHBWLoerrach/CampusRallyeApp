@@ -38,8 +38,7 @@ Beispiel-Setup für eine normale Rallye (Abteilung) und eine Erkundung (Tour):
 
 - Tabelle `location`: neuen Standort anlegen (`DHBW Lörrach`).
 - Tabelle `department`: Departments (früher „Studiengänge“) für den Standort anlegen.
-- Tabelle `rallye`: zwei neue Rallyes anlegen, Status z.B. `running` und `end_time` in der Zukunft.
-- Tabelle `join_department_rallye`: die normale Rallye mit dem passenden Department verknüpfen.
+- Tabelle `rallye`: zwei neue Rallyes anlegen, Status z.B. `running`, `end_time` in der Zukunft und `department_id` mit dem passenden Department setzen.
 - Tabelle `location`: `default_rallye_id` auf die Erkundungs-Rallye setzen (Tour-Mode).
 
 In der Tabelle `questions` ein paar Fragen mit Punkten erstellen (z.B. Typ _knowledge_), dazu passende Antwort(en) in

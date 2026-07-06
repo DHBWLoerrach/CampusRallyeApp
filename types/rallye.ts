@@ -69,6 +69,7 @@ export interface Department {
 export interface RallyeDbRow {
   id: number;
   name: string;
+  department_id: number | null;
   status: RallyeStatus;
   password: string | null;
   end_time: string | null;
@@ -77,7 +78,7 @@ export interface RallyeDbRow {
 
 export type RallyeStorageRow = Pick<
   RallyeDbRow,
-  'id' | 'name' | 'status' | 'password' | 'end_time'
+  'id' | 'name' | 'department_id' | 'status' | 'password' | 'end_time'
 >;
 
 export interface Rallye extends RallyeDbRow {

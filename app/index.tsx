@@ -56,7 +56,6 @@ const AUTO_REFRESH_INTERVAL = 60000;
 function createEmptyDashboardData(): LocationDashboardData {
   return {
     tourModeRallye: null,
-    campusEventsRallyes: [],
     departmentEntries: [],
   };
 }
@@ -87,7 +86,6 @@ export default function Welcome() {
   const [expandedDepartmentIds, setExpandedDepartmentIds] = useState<number[]>(
     []
   );
-  const [campusEventsExpanded, setCampusEventsExpanded] = useState(false);
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isInitializedRef = useRef<boolean>(false);
@@ -129,7 +127,6 @@ export default function Welcome() {
   const resetDashboard = useCallback(() => {
     setDashboardData(createEmptyDashboardData());
     setExpandedDepartmentIds([]);
-    setCampusEventsExpanded(false);
     clearRallyePasswordSheetSession();
   }, []);
 
@@ -304,7 +301,6 @@ export default function Welcome() {
     if (selectionStep !== 'dashboard') return;
     await clearSelectedLocation();
     setSelectedLocation(null);
-    setCampusEventsExpanded(false);
     resetDashboard();
     setSelectionStep('location');
   };
@@ -386,10 +382,6 @@ export default function Welcome() {
     });
   };
 
-  const toggleCampusEventsExpansion = () => {
-    setCampusEventsExpanded((expanded) => !expanded);
-  };
-
   const LoadingContent = () => (
     <View
       style={[
@@ -467,9 +459,7 @@ export default function Welcome() {
   );
 
   const hasDashboardContent =
-    !!dashboardData.tourModeRallye ||
-    dashboardData.campusEventsRallyes.length > 0 ||
-    dashboardData.departmentEntries.length > 0;
+    !!dashboardData.tourModeRallye || dashboardData.departmentEntries.length > 0;
 
   const DashboardContent = () => (
     <View
@@ -591,84 +581,6 @@ export default function Welcome() {
           </Card>
         );
       })}
-
-      {dashboardData.campusEventsRallyes.length > 0 &&
-        (() => {
-          const singleCampusEventRallye =
-            dashboardData.campusEventsRallyes.length === 1
-              ? dashboardData.campusEventsRallyes[0]
-              : null;
-          const campusEventsTitle = t('welcome.campusEvents.title');
-          const campusEventTitle =
-            singleCampusEventRallye?.name?.trim() || campusEventsTitle;
-
-          if (singleCampusEventRallye) {
-            return (
-              <Card
-                containerStyle={dashboardCardStyle}
-                title={campusEventTitle}
-                icon="party.popper"
-              >
-                <UIButton
-                  disabled={joining}
-                  onPress={() =>
-                    void handleRallyePress(singleCampusEventRallye)
-                  }
-                  style={ctaButtonStyle}
-                  textStyle={ctaButtonTextStyle}
-                >
-                  {t('rallye.join')}
-                </UIButton>
-              </Card>
-            );
-          }
-
-          return (
-            <Card
-              containerStyle={dashboardCardStyle}
-              title={campusEventsTitle}
-              icon="party.popper"
-            >
-              <UIButton
-                disabled={joining}
-                onPress={toggleCampusEventsExpansion}
-                style={
-                  campusEventsExpanded
-                    ? closeSelectionButtonStyle
-                    : ctaButtonStyle
-                }
-                textStyle={
-                  campusEventsExpanded
-                    ? closeSelectionButtonTextStyle
-                    : ctaButtonTextStyle
-                }
-              >
-                {campusEventsExpanded
-                  ? t('welcome.join.hide')
-                  : t('welcome.join.select')}
-              </UIButton>
-              {campusEventsExpanded && (
-                <View style={{ marginTop: 10 }}>
-                  {dashboardData.campusEventsRallyes.map((rallye, index) => (
-                    <View
-                      key={rallye.id}
-                      style={index > 0 ? { marginTop: 8 } : undefined}
-                    >
-                      <UIButton
-                        disabled={joining}
-                        onPress={() => void handleRallyePress(rallye)}
-                        style={ctaButtonStyle}
-                        textStyle={ctaButtonTextStyle}
-                      >
-                        {rallye.name}
-                      </UIButton>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </Card>
-          );
-        })()}
 
       {dashboardData.tourModeRallye && (
         <Card

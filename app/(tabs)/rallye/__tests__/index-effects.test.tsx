@@ -185,6 +185,7 @@ jest.mock('@/services/storage/Store', () => ({
       get: jest.fn(() => ({
         id: 1,
         name: 'Department Rallye',
+        department_id: 1,
         status: 'running',
         mode: 'department',
         end_time: null,

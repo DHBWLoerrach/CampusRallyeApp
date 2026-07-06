@@ -209,7 +209,6 @@ describe('Welcome', () => {
     mockedGetLocationsWithActiveRallyes.mockResolvedValue([mockLocation]);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      campusEventsRallyes: [],
       departmentEntries: [],
     });
     mockedGetCurrentTeam.mockResolvedValue(null);
@@ -225,6 +224,7 @@ describe('Welcome', () => {
     const tourModeRallye: Rallye = {
       id: 1,
       name: 'Campus Tour',
+      department_id: 1,
       status: 'running',
       password: '',
       mode: 'tour',
@@ -235,7 +235,6 @@ describe('Welcome', () => {
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye,
-      campusEventsRallyes: [],
       departmentEntries: [],
     });
 
@@ -250,10 +249,11 @@ describe('Welcome', () => {
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
 
-  it('renders single campus event as direct join action and joins directly', async () => {
-    const campusRallye: Rallye = {
+  it('renders single department rallye as direct join action and joins directly', async () => {
+    const departmentRallye: Rallye = {
       id: 11,
-      name: 'Campus Event Rallye',
+      name: 'Informatik Rallye',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -264,80 +264,22 @@ describe('Welcome', () => {
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      campusEventsRallyes: [campusRallye],
-      departmentEntries: [],
+      departmentEntries: [{ department: mockDepartment, rallyes: [departmentRallye] }],
     });
     mockedSetCurrentRallye.mockResolvedValue();
 
-    const { getByText, queryByText } = render(<Welcome />);
+    const { getByText } = render(<Welcome />);
 
     await waitFor(() => {
-      expect(getByText(campusRallye.name)).toBeTruthy();
+      expect(getByText(departmentRallye.name)).toBeTruthy();
       expect(getByText('rallye.join')).toBeTruthy();
     });
-    expect(queryByText('welcome.campusEvents.title')).toBeNull();
-    expect(queryByText('welcome.campusEvents.description')).toBeNull();
 
     await act(async () => {
       fireEvent.press(getByText('rallye.join'));
     });
 
-    expect(mockedSetCurrentRallye).toHaveBeenCalledWith(campusRallye);
-    expect(store$.enabled.set).toHaveBeenCalledWith(true);
-  });
-
-  it('renders multiple campus events behind selection and joins directly', async () => {
-    const campusRallyeA: Rallye = {
-      id: 12,
-      name: 'Campus Event Rallye A',
-      status: 'running',
-      password: '',
-      mode: 'department',
-      end_time: null,
-      created_at: '2024-01-01T00:00:00Z',
-    };
-    const campusRallyeB: Rallye = {
-      id: 13,
-      name: 'Campus Event Rallye B',
-      status: 'running',
-      password: '',
-      mode: 'department',
-      end_time: null,
-      created_at: '2024-01-01T00:00:00Z',
-    };
-
-    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
-    mockedGetLocationDashboardData.mockResolvedValue({
-      tourModeRallye: null,
-      campusEventsRallyes: [campusRallyeA, campusRallyeB],
-      departmentEntries: [],
-    });
-    mockedSetCurrentRallye.mockResolvedValue();
-
-    const { getByText, queryByText } = render(<Welcome />);
-
-    await waitFor(() => {
-      expect(getByText('welcome.campusEvents.title')).toBeTruthy();
-      expect(getByText('welcome.join.select')).toBeTruthy();
-    });
-    expect(queryByText(campusRallyeA.name)).toBeNull();
-    expect(queryByText(campusRallyeB.name)).toBeNull();
-    expect(queryByText('rallye.join')).toBeNull();
-    expect(queryByText('welcome.campusEvents.description')).toBeNull();
-
-    await act(async () => {
-      fireEvent.press(getByText('welcome.join.select'));
-    });
-
-    expect(getByText('welcome.join.hide')).toBeTruthy();
-    expect(getByText(campusRallyeA.name)).toBeTruthy();
-    expect(getByText(campusRallyeB.name)).toBeTruthy();
-
-    await act(async () => {
-      fireEvent.press(getByText(campusRallyeB.name));
-    });
-
-    expect(mockedSetCurrentRallye).toHaveBeenCalledWith(campusRallyeB);
+    expect(mockedSetCurrentRallye).toHaveBeenCalledWith(departmentRallye);
     expect(store$.enabled.set).toHaveBeenCalledWith(true);
   });
 
@@ -386,6 +328,7 @@ describe('Welcome', () => {
     const rallye: Rallye = {
       id: 5,
       name: 'Department Rallye',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -397,7 +340,6 @@ describe('Welcome', () => {
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      campusEventsRallyes: [],
       departmentEntries: [{ department: mockDepartment, rallyes: [rallye] }],
     });
     mockedSetCurrentRallye.mockResolvedValue();
@@ -424,6 +366,7 @@ describe('Welcome', () => {
     const passwordRallye: Rallye = {
       id: 6,
       name: 'Protected Rallye',
+      department_id: mockDepartment.id,
       status: 'running',
       password: 'secret',
       mode: 'department',
@@ -434,7 +377,6 @@ describe('Welcome', () => {
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      campusEventsRallyes: [],
       departmentEntries: [
         { department: mockDepartment, rallyes: [passwordRallye] },
       ],
@@ -465,6 +407,7 @@ describe('Welcome', () => {
     const passwordRallye: Rallye = {
       id: 6,
       name: 'Protected Rallye',
+      department_id: mockDepartment.id,
       status: 'running',
       password: 'secret',
       mode: 'department',
@@ -475,7 +418,6 @@ describe('Welcome', () => {
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      campusEventsRallyes: [],
       departmentEntries: [
         { department: mockDepartment, rallyes: [passwordRallye] },
       ],
@@ -499,6 +441,7 @@ describe('Welcome', () => {
     const rallyeA: Rallye = {
       id: 7,
       name: 'Rallye A',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -508,6 +451,7 @@ describe('Welcome', () => {
     const rallyeB: Rallye = {
       id: 8,
       name: 'Rallye B',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -518,7 +462,6 @@ describe('Welcome', () => {
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      campusEventsRallyes: [],
       departmentEntries: [
         { department: mockDepartment, rallyes: [rallyeA, rallyeB] },
       ],
@@ -546,6 +489,7 @@ describe('Welcome', () => {
     const rallyeA: Rallye = {
       id: 9,
       name: 'Rallye A',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -561,6 +505,7 @@ describe('Welcome', () => {
     const rallyeB: Rallye = {
       id: 10,
       name: 'Rallye B',
+      department_id: secondDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -571,7 +516,6 @@ describe('Welcome', () => {
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      campusEventsRallyes: [],
       departmentEntries: [
         { department: mockDepartment, rallyes: [rallyeA] },
         { department: secondDepartment, rallyes: [rallyeB] },
@@ -621,6 +565,7 @@ describe('Welcome', () => {
     const newRallye: Rallye = {
       id: 99,
       name: 'New Rallye',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -632,12 +577,10 @@ describe('Welcome', () => {
     mockedGetLocationDashboardData
       .mockResolvedValueOnce({
         tourModeRallye: null,
-        campusEventsRallyes: [],
         departmentEntries: [],
       })
       .mockResolvedValueOnce({
         tourModeRallye: null,
-        campusEventsRallyes: [],
         departmentEntries: [
           { department: mockDepartment, rallyes: [newRallye] },
         ],
@@ -672,6 +615,7 @@ describe('Welcome', () => {
     const initialRallye: Rallye = {
       id: 201,
       name: 'Initial Rallye',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -681,6 +625,7 @@ describe('Welcome', () => {
     const refreshedRallye: Rallye = {
       id: 202,
       name: 'Refreshed Rallye',
+      department_id: mockDepartment.id,
       status: 'running',
       password: '',
       mode: 'department',
@@ -695,14 +640,12 @@ describe('Welcome', () => {
     mockedGetLocationDashboardData
       .mockResolvedValueOnce({
         tourModeRallye: null,
-        campusEventsRallyes: [],
         departmentEntries: [
           { department: mockDepartment, rallyes: [initialRallye] },
         ],
       })
       .mockResolvedValueOnce({
         tourModeRallye: null,
-        campusEventsRallyes: [],
         departmentEntries: [
           { department: mockDepartment, rallyes: [refreshedRallye] },
         ],

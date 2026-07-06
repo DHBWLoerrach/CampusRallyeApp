@@ -19,6 +19,7 @@ jest.mock('@/utils/ThemeContext', () => ({
 const protectedRallye: RallyeRow = {
   id: 1,
   name: 'Protected Campus Rallye With A Rather Long Title',
+  department_id: 1,
   status: 'running',
   password: 'secret',
   mode: 'department',
