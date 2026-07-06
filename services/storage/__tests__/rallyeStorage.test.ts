@@ -16,10 +16,7 @@ jest.mock('@/utils/Logger', () => ({
 }));
 
 import { StorageKeys } from '../asyncStorage';
-import {
-  getCurrentRallye,
-  getOrganizationDashboardData,
-} from '../rallyeStorage';
+import { getCurrentRallye, getLocationDashboardData } from '../rallyeStorage';
 import { Logger } from '@/utils/Logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -168,31 +165,31 @@ describe('rallyeStorage.getCurrentRallye', () => {
   });
 });
 
-describe('rallyeStorage.getOrganizationDashboardData', () => {
+describe('rallyeStorage.getLocationDashboardData', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns tour mode, campus events, and department rallyes in one payload', async () => {
-    const orgId = 1;
-    const orgName = 'DHBW Lörrach';
+    const locId = 1;
+    const locName = 'DHBW Lörrach';
     const departments = [
       {
         id: 11,
-        name: orgName,
-        organization_id: orgId,
+        name: locName,
+        organization_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
       {
         id: 12,
         name: 'Informatik',
-        organization_id: orgId,
+        organization_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
       {
         id: 13,
         name: 'BWL',
-        organization_id: orgId,
+        organization_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
     ];
@@ -208,16 +205,16 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
     useTableHandlers({
       organization: ({ select, constraints, single }) => {
         expect(single).toBe(true);
-        const orgIdFilter = constraints.find(
+        const locIdFilter = constraints.find(
           (constraint) => constraint.type === 'eq' && constraint.column === 'id'
         );
-        expect(orgIdFilter?.value).toBe(orgId);
+        expect(locIdFilter?.value).toBe(locId);
 
         if (select === 'default_rallye_id') {
           return { data: { default_rallye_id: 900 }, error: null };
         }
         if (select === 'id, name') {
-          return { data: { id: orgId, name: orgName }, error: null };
+          return { data: { id: locId, name: locName }, error: null };
         }
         return {
           data: null,
@@ -227,11 +224,11 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
       department: ({ select, constraints, single }) => {
         expect(single).toBe(false);
         expect(select).toBe('*');
-        const orgFilter = constraints.find(
+        const locFilter = constraints.find(
           (constraint) =>
             constraint.type === 'eq' && constraint.column === 'organization_id'
         );
-        expect(orgFilter?.value).toBe(orgId);
+        expect(locFilter?.value).toBe(locId);
         return { data: departments, error: null };
       },
       join_department_rallye: ({ select, constraints, single }) => {
@@ -312,7 +309,7 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
       },
     });
 
-    const result = await getOrganizationDashboardData(orgId);
+    const result = await getLocationDashboardData(locId);
 
     expect(result.tourModeRallye).toMatchObject({
       id: 900,
@@ -335,8 +332,8 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
     expect(result.departmentEntries[0].rallyes[0].mode).toBe('department');
   });
 
-  it('returns empty lists when organization has no departments', async () => {
-    const orgId = 2;
+  it('returns empty lists when location has no departments', async () => {
+    const locId = 2;
 
     useTableHandlers({
       organization: ({ select }) => {
@@ -344,7 +341,7 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
           return { data: { default_rallye_id: null }, error: null };
         }
         if (select === 'id, name') {
-          return { data: { id: orgId, name: 'DHBW Mannheim' }, error: null };
+          return { data: { id: locId, name: 'DHBW Mannheim' }, error: null };
         }
         return {
           data: null,
@@ -354,7 +351,7 @@ describe('rallyeStorage.getOrganizationDashboardData', () => {
       department: () => ({ data: [], error: null }),
     });
 
-    const result = await getOrganizationDashboardData(orgId);
+    const result = await getLocationDashboardData(locId);
 
     expect(result).toEqual({
       tourModeRallye: null,

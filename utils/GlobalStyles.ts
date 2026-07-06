@@ -342,7 +342,7 @@ export const globalStyles = createGroupedStyles({
       minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.145 : 0.185),
       marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.01 : 0.013),
     },
-    organizationCard: {
+    locationCard: {
       minHeight: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.095 : 0.115),
       marginVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.004 : 0.008),
       paddingVertical: SCREEN_HEIGHT * (IS_SMALL_SCREEN ? 0.012 : 0.015),

@@ -52,7 +52,7 @@ export interface QuestionProps {
   question: Question;
 }
 
-export interface Organization {
+export interface Location {
   id: number;
   name: string;
   default_rallye_id: number | null;

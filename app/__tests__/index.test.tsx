@@ -4,9 +4,9 @@ import { AppState } from 'react-native';
 import Welcome from '../index';
 import {
   setCurrentRallye,
-  getOrganizationsWithActiveRallyes,
-  getOrganizationDashboardData,
-  getSelectedOrganization,
+  getLocationsWithActiveRallyes,
+  getLocationDashboardData,
+  getSelectedLocation,
 } from '@/services/storage/rallyeStorage';
 import {
   clearCurrentTeam,
@@ -116,11 +116,11 @@ jest.mock('@/services/storage/Store', () => ({
 
 jest.mock('@/services/storage/rallyeStorage', () => ({
   __esModule: true,
-  getOrganizationsWithActiveRallyes: jest.fn(),
-  getOrganizationDashboardData: jest.fn(),
-  getSelectedOrganization: jest.fn(),
-  setSelectedOrganization: jest.fn(),
-  clearSelectedOrganization: jest.fn(),
+  getLocationsWithActiveRallyes: jest.fn(),
+  getLocationDashboardData: jest.fn(),
+  getSelectedLocation: jest.fn(),
+  setSelectedLocation: jest.fn(),
+  clearSelectedLocation: jest.fn(),
   setCurrentRallye: jest.fn(),
 }));
 
@@ -149,18 +149,17 @@ jest.mock('@legendapp/state/react', () => ({
   useSelector: (selector: () => unknown) => selector(),
 }));
 
-const mockedGetOrganizationsWithActiveRallyes =
-  getOrganizationsWithActiveRallyes as jest.MockedFunction<
-    typeof getOrganizationsWithActiveRallyes
+const mockedGetLocationsWithActiveRallyes =
+  getLocationsWithActiveRallyes as jest.MockedFunction<
+    typeof getLocationsWithActiveRallyes
   >;
-const mockedGetOrganizationDashboardData =
-  getOrganizationDashboardData as jest.MockedFunction<
-    typeof getOrganizationDashboardData
+const mockedGetLocationDashboardData =
+  getLocationDashboardData as jest.MockedFunction<
+    typeof getLocationDashboardData
   >;
-const mockedGetSelectedOrganization =
-  getSelectedOrganization as jest.MockedFunction<
-    typeof getSelectedOrganization
-  >;
+const mockedGetSelectedLocation = getSelectedLocation as jest.MockedFunction<
+  typeof getSelectedLocation
+>;
 const mockedSetCurrentRallye = setCurrentRallye as jest.MockedFunction<
   typeof setCurrentRallye
 >;
@@ -181,7 +180,7 @@ const mockedGetRallyePasswordSheetSession =
   >;
 
 describe('Welcome', () => {
-  const mockOrganization = {
+  const mockLocation = {
     id: 1,
     name: 'Test Org',
     default_rallye_id: null,
@@ -206,11 +205,9 @@ describe('Welcome', () => {
       remove: mockAppStateSubscriptionRemove,
     }));
 
-    mockedGetSelectedOrganization.mockResolvedValue(null);
-    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([
-      mockOrganization,
-    ]);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(null);
+    mockedGetLocationsWithActiveRallyes.mockResolvedValue([mockLocation]);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
       departmentEntries: [],
@@ -235,8 +232,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye,
       campusEventsRallyes: [],
       departmentEntries: [],
@@ -264,8 +261,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [campusRallye],
       departmentEntries: [],
@@ -309,8 +306,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [campusRallyeA, campusRallyeB],
       departmentEntries: [],
@@ -344,31 +341,31 @@ describe('Welcome', () => {
     expect(store$.enabled.set).toHaveBeenCalledWith(true);
   });
 
-  it('renders all organizations directly when more than three are available', async () => {
-    const secondOrganization = {
+  it('renders all locations directly when more than three are available', async () => {
+    const secondLocation = {
       id: 2,
       name: 'Second Org',
       default_rallye_id: null,
       created_at: '2024-01-01T00:00:00Z',
     };
-    const thirdOrganization = {
+    const thirdLocation = {
       id: 3,
       name: 'Third Org',
       default_rallye_id: null,
       created_at: '2024-01-01T00:00:00Z',
     };
-    const fourthOrganization = {
+    const fourthLocation = {
       id: 4,
       name: 'Fourth Org',
       default_rallye_id: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetOrganizationsWithActiveRallyes.mockResolvedValue([
-      mockOrganization,
-      secondOrganization,
-      thirdOrganization,
-      fourthOrganization,
+    mockedGetLocationsWithActiveRallyes.mockResolvedValue([
+      mockLocation,
+      secondLocation,
+      thirdLocation,
+      fourthLocation,
     ]);
 
     const { getByText, queryByText } = render(<Welcome />);
@@ -397,8 +394,8 @@ describe('Welcome', () => {
     };
     const existingTeam = { id: 7, name: 'Team' };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
       departmentEntries: [{ department: mockDepartment, rallyes: [rallye] }],
@@ -434,8 +431,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
       departmentEntries: [
@@ -475,8 +472,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
       departmentEntries: [
@@ -518,8 +515,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
       departmentEntries: [
@@ -571,8 +568,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData.mockResolvedValue({
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       campusEventsRallyes: [],
       departmentEntries: [
@@ -592,13 +589,13 @@ describe('Welcome', () => {
   it('performs one delayed sync without falling into a 2-second refresh loop', async () => {
     jest.useFakeTimers();
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
 
     render(<Welcome />);
 
     await waitFor(() => {
-      expect(mockedGetOrganizationsWithActiveRallyes).toHaveBeenCalledTimes(1);
-      expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(1);
+      expect(mockedGetLocationsWithActiveRallyes).toHaveBeenCalledTimes(1);
+      expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(1);
     });
 
     await act(async () => {
@@ -606,16 +603,16 @@ describe('Welcome', () => {
     });
 
     await waitFor(() => {
-      expect(mockedGetOrganizationsWithActiveRallyes).toHaveBeenCalledTimes(2);
-      expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(2);
+      expect(mockedGetLocationsWithActiveRallyes).toHaveBeenCalledTimes(2);
+      expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(2);
     });
 
     await act(async () => {
       await jest.advanceTimersByTimeAsync(2000);
     });
 
-    expect(mockedGetOrganizationsWithActiveRallyes).toHaveBeenCalledTimes(2);
-    expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(2);
+    expect(mockedGetLocationsWithActiveRallyes).toHaveBeenCalledTimes(2);
+    expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(2);
   });
 
   it('shows newly added rallyes after the delayed sync without manual refresh', async () => {
@@ -631,8 +628,8 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationDashboardData
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData
       .mockResolvedValueOnce({
         tourModeRallye: null,
         campusEventsRallyes: [],
@@ -649,7 +646,7 @@ describe('Welcome', () => {
     const { queryByText, getByText } = render(<Welcome />);
 
     await waitFor(() => {
-      expect(mockedGetOrganizationDashboardData).toHaveBeenCalledTimes(1);
+      expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(1);
     });
 
     expect(queryByText(newRallye.name)).toBeNull();
@@ -663,10 +660,10 @@ describe('Welcome', () => {
     });
   });
 
-  it('keeps the currently selected organization when more organizations become available', async () => {
+  it('keeps the currently selected location when more locations become available', async () => {
     jest.useFakeTimers();
 
-    const secondOrganization = {
+    const secondLocation = {
       id: 2,
       name: 'Second Org',
       default_rallye_id: null,
@@ -691,11 +688,11 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetSelectedOrganization.mockResolvedValue(mockOrganization);
-    mockedGetOrganizationsWithActiveRallyes
-      .mockResolvedValueOnce([mockOrganization])
-      .mockResolvedValueOnce([mockOrganization, secondOrganization]);
-    mockedGetOrganizationDashboardData
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationsWithActiveRallyes
+      .mockResolvedValueOnce([mockLocation])
+      .mockResolvedValueOnce([mockLocation, secondLocation]);
+    mockedGetLocationDashboardData
       .mockResolvedValueOnce({
         tourModeRallye: null,
         campusEventsRallyes: [],
@@ -725,9 +722,9 @@ describe('Welcome', () => {
       expect(getByText(refreshedRallye.name)).toBeTruthy();
     });
 
-    expect(mockedGetOrganizationDashboardData).toHaveBeenNthCalledWith(
-      2,
-      mockOrganization.id
+    expect(mockedGetLocationDashboardData).toHaveBeenNthCalledWith(
+      1,
+      mockLocation.id
     );
   });
 });

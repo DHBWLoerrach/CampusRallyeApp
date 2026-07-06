@@ -4,7 +4,7 @@ export const StorageKeys = {
   CURRENT_RALLYE: 'currentRallye',
   TEAM: 'team',
   OFFLINE_QUEUE: 'offlineQueue',
-  SELECTED_ORGANIZATION: 'selectedOrganization',
+  SELECTED_LOCATION: 'selectedLocation',
 } as const;
 
 export async function getStorageItem<T = any>(key: string): Promise<T | null> {

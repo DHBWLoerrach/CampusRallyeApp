@@ -29,12 +29,12 @@ import { confirm } from '@/utils/ConfirmAlert';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import {
   setCurrentRallye,
-  getOrganizationsWithActiveRallyes,
-  getOrganizationDashboardData,
-  getSelectedOrganization as getStoredOrganization,
-  setSelectedOrganization as storeSelectedOrganization,
-  clearSelectedOrganization,
-  type OrganizationDashboardData,
+  getLocationsWithActiveRallyes,
+  getLocationDashboardData,
+  getSelectedLocation as getStoredLocation,
+  setSelectedLocation as storeSelectedLocation,
+  clearSelectedLocation,
+  type LocationDashboardData,
   type RallyeRow,
 } from '@/services/storage/rallyeStorage';
 import {
@@ -47,13 +47,13 @@ import {
   getRallyePasswordSheetSession,
   setRallyePasswordSheetSession,
 } from '@/services/rallyePasswordSheetSession';
-import { Organization } from '@/types/rallye';
+import { Location } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
-type SelectionStep = 'organization' | 'dashboard';
+type SelectionStep = 'location' | 'dashboard';
 const AUTO_REFRESH_INTERVAL = 60000;
 
-function createEmptyDashboardData(): OrganizationDashboardData {
+function createEmptyDashboardData(): LocationDashboardData {
   return {
     tourModeRallye: null,
     campusEventsRallyes: [],
@@ -76,12 +76,12 @@ export default function Welcome() {
   const [joining, setJoining] = useState(false);
   const [online, setOnline] = useState(true);
 
-  const [selectionStep, setSelectionStep] =
-    useState<SelectionStep>('organization');
-  const [selectedOrganization, setSelectedOrganization] =
-    useState<Organization | null>(null);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [dashboardData, setDashboardData] = useState<OrganizationDashboardData>(
+  const [selectionStep, setSelectionStep] = useState<SelectionStep>('location');
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null
+  );
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [dashboardData, setDashboardData] = useState<LocationDashboardData>(
     () => createEmptyDashboardData()
   );
   const [expandedDepartmentIds, setExpandedDepartmentIds] = useState<number[]>(
@@ -97,7 +97,7 @@ export default function Welcome() {
     ? Colors.darkMode.background
     : Colors.lightMode.background;
   const compactCardStyle = globalStyles.welcomeStyles.compactCard;
-  const organizationCardStyle = globalStyles.welcomeStyles.organizationCard;
+  const locationCardStyle = globalStyles.welcomeStyles.locationCard;
   const dashboardCardStyle = [
     compactCardStyle,
     {
@@ -115,19 +115,16 @@ export default function Welcome() {
   ];
   const closeSelectionButtonTextStyle = { color: palette.text };
 
-  const applyDashboardData = useCallback(
-    (nextData: OrganizationDashboardData) => {
-      setDashboardData(nextData);
-      setExpandedDepartmentIds((currentExpandedIds) =>
-        currentExpandedIds.filter((departmentId) =>
-          nextData.departmentEntries.some(
-            (entry) => entry.department.id === departmentId
-          )
+  const applyDashboardData = useCallback((nextData: LocationDashboardData) => {
+    setDashboardData(nextData);
+    setExpandedDepartmentIds((currentExpandedIds) =>
+      currentExpandedIds.filter((departmentId) =>
+        nextData.departmentEntries.some(
+          (entry) => entry.department.id === departmentId
         )
-      );
-    },
-    []
-  );
+      )
+    );
+  }, []);
 
   const resetDashboard = useCallback(() => {
     setDashboardData(createEmptyDashboardData());
@@ -137,8 +134,8 @@ export default function Welcome() {
   }, []);
 
   const loadDashboardData = useCallback(
-    async (organizationId: number) => {
-      const data = await getOrganizationDashboardData(organizationId);
+    async (locationId: number) => {
+      const data = await getLocationDashboardData(locationId);
       applyDashboardData(data);
     },
     [applyDashboardData]
@@ -147,41 +144,41 @@ export default function Welcome() {
   const initializeSelection = useCallback(async () => {
     setLoading(true);
     try {
-      const savedOrg = await getStoredOrganization();
-      const orgs = await getOrganizationsWithActiveRallyes();
-      setOrganizations(orgs);
+      const savedLoc = await getStoredLocation();
+      const locs = await getLocationsWithActiveRallyes();
+      setLocations(locs);
       setOnline(true);
 
-      const storedOrg = savedOrg
-        ? orgs.find((organization) => organization.id === savedOrg.id)
+      const storedLoc = savedLoc
+        ? locs.find((location) => location.id === savedLoc.id)
         : null;
-      const autoSelectedOrg = orgs.length === 1 ? orgs[0] : null;
-      const organizationToSelect = storedOrg ?? autoSelectedOrg;
+      const autoSelectedLoc = locs.length === 1 ? locs[0] : null;
+      const locationToSelect = storedLoc ?? autoSelectedLoc;
 
-      if (organizationToSelect) {
-        if (!storedOrg && autoSelectedOrg) {
+      if (locationToSelect) {
+        if (!storedLoc && autoSelectedLoc) {
           Logger.debug(
             'AutoSelect',
-            'Only one organization available, auto-selecting'
+            'Only one location available, auto-selecting'
           );
         }
 
-        setSelectedOrganization(organizationToSelect);
-        await storeSelectedOrganization(organizationToSelect);
-        await loadDashboardData(organizationToSelect.id);
+        setSelectedLocation(locationToSelect);
+        await storeSelectedLocation(locationToSelect);
+        await loadDashboardData(locationToSelect.id);
         setSelectionStep('dashboard');
       } else {
-        if (savedOrg) {
-          await clearSelectedOrganization();
+        if (savedLoc) {
+          await clearSelectedLocation();
         }
-        setSelectedOrganization(null);
+        setSelectedLocation(null);
         resetDashboard();
-        setSelectionStep('organization');
+        setSelectionStep('location');
       }
     } catch (error) {
       Logger.error('Welcome', 'Error initializing selection', error);
       setOnline(false);
-      setSelectionStep('organization');
+      setSelectionStep('location');
     } finally {
       setLoading(false);
       isInitializedRef.current = true;
@@ -199,44 +196,44 @@ export default function Welcome() {
     if (getRallyePasswordSheetSession()) return;
 
     try {
-      const orgs = await getOrganizationsWithActiveRallyes();
-      setOrganizations(orgs);
+      const locs = await getLocationsWithActiveRallyes();
+      setLocations(locs);
       setOnline(true);
 
-      if (selectionStep === 'organization') return;
+      if (selectionStep === 'location') return;
 
-      if (!selectedOrganization) {
-        setSelectionStep('organization');
+      if (!selectedLocation) {
+        setSelectionStep('location');
         return;
       }
 
-      const orgStillValid = orgs.find(
-        (organization) => organization.id === selectedOrganization.id
+      const locStillValid = locs.find(
+        (location) => location.id === selectedLocation.id
       );
 
-      if (!orgStillValid) {
-        await clearSelectedOrganization();
-        setSelectedOrganization(null);
+      if (!locStillValid) {
+        await clearSelectedLocation();
+        setSelectedLocation(null);
         resetDashboard();
-        setSelectionStep('organization');
+        setSelectionStep('location');
         return;
       }
 
-      setSelectedOrganization((currentOrganization) => {
+      setSelectedLocation((currentLocation) => {
         if (
-          currentOrganization &&
-          currentOrganization.id === orgStillValid.id &&
-          currentOrganization.name === orgStillValid.name &&
-          currentOrganization.default_rallye_id ===
-            orgStillValid.default_rallye_id &&
-          currentOrganization.created_at === orgStillValid.created_at
+          currentLocation &&
+          currentLocation.id === locStillValid.id &&
+          currentLocation.name === locStillValid.name &&
+          currentLocation.default_rallye_id ===
+            locStillValid.default_rallye_id &&
+          currentLocation.created_at === locStillValid.created_at
         ) {
-          return currentOrganization;
+          return currentLocation;
         }
 
-        return orgStillValid;
+        return locStillValid;
       });
-      await loadDashboardData(orgStillValid.id);
+      await loadDashboardData(locStillValid.id);
     } catch (error) {
       Logger.error('AutoRefresh', 'Error refreshing data', error);
     }
@@ -288,15 +285,15 @@ export default function Welcome() {
     };
   }, []);
 
-  const handleOrganizationSelect = async (organization: Organization) => {
-    setSelectedOrganization(organization);
+  const handleLocationSelect = async (location: Location) => {
+    setSelectedLocation(location);
     setLoading(true);
     try {
-      await storeSelectedOrganization(organization);
-      await loadDashboardData(organization.id);
+      await storeSelectedLocation(location);
+      await loadDashboardData(location.id);
       setSelectionStep('dashboard');
     } catch (error) {
-      Logger.error('Welcome', 'Error loading organization dashboard', error);
+      Logger.error('Welcome', 'Error loading location dashboard', error);
       Alert.alert(t('common.errorTitle'), t('welcome.departmentLoadError'));
     } finally {
       setLoading(false);
@@ -305,11 +302,11 @@ export default function Welcome() {
 
   const handleBack = async () => {
     if (selectionStep !== 'dashboard') return;
-    await clearSelectedOrganization();
-    setSelectedOrganization(null);
+    await clearSelectedLocation();
+    setSelectedLocation(null);
     setCampusEventsExpanded(false);
     resetDashboard();
-    setSelectionStep('organization');
+    setSelectionStep('location');
   };
 
   const handleTourModeSubmit = async () => {
@@ -429,14 +426,14 @@ export default function Welcome() {
     </View>
   );
 
-  const OrganizationContent = () => (
+  const LocationContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.container,
         { backgroundColor: stateBackground },
       ]}
     >
-      {organizations.length === 0 && (
+      {locations.length === 0 && (
         <Card
           containerStyle={compactCardStyle}
           title={t('welcome.selectLocation.title')}
@@ -444,7 +441,7 @@ export default function Welcome() {
           icon="info.circle"
         />
       )}
-      {organizations.length > 0 && (
+      {locations.length > 0 && (
         <>
           <ThemedText
             variant="bodySmall"
@@ -455,13 +452,13 @@ export default function Welcome() {
           >
             {t('welcome.selectLocation.description')}
           </ThemedText>
-          {organizations.map((organization) => (
+          {locations.map((location) => (
             <Card
-              key={organization.id}
-              containerStyle={organizationCardStyle}
-              title={organization.name}
+              key={location.id}
+              containerStyle={locationCardStyle}
+              title={location.name}
               icon="building.2"
-              onPress={() => void handleOrganizationSelect(organization)}
+              onPress={() => void handleLocationSelect(location)}
             />
           ))}
         </>
@@ -706,14 +703,14 @@ export default function Welcome() {
   );
 
   const getHeaderTitle = () => {
-    if (selectedOrganization) {
-      return `${selectedOrganization.name} Campus Rallyes`;
+    if (selectedLocation) {
+      return `${selectedLocation.name} Campus Rallyes`;
     }
     return 'Campus Rallyes';
   };
 
   const renderCurrentStep = () => {
-    if (selectionStep === 'organization') return <OrganizationContent />;
+    if (selectionStep === 'location') return <LocationContent />;
     return <DashboardContent />;
   };
 
@@ -722,7 +719,7 @@ export default function Welcome() {
       heroImage={require('../assets/images/app/dhbw-campus-header.png')}
       logoImage={require('../assets/images/app/dhbw-logo.png')}
       title={getHeaderTitle()}
-      showBackButton={selectionStep === 'dashboard' && organizations.length > 1}
+      showBackButton={selectionStep === 'dashboard' && locations.length > 1}
       onBackPress={handleBack}
     >
       {loading && <LoadingContent />}
