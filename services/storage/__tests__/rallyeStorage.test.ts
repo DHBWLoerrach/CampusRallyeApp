@@ -177,19 +177,19 @@ describe('rallyeStorage.getLocationDashboardData', () => {
       {
         id: 11,
         name: locName,
-        organization_id: locId,
+        location_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
       {
         id: 12,
         name: 'Informatik',
-        organization_id: locId,
+        location_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
       {
         id: 13,
         name: 'BWL',
-        organization_id: locId,
+        location_id: locId,
         created_at: '2024-01-01T00:00:00Z',
       },
     ];
@@ -203,7 +203,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
     ];
 
     useTableHandlers({
-      organization: ({ select, constraints, single }) => {
+      location: ({ select, constraints, single }) => {
         expect(single).toBe(true);
         const locIdFilter = constraints.find(
           (constraint) => constraint.type === 'eq' && constraint.column === 'id'
@@ -218,7 +218,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         }
         return {
           data: null,
-          error: new Error(`Unexpected organization select ${select}`),
+          error: new Error(`Unexpected location select ${select}`),
         };
       },
       department: ({ select, constraints, single }) => {
@@ -226,7 +226,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         expect(select).toBe('*');
         const locFilter = constraints.find(
           (constraint) =>
-            constraint.type === 'eq' && constraint.column === 'organization_id'
+            constraint.type === 'eq' && constraint.column === 'location_id'
         );
         expect(locFilter?.value).toBe(locId);
         return { data: departments, error: null };
@@ -336,7 +336,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
     const locId = 2;
 
     useTableHandlers({
-      organization: ({ select }) => {
+      location: ({ select }) => {
         if (select === 'default_rallye_id') {
           return { data: { default_rallye_id: null }, error: null };
         }
@@ -345,7 +345,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         }
         return {
           data: null,
-          error: new Error(`Unexpected organization select ${select}`),
+          error: new Error(`Unexpected location select ${select}`),
         };
       },
       department: () => ({ data: [], error: null }),

@@ -189,7 +189,7 @@ describe('Welcome', () => {
   const mockDepartment = {
     id: 1,
     name: 'Test Dept',
-    organization_id: 1,
+    location_id: 1,
     created_at: '2024-01-01T00:00:00Z',
   };
 
@@ -555,7 +555,7 @@ describe('Welcome', () => {
     const secondDepartment = {
       id: 2,
       name: 'Second Dept',
-      organization_id: 1,
+      location_id: 1,
       created_at: '2024-01-01T00:00:00Z',
     };
     const rallyeB: Rallye = {

@@ -36,11 +36,11 @@ Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstel
 
 Beispiel-Setup für eine normale Rallye (Abteilung) und eine Erkundung (Tour):
 
-- Tabelle `organization`: neue Organisation anlegen.
-- Tabelle `department`: Departments (früher „Studiengänge“) für die Organisation anlegen.
+- Tabelle `location`: neuen Standort anlegen.
+- Tabelle `department`: Departments (früher „Studiengänge“) für den Standort anlegen.
 - Tabelle `rallye`: zwei neue Rallyes anlegen, Status z.B. `running` und `end_time` in der Zukunft.
 - Tabelle `join_department_rallye`: die normale Rallye mit dem passenden Department verknüpfen.
-- Tabelle `organization`: `default_rallye_id` auf die Erkundungs-Rallye setzen (Tour-Mode).
+- Tabelle `location`: `default_rallye_id` auf die Erkundungs-Rallye setzen (Tour-Mode).
 
 In der Tabelle `questions` ein paar Fragen mit Punkten erstellen (z.B. Typ _knowledge_), dazu passende Antwort(en) in
 der Tabelle `answers` mit `question_id` der Frage eintragen und zusätzlich in der Tabelle `join_rallye_questions` den Rallyes zuordnen.

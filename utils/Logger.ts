@@ -8,7 +8,7 @@
  * ```typescript
  * import { Logger } from '@/utils/Logger';
  *
- * Logger.debug('Navigation', 'Zurück zur Organisations-Auswahl');
+ * Logger.debug('Navigation', 'Zurück zur Standort-Auswahl');
  * Logger.info('AutoRefresh', 'Daten aktualisiert');
  * Logger.warn('Storage', 'Alte Daten gefunden');
  * Logger.error('API', 'Fehler beim Laden', error);

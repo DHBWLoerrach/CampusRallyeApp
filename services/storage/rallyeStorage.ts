@@ -119,8 +119,8 @@ export async function getLocationDashboardData(
   const [tourModeRallye, locationResult, departmentsResult] = await Promise.all(
     [
       getTourModeRallyeForLocation(locId),
-      supabase.from('organization').select('id, name').eq('id', locId).single(),
-      supabase.from('department').select('*').eq('organization_id', locId),
+      supabase.from('location').select('id, name').eq('id', locId).single(),
+      supabase.from('department').select('*').eq('location_id', locId),
     ]
   );
 
@@ -324,14 +324,14 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
   if (activeDepartmentIds.length > 0) {
     const { data: departments, error: deptError } = await supabase
       .from('department')
-      .select('id, organization_id')
+      .select('id, location_id')
       .in('id', activeDepartmentIds);
 
     if (deptError) {
       Logger.error('RallyeStorage', 'Error fetching departments', deptError);
     } else if (departments) {
       locIdsWithActiveDepts = [
-        ...new Set(departments.map((d: any) => d.organization_id)),
+        ...new Set(departments.map((d: any) => d.location_id)),
       ];
     }
   }
@@ -340,7 +340,7 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
   // Supabase: .not('column', 'is', null) funktioniert nicht wie erwartet
   // Stattdessen holen wir alle Orgs und filtern client-seitig
   const { data: allLocs, error: allLocsError } = await supabase
-    .from('organization')
+    .from('location')
     .select('id, default_rallye_id');
 
   Logger.debug('RallyeStorage', 'location query result', {
@@ -369,7 +369,7 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
 
   // Schritt 5: Hole die Lokationen
   const { data: locations, error: locError } = await supabase
-    .from('organization')
+    .from('location')
     .select('*')
     .in('id', allLocIds);
 
@@ -451,7 +451,7 @@ export async function getDepartmentsForLocation(
   const { data: departments, error: deptError } = await supabase
     .from('department')
     .select('*')
-    .eq('organization_id', locId)
+    .eq('location_id', locId)
     .in('id', activeDepartmentIds);
 
   Logger.debug('RallyeStorage', `Departments for location ${locId}:`, {
@@ -558,7 +558,7 @@ export async function getRallyesForDepartment(
 }
 
 /**
- * Findet ein Department das den gleichen Namen wie die Organisation hat
+ * Findet ein Department das den gleichen Namen wie den Standort hat
  * und mindestens eine aktive Rallye hat.
  * Wird für "Campus Events" verwendet.
  */
@@ -574,7 +574,7 @@ export async function getCampusEventsDepartment(
   const { data: matchingDept, error: deptError } = await supabase
     .from('department')
     .select('*')
-    .eq('organization_id', loc.id)
+    .eq('location_id', loc.id)
     .eq('name', loc.name)
     .single();
 
@@ -618,7 +618,7 @@ export async function getTourModeRallyeForLocation(
 ): Promise<Rallye | null> {
   // Schritt 1: Hole die default_rallye_id der Lokation
   const { data: location, error: locError } = await supabase
-    .from('organization')
+    .from('location')
     .select('default_rallye_id')
     .eq('id', locId)
     .single();

@@ -62,7 +62,7 @@ export interface Location {
 export interface Department {
   id: number;
   name: string;
-  organization_id: number;
+  location_id: number;
   created_at: string;
 }
 
