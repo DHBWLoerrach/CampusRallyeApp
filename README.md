@@ -36,7 +36,7 @@ Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstel
 
 Beispiel-Setup für eine normale Rallye (Abteilung) und eine Erkundung (Tour):
 
-- Tabelle `location`: neuen Standort anlegen.
+- Tabelle `location`: neuen Standort anlegen (`DHBW Lörrach`).
 - Tabelle `department`: Departments (früher „Studiengänge“) für den Standort anlegen.
 - Tabelle `rallye`: zwei neue Rallyes anlegen, Status z.B. `running` und `end_time` in der Zukunft.
 - Tabelle `join_department_rallye`: die normale Rallye mit dem passenden Department verknüpfen.
