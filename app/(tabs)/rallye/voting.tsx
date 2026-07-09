@@ -99,6 +99,7 @@ export default function Voting({
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
   const [currentVotingIdx, setCurrentVotingIdx] = useState(0);
   const [sendingResult, setSendingResult] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [votableQuestionGroups, setVotableQuestionGroups] = useState<
     VotingQuestionGroup[]
   >([]);
@@ -248,9 +249,19 @@ export default function Voting({
     void loadVotingData();
   }, [loadVotingData]);
 
+  const handleRetry = useCallback(async () => {
+    await loadVotingData();
+    await onRefresh();
+  }, [loadVotingData, onRefresh]);
+
   const handleRefresh = useCallback(async () => {
-    await loadVotingData({ background: true });
-    onRefresh();
+    setRefreshing(true);
+    try {
+      await loadVotingData({ background: true });
+      await onRefresh();
+    } finally {
+      setRefreshing(false);
+    }
   }, [loadVotingData, onRefresh]);
 
   const currentQuestion = useMemo(
@@ -337,7 +348,7 @@ export default function Voting({
             </ThemedText>
           </InfoBox>
           <InfoBox mb={2}>
-            <UIButton icon="rotate" disabled={loading} onPress={handleRefresh}>
+            <UIButton icon="rotate" disabled={loading} onPress={handleRetry}>
               {t('common.refresh')}
             </UIButton>
           </InfoBox>
@@ -357,7 +368,7 @@ export default function Voting({
         data={currentQuestion?.candidates || []}
         keyExtractor={(item) => `${currentQuestion?.questionId}-${item.teamId}`}
         onRefresh={handleRefresh}
-        refreshing={loading}
+        refreshing={loading || refreshing}
         ListHeaderComponent={() => (
           <View style={{ paddingTop: 10, paddingBottom: 30 }}>
             <RallyeContextBar />

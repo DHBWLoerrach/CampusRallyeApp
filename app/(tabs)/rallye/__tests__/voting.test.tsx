@@ -607,8 +607,26 @@ describe('Voting', () => {
     expect(getByText('common.refresh')).toBeTruthy();
     expect(queryByText('voting.ended.title')).toBeNull();
 
+    let resolveRetry!: () => void;
+    mockRpc.mockImplementation(
+      (name: string, params: Record<string, unknown>) => {
+        rpcCalls.push({ name, params });
+        if (name === 'get_voted_voting_question_ids') {
+          return new Promise((resolve) => {
+            resolveRetry = () =>
+              resolve({ data: fixtures.votedQuestions, error: null });
+          });
+        }
+        return Promise.resolve({ data: [], error: null });
+      }
+    );
+
     fireEvent.press(getByText('common.refresh'));
 
+    expect(getByText('common.loading')).toBeTruthy();
+    expect(queryByText('voting.error.load')).toBeNull();
+
+    resolveRetry();
     await waitFor(() => {
       expect(getByText('Question 1')).toBeTruthy();
     });
@@ -649,11 +667,13 @@ describe('Voting', () => {
     // The list stays mounted; the full-screen loading spinner must not appear.
     expect(getByText('Question 1')).toBeTruthy();
     expect(queryByText('common.loading')).toBeNull();
+    expect(getByTestId('voting-list').props.refreshing).toBe(true);
 
     // Let the refresh finish so no pending state updates leak between tests.
     resolveVoted();
     await waitFor(() => {
       expect(getByText('Question 1')).toBeTruthy();
+      expect(getByTestId('voting-list').props.refreshing).toBe(false);
     });
   });
 });
