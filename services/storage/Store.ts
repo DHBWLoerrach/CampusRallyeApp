@@ -20,22 +20,19 @@ type SessionInputs = {
   enabled: boolean;
   rallye: RallyeRow | null;
   allQuestionsAnswered: boolean;
-  timeExpired: boolean;
 };
 
 function deriveSessionState({
   enabled,
   rallye,
   allQuestionsAnswered,
-  timeExpired,
 }: SessionInputs): SessionState {
   if (!enabled || !rallye) return 'not_joined';
   if (rallye.status === 'voting') return 'voting';
   if (
     rallye.status === 'ranking' ||
     rallye.status === 'ended' ||
-    allQuestionsAnswered ||
-    timeExpired
+    allQuestionsAnswered
   )
     return 'finished';
   return 'playing';
@@ -63,7 +60,6 @@ export const store$ = observable({
   allQuestionsAnswered: false,
   answers: [] as AnswerRow[],
   team: null as Team | null,
-  timeExpired: false,
   teamDeleted: false,
 
   // Derived session state for resume/flow decisions.
@@ -72,7 +68,6 @@ export const store$ = observable({
       enabled: store$.enabled.get(),
       rallye: store$.rallye.get(),
       allQuestionsAnswered: store$.allQuestionsAnswered.get(),
-      timeExpired: store$.timeExpired.get(),
     }),
 
   isTourMode: () => store$.rallye.get()?.mode === 'tour',
@@ -126,7 +121,6 @@ export const store$ = observable({
     store$.allQuestionsAnswered.set(false);
     store$.questions.set([]);
     store$.answers.set([]);
-    store$.timeExpired.set(false);
     store$.totalQuestions.set(0);
     store$.answeredCount.set(0);
     store$.usedHints.set({});

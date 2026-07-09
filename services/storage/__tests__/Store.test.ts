@@ -79,13 +79,6 @@ describe('store$ observable', () => {
       store$.allQuestionsAnswered.set(true);
       expect(store$.sessionState.get()).toBe('finished');
     });
-
-    it('returns finished when time expired', () => {
-      store$.enabled.set(true);
-      store$.rallye.set({ id: 1, name: 'R', status: 'active' } as any);
-      store$.timeExpired.set(true);
-      expect(store$.sessionState.get()).toBe('finished');
-    });
   });
 
   // -- reset ------------------------------------------------------------------
@@ -97,7 +90,6 @@ describe('store$ observable', () => {
       store$.allQuestionsAnswered.set(true);
       store$.questions.set([{ id: 1 }] as any);
       store$.answers.set([{ id: 1 }] as any);
-      store$.timeExpired.set(true);
       store$.totalQuestions.set(10);
       store$.answeredCount.set(5);
       store$.usedHints.set({ 1: true });
@@ -109,7 +101,6 @@ describe('store$ observable', () => {
       expect(store$.allQuestionsAnswered.get()).toBe(false);
       expect(store$.questions.get()).toEqual([]);
       expect(store$.answers.get()).toEqual([]);
-      expect(store$.timeExpired.get()).toBe(false);
       expect(store$.totalQuestions.get()).toBe(0);
       expect(store$.answeredCount.get()).toBe(0);
       expect(store$.usedHints.get()).toEqual({});
