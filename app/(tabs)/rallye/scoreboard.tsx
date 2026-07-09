@@ -92,17 +92,21 @@ export default function Scoreboard() {
           return { ...t, total_points, time_spent } as TeamRow;
         });
 
-        combined.sort((a, b) => {
-          if (b.total_points! !== a.total_points!) {
-            return b.total_points! - a.total_points!;
-          }
-          const timeA = a.time_spent ?? Number.MAX_SAFE_INTEGER;
-          const timeB = b.time_spent ?? Number.MAX_SAFE_INTEGER;
-          return timeA - timeB;
-        });
+        combined.sort(
+          (a, b) => (b.total_points ?? 0) - (a.total_points ?? 0)
+        );
 
-        combined = combined.map((t, i) => {
-          return { ...t, rank: i + 1, group_name: t.name };
+        // Dense ranking: teams with equal points share a rank; the next
+        // distinct point value gets previousRank + 1 (no skipped ranks).
+        let currentRank = 0;
+        let previousPoints: number | null = null;
+        combined = combined.map((t) => {
+          const points = t.total_points ?? 0;
+          if (previousPoints === null || points !== previousPoints) {
+            currentRank += 1;
+            previousPoints = points;
+          }
+          return { ...t, rank: currentRank, group_name: t.name };
         });
 
         setRows(combined);

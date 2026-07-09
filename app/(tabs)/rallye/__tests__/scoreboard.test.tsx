@@ -149,38 +149,43 @@ describe('Scoreboard', () => {
     expect(getByText('🥉')).toBeTruthy();
   });
 
-  it('sorts teams by points descending, then by time', async () => {
+  it('ranks tied teams equally without skipping the next rank (dense ranking)', async () => {
     mockRallye = { id: 1, name: 'R', status: 'ranking' };
     mockTeams = [
       {
         id: '1',
-        name: 'Slow',
+        name: 'A',
         created_at: '2024-01-01T10:00:00Z',
         time_played: '2024-01-01T12:00:00Z',
       },
       {
         id: '2',
-        name: 'Fast',
+        name: 'B',
         created_at: '2024-01-01T10:00:00Z',
         time_played: '2024-01-01T10:30:00Z',
       },
+      {
+        id: '3',
+        name: 'C',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T11:00:00Z',
+      },
     ];
-    // Same points — Fast should rank first due to shorter time
+    // A and B tie on points despite different play time; C has fewer points
+    // and must land on rank 2, not 3 (dense ranking, no skipped rank).
     mockPoints = [
       { team_id: '1', points: 10 },
       { team_id: '2', points: 10 },
+      { team_id: '3', points: 5 },
     ];
 
-    const { getAllByText } = render(<Scoreboard />);
+    const { getAllByText, getByText } = render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
 
-    // 🥇 should appear before 🥈
-    const gold = getAllByText('🥇');
-    const silver = getAllByText('🥈');
-    expect(gold.length).toBe(1);
-    expect(silver.length).toBe(1);
+    expect(getAllByText('🥇').length).toBe(2);
+    expect(getByText('🥈')).toBeTruthy();
   });
 
   it('highlights own team row', async () => {
