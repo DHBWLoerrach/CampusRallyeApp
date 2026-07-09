@@ -82,7 +82,7 @@ jest.mock('@/utils/ConfirmAlert', () => ({
   confirm: jest.fn(async () => true),
 }));
 
-jest.mock('@/components/rallye/TimerHeader', () => () => null);
+jest.mock('@/components/rallye/PlannedEndInfo', () => () => null);
 jest.mock('@/components/ui/IconSymbol', () => ({ IconSymbol: () => null }));
 
 type ScreenOptions = {

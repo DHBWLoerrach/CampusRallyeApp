@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { Platform, Pressable } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
-import TimerHeader from '@/components/rallye/TimerHeader';
+import PlannedEndInfo from '@/components/rallye/PlannedEndInfo';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { store$ } from '@/services/storage/Store';
 import Colors from '@/utils/Colors';
@@ -16,7 +16,7 @@ export default function RallyeStackLayout() {
   const rallye = useSelector(() => store$.rallye.get());
   const isTourMode = useSelector(() => store$.isTourMode.get());
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
-  const showTimer = rallye?.status === 'running' && !isTourMode;
+  const showPlannedEnd = rallye?.status === 'running' && !isTourMode;
 
   useEffect(() => {
     return () => {
@@ -44,7 +44,9 @@ export default function RallyeStackLayout() {
     <Stack
       screenOptions={{
         headerTitle: () =>
-          showTimer ? <TimerHeader endTime={rallye?.end_time} /> : null,
+          showPlannedEnd ? (
+            <PlannedEndInfo endTime={rallye?.end_time} />
+          ) : null,
         headerStyle: { backgroundColor: palette.surface1 },
         headerTitleStyle: { color: palette.text },
         headerTintColor: palette.text,
