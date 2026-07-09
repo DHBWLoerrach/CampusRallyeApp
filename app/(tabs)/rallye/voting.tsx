@@ -110,140 +110,146 @@ export default function Voting({
   const rallyeId = rallye?.id;
   const teamId = team?.id;
 
-  const loadVotingData = useCallback(async () => {
-    setLoadState('loading');
-    if (!rallyeId || !teamId) {
-      setVotableQuestionGroups([]);
-      setLoadState('unavailable');
-      return;
-    }
-
-    try {
-      const [questionResponse, teamResponse, votedQuestionResponse] =
-        await Promise.all([
-          supabase
-            .from('join_rallye_questions')
-            .select('question_id, questions!inner(id, content, type)')
-            .eq('rallye_id', rallyeId)
-            .eq('is_voting', true),
-          supabase
-            .from('rallye_team')
-            .select('id, name')
-            .eq('rallye_id', rallyeId),
-          supabase.rpc('get_voted_voting_question_ids', {
-            rallye_id_param: rallyeId,
-            voting_team_id_param: teamId,
-          }),
-        ]);
-
-      if (questionResponse.error) throw questionResponse.error;
-      if (teamResponse.error) throw teamResponse.error;
-      if (votedQuestionResponse.error) throw votedQuestionResponse.error;
-
-      const questionRows = (questionResponse.data || []) as QuestionJoinRow[];
-      const teamRows = (teamResponse.data || []) as RallyeTeamRow[];
-      const votedQuestions = (votedQuestionResponse.data ||
-        []) as VotedQuestionRow[];
-
-      const questions = questionRows
-        .map(normalizeQuestionRow)
-        .filter(
-          (row): row is Omit<VotingQuestionGroup, 'candidates'> => row !== null
-        );
-      const otherTeams = teamRows.filter(
-        (candidate) => candidate.id !== teamId
-      );
-      const candidateTeamIds = otherTeams.map((candidate) => candidate.id);
-
-      if (questions.length === 0 || candidateTeamIds.length === 0) {
+  const loadVotingData = useCallback(
+    async ({ background = false }: { background?: boolean } = {}) => {
+      // A background reload (pull-to-refresh) keeps the current screen so the
+      // list stays visible; only the initial load shows the full-screen spinner.
+      if (!background) setLoadState('loading');
+      if (!rallyeId || !teamId) {
         setVotableQuestionGroups([]);
-        setCurrentVotingIdx(0);
-        setSelectedTeam(null);
         setLoadState('unavailable');
         return;
       }
 
-      const { data: answerData, error: answerError } = await supabase
-        .from('team_questions')
-        .select('question_id, team_id, team_answer')
-        .in(
-          'question_id',
-          questions.map((question) => question.questionId)
-        )
-        .in('team_id', candidateTeamIds);
-      if (answerError) throw answerError;
+      try {
+        const [questionResponse, teamResponse, votedQuestionResponse] =
+          await Promise.all([
+            supabase
+              .from('join_rallye_questions')
+              .select('question_id, questions!inner(id, content, type)')
+              .eq('rallye_id', rallyeId)
+              .eq('is_voting', true),
+            supabase
+              .from('rallye_team')
+              .select('id, name')
+              .eq('rallye_id', rallyeId),
+            supabase.rpc('get_voted_voting_question_ids', {
+              rallye_id_param: rallyeId,
+              voting_team_id_param: teamId,
+            }),
+          ]);
 
-      const votedQuestionIds = new Set<number>(
-        votedQuestions.map((vote) => vote.question_id)
-      );
-      const teamNameById = new Map<number, string>();
-      for (const teamRow of otherTeams) {
-        const rawName =
-          typeof teamRow.name === 'string'
-            ? teamRow.name
-            : typeof teamRow.team_name === 'string'
-              ? teamRow.team_name
-              : '';
-        teamNameById.set(teamRow.id, rawName.trim() || `Team ${teamRow.id}`);
-      }
+        if (questionResponse.error) throw questionResponse.error;
+        if (teamResponse.error) throw teamResponse.error;
+        if (votedQuestionResponse.error) throw votedQuestionResponse.error;
 
-      const groupedCandidates = new Map<number, VotingCandidate[]>();
-      for (const answer of (answerData || []) as TeamQuestionRow[]) {
-        const teamAnswer =
-          typeof answer.team_answer === 'string'
-            ? answer.team_answer.trim()
-            : '';
-        if (!teamAnswer) continue;
+        const questionRows = (questionResponse.data || []) as QuestionJoinRow[];
+        const teamRows = (teamResponse.data || []) as RallyeTeamRow[];
+        const votedQuestions = (votedQuestionResponse.data ||
+          []) as VotedQuestionRow[];
 
-        const teamName = teamNameById.get(answer.team_id);
-        if (!teamName) continue;
+        const questions = questionRows
+          .map(normalizeQuestionRow)
+          .filter(
+            (row): row is Omit<VotingQuestionGroup, 'candidates'> =>
+              row !== null
+          );
+        const otherTeams = teamRows.filter(
+          (candidate) => candidate.id !== teamId
+        );
+        const candidateTeamIds = otherTeams.map((candidate) => candidate.id);
 
-        const existingForQuestion =
-          groupedCandidates.get(answer.question_id) || [];
-        if (
-          existingForQuestion.some(
-            (candidate) => candidate.teamId === answer.team_id
+        if (questions.length === 0 || candidateTeamIds.length === 0) {
+          setVotableQuestionGroups([]);
+          setCurrentVotingIdx(0);
+          setSelectedTeam(null);
+          setLoadState('unavailable');
+          return;
+        }
+
+        const { data: answerData, error: answerError } = await supabase
+          .from('team_questions')
+          .select('question_id, team_id, team_answer')
+          .in(
+            'question_id',
+            questions.map((question) => question.questionId)
           )
-        )
-          continue;
+          .in('team_id', candidateTeamIds);
+        if (answerError) throw answerError;
 
-        existingForQuestion.push({
-          teamId: answer.team_id,
-          teamName,
-          teamAnswer,
-        });
-        groupedCandidates.set(answer.question_id, existingForQuestion);
+        const votedQuestionIds = new Set<number>(
+          votedQuestions.map((vote) => vote.question_id)
+        );
+        const teamNameById = new Map<number, string>();
+        for (const teamRow of otherTeams) {
+          const rawName =
+            typeof teamRow.name === 'string'
+              ? teamRow.name
+              : typeof teamRow.team_name === 'string'
+                ? teamRow.team_name
+                : '';
+          teamNameById.set(teamRow.id, rawName.trim() || `Team ${teamRow.id}`);
+        }
+
+        const groupedCandidates = new Map<number, VotingCandidate[]>();
+        for (const answer of (answerData || []) as TeamQuestionRow[]) {
+          const teamAnswer =
+            typeof answer.team_answer === 'string'
+              ? answer.team_answer.trim()
+              : '';
+          if (!teamAnswer) continue;
+
+          const teamName = teamNameById.get(answer.team_id);
+          if (!teamName) continue;
+
+          const existingForQuestion =
+            groupedCandidates.get(answer.question_id) || [];
+          if (
+            existingForQuestion.some(
+              (candidate) => candidate.teamId === answer.team_id
+            )
+          )
+            continue;
+
+          existingForQuestion.push({
+            teamId: answer.team_id,
+            teamName,
+            teamAnswer,
+          });
+          groupedCandidates.set(answer.question_id, existingForQuestion);
+        }
+
+        const eligibleGroups = questions
+          .map((question) => ({
+            ...question,
+            candidates: groupedCandidates.get(question.questionId) || [],
+          }))
+          .filter((question) => question.candidates.length >= 2);
+        const nextGroups = eligibleGroups.filter(
+          (question) => !votedQuestionIds.has(question.questionId)
+        );
+
+        setVotableQuestionGroups(nextGroups);
+        setCurrentVotingIdx(0);
+        setSelectedTeam(null);
+        setLoadState(eligibleGroups.length > 0 ? 'ready' : 'unavailable');
+      } catch (error) {
+        console.error('Error fetching voting questions:', error);
+        setVotableQuestionGroups([]);
+        setCurrentVotingIdx(0);
+        setSelectedTeam(null);
+        setLoadState('error');
       }
-
-      const eligibleGroups = questions
-        .map((question) => ({
-          ...question,
-          candidates: groupedCandidates.get(question.questionId) || [],
-        }))
-        .filter((question) => question.candidates.length >= 2);
-      const nextGroups = eligibleGroups.filter(
-        (question) => !votedQuestionIds.has(question.questionId)
-      );
-
-      setVotableQuestionGroups(nextGroups);
-      setCurrentVotingIdx(0);
-      setSelectedTeam(null);
-      setLoadState(eligibleGroups.length > 0 ? 'ready' : 'unavailable');
-    } catch (error) {
-      console.error('Error fetching voting questions:', error);
-      setVotableQuestionGroups([]);
-      setCurrentVotingIdx(0);
-      setSelectedTeam(null);
-      setLoadState('error');
-    }
-  }, [rallyeId, teamId]);
+    },
+    [rallyeId, teamId]
+  );
 
   useEffect(() => {
     void loadVotingData();
   }, [loadVotingData]);
 
   const handleRefresh = useCallback(async () => {
-    await loadVotingData();
+    await loadVotingData({ background: true });
     onRefresh();
   }, [loadVotingData, onRefresh]);
 
@@ -347,6 +353,7 @@ export default function Voting({
       contentStyle={[globalStyles.default.container, { flex: 1 }]}
     >
       <FlatList
+        testID="voting-list"
         data={currentQuestion?.candidates || []}
         keyExtractor={(item) => `${currentQuestion?.questionId}-${item.teamId}`}
         onRefresh={handleRefresh}

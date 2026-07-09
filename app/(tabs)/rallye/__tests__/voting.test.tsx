@@ -613,4 +613,47 @@ describe('Voting', () => {
       expect(getByText('Question 1')).toBeTruthy();
     });
   });
+
+  it('keeps the list visible during a background pull-to-refresh', async () => {
+    const { getByText, queryByText, getByTestId } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('Question 1')).toBeTruthy();
+    });
+
+    // Make the next voted-questions fetch hang so the refresh stays in flight.
+    let resolveVoted!: () => void;
+    mockRpc.mockImplementation(
+      (name: string, params: Record<string, unknown>) => {
+        rpcCalls.push({ name, params });
+        if (name === 'get_voted_voting_question_ids') {
+          return new Promise((resolve) => {
+            resolveVoted = () =>
+              resolve({ data: fixtures.votedQuestions, error: null });
+          });
+        }
+        return Promise.resolve({ data: [], error: null });
+      }
+    );
+
+    fireEvent(getByTestId('voting-list'), 'refresh');
+
+    await waitFor(() => {
+      expect(
+        rpcCalls.filter((call) => call.name === 'get_voted_voting_question_ids')
+      ).toHaveLength(2);
+    });
+
+    // The list stays mounted; the full-screen loading spinner must not appear.
+    expect(getByText('Question 1')).toBeTruthy();
+    expect(queryByText('common.loading')).toBeNull();
+
+    // Let the refresh finish so no pending state updates leak between tests.
+    resolveVoted();
+    await waitFor(() => {
+      expect(getByText('Question 1')).toBeTruthy();
+    });
+  });
 });
