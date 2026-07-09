@@ -220,6 +220,37 @@ describe('Scoreboard', () => {
     expect(getAllByText('MyTeam').length).toBe(2);
   });
 
+  it('shows the own team play time as a retrospective, not for other teams', async () => {
+    mockRallye = { id: 1, name: 'R', status: 'ended' };
+    mockTeam = { id: '2', name: 'MyTeam' };
+    mockTeams = [
+      {
+        id: '1',
+        name: 'Other',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T11:00:00Z',
+      },
+      {
+        id: '2',
+        name: 'MyTeam',
+        created_at: '2024-01-01T10:00:00Z',
+        time_played: '2024-01-01T10:47:00Z',
+      },
+    ];
+    mockPoints = [
+      { team_id: '1', points: 20 },
+      { team_id: '2', points: 10 },
+    ];
+
+    const { getAllByText } = render(<Scoreboard />);
+    await act(async () => {
+      await flushPromises();
+    });
+
+    // Only the own team's row renders the retrospective duration text.
+    expect(getAllByText('scoreboard.ownDuration').length).toBe(1);
+  });
+
   it('renders team points in the row', async () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [

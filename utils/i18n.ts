@@ -151,7 +151,10 @@ export const translations = {
       'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
     'confirm.exit.confirm': 'Beenden',
     'scoreboard.rowLabel':
-      'Platz {{rank}}, Team {{team}}, Zeit {{time}}, Punkte {{points}}',
+      'Platz {{rank}}, Team {{team}}, Punkte {{points}}',
+    'scoreboard.ownDuration': 'Ihr wart {{time}} unterwegs',
+    'scoreboard.durationMinutes': '{{minutes}} Min.',
+    'scoreboard.durationHoursMinutes': '{{hours}} Std. {{minutes}} Min.',
     'voting.ended.title': 'Die Abstimmung wurde beendet.',
     'voting.ended.message': 'Wartet auf die Beendigung der Rallye.',
     'voting.instruction':
@@ -313,7 +316,10 @@ export const translations = {
       'Do you really want to end participation? The team assignment on this device will be removed.',
     'confirm.exit.confirm': 'End',
     'scoreboard.rowLabel':
-      'Rank {{rank}}, Team {{team}}, Time {{time}}, Points {{points}}',
+      'Rank {{rank}}, Team {{team}}, Points {{points}}',
+    'scoreboard.ownDuration': 'You took {{time}}',
+    'scoreboard.durationMinutes': '{{minutes}} min',
+    'scoreboard.durationHoursMinutes': '{{hours}} hr {{minutes}} min',
     'voting.ended.title': 'Voting has ended.',
     'voting.ended.message': 'Wait for the rallye to finish.',
     'voting.instruction':
