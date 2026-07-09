@@ -154,7 +154,6 @@ jest.mock('@/services/storage/Store', () => ({
     currentQuestion: { get: jest.fn(() => null), set: jest.fn() },
     points: { get: jest.fn(() => 12), set: jest.fn() },
     allQuestionsAnswered: { get: jest.fn(() => true), set: jest.fn() },
-    timeExpired: { get: jest.fn(() => false), set: jest.fn() },
     isTourMode: { get: jest.fn(() => true) },
     answers: { get: jest.fn(() => []), set: jest.fn() },
     leaveRallye: jest.fn(),
@@ -181,7 +180,6 @@ describe('RallyeIndex', () => {
     (store$.currentQuestion.get as jest.Mock).mockReturnValue(null);
     (store$.points.get as jest.Mock).mockReturnValue(12);
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(true);
-    (store$.timeExpired.get as jest.Mock).mockReturnValue(false);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
     (store$.answers.get as jest.Mock).mockReturnValue([]);
   });
@@ -215,7 +213,7 @@ describe('RallyeIndex', () => {
     expect(activeQuestionViewProps?.refreshControl).toBeUndefined();
   });
 
-  it('shows the time-up state instead of active questions after team rallye expiry', () => {
+  it('keeps rendering active team questions after the stored end time has passed', () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,
       name: 'Campus Rallye',
@@ -225,35 +223,6 @@ describe('RallyeIndex', () => {
     });
     (store$.team.get as jest.Mock).mockReturnValue({ id: 2, name: 'Team A' });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
-    (store$.timeExpired.get as jest.Mock).mockReturnValue(true);
-    (store$.isTourMode.get as jest.Mock).mockReturnValue(false);
-    (store$.questions.get as jest.Mock).mockReturnValue([
-      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
-    ]);
-    (store$.currentQuestion.get as jest.Mock).mockReturnValue({
-      id: 1,
-      question: 'Q1',
-      question_type: 'knowledge',
-      points: 1,
-    });
-
-    const { getByText } = render(<RallyeIndex />);
-
-    expect(getByText('rallye.timeUp')).toBeTruthy();
-    expect(mockQuestionRenderer).not.toHaveBeenCalled();
-  });
-
-  it('keeps rendering active team questions when stale timeExpired has a future end time', () => {
-    (store$.rallye.get as jest.Mock).mockReturnValue({
-      id: 1,
-      name: 'Campus Rallye',
-      status: 'running',
-      mode: 'classic',
-      end_time: new Date(Date.now() + 40_000).toISOString(),
-    });
-    (store$.team.get as jest.Mock).mockReturnValue({ id: 2, name: 'Team A' });
-    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
-    (store$.timeExpired.get as jest.Mock).mockReturnValue(true);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(false);
     (store$.questions.get as jest.Mock).mockReturnValue([
       { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
@@ -274,7 +243,7 @@ describe('RallyeIndex', () => {
     );
   });
 
-  it('keeps rendering active tour questions even if timeExpired is true', () => {
+  it('keeps rendering active tour questions after the stored end time has passed', () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,
       name: 'Campus Tour',
@@ -283,7 +252,6 @@ describe('RallyeIndex', () => {
       end_time: new Date(Date.now() - 1_000).toISOString(),
     });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
-    (store$.timeExpired.get as jest.Mock).mockReturnValue(true);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
     (store$.questions.get as jest.Mock).mockReturnValue([
       { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },

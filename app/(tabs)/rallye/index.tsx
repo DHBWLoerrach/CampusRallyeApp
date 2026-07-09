@@ -53,24 +53,11 @@ const RallyeIndex = observer(function RallyeIndex() {
   const allQuestionsAnswered = useSelector(() =>
     store$.allQuestionsAnswered.get()
   );
-  const timeExpired = useSelector(() => store$.timeExpired.get());
   const isTourMode = useSelector(() => store$.isTourMode.get());
 
-  // Use primitive IDs as callback dependencies so that sub-field mutations
-  // on the rallye observable (status, end_time, name) don't recreate the
-  // callbacks and re-trigger the main data-loading effect.
   const rallyeId = rallye?.id;
   const teamId = team?.id;
-  const endTimeMs = rallye?.end_time
-    ? new Date(rallye.end_time).getTime()
-    : null;
-  const hasFutureEndTime =
-    typeof endTimeMs === 'number' &&
-    Number.isFinite(endTimeMs) &&
-    endTimeMs > Date.now();
-  const rallyeTimeExpired = timeExpired && !hasFutureEndTime;
-  const teamRallyeFinished =
-    !isTourMode && (allQuestionsAnswered || rallyeTimeExpired);
+  const teamRallyeFinished = !isTourMode && allQuestionsAnswered;
   const questionIdsCacheRef = useRef<{
     rallyeId: number;
     ids: number[];
@@ -313,7 +300,6 @@ const RallyeIndex = observer(function RallyeIndex() {
   }
 
   if (teamRallyeFinished) {
-    // Time up vs finished before end
     return (
       <ScreenScrollView
         padding="none"
@@ -332,11 +318,9 @@ const RallyeIndex = observer(function RallyeIndex() {
               variant="title"
               style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
             >
-              {rallyeTimeExpired
-                ? t('rallye.timeUp')
-                : t('rallye.allAnswered.simple')}
+              {t('rallye.allAnswered.simple')}
             </ThemedText>
-            {!rallyeTimeExpired && team ? (
+            {team ? (
               <ThemedText
                 variant="body"
                 style={[
