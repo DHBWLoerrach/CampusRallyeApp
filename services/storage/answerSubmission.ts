@@ -8,24 +8,7 @@ import {
 export type SubmitOutcome =
   | { status: 'local' }
   | { status: 'sent' }
-  | { status: 'queued' }
-  | { status: 'expired' };
-
-function isRallyeTimeExpired() {
-  const endTime = store$.rallye.get()?.end_time;
-  if (!endTime) return store$.timeExpired.get();
-
-  const endMs = new Date(endTime).getTime();
-  if (!Number.isFinite(endMs)) return store$.timeExpired.get();
-
-  const expired = endMs <= Date.now();
-  if (expired) {
-    store$.timeExpired.set(true);
-  } else if (store$.timeExpired.get()) {
-    store$.timeExpired.set(false);
-  }
-  return expired;
-}
+  | { status: 'queued' };
 
 export async function submitAnswerAndAdvance(options: {
   teamId: number | null;
@@ -43,12 +26,6 @@ export async function submitAnswerAndAdvance(options: {
     }
     await store$.gotoNextQuestion();
     return { status: 'local' };
-  }
-
-  // Team-mode submissions stop at expiry; setting timeExpired in the guard
-  // lets RallyeIndex switch away from the active question screen.
-  if (isRallyeTimeExpired()) {
-    return { status: 'expired' };
   }
 
   const result = await saveAnswer(
@@ -69,8 +46,7 @@ export async function submitAnswerAndAdvance(options: {
 export type SubmitPhotoOutcome =
   | { status: 'sent' }
   | { status: 'queued' }
-  | { status: 'requires_online' }
-  | { status: 'expired' };
+  | { status: 'requires_online' };
 
 export async function submitPhotoAnswerAndAdvance(options: {
   teamId: number | null;
@@ -80,7 +56,6 @@ export async function submitPhotoAnswerAndAdvance(options: {
 }): Promise<SubmitPhotoOutcome> {
   const { teamId, questionId, pointsAwarded, imageUri } = options;
   if (!teamId) return { status: 'requires_online' };
-  if (isRallyeTimeExpired()) return { status: 'expired' };
 
   const net = await NetInfo.fetch();
   if (!net.isConnected) return { status: 'requires_online' };

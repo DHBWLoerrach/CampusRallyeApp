@@ -17,16 +17,10 @@ const mockGotoNextQuestion = jest.fn(async () => {});
 const mockRallyeGet = jest.fn((): { end_time: string | null } => ({
   end_time: null,
 }));
-const mockTimeExpiredGet = jest.fn(() => false);
-const mockTimeExpiredSet = jest.fn();
 jest.mock('@/services/storage/Store', () => ({
   store$: {
     rallye: {
       get: () => mockRallyeGet(),
-    },
-    timeExpired: {
-      get: () => mockTimeExpiredGet(),
-      set: (value: boolean) => mockTimeExpiredSet(value),
     },
     points: {
       get: () => mockPointsGet(),
@@ -46,7 +40,6 @@ describe('submitAnswerAndAdvance', () => {
     jest.clearAllMocks();
     mockPointsGet.mockReturnValue(0);
     mockRallyeGet.mockReturnValue({ end_time: null });
-    mockTimeExpiredGet.mockReturnValue(false);
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
   });
 
@@ -59,25 +52,6 @@ describe('submitAnswerAndAdvance', () => {
     });
 
     expect(result).toEqual({ status: 'local' });
-    expect(mockSaveAnswer).not.toHaveBeenCalled();
-    expect(mockPointsSet).toHaveBeenCalledWith(5);
-    expect(mockGotoNextQuestion).toHaveBeenCalled();
-  });
-
-  it('keeps local tour answers playable after the stored end time', async () => {
-    mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() - 1_000).toISOString(),
-    });
-
-    const result = await submitAnswerAndAdvance({
-      teamId: null,
-      questionId: 1,
-      answeredCorrectly: true,
-      pointsAwarded: 5,
-    });
-
-    expect(result).toEqual({ status: 'local' });
-    expect(mockTimeExpiredSet).not.toHaveBeenCalled();
     expect(mockSaveAnswer).not.toHaveBeenCalled();
     expect(mockPointsSet).toHaveBeenCalledWith(5);
     expect(mockGotoNextQuestion).toHaveBeenCalled();
@@ -99,24 +73,20 @@ describe('submitAnswerAndAdvance', () => {
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 
-  it('ignores stale expiry state when the stored end time is still in the future', async () => {
-    mockTimeExpiredGet.mockReturnValue(true);
+  it('saves the answer even after the stored end time has passed', async () => {
     mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() + 40_000).toISOString(),
+      end_time: new Date(Date.now() - 1_000).toISOString(),
     });
 
     const result = await submitAnswerAndAdvance({
       teamId: 42,
       questionId: 7,
       answeredCorrectly: true,
-      pointsAwarded: 3,
-      answerText: 'hello',
+      pointsAwarded: 2,
     });
 
     expect(result).toEqual({ status: 'sent' });
-    expect(mockTimeExpiredSet).toHaveBeenCalledWith(false);
-    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, true, 3, 'hello');
-    expect(mockPointsSet).toHaveBeenCalledWith(3);
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, true, 2, '');
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 
@@ -145,40 +115,6 @@ describe('submitAnswerAndAdvance', () => {
 
     expect(result).toEqual({ status: 'queued' });
   });
-
-  it('does not save or advance when the timer already expired', async () => {
-    mockTimeExpiredGet.mockReturnValue(true);
-
-    const result = await submitAnswerAndAdvance({
-      teamId: 42,
-      questionId: 7,
-      answeredCorrectly: true,
-      pointsAwarded: 2,
-    });
-
-    expect(result).toEqual({ status: 'expired' });
-    expect(mockSaveAnswer).not.toHaveBeenCalled();
-    expect(mockPointsSet).not.toHaveBeenCalled();
-    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
-  });
-
-  it('marks expired end times and does not save the answer', async () => {
-    mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() - 1_000).toISOString(),
-    });
-
-    const result = await submitAnswerAndAdvance({
-      teamId: 42,
-      questionId: 7,
-      answeredCorrectly: true,
-      pointsAwarded: 2,
-    });
-
-    expect(result).toEqual({ status: 'expired' });
-    expect(mockTimeExpiredSet).toHaveBeenCalledWith(true);
-    expect(mockSaveAnswer).not.toHaveBeenCalled();
-    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
-  });
 });
 
 describe('submitPhotoAnswerAndAdvance', () => {
@@ -187,7 +123,6 @@ describe('submitPhotoAnswerAndAdvance', () => {
     mockIsConnected = true;
     mockPointsGet.mockReturnValue(0);
     mockRallyeGet.mockReturnValue({ end_time: null });
-    mockTimeExpiredGet.mockReturnValue(false);
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
     mockUploadPhotoAnswer.mockResolvedValue({ filePath: '1_2.jpg' });
   });
@@ -201,24 +136,6 @@ describe('submitPhotoAnswerAndAdvance', () => {
     });
 
     expect(result).toEqual({ status: 'requires_online' });
-    expect(mockUploadPhotoAnswer).not.toHaveBeenCalled();
-    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
-  });
-
-  it('keeps no-team photo answers in the existing requires-online path after the stored end time', async () => {
-    mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() - 1_000).toISOString(),
-    });
-
-    const result = await submitPhotoAnswerAndAdvance({
-      teamId: null,
-      questionId: 1,
-      pointsAwarded: 5,
-      imageUri: '/tmp/photo.jpg',
-    });
-
-    expect(result).toEqual({ status: 'requires_online' });
-    expect(mockTimeExpiredSet).not.toHaveBeenCalled();
     expect(mockUploadPhotoAnswer).not.toHaveBeenCalled();
     expect(mockGotoNextQuestion).not.toHaveBeenCalled();
   });
@@ -258,8 +175,10 @@ describe('submitPhotoAnswerAndAdvance', () => {
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 
-  it('does not upload, save, or advance when the timer expired', async () => {
-    mockTimeExpiredGet.mockReturnValue(true);
+  it('uploads and saves the photo even after the stored end time has passed', async () => {
+    mockRallyeGet.mockReturnValue({
+      end_time: new Date(Date.now() - 1_000).toISOString(),
+    });
 
     const result = await submitPhotoAnswerAndAdvance({
       teamId: 42,
@@ -268,10 +187,9 @@ describe('submitPhotoAnswerAndAdvance', () => {
       imageUri: '/tmp/photo.jpg',
     });
 
-    expect(result).toEqual({ status: 'expired' });
-    expect(mockUploadPhotoAnswer).not.toHaveBeenCalled();
-    expect(mockSaveAnswer).not.toHaveBeenCalled();
-    expect(mockPointsSet).not.toHaveBeenCalled();
-    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+    expect(result).toEqual({ status: 'sent' });
+    expect(mockUploadPhotoAnswer).toHaveBeenCalled();
+    expect(mockSaveAnswer).toHaveBeenCalled();
+    expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 });
