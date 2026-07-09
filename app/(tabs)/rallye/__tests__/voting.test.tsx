@@ -284,6 +284,15 @@ describe('Voting', () => {
     consoleSpy.mockRestore();
   });
 
+  it('shows a loading state before voting data is available', () => {
+    const { getByText, queryByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    expect(getByText('common.loading')).toBeTruthy();
+    expect(queryByText('voting.ended.title')).toBeNull();
+  });
+
   it('loads voting questions from join_rallye_questions with is_voting=true', async () => {
     const { getByText, queryByText } = render(
       <Voting onRefresh={jest.fn()} loading={false} />
@@ -551,18 +560,57 @@ describe('Voting', () => {
     });
   });
 
-  it('shows refresh/end view when fewer than 3 teams are available', async () => {
+  it('shows an unavailable state when fewer than 3 teams are available', async () => {
     fixtures.teamRows = [
       { id: 2, rallye_id: 1, name: 'Own Team' },
       { id: 3, rallye_id: 1, name: 'Team A' },
     ];
 
-    const { getByText } = render(
+    const { getByText, queryByText } = render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
     await waitFor(() => {
-      expect(getByText('voting.ended.title')).toBeTruthy();
+      expect(getByText('voting.unavailable.title')).toBeTruthy();
+    });
+    expect(queryByText('voting.ended.title')).toBeNull();
+  });
+
+  it('shows an unavailable state when no question has two candidates', async () => {
+    fixtures.answerRows = [
+      { question_id: 101, team_id: 3, team_answer: 'Only one answer' },
+    ];
+
+    const { getByText, queryByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('voting.unavailable.title')).toBeTruthy();
+    });
+    expect(queryByText('voting.ended.title')).toBeNull();
+  });
+
+  it('shows a retryable error state when voting data cannot be loaded', async () => {
+    mockRpc.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'load failed' },
+    });
+
+    const { getByText, queryByText } = render(
+      <Voting onRefresh={jest.fn()} loading={false} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('voting.error.load')).toBeTruthy();
+    });
+    expect(getByText('common.refresh')).toBeTruthy();
+    expect(queryByText('voting.ended.title')).toBeNull();
+
+    fireEvent.press(getByText('common.refresh'));
+
+    await waitFor(() => {
+      expect(getByText('Question 1')).toBeTruthy();
     });
   });
 });

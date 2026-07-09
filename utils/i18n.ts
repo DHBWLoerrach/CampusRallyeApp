@@ -157,9 +157,13 @@ export const translations = {
     'scoreboard.durationHoursMinutes': '{{hours}} Std. {{minutes}} Min.',
     'voting.ended.title': 'Die Abstimmung wurde beendet.',
     'voting.ended.message': 'Wartet auf die Beendigung der Rallye.',
+    'voting.unavailable.title': 'Keine Abstimmung verfügbar',
+    'voting.unavailable.message':
+      'Derzeit stehen nicht genügend Antworten zur Abstimmung bereit.',
     'voting.instruction':
       'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.',
     'voting.next': 'Nächste Abstimmung',
+    'voting.error.load': 'Die Abstimmung konnte nicht geladen werden.',
     'voting.error.submit': 'Abstimmung konnte nicht gespeichert werden.',
     'scoreboard.title': 'Endstand',
     'geocaching.arrived': 'Ziel erreicht!',
@@ -322,9 +326,13 @@ export const translations = {
     'scoreboard.durationHoursMinutes': '{{hours}} hr {{minutes}} min',
     'voting.ended.title': 'Voting has ended.',
     'voting.ended.message': 'Wait for the rallye to finish.',
+    'voting.unavailable.title': 'No voting available',
+    'voting.unavailable.message':
+      'There are currently not enough answers available for voting.',
     'voting.instruction':
       'Give an extra point to the team that you think solved the task above the best.',
     'voting.next': 'Next vote',
+    'voting.error.load': 'Voting could not be loaded.',
     'voting.error.submit': 'Vote could not be saved.',
     'scoreboard.title': 'Final standings',
     'geocaching.arrived': 'Destination reached!',

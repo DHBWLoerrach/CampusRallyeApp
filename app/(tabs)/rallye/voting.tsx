@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
 import UIButton from '@/components/ui/UIButton';
@@ -59,6 +65,8 @@ type VotingQuestionGroup = {
   candidates: VotingCandidate[];
 };
 
+type VotingLoadState = 'loading' | 'ready' | 'unavailable' | 'error';
+
 function normalizeQuestionRow(
   row: QuestionJoinRow
 ): Omit<VotingQuestionGroup, 'candidates'> | null {
@@ -87,7 +95,7 @@ export default function Voting({
   onRefresh: () => void;
   loading: boolean;
 }) {
-  const [teamCount, setTeamCount] = useState(0);
+  const [loadState, setLoadState] = useState<VotingLoadState>('loading');
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
   const [currentVotingIdx, setCurrentVotingIdx] = useState(0);
   const [sendingResult, setSendingResult] = useState(false);
@@ -103,7 +111,12 @@ export default function Voting({
   const teamId = team?.id;
 
   const loadVotingData = useCallback(async () => {
-    if (!rallyeId || !teamId) return;
+    setLoadState('loading');
+    if (!rallyeId || !teamId) {
+      setVotableQuestionGroups([]);
+      setLoadState('unavailable');
+      return;
+    }
 
     try {
       const [questionResponse, teamResponse, votedQuestionResponse] =
@@ -132,8 +145,6 @@ export default function Voting({
       const votedQuestions = (votedQuestionResponse.data ||
         []) as VotedQuestionRow[];
 
-      setTeamCount(teamRows.length);
-
       const questions = questionRows
         .map(normalizeQuestionRow)
         .filter(
@@ -148,6 +159,7 @@ export default function Voting({
         setVotableQuestionGroups([]);
         setCurrentVotingIdx(0);
         setSelectedTeam(null);
+        setLoadState('unavailable');
         return;
       }
 
@@ -203,19 +215,26 @@ export default function Voting({
         groupedCandidates.set(answer.question_id, existingForQuestion);
       }
 
-      const nextGroups = questions
+      const eligibleGroups = questions
         .map((question) => ({
           ...question,
           candidates: groupedCandidates.get(question.questionId) || [],
         }))
-        .filter((question) => !votedQuestionIds.has(question.questionId))
         .filter((question) => question.candidates.length >= 2);
+      const nextGroups = eligibleGroups.filter(
+        (question) => !votedQuestionIds.has(question.questionId)
+      );
 
       setVotableQuestionGroups(nextGroups);
       setCurrentVotingIdx(0);
       setSelectedTeam(null);
+      setLoadState(eligibleGroups.length > 0 ? 'ready' : 'unavailable');
     } catch (error) {
       console.error('Error fetching voting questions:', error);
+      setVotableQuestionGroups([]);
+      setCurrentVotingIdx(0);
+      setSelectedTeam(null);
+      setLoadState('error');
     }
   }, [rallyeId, teamId]);
 
@@ -259,7 +278,37 @@ export default function Voting({
     }
   };
 
-  if (!votingAllowed || teamCount < 3) {
+  if (loadState === 'loading') {
+    return (
+      <Screen
+        padding="none"
+        contentStyle={[
+          globalStyles.default.container,
+          { justifyContent: 'center', alignItems: 'center' },
+        ]}
+      >
+        <ActivityIndicator size="large" color={Colors.dhbwRed} />
+        <ThemedText variant="body" style={[s.muted, { marginTop: 10 }]}>
+          {t('common.loading')}
+        </ThemedText>
+      </Screen>
+    );
+  }
+
+  if (loadState !== 'ready' || !votingAllowed) {
+    const titleKey =
+      loadState === 'error'
+        ? 'common.errorTitle'
+        : loadState === 'unavailable'
+          ? 'voting.unavailable.title'
+          : 'voting.ended.title';
+    const messageKey =
+      loadState === 'error'
+        ? 'voting.error.load'
+        : loadState === 'unavailable'
+          ? 'voting.unavailable.message'
+          : 'voting.ended.message';
+
     return (
       <Screen padding="none" contentStyle={globalStyles.default.container}>
         <VStack style={{ width: '100%' }} gap={2}>
@@ -268,7 +317,7 @@ export default function Voting({
               variant="title"
               style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
             >
-              {t('voting.ended.title')}
+              {t(titleKey)}
             </ThemedText>
             <ThemedText
               variant="body"
@@ -278,7 +327,7 @@ export default function Voting({
                 { marginTop: 10 },
               ]}
             >
-              {t('voting.ended.message')}
+              {t(messageKey)}
             </ThemedText>
           </InfoBox>
           <InfoBox mb={2}>
