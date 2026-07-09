@@ -44,3 +44,6 @@ yarn-error.*
 
 ios/
 android/
+
+# Superpowers subagent-driven-development scratch state
+.superpowers/
