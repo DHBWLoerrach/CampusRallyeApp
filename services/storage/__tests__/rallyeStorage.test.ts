@@ -19,6 +19,7 @@ import { StorageKeys } from '../asyncStorage';
 import {
   getCurrentRallye,
   getLocationDashboardData,
+  getLocationsWithJoinableRallyes,
 } from '../rallyeStorage';
 import { Logger } from '@/utils/Logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -391,5 +392,64 @@ describe('rallyeStorage.getLocationDashboardData', () => {
       'Skipping joinable rallye without department_id in dashboard mapping',
       { rallyeId: 555 }
     );
+  });
+});
+
+describe('rallyeStorage.getLocationsWithJoinableRallyes', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('excludes locations whose tour-mode rallye is not joinable', async () => {
+    useTableHandlers({
+      rallye: ({ select }) => {
+        expect(select).toBe('id, status, department_id');
+        return {
+          data: [
+            { id: 900, status: 'ended', department_id: null },
+            { id: 901, status: 'ready', department_id: null },
+          ],
+          error: null,
+        };
+      },
+      location: ({ select, constraints }) => {
+        if (select === 'id, default_rallye_id') {
+          return {
+            data: [
+              { id: 1, default_rallye_id: 900 },
+              { id: 2, default_rallye_id: 901 },
+            ],
+            error: null,
+          };
+        }
+
+        expect(select).toBe('*');
+        expect(constraints).toContainEqual({
+          type: 'in',
+          column: 'id',
+          value: [2],
+        });
+        return {
+          data: [
+            {
+              id: 2,
+              name: 'Joinable Tour Location',
+              default_rallye_id: 901,
+              created_at: '2024-01-01T00:00:00Z',
+            },
+          ],
+          error: null,
+        };
+      },
+    });
+
+    await expect(getLocationsWithJoinableRallyes()).resolves.toEqual([
+      {
+        id: 2,
+        name: 'Joinable Tour Location',
+        default_rallye_id: 901,
+        created_at: '2024-01-01T00:00:00Z',
+      },
+    ]);
   });
 });

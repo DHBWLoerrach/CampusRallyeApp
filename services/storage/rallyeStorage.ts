@@ -204,6 +204,10 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
       (rallye) => isJoinableRallyeStatus(rallye.status)
     ) ?? [];
 
+  const joinableRallyeIds = new Set(
+    joinableRallyes.map((rallye) => rallye.id)
+  );
+
   const joinableDepartmentIds = [
     ...new Set(
       joinableRallyes
@@ -238,7 +242,9 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
 
   const locIdsWithTourMode = allLocs
     ? allLocs
-        .filter((location: any) => location.default_rallye_id !== null)
+        .filter((location: any) =>
+          joinableRallyeIds.has(location.default_rallye_id)
+        )
         .map((location: any) => location.id)
     : [];
 
