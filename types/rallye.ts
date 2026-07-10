@@ -12,11 +12,11 @@ export type QuestionType =
 export type RallyeMode = 'tour' | 'department';
 
 export const RALLYE_STATUSES = [
-  'preparing',
-  'inactive',
+  'draft',
+  'ready',
   'running',
   'voting',
-  'ranking',
+  'results',
   'ended',
 ] as const;
 

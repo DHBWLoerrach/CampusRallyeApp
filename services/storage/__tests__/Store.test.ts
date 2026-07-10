@@ -49,9 +49,9 @@ describe('store$ observable', () => {
       expect(store$.sessionState.get()).toBe('not_joined');
     });
 
-    it('returns playing for an active rallye', () => {
+    it('returns playing for a running rallye', () => {
       store$.enabled.set(true);
-      store$.rallye.set({ id: 1, name: 'R', status: 'active' } as any);
+      store$.rallye.set({ id: 1, name: 'R', status: 'running' } as any);
       expect(store$.sessionState.get()).toBe('playing');
     });
 
@@ -67,15 +67,15 @@ describe('store$ observable', () => {
       expect(store$.sessionState.get()).toBe('finished');
     });
 
-    it('returns finished when rallye status is ranking', () => {
+    it('returns finished when rallye status is results', () => {
       store$.enabled.set(true);
-      store$.rallye.set({ id: 1, name: 'R', status: 'ranking' } as any);
+      store$.rallye.set({ id: 1, name: 'R', status: 'results' } as any);
       expect(store$.sessionState.get()).toBe('finished');
     });
 
     it('returns finished when all questions are answered', () => {
       store$.enabled.set(true);
-      store$.rallye.set({ id: 1, name: 'R', status: 'active' } as any);
+      store$.rallye.set({ id: 1, name: 'R', status: 'running' } as any);
       store$.allQuestionsAnswered.set(true);
       expect(store$.sessionState.get()).toBe('finished');
     });

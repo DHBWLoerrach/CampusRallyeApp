@@ -42,7 +42,7 @@ function withMode<T extends RallyeStorageRow>(
 function isActiveRallyeStatus(
   status: RallyeStatus | null | undefined
 ): boolean {
-  return !!status && status !== 'inactive' && status !== 'ended';
+  return !!status && status !== 'draft' && status !== 'ended';
 }
 
 export async function getCurrentRallye(): Promise<RallyeRow | null> {

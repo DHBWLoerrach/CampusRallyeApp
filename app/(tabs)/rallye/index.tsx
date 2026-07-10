@@ -32,7 +32,7 @@ interface GeocachingMetadata {
 }
 
 function isPreparation(status?: RallyeStatus) {
-  return status === 'preparing';
+  return status === 'draft' || status === 'ready';
 }
 
 const RallyeIndex = observer(function RallyeIndex() {
@@ -291,7 +291,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     return <Voting loading={loading} onRefresh={onRefresh} />;
   }
 
-  if (rallye.status === 'ranking' || rallye.status === 'ended') {
+  if (rallye.status === 'results' || rallye.status === 'ended') {
     return <Scoreboard />;
   }
 

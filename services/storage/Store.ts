@@ -30,7 +30,7 @@ function deriveSessionState({
   if (!enabled || !rallye) return 'not_joined';
   if (rallye.status === 'voting') return 'voting';
   if (
-    rallye.status === 'ranking' ||
+    rallye.status === 'results' ||
     rallye.status === 'ended' ||
     allQuestionsAnswered
   )

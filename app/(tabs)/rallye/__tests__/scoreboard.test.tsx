@@ -150,7 +150,7 @@ describe('Scoreboard', () => {
   });
 
   it('ranks tied teams equally without skipping the next rank (dense ranking)', async () => {
-    mockRallye = { id: 1, name: 'R', status: 'ranking' };
+    mockRallye = { id: 1, name: 'R', status: 'results' };
     mockTeams = [
       {
         id: '1',

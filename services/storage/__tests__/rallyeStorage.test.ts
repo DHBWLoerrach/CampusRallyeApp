@@ -257,9 +257,9 @@ describe('rallyeStorage.getLocationDashboardData', () => {
             },
             {
               id: 102,
-              name: 'Info Rallye Inactive',
+              name: 'Info Rallye Draft',
               department_id: 11,
-              status: 'inactive',
+              status: 'draft',
               password: null,
               end_time: null,
               created_at: '2024-01-01T00:00:00Z',

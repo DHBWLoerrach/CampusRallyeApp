@@ -58,7 +58,7 @@ export default function Scoreboard() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    if (!rallyeId || (rallyeStatus !== 'ranking' && rallyeStatus !== 'ended'))
+    if (!rallyeId || (rallyeStatus !== 'results' && rallyeStatus !== 'ended'))
       return;
     (async () => {
       try {
