@@ -8,7 +8,7 @@
 Die App erzeugt aktuell aktiven Zeitdruck für Teams:
 
 - `TimerHeader.tsx` zeigt einen live herunterzählenden `hh:mm:ss`-Countdown im
-  Header und setzt `store$.timeExpired`, sobald `end_time` erreicht ist.
+  Header und setzt `store$.timeExpired`, sobald `rallye_end` erreicht ist.
 - `store$.timeExpired` löst eine **harte Sperre** aus: Antworten können nicht
   mehr gespeichert werden (`answerSubmission.ts`), und der Fragen-Screen wird
   clientseitig durch einen „Zeit abgelaufen!“-Screen ersetzt (`index.tsx`) —
@@ -60,7 +60,7 @@ gerechtfertigt, weil sich der Zweck der Komponente vollständig ändert.
 `app/(tabs)/rallye/_layout.tsx`: Import und lokale Variable (`showTimer` →
 `showPlannedEnd`) umbenannt, gleiche Sichtbarkeitsbedingung
 (`rallye?.status === 'running' && !isTourMode`), Prop bleibt
-`rallye?.end_time`.
+`rallye?.rallye_end`.
 
 ### 2. Keine harte Sperre mehr nach Zeitablauf
 
@@ -81,12 +81,12 @@ gerechtfertigt, weil sich der Zweck der Komponente vollständig ändert.
   `!isTourMode && allQuestionsAnswered`. Der „Rallye beendet“-Screen zeigt
   dadurch immer `rallye.allAnswered.simple` (der `rallye.timeUp`-Zweig
   entfällt). Der i18n-Key `rallye.timeUp` wird gelöscht (dann ungenutzt).
-- Ergebnis: Fragen und Antwortabgabe bleiben nach `end_time` uneingeschränkt
+- Ergebnis: Fragen und Antwortabgabe bleiben nach `rallye_end` uneingeschränkt
   zugänglich. Einzige Quelle für „Rallye beendet“ ist `rallye.status`.
 
 ### 3. Spielzeit nur als Rückblick fürs eigene Team
 
-- Die Erfassung von `time_played` (`services/storage/teamStorage.ts:
+- Die Erfassung von `play_time` (`services/storage/teamStorage.ts:
   setTimePlayed`, Aufruf in `Store.ts: gotoNextQuestion`) bleibt unverändert —
   wird weiterhin benötigt.
 - `app/(tabs)/rallye/scoreboard.tsx`: Die Dauer-Anzeige verschwindet aus jeder
@@ -118,7 +118,7 @@ gerechtfertigt, weil sich der Zweck der Komponente vollständig ändert.
 - Die Umbenennung `TimerHeader` → `PlannedEndInfo` berührt vier Dateien zur
   Namensklarheit statt eines reinen Verhaltens-Patches — bewusst in Kauf
   genommen, weil der bisherige Name („Timer“) dem neuen Zweck widerspricht.
-- Teams, die eine Rallye nicht abschließen (`time_played === null`), erhalten
+- Teams, die eine Rallye nicht abschließen (`play_time === null`), erhalten
   keinen eigenen Rückblick-Satz im Scoreboard (kein `time_spent`); das ist
   unverändert zum Status quo, in dem solche Teams zuvor ans Ende der
   Gleichstandsgruppe sortiert wurden — jetzt entscheidet nur die Punktzahl,
@@ -128,20 +128,20 @@ gerechtfertigt, weil sich der Zweck der Komponente vollständig ändert.
 
 - `components/rallye/__tests__/TimerHeader.test.tsx` →
   `PlannedEndInfo.test.tsx`: kein Timer-/Interval-Verhalten mehr; stattdessen
-  Formatierungs-Test (`end_time` gesetzt → Text sichtbar) und Null-Fall
-  (`end_time` null/undefined → nichts gerendert). Kein
+  Formatierungs-Test (`rallye_end` gesetzt → Text sichtbar) und Null-Fall
+  (`rallye_end` null/undefined → nichts gerendert). Kein
   `store$.timeExpired`-Bezug mehr.
 - `app/(tabs)/rallye/__tests__/_layout.test.tsx`: Umbenennung der Prüfungen
   auf `PlannedEndInfo`.
 - `services/storage/__tests__/answerSubmission.test.ts`: Alle `expired`-Fälle
-  (abgelaufene `end_time` blockiert Speichern) entfernt; stattdessen Test,
-  dass eine Antwortabgabe nach abgelaufener `end_time` weiterhin normal
+  (abgelaufene `rallye_end` blockiert Speichern) entfernt; stattdessen Test,
+  dass eine Antwortabgabe nach abgelaufener `rallye_end` weiterhin normal
   gespeichert wird.
 - `services/storage/__tests__/Store.test.ts`: `timeExpired`-Fälle in
   `sessionState`/`reset()` entfernt.
 - `app/(tabs)/rallye/__tests__/index.test.tsx` /
   `index-effects.test.tsx`: `rallye.timeUp`-/`timeExpired`-Fälle entfernt;
-  „alle Fragen beantwortet“-Screen wird unabhängig von `end_time` getestet.
+  „alle Fragen beantwortet“-Screen wird unabhängig von `rallye_end` getestet.
 - `app/(tabs)/rallye/__tests__/scoreboard.test.tsx`: Test
   `"sorts teams by points descending, then by time"` wird ersetzt durch einen
   Test auf Dense Ranking bei Punktgleichheit (kein Zeit-Tie-Break mehr) sowie
@@ -154,4 +154,4 @@ gerechtfertigt, weil sich der Zweck der Komponente vollständig ändert.
   dieses Repos).
 - Neue Anzeige der eigenen Spielzeit außerhalb des Scoreboards (z. B. eigenes
   Widget während des Spiels).
-- Änderungen an der DB-Spalte `end_time` selbst (ist bereits nullable im Typ).
+- Änderungen an der DB-Spalte `rallye_end` selbst (ist bereits nullable im Typ).

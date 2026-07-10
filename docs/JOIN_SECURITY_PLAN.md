@@ -1,20 +1,20 @@
 # Join-Schutz (Roadmap): Serverseitig + QR-Code
 
 ## Kontext / Motivation
-Aktuell nutzen wir ein einfaches Rallye-Passwort, um „ungewollte Teilnahme“ zu reduzieren (soft barrier).
-Das Passwort ist **nicht als Geheimnis** gedacht (keine sensitiven Daten), sondern als pragmatische Hürde gegen Zufalls-Teilnahmen.
+Aktuell nutzen wir einen einfachen Rallye-Code, um „ungewollte Teilnahme“ zu reduzieren (soft barrier).
+Der Code ist **nicht als Geheimnis** gedacht (keine sensitiven Daten), sondern als pragmatische Hürde gegen Zufalls-Teilnahmen.
 
-Wir haben uns bewusst dafür entschieden, das Passwort **kurzfristig „untrusted“** zu handhaben:
-- Die App lädt das Passwort (z.B. über `SELECT * FROM rallye`) mit herunter.
-- Die App prüft das Passwort **clientseitig**.
+Wir haben uns bewusst dafür entschieden, den Code **kurzfristig „untrusted“** zu handhaben:
+- Die App lädt den Code (z.B. über `SELECT * FROM rallyes`) mit herunter.
+- Die App prüft den Code **clientseitig**.
 
-Das ist aktuell **akzeptiert**, aber langfristig nicht ideal, weil es das Passwort faktisch entwertet (wer es wirklich will, kann es aus App/Netzwerk/State auslesen).
+Das ist aktuell **akzeptiert**, aber langfristig nicht ideal, weil es den Code faktisch entwertet (wer ihn wirklich will, kann ihn aus App/Netzwerk/State auslesen).
 
 ## Zielbild
 Premium-/Trust-Level erhöhen, ohne unnötige Friktion:
-- **Kurzfristig**: Password-Barrier bleibt, aber UX ist sauber (Rallyes ohne Passwort funktionieren).
-- **Als nächstes**: Passwortprüfung **serverseitig** (Supabase RPC) + Policies, sodass das Passwort nicht mehr im Client auftaucht.
-- **Mittelfristig**: Join per **QR-Code / Einladungs-Token** (Event-typisch, vor Ort scanbar), ggf. kombiniert mit Passwort.
+- **Kurzfristig**: Code-Barrier bleibt, aber UX ist sauber (Rallyes ohne Code funktionieren).
+- **Als nächstes**: Codeprüfung **serverseitig** (Supabase RPC) + Policies, sodass der Code nicht mehr im Client auftaucht.
+- **Mittelfristig**: Join per **QR-Code / Einladungs-Token** (Event-typisch, vor Ort scanbar), ggf. kombiniert mit Code.
 
 ## Nicht-Ziele (bewusste Abgrenzung)
 - Kein vollständiges „Security“-System (kein echtes Identity-/Login-System).
@@ -23,14 +23,14 @@ Premium-/Trust-Level erhöhen, ohne unnötige Friktion:
 
 ---
 
-## Phase 0 (JETZT): „Untrusted“ Passwort-Join (Status Quo)
+## Phase 0 (JETZT): „Untrusted“ Code-Join (Status Quo)
 ### Verhalten
-- Rallyes **ohne Passwort** (`NULL` oder `''`) → Join ohne Eingabe.
-- Rallyes **mit Passwort** → Passwortfeld sichtbar, Join erst nach Eingabe, Prüfung clientseitig.
+- Rallyes **ohne Code** (`NULL` oder `''`) → Join ohne Eingabe.
+- Rallyes **mit Code** → Codefeld sichtbar, Join erst nach Eingabe, Prüfung clientseitig.
 
 ### Bekannte Trade-offs / Risiken
-- Passwort kann aus App/Netzwerk/State extrahiert werden → Barrier nur gegen „Zufall“, nicht gegen Absicht.
-- Passwort kann (je nach Flow) lokal persistiert werden, wenn wir die komplette Rallye-Zeile speichern.
+- Code kann aus App/Netzwerk/State extrahiert werden → Barrier nur gegen „Zufall“, nicht gegen Absicht.
+- Code kann (je nach Flow) lokal persistiert werden, wenn wir die komplette Rallye-Zeile speichern.
 
 ### Warum wir das vorerst so lassen
 - Änderung auf serverseitige Prüfung + RLS/RPC betrifft DB-Policies und App-Flow → höheres Risiko/Scope.
@@ -38,42 +38,42 @@ Premium-/Trust-Level erhöhen, ohne unnötige Friktion:
 
 ---
 
-## Phase 1: Serverseitige Passwortprüfung (RPC) + RLS/Policies
+## Phase 1: Serverseitige Codeprüfung (RPC) + RLS/Policies
 ### Ziel
-Client soll **nie** das Rallye-Passwort sehen oder speichern.
-Die App bekommt nur ein Ergebnis: „ok / nicht ok“ (plus optional „password_required“).
+Client soll **nie** den Rallye-Code sehen oder speichern.
+Die App bekommt nur ein Ergebnis: „ok / nicht ok“ (plus optional „rallye_code_required“).
 
 ### Kernidee
-1. Rallye-Liste liefert **kein `password`** mehr.
-2. Join prüft Passwort über eine **Supabase RPC** (oder ein dediziertes „Join“-Endpoint/Function).
-3. RLS/Policies verhindern das Auslesen der Passwort-Spalte.
+1. Rallye-Liste liefert **keinen `rallye_code`** mehr.
+2. Join prüft Code über eine **Supabase RPC** (oder ein dediziertes „Join“-Endpoint/Function).
+3. RLS/Policies verhindern das Auslesen der Code-Spalte.
 
 ### Beads / Tasks (feingranular)
-1) **DB/RPC: `validate_rallye_password`**
-   - Funktion (z.B.) `validate_rallye_password(rallye_id int, password text) returns boolean`.
-   - Gibt nur `true/false` zurück (kein Passwort, keine Details).
+1) **DB/RPC: `validate_rallye_code`**
+   - Funktion (z.B.) `validate_rallye_code(rallye_id int, rallye_code text) returns boolean`.
+   - Gibt nur `true/false` zurück (kein Code, keine Details).
    - Logging/Rate-Limit (optional) für Missbrauchserkennung.
 
-2) **DB: `password_required` Flag (optional, aber sehr hilfreich für UX)**
-   - Variante A: View `rallye_public` mit `password_required = (password is not null and password <> '')`.
+2) **DB: `rallye_code_required` Flag (optional, aber sehr hilfreich für UX)**
+   - Variante A: View `rallye_public` mit `rallye_code_required = (rallye_code is not null and rallye_code <> '')`.
    - Variante B: Zusätzliches computed Feld über RPC.
-   - Ziel: App kann UI korrekt anzeigen (Lock-Icon / Passwortfeld), ohne Passwort zu kennen.
+   - Ziel: App kann UI korrekt anzeigen (Lock-Icon / Codefeld), ohne Code zu kennen.
 
 3) **Supabase RLS/Policies**
-   - `SELECT` auf `rallye.password` für anonyme Clients verhindern (mindestens per View/Spaltenauswahl in Queries).
-   - Falls möglich: Row-Level `SELECT` auf `rallye` nur über `rallye_public` erlauben.
+   - `SELECT` auf `rallyes.rallye_code` für anonyme Clients verhindern (mindestens per View/Spaltenauswahl in Queries).
+   - Falls möglich: Row-Level `SELECT` auf `rallyes` nur über `rallye_public` erlauben.
    - Sicherstellen, dass RPC ausführbar bleibt (ggf. `SECURITY DEFINER` + sauberer `search_path`).
 
 4) **App: Rallye-Liste auf „public select“ umstellen**
    - `getActiveRallyes()`/`onRefresh()` nicht mehr `select('*')`, sondern nur die public Felder (oder View).
-   - UI-Logik nutzt `password_required` statt `password`.
+   - UI-Logik nutzt `rallye_code_required` statt `rallye_code`.
 
 5) **App: Join-Flow umstellen**
-   - Wenn `password_required`:
-     - Passwortfeld anzeigen
-     - Join: RPC aufrufen, bei `false` → „Falsches Passwort“
+   - Wenn `rallye_code_required`:
+     - Codefeld anzeigen
+     - Join: RPC aufrufen, bei `false` → „Falscher Code“
    - Wenn **nicht** required:
-     - Kein Passwortfeld
+     - Kein Codefeld
      - Join ohne RPC (oder RPC, die „ok“ zurückgibt)
    - Offline-Fall: Wenn required und offline → klarer Hinweis („Zum Beitreten ist Internet nötig“).
 
@@ -82,9 +82,9 @@ Die App bekommt nur ein Ergebnis: „ok / nicht ok“ (plus optional „password
 - Koordination: Welche Clients sind im Feld? (Versionen/Backward-Compat)
 
 ### Definition of Done (Phase 1)
-- Rallye-Passwörter sind nicht mehr in Client-Requests für Listen enthalten.
-- App kann nur noch über RPC beitreten, wenn Passwort erforderlich ist.
-- Policies verhindern das triviale Auslesen des Passworts über normale Selects.
+- Rallye-Codes sind nicht mehr in Client-Requests für Listen enthalten.
+- App kann nur noch über RPC beitreten, wenn Code erforderlich ist.
+- Policies verhindern das triviale Auslesen des Codes über normale Selects.
 
 ---
 
@@ -119,8 +119,8 @@ Das reduziert zufällige Teilnahme stark und fühlt sich „Event/Premium“ an.
    - Nach Erfolg: Rallye setzen + Team-Setup wie gewohnt.
 
 5) **Transition / Kompatibilität**
-   - Übergangsmodus: Passwort + QR parallel möglich.
-   - Langfristig: QR ersetzt Passwort oder wird „Preferred“.
+   - Übergangsmodus: Code + QR parallel möglich.
+   - Langfristig: QR ersetzt Code oder wird „Preferred“.
 
 ### Definition of Done (Phase 2)
 - Join ist ohne QR/Token nicht möglich (für entsprechend konfigurierte Rallyes).
@@ -132,4 +132,3 @@ Das reduziert zufällige Teilnahme stark und fühlt sich „Event/Premium“ an.
 - Soll QR-Join offline funktionieren? (nur möglich mit signierten Tokens + lokaler Verifikation; deutlich mehr Aufwand)
 - Brauchen wir Rate-Limiting/Bruteforce-Schutz serverseitig?
 - Wollen wir pro Team einen Token (stärkerer Schutz) oder pro Rallye (einfacher)?
-

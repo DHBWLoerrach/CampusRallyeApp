@@ -18,7 +18,7 @@ der Cloud erstellt werden.
 Supabase-Owner können einen SQL-Dump des Schemas (Tabellen, Funktionen, usw.) ohne Daten wie folgt mit dem Supabase-CLI erstellen:
 
 ```
-supabase db dump --db-url "postgresql://postgres:<password>@<serverurl>/postgres" -f schema.sql --schema public
+supabase db dump --db-url "postgresql://postgres:<db-secret>@<serverurl>/postgres" -f schema.sql --schema public
 ```
 
 #### Supabase in der Cloud
@@ -36,13 +36,13 @@ Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstel
 
 Beispiel-Setup für eine normale Rallye und eine Erkundungsttour:
 
-- Tabelle `location`: neuen Standort anlegen (`DHBW Lörrach`).
-- Tabelle `department`: Departments (Bereiche wie Studiengänge oder Marketing) für den Standort anlegen.
-- Tabelle `rallye`: zwei neue Rallyes anlegen, Status z.B. `running`, `end_time` in der Zukunft und `department_id` mit dem passenden Department setzen.
-- Tabelle `location`: `default_rallye_id` auf die Erkundungs-Rallye setzen (Tour-Mode).
+- Tabelle `locations`: neuen Standort anlegen (`DHBW Lörrach`).
+- Tabelle `departments`: Departments (Bereiche wie Studiengänge oder Marketing) für den Standort anlegen.
+- Tabelle `rallyes`: zwei neue Rallyes anlegen, Status z.B. `running`, `rallye_end` in der Zukunft und `department_id` mit dem passenden Department setzen.
+- Tabelle `locations`: `default_rallye_id` auf die Erkundungs-Rallye setzen (Tour-Mode).
 
 In der Tabelle `questions` ein paar Fragen mit Punkten erstellen (z.B. Typ _knowledge_), dazu passende Antwort(en) in
-der Tabelle `answers` mit `question_id` der Frage eintragen und zusätzlich in der Tabelle `join_rallye_questions` den Rallyes zuordnen.
+der Tabelle `solution_options` mit `question_id` der Frage eintragen und zusätzlich in der Tabelle `rallye_questions` den Rallyes zuordnen.
 
 Möglich ist auch die lokale Einrichtung und Verwendung der Webandwendung zur Verwaltung
 von Campus Rallyes. Im GitHub-Projekt (https://github.com/DHBWLoerrach/campus-rallye-admin)

@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - Spec: `docs/superpowers/specs/2026-07-09-remove-time-pressure-design.md` (abgestimmt, committet).
-- Countdown-Header wird durch statischen Endzeit-Hinweis im **gleichen Header-Slot** ersetzt; `end_time` null/undefined → kein Zeit-Hinweis.
+- Countdown-Header wird durch statischen Endzeit-Hinweis im **gleichen Header-Slot** ersetzt; `rallye_end` null/undefined → kein Zeit-Hinweis.
 - `store$.timeExpired` wird **vollständig entfernt**, nicht nur wirkungslos gemacht. Einzige Quelle für „Rallye beendet" ist `rallye.status` bzw. `allQuestionsAnswered`.
 - Eigene Spielzeit erscheint **nur** in der eigenen Scoreboard-Zeile, als reiner Rückblick, nie als Vergleich zu anderen Teams.
 - Ranking sortiert **nur nach Punkten**; bei Punktgleichheit teilen sich Teams denselben Rang, der nächste Rang wird **nicht übersprungen** (Dense Ranking: 1, 2, 2, 3).
@@ -180,13 +180,13 @@ import PlannedEndInfo from '@/components/rallye/PlannedEndInfo';
 
 ```ts
         headerTitle: () =>
-          showTimer ? <TimerHeader endTime={rallye?.end_time} /> : null,
+          showTimer ? <TimerHeader endTime={rallye?.rallye_end} /> : null,
 ```
 →
 ```ts
         headerTitle: () =>
           showPlannedEnd ? (
-            <PlannedEndInfo endTime={rallye?.end_time} />
+            <PlannedEndInfo endTime={rallye?.rallye_end} />
           ) : null,
 ```
 
@@ -247,8 +247,8 @@ jest.mock('@/services/storage/answerStorage', () => ({
 const mockPointsGet = jest.fn(() => 0);
 const mockPointsSet = jest.fn();
 const mockGotoNextQuestion = jest.fn(async () => {});
-const mockRallyeGet = jest.fn((): { end_time: string | null } => ({
-  end_time: null,
+const mockRallyeGet = jest.fn((): { rallye_end: string | null } => ({
+  rallye_end: null,
 }));
 jest.mock('@/services/storage/Store', () => ({
   store$: {
@@ -272,7 +272,7 @@ describe('submitAnswerAndAdvance', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPointsGet.mockReturnValue(0);
-    mockRallyeGet.mockReturnValue({ end_time: null });
+    mockRallyeGet.mockReturnValue({ rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
   });
 
@@ -308,7 +308,7 @@ describe('submitAnswerAndAdvance', () => {
 
   it('saves the answer even after the stored end time has passed', async () => {
     mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      rallye_end: new Date(Date.now() - 1_000).toISOString(),
     });
 
     const result = await submitAnswerAndAdvance({
@@ -355,7 +355,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
     jest.clearAllMocks();
     mockIsConnected = true;
     mockPointsGet.mockReturnValue(0);
-    mockRallyeGet.mockReturnValue({ end_time: null });
+    mockRallyeGet.mockReturnValue({ rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
     mockUploadPhotoAnswer.mockResolvedValue({ filePath: '1_2.jpg' });
   });
@@ -410,7 +410,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
 
   it('uploads and saves the photo even after the stored end time has passed', async () => {
     mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      rallye_end: new Date(Date.now() - 1_000).toISOString(),
     });
 
     const result = await submitPhotoAnswerAndAdvance({
@@ -431,7 +431,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
 - [ ] **Step 2: Test laufen lassen — erwartetes Scheitern**
 
 Run: `npm test -- answerSubmission`
-Expected: FAIL (die alte Implementierung ruft weiterhin `store$.timeExpired.get()` auf, das im neuen Mock nicht existiert, und blockiert die Fälle mit abgelaufener `end_time` statt zu speichern)
+Expected: FAIL (die alte Implementierung ruft weiterhin `store$.timeExpired.get()` auf, das im neuen Mock nicht existiert, und blockiert die Fälle mit abgelaufener `rallye_end` statt zu speichern)
 
 - [ ] **Step 3: `isRallyeTimeExpired` und beide Guards entfernen (ersetzt kompletten Dateiinhalt)**
 
@@ -576,7 +576,7 @@ Test `'shows the time-up state instead of active questions after team rallye exp
       name: 'Campus Rallye',
       status: 'running',
       mode: 'classic',
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      rallye_end: new Date(Date.now() - 1_000).toISOString(),
     });
     (store$.team.get as jest.Mock).mockReturnValue({ id: 2, name: 'Team A' });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
@@ -612,7 +612,7 @@ Test `'keeps rendering active tour questions even if timeExpired is true'` erset
       name: 'Campus Tour',
       status: 'running',
       mode: 'tour',
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      rallye_end: new Date(Date.now() - 1_000).toISOString(),
     });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
@@ -647,7 +647,7 @@ In `app/(tabs)/rallye/__tests__/index-effects.test.tsx`, im `jest.mock('@/servic
 - [ ] **Step 3: Tests laufen lassen — erwartetes Scheitern**
 
 Run: `npm test -- index.test index-effects.test`
-Expected: FAIL (die Produktionslogik in `index.tsx` liest weiterhin `store$.timeExpired.get()`, das in den Mocks jetzt fehlt, und zeigt bei abgelaufener `end_time` noch den `rallye.timeUp`-Screen statt der Fragen)
+Expected: FAIL (die Produktionslogik in `index.tsx` liest weiterhin `store$.timeExpired.get()`, das in den Mocks jetzt fehlt, und zeigt bei abgelaufener `rallye_end` noch den `rallye.timeUp`-Screen statt der Fragen)
 
 - [ ] **Step 4: `teamRallyeFinished`-Logik in `index.tsx` vereinfachen**
 
@@ -659,12 +659,12 @@ Expected: FAIL (die Produktionslogik in `index.tsx` liest weiterhin `store$.time
   const isTourMode = useSelector(() => store$.isTourMode.get());
 
   // Use primitive IDs as callback dependencies so that sub-field mutations
-  // on the rallye observable (status, end_time, name) don't recreate the
+  // on the rallye observable (status, rallye_end, name) don't recreate the
   // callbacks and re-trigger the main data-loading effect.
   const rallyeId = rallye?.id;
   const teamId = team?.id;
-  const endTimeMs = rallye?.end_time
-    ? new Date(rallye.end_time).getTime()
+  const endTimeMs = rallye?.rallye_end
+    ? new Date(rallye.rallye_end).getTime()
     : null;
   const hasFutureEndTime =
     typeof endTimeMs === 'number' &&
@@ -918,13 +918,13 @@ In `app/(tabs)/rallye/__tests__/scoreboard.test.tsx`:
         id: '1',
         name: 'Slow',
         created_at: '2024-01-01T10:00:00Z',
-        time_played: '2024-01-01T12:00:00Z',
+        play_time: '2024-01-01T12:00:00Z',
       },
       {
         id: '2',
         name: 'Fast',
         created_at: '2024-01-01T10:00:00Z',
-        time_played: '2024-01-01T10:30:00Z',
+        play_time: '2024-01-01T10:30:00Z',
       },
     ];
     // Same points — Fast should rank first due to shorter time
@@ -954,19 +954,19 @@ In `app/(tabs)/rallye/__tests__/scoreboard.test.tsx`:
         id: '1',
         name: 'A',
         created_at: '2024-01-01T10:00:00Z',
-        time_played: '2024-01-01T12:00:00Z',
+        play_time: '2024-01-01T12:00:00Z',
       },
       {
         id: '2',
         name: 'B',
         created_at: '2024-01-01T10:00:00Z',
-        time_played: '2024-01-01T10:30:00Z',
+        play_time: '2024-01-01T10:30:00Z',
       },
       {
         id: '3',
         name: 'C',
         created_at: '2024-01-01T10:00:00Z',
-        time_played: '2024-01-01T11:00:00Z',
+        play_time: '2024-01-01T11:00:00Z',
       },
     ];
     // A and B tie on points despite different play time; C has fewer points
@@ -1071,13 +1071,13 @@ In `app/(tabs)/rallye/__tests__/scoreboard.test.tsx`, nach dem Test `'highlights
         id: '1',
         name: 'Other',
         created_at: '2024-01-01T10:00:00Z',
-        time_played: '2024-01-01T11:00:00Z',
+        play_time: '2024-01-01T11:00:00Z',
       },
       {
         id: '2',
         name: 'MyTeam',
         created_at: '2024-01-01T10:00:00Z',
-        time_played: '2024-01-01T10:47:00Z',
+        play_time: '2024-01-01T10:47:00Z',
       },
     ];
     mockPoints = [

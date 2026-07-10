@@ -55,7 +55,7 @@ Hinweis: Einige Duplikate sind Basis-Styles in UI-Komponenten (z. B. ThemedView/
 Erkenntnisse:
 
 - Potenzielle Dark-Mode-Inkonsistenz: `globalStyles.teamStyles.title` und `globalStyles.teamStyles.message` setzen `color: Colors.dhbwGray` und werden in `app/(tabs)/rallye/team-setup.tsx` ohne `s.text`/`s.muted` genutzt. In Dark Mode wirkt das Grau ggf. zu dunkel/kontrastarm.
-- Einige Light-Mode-Farben sind in `utils/GlobalStyles.ts` hinterlegt, werden aber in Komponenten per `palette` überschrieben (z. B. `scoreboardStyles.row`). Kein Bug, aber redundant. Der frühere `globalStyles.rallyeModal`-Block wurde mit der nativen Passwort-Sheet-Migration entfernt.
+- Einige Light-Mode-Farben sind in `utils/GlobalStyles.ts` hinterlegt, werden aber in Komponenten per `palette` überschrieben (z. B. `scoreboardStyles.row`). Kein Bug, aber redundant. Der frühere `globalStyles.rallyeModal`-Block wurde mit der nativen Code-Sheet-Migration entfernt.
 - Hardcoded Overlays/Whites sind intentional (Hero/Overlay/CTA), z. B. `components/ui/CollapsibleHeroHeader.tsx` (Weiß + rgba-Overlay), `components/ui/TeamNameSheet.tsx` (Backdrop), `components/ui/Hint.tsx` (Icon-Farbe). Keine klaren Theme-Bugs.
 
 Vorschläge:
@@ -154,7 +154,7 @@ Vorschlag:
 - [ ] **LOW-04:** Touch-Target-Größe in `Card.tsx`
 - [ ] **LOW-05:** Touch-Target-Größe in `CollapsibleHeroHeader.tsx`
 - [ ] **LOW-06:** Touch-Target-Größe in `MultipleChoiceQuestion.tsx`
-- [x] **LOW-07:** Password autoFocus Timing in `RallyePasswordSheet.tsx`
+- [x] **LOW-07:** Code autoFocus Timing in `RallyeCodeSheet.tsx`
 - [ ] **LOW-08:** Countdown-Indikator in `TeamNameSheet.tsx`
 - [ ] **LOW-09:** Android Keyboard-Handling in `Screen.tsx`
 - [ ] **LOW-10:** AsyncStorage-Wrapper konsolidieren
@@ -556,13 +556,13 @@ return iconConfig?.source ?? DEFAULT_ICON;
 
 ---
 
-### Password autoFocus während Sheet-Präsentation
+### Code autoFocus während Sheet-Präsentation
 
-**Status:** Erledigt mit der nativen `RallyePasswordSheet`-Route.
+**Status:** Erledigt mit der nativen `RallyeCodeSheet`-Route.
 
-**Dateien:** `app/rallye-password-sheet.tsx`, `components/ui/RallyePasswordSheet.tsx`
+**Dateien:** `app/rallye-code-sheet.tsx`, `components/ui/RallyeCodeSheet.tsx`
 
-**Umsetzung:** Das frühere transparente Modal wurde durch eine native `formSheet`-Route ersetzt. Der Password-Input fokussiert verzögert nach der Sheet-Präsentation, um Fokus-/Keyboard-Flakiness während der Animation zu vermeiden.
+**Umsetzung:** Das frühere transparente Modal wurde durch eine native `formSheet`-Route ersetzt. Der Code-Input fokussiert verzögert nach der Sheet-Präsentation, um Fokus-/Keyboard-Flakiness während der Animation zu vermeiden.
 
 **Rest-Risiko:** Android-Keyboard-Verhalten sollte bei UI-QA weiter manuell geprüft werden, da native Sheet-Detents plattformspezifisch abweichen können.
 
