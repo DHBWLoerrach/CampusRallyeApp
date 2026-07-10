@@ -34,10 +34,10 @@ supabase db dump --db-url "postgresql://postgres:<password>@<serverurl>/postgres
 
 Rallyes und Fragen können direkt im _Table Editor_ des Supabase-Projekts erstellt werden.
 
-Beispiel-Setup für eine normale Rallye (Abteilung) und eine Erkundung (Tour):
+Beispiel-Setup für eine normale Rallye und eine Erkundungsttour:
 
 - Tabelle `location`: neuen Standort anlegen (`DHBW Lörrach`).
-- Tabelle `department`: Departments (früher „Studiengänge“) für den Standort anlegen.
+- Tabelle `department`: Departments (Bereiche wie Studiengänge oder Marketing) für den Standort anlegen.
 - Tabelle `rallye`: zwei neue Rallyes anlegen, Status z.B. `running`, `end_time` in der Zukunft und `department_id` mit dem passenden Department setzen.
 - Tabelle `location`: `default_rallye_id` auf die Erkundungs-Rallye setzen (Tour-Mode).
 
