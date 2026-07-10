@@ -83,9 +83,6 @@ export default function Welcome() {
   const [dashboardData, setDashboardData] = useState<LocationDashboardData>(
     () => createEmptyDashboardData()
   );
-  const [expandedDepartmentIds, setExpandedDepartmentIds] = useState<number[]>(
-    []
-  );
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isInitializedRef = useRef<boolean>(false);
@@ -104,29 +101,16 @@ export default function Welcome() {
       paddingVertical: 12,
     },
   ];
-  const departmentCardStyle = [dashboardCardStyle, { marginVertical: 4 }];
+  const rallyeCardStyle = [dashboardCardStyle, { marginVertical: 4 }];
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
-  const closeSelectionButtonStyle = [
-    ctaButtonStyle,
-    { backgroundColor: palette.surface1 },
-  ];
-  const closeSelectionButtonTextStyle = { color: palette.text };
 
   const applyDashboardData = useCallback((nextData: LocationDashboardData) => {
     setDashboardData(nextData);
-    setExpandedDepartmentIds((currentExpandedIds) =>
-      currentExpandedIds.filter((departmentId) =>
-        nextData.departmentEntries.some(
-          (entry) => entry.department.id === departmentId
-        )
-      )
-    );
   }, []);
 
   const resetDashboard = useCallback(() => {
     setDashboardData(createEmptyDashboardData());
-    setExpandedDepartmentIds([]);
     clearRallyePasswordSheetSession();
   }, []);
 
@@ -373,15 +357,6 @@ export default function Welcome() {
     await joinRallye(rallye);
   };
 
-  const toggleDepartmentExpansion = (departmentId: number) => {
-    setExpandedDepartmentIds((currentExpandedIds) => {
-      if (currentExpandedIds.includes(departmentId)) {
-        return currentExpandedIds.filter((id) => id !== departmentId);
-      }
-      return [...currentExpandedIds, departmentId];
-    });
-  };
-
   const LoadingContent = () => (
     <View
       style={[
@@ -513,74 +488,25 @@ export default function Welcome() {
         </Card>
       )}
 
-      {dashboardData.departmentEntries.map((entry) => {
-        const rallyes = entry.rallyes;
-        const singleRallye = rallyes.length === 1 ? rallyes[0] : null;
-        const rallyeTitle = singleRallye?.name?.trim() || entry.department.name;
-        const cardTitle = singleRallye ? rallyeTitle : entry.department.name;
-        const cardDescription = singleRallye
-          ? entry.department.name
-          : undefined;
-        const multipleRallyes = rallyes.length > 1;
-        const expanded = expandedDepartmentIds.includes(entry.department.id);
-
-        return (
+      {dashboardData.departmentEntries
+        .flatMap((entry) => entry.rallyes)
+        .map((rallye) => (
           <Card
-            key={entry.department.id}
-            containerStyle={departmentCardStyle}
-            title={cardTitle}
-            description={cardDescription}
+            key={rallye.id}
+            containerStyle={rallyeCardStyle}
+            title={rallye.name}
             icon="graduationcap"
           >
-            {!multipleRallyes && rallyes[0] && (
-              <UIButton
-                disabled={joining}
-                onPress={() => void handleRallyePress(rallyes[0])}
-                style={ctaButtonStyle}
-                textStyle={ctaButtonTextStyle}
-              >
-                {t('rallye.join')}
-              </UIButton>
-            )}
-
-            {multipleRallyes && (
-              <>
-                <UIButton
-                  disabled={joining}
-                  onPress={() => toggleDepartmentExpansion(entry.department.id)}
-                  style={expanded ? closeSelectionButtonStyle : ctaButtonStyle}
-                  textStyle={
-                    expanded
-                      ? closeSelectionButtonTextStyle
-                      : ctaButtonTextStyle
-                  }
-                >
-                  {expanded ? t('welcome.join.hide') : t('welcome.join.select')}
-                </UIButton>
-                {expanded && (
-                  <View style={{ marginTop: 10 }}>
-                    {rallyes.map((rallye, index) => (
-                      <View
-                        key={rallye.id}
-                        style={index > 0 ? { marginTop: 8 } : undefined}
-                      >
-                        <UIButton
-                          disabled={joining}
-                          onPress={() => void handleRallyePress(rallye)}
-                          style={ctaButtonStyle}
-                          textStyle={ctaButtonTextStyle}
-                        >
-                          {rallye.name}
-                        </UIButton>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </>
-            )}
+            <UIButton
+              disabled={joining}
+              onPress={() => void handleRallyePress(rallye)}
+              style={ctaButtonStyle}
+              textStyle={ctaButtonTextStyle}
+            >
+              {t('rallye.join')}
+            </UIButton>
           </Card>
-        );
-      })}
+        ))}
 
       {dashboardData.tourModeRallye && (
         <Card

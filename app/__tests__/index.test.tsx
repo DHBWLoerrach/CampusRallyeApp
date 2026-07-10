@@ -249,7 +249,7 @@ describe('Welcome', () => {
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
 
-  it('renders single department rallye as direct join action and joins directly', async () => {
+  it('renders a rallye as a direct join action without its department', async () => {
     const departmentRallye: Rallye = {
       id: 11,
       name: 'Informatik Rallye',
@@ -268,12 +268,13 @@ describe('Welcome', () => {
     });
     mockedSetCurrentRallye.mockResolvedValue();
 
-    const { getByText } = render(<Welcome />);
+    const { getByText, queryByText } = render(<Welcome />);
 
     await waitFor(() => {
       expect(getByText(departmentRallye.name)).toBeTruthy();
       expect(getByText('rallye.join')).toBeTruthy();
     });
+    expect(queryByText(mockDepartment.name)).toBeNull();
 
     await act(async () => {
       fireEvent.press(getByText('rallye.join'));
@@ -351,7 +352,7 @@ describe('Welcome', () => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
     expect(getByText('Department Rallye')).toBeTruthy();
-    expect(getByText('Test Dept')).toBeTruthy();
+    expect(queryByText('Test Dept')).toBeNull();
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
 
     await act(async () => {
@@ -437,7 +438,7 @@ describe('Welcome', () => {
     expect(mockRouterPush).toHaveBeenCalledTimes(1);
   });
 
-  it('expands department card when multiple rallyes are available', async () => {
+  it('renders multiple rallyes directly without a department grouping', async () => {
     const rallyeA: Rallye = {
       id: 7,
       name: 'Rallye A',
@@ -469,23 +470,16 @@ describe('Welcome', () => {
 
     const { getAllByText, queryByText, getByText } = render(<Welcome />);
     await waitFor(() => {
-      expect(getAllByText('welcome.join.select').length).toBeGreaterThan(0);
+      expect(getByText('Rallye A')).toBeTruthy();
+      expect(getByText('Rallye B')).toBeTruthy();
     });
 
-    expect(queryByText('welcome.join.count')).toBeNull();
-    expect(queryByText('Rallye A')).toBeNull();
-    expect(queryByText('Rallye B')).toBeNull();
-
-    await act(async () => {
-      const selectableItems = getAllByText('welcome.join.select');
-      fireEvent.press(selectableItems[selectableItems.length - 1]);
-    });
-
-    expect(getByText('Rallye A')).toBeTruthy();
-    expect(getByText('Rallye B')).toBeTruthy();
+    expect(getAllByText('rallye.join')).toHaveLength(2);
+    expect(queryByText(mockDepartment.name)).toBeNull();
+    expect(queryByText('welcome.join.select')).toBeNull();
   });
 
-  it('does not show department section label when multiple departments are available', async () => {
+  it('does not show department names when rallyes span multiple departments', async () => {
     const rallyeA: Rallye = {
       id: 9,
       name: 'Rallye A',
@@ -524,9 +518,11 @@ describe('Welcome', () => {
 
     const { getByText, queryByText } = render(<Welcome />);
     await waitFor(() => {
-      expect(getByText(mockDepartment.name)).toBeTruthy();
-      expect(getByText(secondDepartment.name)).toBeTruthy();
+      expect(getByText(rallyeA.name)).toBeTruthy();
+      expect(getByText(rallyeB.name)).toBeTruthy();
     });
+    expect(queryByText(mockDepartment.name)).toBeNull();
+    expect(queryByText(secondDepartment.name)).toBeNull();
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
 
