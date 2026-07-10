@@ -72,6 +72,7 @@ export interface RallyeDbRow {
   department_id: number | null;
   status: RallyeStatus;
   password: string | null;
+  /** PostgreSQL `time without time zone`, serialized as `HH:mm:ss`. */
   end_time: string | null;
   created_at: string;
 }

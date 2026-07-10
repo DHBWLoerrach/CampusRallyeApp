@@ -213,13 +213,13 @@ describe('RallyeIndex', () => {
     expect(activeQuestionViewProps?.refreshControl).toBeUndefined();
   });
 
-  it('keeps rendering active team questions after the stored end time has passed', () => {
+  it('keeps rendering active team questions when an end time is set', () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,
       name: 'Campus Rallye',
       status: 'running',
       mode: 'classic',
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      end_time: '14:30:00',
     });
     (store$.team.get as jest.Mock).mockReturnValue({ id: 2, name: 'Team A' });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
@@ -243,13 +243,13 @@ describe('RallyeIndex', () => {
     );
   });
 
-  it('keeps rendering active tour questions after the stored end time has passed', () => {
+  it('keeps rendering active tour questions when an end time is set', () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,
       name: 'Campus Tour',
       status: 'running',
       mode: 'tour',
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      end_time: '14:30:00',
     });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(true);

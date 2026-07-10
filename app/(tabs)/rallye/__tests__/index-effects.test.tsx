@@ -255,6 +255,14 @@ describe('RallyeIndex effects', () => {
     );
   });
 
+  it('clears the stored end time when the refreshed rallye has none', async () => {
+    render(<RallyeIndex />);
+
+    await waitFor(() => {
+      expect(store$.rallye.end_time.set).toHaveBeenCalledWith(null);
+    });
+  });
+
   it('shows a load error instead of silently loading geocaching without metadata', async () => {
     mockJoinQuestionIds = [{ question_id: 2 }];
     mockQuestionsData = [{ id: 2, content: 'Geo', type: 'geocaching' }];

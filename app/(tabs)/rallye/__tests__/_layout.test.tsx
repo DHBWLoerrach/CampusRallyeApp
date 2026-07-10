@@ -106,7 +106,7 @@ describe('RallyeStackLayout', () => {
   beforeEach(() => {
     mockRallye = {
       status: 'running',
-      end_time: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      end_time: '14:30:00',
     };
     mockIsTourMode = false;
     mockEnabled = true;

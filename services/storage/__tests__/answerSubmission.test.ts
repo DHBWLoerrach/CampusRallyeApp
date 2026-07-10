@@ -73,9 +73,9 @@ describe('submitAnswerAndAdvance', () => {
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 
-  it('saves the answer even after the stored end time has passed', async () => {
+  it('saves the answer when an end time is set', async () => {
     mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      end_time: '14:30:00',
     });
 
     const result = await submitAnswerAndAdvance({
@@ -175,9 +175,9 @@ describe('submitPhotoAnswerAndAdvance', () => {
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 
-  it('uploads and saves the photo even after the stored end time has passed', async () => {
+  it('uploads and saves the photo when an end time is set', async () => {
     mockRallyeGet.mockReturnValue({
-      end_time: new Date(Date.now() - 1_000).toISOString(),
+      end_time: '14:30:00',
     });
 
     const result = await submitPhotoAnswerAndAdvance({

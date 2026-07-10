@@ -239,7 +239,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       if (error) throw error;
       if (data) {
         store$.rallye.status.set(data.status);
-        if (data.end_time) store$.rallye.end_time.set(data.end_time);
+        store$.rallye.end_time.set(data.end_time);
         if (data.name) store$.rallye.name.set(data.name);
       }
     } catch (e) {
