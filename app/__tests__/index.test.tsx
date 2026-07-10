@@ -284,6 +284,33 @@ describe('Welcome', () => {
     expect(store$.enabled.set).toHaveBeenCalledWith(true);
   });
 
+  it('falls back to the department name when a rallye has a blank name', async () => {
+    const unnamedRallye: Rallye = {
+      id: 12,
+      name: '   ',
+      department_id: mockDepartment.id,
+      status: 'running',
+      password: '',
+      mode: 'department',
+      end_time: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    mockedGetSelectedLocation.mockResolvedValue(mockLocation);
+    mockedGetLocationDashboardData.mockResolvedValue({
+      tourModeRallye: null,
+      departmentEntries: [{ department: mockDepartment, rallyes: [unnamedRallye] }],
+    });
+    mockedSetCurrentRallye.mockResolvedValue();
+
+    const { getByText } = render(<Welcome />);
+
+    await waitFor(() => {
+      expect(getByText(mockDepartment.name)).toBeTruthy();
+      expect(getByText('rallye.join')).toBeTruthy();
+    });
+  });
+
   it('renders all locations directly when more than three are available', async () => {
     const secondLocation = {
       id: 2,

@@ -489,12 +489,17 @@ export default function Welcome() {
       )}
 
       {dashboardData.departmentEntries
-        .flatMap((entry) => entry.rallyes)
-        .map((rallye) => (
+        .flatMap((entry) =>
+          entry.rallyes.map((rallye) => ({
+            rallye,
+            departmentName: entry.department.name,
+          }))
+        )
+        .map(({ rallye, departmentName }) => (
           <Card
             key={rallye.id}
             containerStyle={rallyeCardStyle}
-            title={rallye.name}
+            title={rallye.name.trim() || departmentName}
             icon="graduationcap"
           >
             <UIButton
