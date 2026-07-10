@@ -39,8 +39,6 @@ export const translations = {
     'welcome.resume.details': 'Rallye: {{rallye}}\nTeam: {{team}}',
     'welcome.join.description':
       'Wähle eine Rallye und tritt mit deinem Team bei',
-    'welcome.join.select': 'Rallye auswählen',
-    'welcome.join.hide': 'Auswahl schließen',
     'welcome.explore.title': 'Campus-Gelände erkunden',
     'welcome.explore.description':
       'Erkunde den Campus in deinem eigenen Tempo ohne Zeitdruck',
@@ -211,8 +209,6 @@ export const translations = {
     'welcome.resume.title': 'Resume rallye',
     'welcome.resume.details': 'Rallye: {{rallye}}\nTeam: {{team}}',
     'welcome.join.description': 'Select a rallye and join with your team',
-    'welcome.join.select': 'Select rallye',
-    'welcome.join.hide': 'Close selection',
     'welcome.explore.title': 'Explore Campus',
     'welcome.explore.description':
       'Explore the campus at your own pace without time pressure',
