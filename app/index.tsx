@@ -29,7 +29,7 @@ import { confirm } from '@/utils/ConfirmAlert';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import {
   setCurrentRallye,
-  getLocationsWithActiveRallyes,
+  getLocationsWithJoinableRallyes,
   getLocationDashboardData,
   getSelectedLocation as getStoredLocation,
   setSelectedLocation as storeSelectedLocation,
@@ -126,7 +126,7 @@ export default function Welcome() {
     setLoading(true);
     try {
       const savedLoc = await getStoredLocation();
-      const locs = await getLocationsWithActiveRallyes();
+      const locs = await getLocationsWithJoinableRallyes();
       setLocations(locs);
       setOnline(true);
 
@@ -177,7 +177,7 @@ export default function Welcome() {
     if (getRallyePasswordSheetSession()) return;
 
     try {
-      const locs = await getLocationsWithActiveRallyes();
+      const locs = await getLocationsWithJoinableRallyes();
       setLocations(locs);
       setOnline(true);
 

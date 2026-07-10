@@ -4,7 +4,7 @@ import { AppState } from 'react-native';
 import Welcome from '../index';
 import {
   setCurrentRallye,
-  getLocationsWithActiveRallyes,
+  getLocationsWithJoinableRallyes,
   getLocationDashboardData,
   getSelectedLocation,
 } from '@/services/storage/rallyeStorage';
@@ -116,7 +116,7 @@ jest.mock('@/services/storage/Store', () => ({
 
 jest.mock('@/services/storage/rallyeStorage', () => ({
   __esModule: true,
-  getLocationsWithActiveRallyes: jest.fn(),
+  getLocationsWithJoinableRallyes: jest.fn(),
   getLocationDashboardData: jest.fn(),
   getSelectedLocation: jest.fn(),
   setSelectedLocation: jest.fn(),
@@ -149,9 +149,9 @@ jest.mock('@legendapp/state/react', () => ({
   useSelector: (selector: () => unknown) => selector(),
 }));
 
-const mockedGetLocationsWithActiveRallyes =
-  getLocationsWithActiveRallyes as jest.MockedFunction<
-    typeof getLocationsWithActiveRallyes
+const mockedGetLocationsWithJoinableRallyes =
+  getLocationsWithJoinableRallyes as jest.MockedFunction<
+    typeof getLocationsWithJoinableRallyes
   >;
 const mockedGetLocationDashboardData =
   getLocationDashboardData as jest.MockedFunction<
@@ -206,7 +206,7 @@ describe('Welcome', () => {
     }));
 
     mockedGetSelectedLocation.mockResolvedValue(null);
-    mockedGetLocationsWithActiveRallyes.mockResolvedValue([mockLocation]);
+    mockedGetLocationsWithJoinableRallyes.mockResolvedValue([mockLocation]);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       departmentEntries: [],
@@ -331,7 +331,7 @@ describe('Welcome', () => {
       created_at: '2024-01-01T00:00:00Z',
     };
 
-    mockedGetLocationsWithActiveRallyes.mockResolvedValue([
+    mockedGetLocationsWithJoinableRallyes.mockResolvedValue([
       mockLocation,
       secondLocation,
       thirdLocation,
@@ -561,7 +561,7 @@ describe('Welcome', () => {
     render(<Welcome />);
 
     await waitFor(() => {
-      expect(mockedGetLocationsWithActiveRallyes).toHaveBeenCalledTimes(1);
+      expect(mockedGetLocationsWithJoinableRallyes).toHaveBeenCalledTimes(1);
       expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(1);
     });
 
@@ -570,7 +570,7 @@ describe('Welcome', () => {
     });
 
     await waitFor(() => {
-      expect(mockedGetLocationsWithActiveRallyes).toHaveBeenCalledTimes(2);
+      expect(mockedGetLocationsWithJoinableRallyes).toHaveBeenCalledTimes(2);
       expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(2);
     });
 
@@ -578,7 +578,7 @@ describe('Welcome', () => {
       await jest.advanceTimersByTimeAsync(2000);
     });
 
-    expect(mockedGetLocationsWithActiveRallyes).toHaveBeenCalledTimes(2);
+    expect(mockedGetLocationsWithJoinableRallyes).toHaveBeenCalledTimes(2);
     expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(2);
   });
 
@@ -657,7 +657,7 @@ describe('Welcome', () => {
     };
 
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
-    mockedGetLocationsWithActiveRallyes
+    mockedGetLocationsWithJoinableRallyes
       .mockResolvedValueOnce([mockLocation])
       .mockResolvedValueOnce([mockLocation, secondLocation]);
     mockedGetLocationDashboardData

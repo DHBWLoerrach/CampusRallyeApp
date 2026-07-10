@@ -16,7 +16,10 @@ jest.mock('@/utils/Logger', () => ({
 }));
 
 import { StorageKeys } from '../asyncStorage';
-import { getCurrentRallye, getLocationDashboardData } from '../rallyeStorage';
+import {
+  getCurrentRallye,
+  getLocationDashboardData,
+} from '../rallyeStorage';
 import { Logger } from '@/utils/Logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -172,7 +175,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
     jest.clearAllMocks();
   });
 
-  it('loads tour mode and department rallyes via rallye.department_id', async () => {
+  it('loads only joinable tour mode and department rallyes', async () => {
     const locId = 1;
     const departments = [
       {
@@ -265,6 +268,42 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               created_at: '2024-01-01T00:00:00Z',
             },
             {
+              id: 103,
+              name: 'Info Rallye Ready',
+              department_id: 11,
+              status: 'ready',
+              password: null,
+              end_time: null,
+              created_at: '2024-01-01T00:00:00Z',
+            },
+            {
+              id: 104,
+              name: 'Info Rallye Voting',
+              department_id: 11,
+              status: 'voting',
+              password: null,
+              end_time: null,
+              created_at: '2024-01-01T00:00:00Z',
+            },
+            {
+              id: 105,
+              name: 'Info Rallye Results',
+              department_id: 11,
+              status: 'results',
+              password: null,
+              end_time: null,
+              created_at: '2024-01-01T00:00:00Z',
+            },
+            {
+              id: 106,
+              name: 'Info Rallye Ended',
+              department_id: 11,
+              status: 'ended',
+              password: null,
+              end_time: null,
+              created_at: '2024-01-01T00:00:00Z',
+            },
+            {
               id: 201,
               name: 'BWL Rallye',
               department_id: 12,
@@ -291,14 +330,14 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         rallyeIds: entry.rallyes.map((rallye) => rallye.id),
       }))
     ).toEqual([
-      { departmentId: 11, rallyeIds: [101] },
+      { departmentId: 11, rallyeIds: [101, 103] },
       { departmentId: 12, rallyeIds: [201] },
     ]);
     expect(result.departmentEntries[0].rallyes[0].mode).toBe('department');
     expect(mockFrom).not.toHaveBeenCalledWith('join_department_rallye');
   });
 
-  it('skips active rallyes without department_id and logs warning', async () => {
+  it('skips joinable rallyes without department_id and logs warning', async () => {
     const locId = 3;
 
     useTableHandlers({
@@ -349,7 +388,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
     expect(result.departmentEntries).toEqual([]);
     expect(Logger.warn).toHaveBeenCalledWith(
       'RallyeStorage',
-      'Skipping active rallye without department_id in dashboard mapping',
+      'Skipping joinable rallye without department_id in dashboard mapping',
       { rallyeId: 555 }
     );
   });

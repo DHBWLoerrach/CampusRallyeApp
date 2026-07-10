@@ -39,10 +39,10 @@ function withMode<T extends RallyeStorageRow>(
   return { ...rallye, mode };
 }
 
-function isActiveRallyeStatus(
+function isJoinableRallyeStatus(
   status: RallyeStatus | null | undefined
 ): boolean {
-  return !!status && status !== 'draft' && status !== 'ended';
+  return status === 'ready' || status === 'running';
 }
 
 export async function getCurrentRallye(): Promise<RallyeRow | null> {
@@ -155,11 +155,11 @@ export async function getLocationDashboardData(
 
   const rallyesByDepartment = new Map<number, RallyeRow[]>();
   (rallyeRows as RallyeDbRow[] | null)?.forEach((rallye) => {
-    if (!isActiveRallyeStatus(rallye.status)) return;
+    if (!isJoinableRallyeStatus(rallye.status)) return;
     if (rallye.department_id == null) {
       Logger.warn(
         'RallyeStorage',
-        'Skipping active rallye without department_id in dashboard mapping',
+        'Skipping joinable rallye without department_id in dashboard mapping',
         { rallyeId: rallye.id }
       );
       return;
@@ -184,11 +184,11 @@ export async function getLocationDashboardData(
 
 /**
  * Lädt alle Lokationen, die:
- * a) Mindestens ein Department mit einer aktiven Rallye haben, ODER
+ * a) Mindestens ein Department mit einer beitretbaren Rallye haben, ODER
  * b) Eine default_rallye_id (Tour-Mode) gesetzt haben.
  */
-export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
-  Logger.debug('RallyeStorage', 'getLocationsWithActiveRallyes called');
+export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
+  Logger.debug('RallyeStorage', 'getLocationsWithJoinableRallyes called');
 
   const { data: allRallyes, error: rallyeError } = await supabase
     .from('rallye')
@@ -199,22 +199,25 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
     return [];
   }
 
-  const activeDepartmentIds = [
+  const joinableRallyes =
+    (allRallyes as Pick<RallyeDbRow, 'id' | 'status' | 'department_id'>[] | null)?.filter(
+      (rallye) => isJoinableRallyeStatus(rallye.status)
+    ) ?? [];
+
+  const joinableDepartmentIds = [
     ...new Set(
-      ((allRallyes as Pick<RallyeDbRow, 'status' | 'department_id'>[] | null) ??
-        [])
-        .filter((rallye) => isActiveRallyeStatus(rallye.status))
+      joinableRallyes
         .map((rallye) => rallye.department_id)
         .filter((departmentId): departmentId is number => departmentId != null)
     ),
   ];
 
   let locIdsWithActiveDepts: number[] = [];
-  if (activeDepartmentIds.length > 0) {
+  if (joinableDepartmentIds.length > 0) {
     const { data: departments, error: deptError } = await supabase
       .from('department')
       .select('id, location_id')
-      .in('id', activeDepartmentIds);
+      .in('id', joinableDepartmentIds);
 
     if (deptError) {
       Logger.error('RallyeStorage', 'Error fetching departments', deptError);
@@ -261,7 +264,7 @@ export async function getLocationsWithActiveRallyes(): Promise<Location[]> {
 }
 
 /**
- * Lädt alle Departments einer Lokation, die mindestens eine aktive Rallye haben.
+ * Lädt alle Departments einer Lokation, die mindestens eine beitretbare Rallye haben.
  */
 export async function getDepartmentsForLocation(
   locId: number
@@ -305,20 +308,20 @@ export async function getDepartmentsForLocation(
     return [];
   }
 
-  const activeDepartmentIds = new Set<number>(
+  const joinableDepartmentIds = new Set<number>(
     ((rallyes as Pick<RallyeDbRow, 'status' | 'department_id'>[] | null) ?? [])
-      .filter((rallye) => isActiveRallyeStatus(rallye.status))
+      .filter((rallye) => isJoinableRallyeStatus(rallye.status))
       .map((rallye) => rallye.department_id)
       .filter((departmentId): departmentId is number => departmentId != null)
   );
 
   return typedDepartments.filter((department) =>
-    activeDepartmentIds.has(department.id)
+    joinableDepartmentIds.has(department.id)
   );
 }
 
 /**
- * Lädt alle aktiven Rallyes für ein Department.
+ * Lädt alle beitretbaren Rallyes für ein Department.
  */
 export async function getRallyesForDepartment(
   deptId: number
@@ -342,17 +345,17 @@ export async function getRallyesForDepartment(
     return [];
   }
 
-  const activeRallyes =
+  const joinableRallyes =
     (allRallyes as RallyeDbRow[] | null)?.filter((rallye) =>
-      isActiveRallyeStatus(rallye.status)
+      isJoinableRallyeStatus(rallye.status)
     ) ?? [];
 
-  return activeRallyes.map((rallye) => withMode(rallye, 'department')) as Rallye[];
+  return joinableRallyes.map((rallye) => withMode(rallye, 'department')) as Rallye[];
 }
 
 /**
  * Lädt die Tour-Mode Rallye für eine Lokation.
- * Gibt null zurück, wenn keine default_rallye_id gesetzt ist oder die Rallye nicht aktiv ist.
+ * Gibt null zurück, wenn keine default_rallye_id gesetzt ist oder die Rallye nicht beitretbar ist.
  */
 export async function getTourModeRallyeForLocation(
   locId: number
@@ -391,7 +394,7 @@ export async function getTourModeRallyeForLocation(
     return null;
   }
 
-  if (!rallye || !isActiveRallyeStatus(rallye.status)) {
+  if (!rallye || !isJoinableRallyeStatus(rallye.status)) {
     return null;
   }
 
