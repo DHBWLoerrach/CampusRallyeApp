@@ -54,6 +54,30 @@ describe('RallyeCodeSheet', () => {
     expect(getByText(protectedRallye.name).props.numberOfLines).toBe(2);
   });
 
+  it('shows the subtitle explaining the code entry', () => {
+    const { getByText } = render(
+      <RallyeCodeSheet
+        rallye={protectedRallye}
+        onClose={jest.fn()}
+        onJoin={jest.fn()}
+      />
+    );
+
+    expect(getByText('rallye.code.subtitle')).toBeTruthy();
+  });
+
+  it('renders the code input unmasked', () => {
+    const { getByLabelText } = render(
+      <RallyeCodeSheet
+        rallye={protectedRallye}
+        onClose={jest.fn()}
+        onJoin={jest.fn()}
+      />
+    );
+
+    expect(getByLabelText('rallye.code.label').props.secureTextEntry).toBeFalsy();
+  });
+
   it('keeps the content scrollable when the keyboard reduces available space', () => {
     const { UNSAFE_getByType } = render(
       <RallyeCodeSheet

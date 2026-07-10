@@ -123,10 +123,13 @@ export default function RallyeCodeSheet({
             {rallye?.name ?? t('rallye.modal.activeTitle')}
           </ThemedText>
 
+          <ThemedText style={styles.subtitle} variant="muted">
+            {t('rallye.code.subtitle')}
+          </ThemedText>
+
           <ThemedTextInput
             autoFocus={autoFocusInput}
             style={styles.codeInput}
-            secureTextEntry
             value={rallyeCode}
             onChangeText={setRallyeCode}
             placeholder={t('rallye.code.placeholder')}
@@ -211,9 +214,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   title: {
-    marginBottom: 14,
+    marginBottom: 4,
     textAlign: 'left',
     alignSelf: 'stretch',
+  },
+  subtitle: {
+    marginBottom: 16,
+    textAlign: 'left',
+    alignSelf: 'stretch',
+    fontSize: 14,
   },
   codeInput: {
     width: '100%',
