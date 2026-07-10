@@ -17,7 +17,7 @@ import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
-import { isPasswordRequired } from '@/components/ui/RallyePasswordSheet';
+import { isRallyeCodeRequired } from '@/components/ui/RallyeCodeSheet';
 import { CollapsibleHeroHeader } from '@/components/ui/CollapsibleHeroHeader';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
@@ -43,10 +43,10 @@ import {
   clearCurrentTeam,
 } from '@/services/storage/teamStorage';
 import {
-  clearRallyePasswordSheetSession,
-  getRallyePasswordSheetSession,
-  setRallyePasswordSheetSession,
-} from '@/services/rallyePasswordSheetSession';
+  clearRallyeCodeSheetSession,
+  getRallyeCodeSheetSession,
+  setRallyeCodeSheetSession,
+} from '@/services/rallyeCodeSheetSession';
 import { Location } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
@@ -111,7 +111,7 @@ export default function Welcome() {
 
   const resetDashboard = useCallback(() => {
     setDashboardData(createEmptyDashboardData());
-    clearRallyePasswordSheetSession();
+    clearRallyeCodeSheetSession();
   }, []);
 
   const loadDashboardData = useCallback(
@@ -174,7 +174,7 @@ export default function Welcome() {
     if (loading || !isInitializedRef.current) return;
     if (store$.enabled.get()) return;
     if (appStateRef.current !== 'active') return;
-    if (getRallyePasswordSheetSession()) return;
+    if (getRallyeCodeSheetSession()) return;
 
     try {
       const locs = await getLocationsWithJoinableRallyes();
@@ -345,13 +345,13 @@ export default function Welcome() {
 
   const handleRallyePress = async (rallye: RallyeRow) => {
     if (joining) return;
-    if (isPasswordRequired(rallye)) {
-      if (getRallyePasswordSheetSession()) return;
-      setRallyePasswordSheetSession({
+    if (isRallyeCodeRequired(rallye)) {
+      if (getRallyeCodeSheetSession()) return;
+      setRallyeCodeSheetSession({
         rallye,
         onJoin: joinRallye,
       });
-      router.push('/rallye-password-sheet');
+      router.push('/rallye-code-sheet' as never);
       return;
     }
     await joinRallye(rallye);
@@ -434,7 +434,8 @@ export default function Welcome() {
   );
 
   const hasDashboardContent =
-    !!dashboardData.tourModeRallye || dashboardData.departmentEntries.length > 0;
+    !!dashboardData.tourModeRallye ||
+    dashboardData.departmentEntries.length > 0;
 
   const DashboardContent = () => (
     <View

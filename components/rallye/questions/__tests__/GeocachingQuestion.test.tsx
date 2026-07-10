@@ -214,11 +214,11 @@ const baseQuestion: Question = {
   id: 42,
   question: 'Find the hidden marker',
   question_type: 'geocaching',
-  points: 10,
+  point_value: 10,
   target_latitude: 47.6164,
   target_longitude: 7.6706,
   proximity_radius: 15,
-  geocaching_input_type: 'text',
+  input_type: 'text',
 };
 
 function setupLocationMocks(opts?: {
@@ -615,7 +615,7 @@ describe('GeocachingQuestion', () => {
   it('renders QR scanner button in answer phase with qr input type', async () => {
     const qrQuestion = {
       ...baseQuestion,
-      geocaching_input_type: 'qr' as const,
+      input_type: 'qr' as const,
     };
 
     mockWatchPositionAsync.mockImplementation(
@@ -643,7 +643,7 @@ describe('GeocachingQuestion', () => {
   it('allows surrender when camera access is denied in qr mode', async () => {
     const qrQuestion = {
       ...baseQuestion,
-      geocaching_input_type: 'qr' as const,
+      input_type: 'qr' as const,
     };
     mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
@@ -687,7 +687,7 @@ describe('GeocachingQuestion', () => {
   it('stores the scanned QR value as answer text', async () => {
     const qrQuestion = {
       ...baseQuestion,
-      geocaching_input_type: 'qr' as const,
+      input_type: 'qr' as const,
     };
     const storeMock = jest.requireMock('@/services/storage/Store');
     const scannedValue = 'Secret Code';
@@ -732,8 +732,7 @@ describe('GeocachingQuestion', () => {
     });
 
     const buttons = alertSpy.mock.calls.at(-1)?.[2] as
-      | { onPress?: () => void }[]
-      | undefined;
+      { onPress?: () => void }[] | undefined;
     buttons?.[0]?.onPress?.();
 
     await waitFor(() => {
@@ -752,7 +751,7 @@ describe('GeocachingQuestion', () => {
   it('accepts scanned QR values with trailing whitespace', async () => {
     const qrQuestion = {
       ...baseQuestion,
-      geocaching_input_type: 'qr' as const,
+      input_type: 'qr' as const,
     };
     const storeMock = jest.requireMock('@/services/storage/Store');
 
@@ -799,7 +798,7 @@ describe('GeocachingQuestion', () => {
   it('ignores duplicate incorrect QR scan events while the camera is closing', async () => {
     const qrQuestion = {
       ...baseQuestion,
-      geocaching_input_type: 'qr' as const,
+      input_type: 'qr' as const,
     };
     const storeMock = jest.requireMock('@/services/storage/Store');
 

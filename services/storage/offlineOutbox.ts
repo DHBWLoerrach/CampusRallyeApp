@@ -8,6 +8,14 @@ export type SaveAnswerPayload = {
   team_id: number;
   question_id: number;
   correct: boolean;
+  team_points: number;
+  answer: string;
+};
+
+type LegacySaveAnswerPayload = {
+  team_id: number;
+  question_id: number;
+  correct: boolean;
   points: number;
   team_answer: string;
 };
@@ -45,7 +53,21 @@ function normalizeQueueItem(raw: any): OfflineActionV1 | null {
 
   // New format already
   if (raw.type === 'SAVE_ANSWER' && raw.payloadVersion === 1 && raw.payload) {
-    const p = raw.payload as Partial<SaveAnswerPayload>;
+    const p = raw.payload as Partial<
+      SaveAnswerPayload & LegacySaveAnswerPayload
+    >;
+    if (
+      typeof p.team_id === 'number' &&
+      typeof p.question_id === 'number' &&
+      typeof p.correct === 'boolean' &&
+      typeof p.team_points === 'number' &&
+      typeof p.answer === 'string'
+    ) {
+      return raw as OfflineActionV1;
+    }
+
+    // App versions before the database rename persisted the old field names.
+    // Convert them before syncing so queued offline answers are never discarded.
     if (
       typeof p.team_id === 'number' &&
       typeof p.question_id === 'number' &&
@@ -53,61 +75,16 @@ function normalizeQueueItem(raw: any): OfflineActionV1 | null {
       typeof p.points === 'number' &&
       typeof p.team_answer === 'string'
     ) {
-      return raw as OfflineActionV1;
-    }
-  }
-
-  // Legacy: { type: 'SAVE_ANSWER', data: { teamId, questionId, answeredCorrectly, points } }
-  if (raw.type === 'SAVE_ANSWER' && raw.data) {
-    const d = raw.data as any;
-    if (
-      typeof d.teamId === 'number' &&
-      typeof d.questionId === 'number' &&
-      typeof d.answeredCorrectly === 'boolean' &&
-      typeof d.points === 'number'
-    ) {
       return {
-        id: createId(),
-        type: 'SAVE_ANSWER',
-        payloadVersion: 1,
-        createdAt: Date.now(),
-        attempts: 0,
-        nextRetryAt: null,
+        ...raw,
         payload: {
-          team_id: d.teamId,
-          question_id: d.questionId,
-          correct: d.answeredCorrectly,
-          points: d.points,
-          team_answer: '',
+          team_id: p.team_id,
+          question_id: p.question_id,
+          correct: p.correct,
+          team_points: p.points,
+          answer: p.team_answer,
         },
-      };
-    }
-  }
-
-  // Legacy from previous Store.ts: { table: 'team_questions', data: {...} }
-  if (raw.table === 'team_questions' && raw.data) {
-    const d = raw.data as any;
-    if (
-      typeof d.team_id === 'number' &&
-      typeof d.question_id === 'number' &&
-      typeof d.correct === 'boolean' &&
-      typeof d.points === 'number'
-    ) {
-      return {
-        id: createId(),
-        type: 'SAVE_ANSWER',
-        payloadVersion: 1,
-        createdAt: Date.now(),
-        attempts: 0,
-        nextRetryAt: null,
-        payload: {
-          team_id: d.team_id,
-          question_id: d.question_id,
-          correct: d.correct,
-          points: d.points,
-          team_answer: typeof d.team_answer === 'string' ? d.team_answer : '',
-        },
-      };
+      } as OfflineActionV1;
     }
   }
 
@@ -124,7 +101,9 @@ async function readQueue(): Promise<OfflineActionV1[]> {
     .filter(Boolean) as OfflineActionV1[];
 
   // If we dropped or transformed items, persist the normalized queue to prevent stuck states.
-  const changed = normalized.length !== raw.length;
+  const changed =
+    normalized.length !== raw.length ||
+    normalized.some((item, index) => item !== raw[index]);
   if (changed) {
     await setStorageItem(StorageKeys.OFFLINE_QUEUE, normalized);
   }
@@ -184,13 +163,13 @@ export function processOutbox() {
           }
 
           const p = action.payload;
-          const { error } = await supabase.from('team_questions').upsert(
+          const { error } = await supabase.from('team_answers').upsert(
             {
               team_id: p.team_id,
               question_id: p.question_id,
               correct: p.correct,
-              points: p.points,
-              team_answer: p.team_answer,
+              team_points: p.team_points,
+              answer: p.answer,
             },
             { onConflict: 'team_id,question_id', ignoreDuplicates: true }
           );

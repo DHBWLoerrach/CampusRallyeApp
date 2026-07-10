@@ -1,9 +1,9 @@
 import React from 'react';
 import { Alert, Keyboard, ScrollView, View } from 'react-native';
 import { act, fireEvent, render } from '@testing-library/react-native';
-import RallyePasswordSheet, {
-  isPasswordRequired,
-} from '@/components/ui/RallyePasswordSheet';
+import RallyeCodeSheet, {
+  isRallyeCodeRequired,
+} from '@/components/ui/RallyeCodeSheet';
 import type { RallyeRow } from '@/services/storage/rallyeStorage';
 
 jest.mock('@/utils/LanguageContext', () => ({
@@ -21,12 +21,12 @@ const protectedRallye: RallyeRow = {
   name: 'Protected Campus Rallye With A Rather Long Title',
   department_id: 1,
   status: 'running',
-  password: 'secret',
+  rallye_code: 'secret',
   mode: 'department',
-  end_time: null,
+  rallye_end: null,
 };
 
-describe('RallyePasswordSheet', () => {
+describe('RallyeCodeSheet', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
@@ -36,15 +36,15 @@ describe('RallyePasswordSheet', () => {
     jest.restoreAllMocks();
   });
 
-  it('detects whether a password is required', () => {
-    expect(isPasswordRequired(protectedRallye)).toBe(true);
-    expect(isPasswordRequired({ password: '   ' })).toBe(false);
-    expect(isPasswordRequired(null)).toBe(false);
+  it('detects whether a rallye code is required', () => {
+    expect(isRallyeCodeRequired(protectedRallye)).toBe(true);
+    expect(isRallyeCodeRequired({ rallye_code: '   ' })).toBe(false);
+    expect(isRallyeCodeRequired(null)).toBe(false);
   });
 
   it('truncates long rallye titles in the sheet content', () => {
     const { getByText } = render(
-      <RallyePasswordSheet
+      <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
         onJoin={jest.fn()}
@@ -56,7 +56,7 @@ describe('RallyePasswordSheet', () => {
 
   it('keeps the content scrollable when the keyboard reduces available space', () => {
     const { UNSAFE_getByType } = render(
-      <RallyePasswordSheet
+      <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
         onJoin={jest.fn()}
@@ -70,7 +70,7 @@ describe('RallyePasswordSheet', () => {
 
   it('marks the card as modal content for accessibility', () => {
     const { UNSAFE_getAllByType } = render(
-      <RallyePasswordSheet
+      <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
         onJoin={jest.fn()}
@@ -89,72 +89,72 @@ describe('RallyePasswordSheet', () => {
       .spyOn(Keyboard, 'dismiss')
       .mockImplementation(() => undefined);
     const { UNSAFE_getByProps } = render(
-      <RallyePasswordSheet
+      <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={onClose}
         onJoin={jest.fn()}
       />
     );
 
-    fireEvent.press(UNSAFE_getByProps({ testID: 'rallye-password-backdrop' }));
+    fireEvent.press(UNSAFE_getByProps({ testID: 'rallye-code-backdrop' }));
 
     expect(dismissSpy).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('shows an alert when submitting without a password', () => {
+  it('shows an alert when submitting without a code', () => {
     const onJoin = jest.fn();
     const { getByText } = render(
-      <RallyePasswordSheet
+      <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
         onJoin={onJoin}
       />
     );
 
-    fireEvent.press(getByText('rallye.password.join'));
+    fireEvent.press(getByText('rallye.code.join'));
 
     expect(Alert.alert).toHaveBeenCalledWith(
-      'rallye.password.missing.title',
-      'rallye.password.missing.message'
+      'rallye.code.missing.title',
+      'rallye.code.missing.message'
     );
     expect(onJoin).not.toHaveBeenCalled();
   });
 
-  it('shows an alert when the password is wrong', () => {
+  it('shows an alert when the code is wrong', () => {
     const onJoin = jest.fn();
     const { getByLabelText, getByText } = render(
-      <RallyePasswordSheet
+      <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
         onJoin={onJoin}
       />
     );
 
-    fireEvent.changeText(getByLabelText('rallye.password.label'), 'wrong');
-    fireEvent.press(getByText('rallye.password.join'));
+    fireEvent.changeText(getByLabelText('rallye.code.label'), 'wrong');
+    fireEvent.press(getByText('rallye.code.join'));
 
     expect(Alert.alert).toHaveBeenCalledWith(
-      'rallye.password.wrong.title',
-      'rallye.password.wrong.message'
+      'rallye.code.wrong.title',
+      'rallye.code.wrong.message'
     );
     expect(onJoin).not.toHaveBeenCalled();
   });
 
-  it('joins without closing itself when the password is correct', async () => {
+  it('joins without closing itself when the code is correct', async () => {
     const onClose = jest.fn();
     const onJoin = jest.fn().mockResolvedValue(true);
     const { getByLabelText, getByText } = render(
-      <RallyePasswordSheet
+      <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={onClose}
         onJoin={onJoin}
       />
     );
 
-    fireEvent.changeText(getByLabelText('rallye.password.label'), 'secret');
+    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.password.join'));
+      fireEvent.press(getByText('rallye.code.join'));
     });
 
     expect(onJoin).toHaveBeenCalledWith(protectedRallye);

@@ -42,10 +42,10 @@ type RallyeTeamRow = {
   team_name?: string | null;
 };
 
-type TeamQuestionRow = {
+type TeamAnswerRow = {
   question_id: number;
   team_id: number;
-  team_answer: string | null;
+  answer: string | null;
 };
 
 type VotedQuestionRow = {
@@ -126,14 +126,11 @@ export default function Voting({
         const [questionResponse, teamResponse, votedQuestionResponse] =
           await Promise.all([
             supabase
-              .from('join_rallye_questions')
+              .from('rallye_questions')
               .select('question_id, questions!inner(id, content, type)')
               .eq('rallye_id', rallyeId)
               .eq('is_voting', true),
-            supabase
-              .from('rallye_team')
-              .select('id, name')
-              .eq('rallye_id', rallyeId),
+            supabase.from('teams').select('id, name').eq('rallye_id', rallyeId),
             supabase.rpc('get_voted_voting_question_ids', {
               rallye_id_param: rallyeId,
               voting_team_id_param: teamId,
@@ -169,8 +166,8 @@ export default function Voting({
         }
 
         const { data: answerData, error: answerError } = await supabase
-          .from('team_questions')
-          .select('question_id, team_id, team_answer')
+          .from('team_answers')
+          .select('question_id, team_id, answer')
           .in(
             'question_id',
             questions.map((question) => question.questionId)
@@ -193,11 +190,9 @@ export default function Voting({
         }
 
         const groupedCandidates = new Map<number, VotingCandidate[]>();
-        for (const answer of (answerData || []) as TeamQuestionRow[]) {
+        for (const answer of (answerData || []) as TeamAnswerRow[]) {
           const teamAnswer =
-            typeof answer.team_answer === 'string'
-              ? answer.team_answer.trim()
-              : '';
+            typeof answer.answer === 'string' ? answer.answer.trim() : '';
           if (!teamAnswer) continue;
 
           const teamName = teamNameById.get(answer.team_id);

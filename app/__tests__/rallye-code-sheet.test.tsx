@@ -1,11 +1,11 @@
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react-native';
-import RallyePasswordSheetRoute from '../rallye-password-sheet';
+import RallyeCodeSheetRoute from '../rallye-code-sheet';
 import {
-  clearRallyePasswordSheetSession,
-  getRallyePasswordSheetSession,
-  setRallyePasswordSheetSession,
-} from '@/services/rallyePasswordSheetSession';
+  clearRallyeCodeSheetSession,
+  getRallyeCodeSheetSession,
+  setRallyeCodeSheetSession,
+} from '@/services/rallyeCodeSheetSession';
 import type { RallyeRow } from '@/services/storage/rallyeStorage';
 
 const mockRouterBack = jest.fn();
@@ -33,66 +33,66 @@ const protectedRallye: RallyeRow = {
   name: 'Protected Campus Rallye',
   department_id: 1,
   status: 'running',
-  password: 'secret',
+  rallye_code: 'secret',
   mode: 'department',
-  end_time: null,
+  rallye_end: null,
 };
 
-describe('RallyePasswordSheetRoute', () => {
+describe('RallyeCodeSheetRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    clearRallyePasswordSheetSession();
+    clearRallyeCodeSheetSession();
     mockRouterCanGoBack.mockReturnValue(true);
   });
 
   afterEach(() => {
-    clearRallyePasswordSheetSession();
+    clearRallyeCodeSheetSession();
   });
 
   it('dismisses itself when opened without a pending session', () => {
-    render(<RallyePasswordSheetRoute />);
+    render(<RallyeCodeSheetRoute />);
 
     expect(mockRouterBack).toHaveBeenCalledTimes(1);
   });
 
   it('joins through the pending session without navigating back', async () => {
     const onJoin = jest.fn().mockResolvedValue(true);
-    setRallyePasswordSheetSession({
+    setRallyeCodeSheetSession({
       rallye: protectedRallye,
       onJoin,
     });
 
     const { getByLabelText, getByText, unmount } = render(
-      <RallyePasswordSheetRoute />
+      <RallyeCodeSheetRoute />
     );
 
-    fireEvent.changeText(getByLabelText('rallye.password.label'), 'secret');
+    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.password.join'));
+      fireEvent.press(getByText('rallye.code.join'));
     });
 
     expect(onJoin).toHaveBeenCalledWith(protectedRallye);
     expect(mockRouterBack).not.toHaveBeenCalled();
 
     unmount();
-    expect(getRallyePasswordSheetSession()).toBeNull();
+    expect(getRallyeCodeSheetSession()).toBeNull();
   });
 
   it('keeps the sheet retryable when join fails', async () => {
     const onJoin = jest.fn().mockResolvedValue(false);
-    setRallyePasswordSheetSession({
+    setRallyeCodeSheetSession({
       rallye: protectedRallye,
       onJoin,
     });
 
-    const { getByLabelText, getByText } = render(<RallyePasswordSheetRoute />);
+    const { getByLabelText, getByText } = render(<RallyeCodeSheetRoute />);
 
-    fireEvent.changeText(getByLabelText('rallye.password.label'), 'secret');
+    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.password.join'));
+      fireEvent.press(getByText('rallye.code.join'));
     });
     await act(async () => {
-      fireEvent.press(getByText('rallye.password.join'));
+      fireEvent.press(getByText('rallye.code.join'));
     });
 
     expect(onJoin).toHaveBeenCalledTimes(2);
@@ -107,16 +107,16 @@ describe('RallyePasswordSheetRoute', () => {
           resolveJoin = resolve;
         })
     );
-    setRallyePasswordSheetSession({
+    setRallyeCodeSheetSession({
       rallye: protectedRallye,
       onJoin,
     });
 
-    const { getByLabelText, getByText } = render(<RallyePasswordSheetRoute />);
+    const { getByLabelText, getByText } = render(<RallyeCodeSheetRoute />);
 
-    fireEvent.changeText(getByLabelText('rallye.password.label'), 'secret');
+    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.password.join'));
+      fireEvent.press(getByText('rallye.code.join'));
     });
     fireEvent.press(getByText('common.cancel'));
 

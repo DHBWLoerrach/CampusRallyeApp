@@ -8,17 +8,17 @@ export async function saveAnswer(
   teamId: number,
   questionId: number,
   answeredCorrectly: boolean,
-  points: number,
+  teamPoints: number,
   answer: string = ''
 ): Promise<SaveAnswerResult> {
   try {
-    const { error } = await supabase.from('team_questions').upsert(
+    const { error } = await supabase.from('team_answers').upsert(
       {
         team_id: teamId,
         question_id: questionId,
         correct: answeredCorrectly,
-        points: points,
-        team_answer: answer,
+        team_points: teamPoints,
+        answer,
       },
       { onConflict: 'team_id,question_id', ignoreDuplicates: true }
     );
@@ -31,8 +31,8 @@ export async function saveAnswer(
         team_id: teamId,
         question_id: questionId,
         correct: answeredCorrectly,
-        points,
-        team_answer: answer,
+        team_points: teamPoints,
+        answer,
       });
       return { status: 'queued' };
     } catch (queueError) {

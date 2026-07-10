@@ -17,7 +17,7 @@ let mockGeocachingData: {
 };
 
 const mockFrom = jest.fn((table: string) => {
-  if (table === 'join_rallye_questions') {
+  if (table === 'rallye_questions') {
     return {
       select: jest.fn(() => ({
         eq: jest.fn(() =>
@@ -30,7 +30,7 @@ const mockFrom = jest.fn((table: string) => {
     };
   }
 
-  if (table === 'answers') {
+  if (table === 'solution_options') {
     return {
       select: jest.fn(() => ({
         in: jest.fn(() => Promise.resolve({ data: [], error: null })),
@@ -38,7 +38,7 @@ const mockFrom = jest.fn((table: string) => {
     };
   }
 
-  if (table === 'team_questions') {
+  if (table === 'team_answers') {
     return {
       select: jest.fn(() => ({
         eq: jest.fn(() =>
@@ -61,7 +61,7 @@ const mockFrom = jest.fn((table: string) => {
     };
   }
 
-  if (table === 'questions_geocaching') {
+  if (table === 'geocaching_questions') {
     return {
       select: jest.fn(() => ({
         in: jest.fn(() => Promise.resolve(mockGeocachingData)),
@@ -69,13 +69,13 @@ const mockFrom = jest.fn((table: string) => {
     };
   }
 
-  if (table === 'rallye') {
+  if (table === 'rallyes') {
     return {
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           single: jest.fn(() =>
             Promise.resolve({
-              data: { status: 'running', end_time: null, name: 'Rallye 1' },
+              data: { status: 'running', rallye_end: null, name: 'Rallye 1' },
               error: null,
             })
           ),
@@ -188,10 +188,10 @@ jest.mock('@/services/storage/Store', () => ({
         department_id: 1,
         status: 'running',
         mode: 'department',
-        end_time: null,
+        rallye_end: null,
       })),
       status: { set: jest.fn() },
-      end_time: { set: jest.fn() },
+      rallye_end: { set: jest.fn() },
       name: { set: jest.fn() },
     },
     team: { get: jest.fn(() => mockTeam) },
@@ -232,34 +232,34 @@ describe('RallyeIndex effects', () => {
     const { rerender } = render(<RallyeIndex />);
 
     await waitFor(() => {
-      expect(tableCallCount('answers')).toBeGreaterThan(0);
-      expect(tableCallCount('rallye')).toBeGreaterThan(0);
-      expect(tableCallCount('join_rallye_questions')).toBe(1);
+      expect(tableCallCount('solution_options')).toBeGreaterThan(0);
+      expect(tableCallCount('rallyes')).toBeGreaterThan(0);
+      expect(tableCallCount('rallye_questions')).toBe(1);
     });
 
-    const answersCallsAfterMount = tableCallCount('answers');
-    const rallyeCallsAfterMount = tableCallCount('rallye');
-    const questionJoinCallsAfterMount = tableCallCount('join_rallye_questions');
+    const answersCallsAfterMount = tableCallCount('solution_options');
+    const rallyeCallsAfterMount = tableCallCount('rallyes');
+    const questionJoinCallsAfterMount = tableCallCount('rallye_questions');
 
     mockTeam = { id: 123, name: 'New Team' };
     rerender(<RallyeIndex />);
 
     await waitFor(() => {
-      expect(tableCallCount('team_questions')).toBeGreaterThan(0);
+      expect(tableCallCount('team_answers')).toBeGreaterThan(0);
     });
 
-    expect(tableCallCount('answers')).toBe(answersCallsAfterMount);
-    expect(tableCallCount('rallye')).toBe(rallyeCallsAfterMount);
-    expect(tableCallCount('join_rallye_questions')).toBe(
+    expect(tableCallCount('solution_options')).toBe(answersCallsAfterMount);
+    expect(tableCallCount('rallyes')).toBe(rallyeCallsAfterMount);
+    expect(tableCallCount('rallye_questions')).toBe(
       questionJoinCallsAfterMount
     );
   });
 
-  it('clears the stored end time when the refreshed rallye has none', async () => {
+  it('clears the stored rallye end when the refreshed rallye has none', async () => {
     render(<RallyeIndex />);
 
     await waitFor(() => {
-      expect(store$.rallye.end_time.set).toHaveBeenCalledWith(null);
+      expect(store$.rallye.rallye_end.set).toHaveBeenCalledWith(null);
     });
   });
 
@@ -268,7 +268,7 @@ describe('RallyeIndex effects', () => {
     mockQuestionsData = [{ id: 2, content: 'Geo', type: 'geocaching' }];
     mockGeocachingData = {
       data: null,
-      error: new Error('questions_geocaching failed'),
+      error: new Error('geocaching_questions failed'),
     };
 
     render(<RallyeIndex />);
@@ -280,7 +280,7 @@ describe('RallyeIndex effects', () => {
       );
     });
 
-    expect(tableCallCount('questions_geocaching')).toBeGreaterThan(0);
+    expect(tableCallCount('geocaching_questions')).toBeGreaterThan(0);
     expect(store$.questions.set).not.toHaveBeenCalled();
     expect(store$.currentQuestion.set).not.toHaveBeenCalled();
   });
@@ -299,15 +299,20 @@ describe('RallyeIndex effects', () => {
     ];
 
     (store$.questions.get as jest.Mock).mockImplementation(() => [
-      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
-      { id: 3, question: 'Q3', question_type: 'multiple_choice', points: 1 },
-      { id: 2, question: 'Q2', question_type: 'knowledge', points: 1 },
+      { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
+      {
+        id: 3,
+        question: 'Q3',
+        question_type: 'multiple_choice',
+        point_value: 1,
+      },
+      { id: 2, question: 'Q2', question_type: 'knowledge', point_value: 1 },
     ]);
     (store$.currentQuestion.get as jest.Mock).mockImplementation(() => ({
       id: 2,
       question: 'Q2',
       question_type: 'knowledge',
-      points: 1,
+      point_value: 1,
     }));
 
     render(<RallyeIndex />);

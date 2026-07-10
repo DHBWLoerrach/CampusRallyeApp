@@ -45,7 +45,7 @@ export default function RallyeStackLayout() {
       screenOptions={{
         headerTitle: () =>
           showPlannedEnd ? (
-            <PlannedEndInfo endTime={rallye?.end_time} />
+            <PlannedEndInfo endTime={rallye?.rallye_end} />
           ) : null,
         headerStyle: { backgroundColor: palette.surface1 },
         headerTitleStyle: { color: palette.text },

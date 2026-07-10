@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler } from 'react-native';
 import { useRouter } from 'expo-router';
-import RallyePasswordSheet from '@/components/ui/RallyePasswordSheet';
+import RallyeCodeSheet from '@/components/ui/RallyeCodeSheet';
 import {
-  clearRallyePasswordSheetSession,
-  getRallyePasswordSheetSession,
-} from '@/services/rallyePasswordSheetSession';
+  clearRallyeCodeSheetSession,
+  getRallyeCodeSheetSession,
+} from '@/services/rallyeCodeSheetSession';
 import type { RallyeRow } from '@/services/storage/rallyeStorage';
 
-export default function RallyePasswordSheetRoute() {
+export default function RallyeCodeSheetRoute() {
   const router = useRouter();
-  const session = useMemo(() => getRallyePasswordSheetSession(), []);
+  const session = useMemo(() => getRallyeCodeSheetSession(), []);
   const [joining, setJoining] = useState(false);
   const joiningRef = useRef(false);
 
@@ -21,7 +21,7 @@ export default function RallyePasswordSheetRoute() {
     }
 
     return () => {
-      clearRallyePasswordSheetSession();
+      clearRallyeCodeSheetSession();
     };
   }, [router, session]);
 
@@ -63,7 +63,7 @@ export default function RallyePasswordSheetRoute() {
   if (!session) return null;
 
   return (
-    <RallyePasswordSheet
+    <RallyeCodeSheet
       rallye={session.rallye}
       joining={joining}
       onClose={handleClose}

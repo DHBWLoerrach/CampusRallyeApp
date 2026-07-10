@@ -196,7 +196,7 @@ function RootNavigator() {
               <Stack.Screen name="index" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen
-                name="rallye-password-sheet"
+                name="rallye-code-sheet"
                 options={{
                   contentStyle: { backgroundColor: 'transparent' },
                   gestureEnabled: false,

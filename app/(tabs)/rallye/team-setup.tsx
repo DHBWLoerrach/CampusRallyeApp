@@ -25,7 +25,7 @@ const TeamSetup = observer(function TeamSetup() {
     const teamName = generateTeamName();
     try {
       const { data, error } = await supabase
-        .from('rallye_team')
+        .from('teams')
         .insert({ name: teamName, rallye_id: rallye.id })
         .select()
         .single();

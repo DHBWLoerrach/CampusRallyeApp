@@ -24,17 +24,17 @@ export async function clearCurrentTeam(rallyeId: number) {
   return removeStorageItem(`${StorageKeys.TEAM}_${rallyeId}`);
 }
 
-export async function setTimePlayed(rallyeId: number, teamId: number) {
+export async function setPlayTime(rallyeId: number, teamId: number) {
   await supabase
-    .from('rallye_team')
-    .update({ time_played: new Date().toISOString() })
+    .from('teams')
+    .update({ play_time: new Date().toISOString() })
     .eq('id', teamId)
     .eq('rallye_id', rallyeId);
 }
 
 export async function createTeam(teamName: string, rallyeId: number) {
   const { data, error } = await supabase
-    .from('rallye_team')
+    .from('teams')
     .insert({ name: teamName, rallye_id: rallyeId })
     .select()
     .single();
@@ -45,7 +45,7 @@ export async function createTeam(teamName: string, rallyeId: number) {
 
 export async function getTeamsByRallye(rallyeId: number) {
   const { data, error } = await supabase
-    .from('rallye_team')
+    .from('teams')
     .select('*')
     .eq('rallye_id', rallyeId);
   if (error) throw error;
@@ -58,7 +58,7 @@ export async function teamExists(
 ): Promise<TeamExistsResult> {
   if (!rallyeId || !teamId) return 'missing';
   const { data, error } = await supabase
-    .from('rallye_team')
+    .from('teams')
     .select('id')
     .eq('id', teamId)
     .eq('rallye_id', rallyeId)

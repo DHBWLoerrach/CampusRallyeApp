@@ -11,7 +11,7 @@ const makeQuestion = (
   id,
   question: `Question ${id}`,
   question_type: type,
-  points: 1,
+  point_value: 1,
 });
 
 describe('orderQuestionsWithUploadsLast', () => {

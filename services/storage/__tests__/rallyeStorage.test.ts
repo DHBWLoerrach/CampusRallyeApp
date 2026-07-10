@@ -194,7 +194,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
     ];
 
     useTableHandlers({
-      location: ({ select, constraints, single }) => {
+      locations: ({ select, constraints, single }) => {
         expect(single).toBe(true);
         const locIdFilter = constraints.find(
           (constraint) => constraint.type === 'eq' && constraint.column === 'id'
@@ -210,7 +210,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
           error: new Error(`Unexpected location select ${select}`),
         };
       },
-      department: ({ select, constraints, single }) => {
+      departments: ({ select, constraints, single }) => {
         expect(single).toBe(false);
         expect(select).toBe('*');
         const locFilter = constraints.find(
@@ -220,11 +220,12 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         expect(locFilter?.value).toBe(locId);
         return { data: departments, error: null };
       },
-      rallye: ({ select, constraints, single }) => {
+      rallyes: ({ select, constraints, single }) => {
         if (single) {
           expect(select).toBe('*');
           const rallyeIdFilter = constraints.find(
-            (constraint) => constraint.type === 'eq' && constraint.column === 'id'
+            (constraint) =>
+              constraint.type === 'eq' && constraint.column === 'id'
           );
           expect(rallyeIdFilter?.value).toBe(900);
           return {
@@ -233,8 +234,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Campus Tour',
               department_id: 11,
               status: 'running',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
             error: null,
@@ -255,8 +256,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Info Rallye',
               department_id: 11,
               status: 'running',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
             {
@@ -264,8 +265,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Info Rallye Draft',
               department_id: 11,
               status: 'draft',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
             {
@@ -273,8 +274,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Info Rallye Ready',
               department_id: 11,
               status: 'ready',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
             {
@@ -282,8 +283,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Info Rallye Voting',
               department_id: 11,
               status: 'voting',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
             {
@@ -291,8 +292,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Info Rallye Results',
               department_id: 11,
               status: 'results',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
             {
@@ -300,8 +301,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Info Rallye Ended',
               department_id: 11,
               status: 'ended',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
             {
@@ -309,8 +310,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'BWL Rallye',
               department_id: 12,
               status: 'running',
-              password: 'secret',
-              end_time: null,
+              rallye_code: 'secret',
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
           ],
@@ -342,7 +343,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
     const locId = 3;
 
     useTableHandlers({
-      location: ({ select }) => {
+      locations: ({ select }) => {
         if (select === 'default_rallye_id') {
           return { data: { default_rallye_id: null }, error: null };
         }
@@ -352,7 +353,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
           error: new Error(`Unexpected location select ${select}`),
         };
       },
-      department: () => ({
+      departments: () => ({
         data: [
           {
             id: 10,
@@ -363,7 +364,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         ],
         error: null,
       }),
-      rallye: ({ single }) => {
+      rallyes: ({ single }) => {
         if (single) {
           return { data: null, error: null };
         }
@@ -374,8 +375,8 @@ describe('rallyeStorage.getLocationDashboardData', () => {
               name: 'Broken Rallye',
               department_id: null,
               status: 'running',
-              password: null,
-              end_time: null,
+              rallye_code: null,
+              rallye_end: null,
               created_at: '2024-01-01T00:00:00Z',
             },
           ],
@@ -402,7 +403,7 @@ describe('rallyeStorage.getLocationsWithJoinableRallyes', () => {
 
   it('excludes locations whose tour-mode rallye is not joinable', async () => {
     useTableHandlers({
-      rallye: ({ select }) => {
+      rallyes: ({ select }) => {
         expect(select).toBe('id, status, department_id');
         return {
           data: [
@@ -412,7 +413,7 @@ describe('rallyeStorage.getLocationsWithJoinableRallyes', () => {
           error: null,
         };
       },
-      location: ({ select, constraints }) => {
+      locations: ({ select, constraints }) => {
         if (select === 'id, default_rallye_id') {
           return {
             data: [

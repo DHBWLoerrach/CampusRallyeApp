@@ -117,7 +117,7 @@ const baseQuestion: Question = {
   id: 42,
   question: 'Gibt es Mehrwegtassen?',
   question_type: 'multiple_choice',
-  points: 10,
+  point_value: 10,
 };
 
 describe('MultipleChoiceQuestion', () => {

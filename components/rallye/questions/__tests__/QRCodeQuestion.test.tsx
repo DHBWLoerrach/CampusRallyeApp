@@ -119,7 +119,7 @@ const baseQuestion: Question = {
   id: 42,
   question: 'Scan the hidden marker',
   question_type: 'qr_code',
-  points: 10,
+  point_value: 10,
 };
 
 describe('QRCodeQuestion', () => {
@@ -179,8 +179,7 @@ describe('QRCodeQuestion', () => {
     });
 
     const successButtons = alertSpy.mock.calls.at(-1)?.[2] as
-      | { onPress?: () => void }[]
-      | undefined;
+      { onPress?: () => void }[] | undefined;
     successButtons?.[0]?.onPress?.();
 
     act(() => {

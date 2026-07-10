@@ -140,12 +140,12 @@ describe('RootLayout', () => {
     mockErrorBoundaryError = null;
   });
 
-  it('registers the rallye password entry as a transparent modal instead of a form sheet', () => {
+  it('registers the rallye code entry as a transparent modal instead of a form sheet', () => {
     render(<RootLayout />);
 
     expect(mockStackScreen).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'rallye-password-sheet',
+        name: 'rallye-code-sheet',
         options: expect.objectContaining({
           contentStyle: { backgroundColor: 'transparent' },
           gestureEnabled: false,
@@ -155,12 +155,12 @@ describe('RootLayout', () => {
       undefined
     );
 
-    const passwordScreenOptions = mockStackScreen.mock.calls.find(
-      ([props]) => props.name === 'rallye-password-sheet'
+    const codeScreenOptions = mockStackScreen.mock.calls.find(
+      ([props]) => props.name === 'rallye-code-sheet'
     )?.[0].options;
 
-    expect(passwordScreenOptions).not.toHaveProperty('sheetAllowedDetents');
-    expect(passwordScreenOptions).not.toHaveProperty('sheetGrabberVisible');
+    expect(codeScreenOptions).not.toHaveProperty('sheetAllowedDetents');
+    expect(codeScreenOptions).not.toHaveProperty('sheetGrabberVisible');
   });
 
   it('clears rallye session state when recovering from the error fallback', async () => {

@@ -18,10 +18,10 @@ import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 
-export function isPasswordRequired(
-  rallye: Pick<RallyeRow, 'password'> | null | undefined
+export function isRallyeCodeRequired(
+  rallye: Pick<RallyeRow, 'rallye_code'> | null | undefined
 ) {
-  return !!(rallye?.password ?? '').trim().length;
+  return !!(rallye?.rallye_code ?? '').trim().length;
 }
 
 type Props = {
@@ -31,7 +31,7 @@ type Props = {
   onJoin: (rallye: RallyeRow) => Promise<boolean>;
 };
 
-export default function RallyePasswordSheet({
+export default function RallyeCodeSheet({
   rallye,
   joining = false,
   onClose,
@@ -39,7 +39,7 @@ export default function RallyePasswordSheet({
 }: Props) {
   const { t } = useLanguage();
   const { isDarkMode } = useTheme();
-  const [password, setPassword] = useState('');
+  const [rallyeCode, setRallyeCode] = useState('');
   const [autoFocusInput, setAutoFocusInput] = useState(false);
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const cancelTextColor = palette.textMuted ?? Colors.mediumGray;
@@ -52,7 +52,7 @@ export default function RallyePasswordSheet({
   };
 
   useEffect(() => {
-    setPassword('');
+    setRallyeCode('');
     setAutoFocusInput(false);
 
     const id = setTimeout(() => {
@@ -65,22 +65,19 @@ export default function RallyePasswordSheet({
   const confirmAndJoin = async () => {
     if (!rallye || joining) return;
 
-    const requiredPassword = (rallye.password ?? '').trim();
-    const passwordAttempt = password.trim();
+    const requiredCode = (rallye.rallye_code ?? '').trim();
+    const codeAttempt = rallyeCode.trim();
 
-    if (!passwordAttempt) {
+    if (!codeAttempt) {
       Alert.alert(
-        t('rallye.password.missing.title'),
-        t('rallye.password.missing.message')
+        t('rallye.code.missing.title'),
+        t('rallye.code.missing.message')
       );
       return;
     }
 
-    if (passwordAttempt !== requiredPassword) {
-      Alert.alert(
-        t('rallye.password.wrong.title'),
-        t('rallye.password.wrong.message')
-      );
+    if (codeAttempt !== requiredCode) {
+      Alert.alert(t('rallye.code.wrong.title'), t('rallye.code.wrong.message'));
       return;
     }
 
@@ -93,7 +90,7 @@ export default function RallyePasswordSheet({
       style={styles.overlay}
     >
       <Pressable
-        testID="rallye-password-backdrop"
+        testID="rallye-code-backdrop"
         style={styles.backdrop}
         onPress={closeSheet}
         disabled={joining}
@@ -128,20 +125,20 @@ export default function RallyePasswordSheet({
 
           <ThemedTextInput
             autoFocus={autoFocusInput}
-            style={styles.passwordInput}
+            style={styles.codeInput}
             secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-            placeholder={t('rallye.password.placeholder')}
-            accessibilityLabel={t('rallye.password.label')}
+            value={rallyeCode}
+            onChangeText={setRallyeCode}
+            placeholder={t('rallye.code.placeholder')}
+            accessibilityLabel={t('rallye.code.label')}
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="done"
             onSubmitEditing={() => void confirmAndJoin()}
           />
 
-          <ThemedText style={styles.passwordHelper} variant="muted">
-            {t('rallye.password.helper')}
+          <ThemedText style={styles.codeHelper} variant="muted">
+            {t('rallye.code.helper')}
           </ThemedText>
         </ScrollView>
 
@@ -174,7 +171,7 @@ export default function RallyePasswordSheet({
             textStyle={ctaButtonTextStyle}
             loading={joining}
           >
-            {t('rallye.password.join')}
+            {t('rallye.code.join')}
           </UIButton>
         </View>
       </View>
@@ -218,7 +215,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     alignSelf: 'stretch',
   },
-  passwordInput: {
+  codeInput: {
     width: '100%',
     height: 44,
     borderWidth: StyleSheet.hairlineWidth,
@@ -227,7 +224,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 12,
   },
-  passwordHelper: {
+  codeHelper: {
     textAlign: 'left',
     marginBottom: 16,
     fontSize: 13,

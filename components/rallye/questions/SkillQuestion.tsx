@@ -41,7 +41,7 @@ export default function SkillQuestion({ question }: QuestionProps) {
         teamId: team?.id ?? null,
         questionId: question.id,
         answeredCorrectly: isCorrect,
-        pointsAwarded: isCorrect ? question.points : 0,
+        pointsAwarded: isCorrect ? question.point_value : 0,
         answerText: trimmed,
       });
       setAnswer('');

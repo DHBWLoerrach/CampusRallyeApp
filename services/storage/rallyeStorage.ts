@@ -91,7 +91,7 @@ export async function getRallyeStatus(
   rallyeId: number
 ): Promise<RallyeStatus | null> {
   const { data, error } = await supabase
-    .from('rallye')
+    .from('rallyes')
     .select('status')
     .eq('id', rallyeId)
     .single();
@@ -112,7 +112,7 @@ export async function getLocationDashboardData(
 
   const [tourModeRallye, departmentsResult] = await Promise.all([
     getTourModeRallyeForLocation(locId),
-    supabase.from('department').select('*').eq('location_id', locId),
+    supabase.from('departments').select('*').eq('location_id', locId),
   ]);
 
   if (departmentsResult.error) {
@@ -137,7 +137,7 @@ export async function getLocationDashboardData(
 
   const departmentIds = departments.map((department) => department.id);
   const { data: rallyeRows, error: rallyeError } = await supabase
-    .from('rallye')
+    .from('rallyes')
     .select('*')
     .in('department_id', departmentIds);
 
@@ -191,7 +191,7 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
   Logger.debug('RallyeStorage', 'getLocationsWithJoinableRallyes called');
 
   const { data: allRallyes, error: rallyeError } = await supabase
-    .from('rallye')
+    .from('rallyes')
     .select('id, status, department_id');
 
   if (rallyeError) {
@@ -200,13 +200,12 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
   }
 
   const joinableRallyes =
-    (allRallyes as Pick<RallyeDbRow, 'id' | 'status' | 'department_id'>[] | null)?.filter(
-      (rallye) => isJoinableRallyeStatus(rallye.status)
-    ) ?? [];
+    (
+      allRallyes as
+        Pick<RallyeDbRow, 'id' | 'status' | 'department_id'>[] | null
+    )?.filter((rallye) => isJoinableRallyeStatus(rallye.status)) ?? [];
 
-  const joinableRallyeIds = new Set(
-    joinableRallyes.map((rallye) => rallye.id)
-  );
+  const joinableRallyeIds = new Set(joinableRallyes.map((rallye) => rallye.id));
 
   const joinableDepartmentIds = [
     ...new Set(
@@ -219,7 +218,7 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
   let locIdsWithActiveDepts: number[] = [];
   if (joinableDepartmentIds.length > 0) {
     const { data: departments, error: deptError } = await supabase
-      .from('department')
+      .from('departments')
       .select('id, location_id')
       .in('id', joinableDepartmentIds);
 
@@ -233,7 +232,7 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
   }
 
   const { data: allLocs, error: allLocsError } = await supabase
-    .from('location')
+    .from('locations')
     .select('id, default_rallye_id');
 
   if (allLocsError) {
@@ -257,7 +256,7 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
   }
 
   const { data: locations, error: locError } = await supabase
-    .from('location')
+    .from('locations')
     .select('*')
     .in('id', allLocIds);
 
@@ -277,7 +276,7 @@ export async function getTourModeRallyeForLocation(
   locId: number
 ): Promise<Rallye | null> {
   const { data: location, error: locError } = await supabase
-    .from('location')
+    .from('locations')
     .select('default_rallye_id')
     .eq('id', locId)
     .single();
@@ -296,7 +295,7 @@ export async function getTourModeRallyeForLocation(
   }
 
   const { data: rallye, error: rallyeError } = await supabase
-    .from('rallye')
+    .from('rallyes')
     .select('*')
     .eq('id', location.default_rallye_id)
     .single();

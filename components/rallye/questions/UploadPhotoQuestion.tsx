@@ -308,7 +308,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
           teamId: null,
           questionId: question.id,
           answeredCorrectly: true,
-          pointsAwarded: question.points,
+          pointsAwarded: question.point_value,
         });
         return;
       }
@@ -316,7 +316,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
       const result = await submitPhotoAnswerAndAdvance({
         teamId: team.id,
         questionId: question.id,
-        pointsAwarded: question.points,
+        pointsAwarded: question.point_value,
         imageUri: picture.uri,
       });
       if (result.status === 'requires_online') {

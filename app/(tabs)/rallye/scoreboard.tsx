@@ -17,7 +17,7 @@ type TeamRow = {
   id: string;
   name: string;
   created_at: string;
-  time_played: string | null;
+  play_time: string | null;
   total_points?: number;
   time_spent?: number | null;
   rank?: number;
@@ -35,11 +35,11 @@ function formatOwnDuration(ms: number, t: Translator): string {
 
 const calculateDuration = (
   created_at: string,
-  time_played: string | null
+  play_time: string | null
 ): number | null => {
-  if (!time_played) return null;
+  if (!play_time) return null;
   const start = new Date(created_at).getTime();
-  const end = new Date(time_played).getTime();
+  const end = new Date(play_time).getTime();
   if (Number.isNaN(start) || Number.isNaN(end) || end < start) {
     return null;
   }
@@ -63,32 +63,30 @@ export default function Scoreboard() {
     (async () => {
       try {
         let { data } = await supabase
-          .from('rallye_team')
-          .select('id, name, created_at, time_played')
+          .from('teams')
+          .select('id, name, created_at, play_time')
           .eq('rallye_id', rallyeId);
         const teamRows = (data || []) as TeamRow[];
 
         const teamIds = teamRows.map((t) => t.id);
 
         const { data: teamPoints, error } = await supabase
-          .from('team_questions')
-          .select('team_id, points')
+          .from('team_answers')
+          .select('team_id, team_points')
           .in('team_id', teamIds);
         if (error) throw error;
 
         let combined = teamRows.map((t) => {
           const pts = (teamPoints || []).filter((p: any) => p.team_id === t.id);
           const total_points = pts.reduce(
-            (acc: number, cur: any) => acc + cur.points,
+            (acc: number, cur: any) => acc + cur.team_points,
             0
           );
-          const time_spent = calculateDuration(t.created_at, t.time_played);
+          const time_spent = calculateDuration(t.created_at, t.play_time);
           return { ...t, total_points, time_spent } as TeamRow;
         });
 
-        combined.sort(
-          (a, b) => (b.total_points ?? 0) - (a.total_points ?? 0)
-        );
+        combined.sort((a, b) => (b.total_points ?? 0) - (a.total_points ?? 0));
 
         // Dense ranking: teams with equal points share a rank; the next
         // distinct point value gets previousRank + 1 (no skipped ranks).

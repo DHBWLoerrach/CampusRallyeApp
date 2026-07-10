@@ -113,7 +113,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const targetLat = question.target_latitude;
   const targetLon = question.target_longitude;
   const radius = question.proximity_radius ?? 10;
-  const inputType = question.geocaching_input_type ?? 'text';
+  const inputType = question.input_type ?? 'text';
 
   // Correct answer key (for text or QR verification)
   const correctText = getAnswerKeyForQuestion(answers, question.id);
@@ -420,14 +420,14 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     const isCorrect = trimmed.toLowerCase() === correctText;
     Logger.info(
       'Geocaching',
-      `Text answer evaluated — isCorrect=${isCorrect}, points=${isCorrect ? question.points : 0}`
+      `Text answer evaluated — isCorrect=${isCorrect}, points=${isCorrect ? question.point_value : 0}`
     );
     try {
       await submitAnswerAndAdvance({
         teamId: team?.id ?? null,
         questionId: question.id,
         answeredCorrectly: isCorrect,
-        pointsAwarded: isCorrect ? question.points : 0,
+        pointsAwarded: isCorrect ? question.point_value : 0,
         answerText: trimmed,
       });
       setAnswer('');
@@ -472,7 +472,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                   teamId: team?.id ?? null,
                   questionId: question.id,
                   answeredCorrectly: true,
-                  pointsAwarded: question.points,
+                  pointsAwarded: question.point_value,
                   answerText: data,
                 });
               } catch (e) {

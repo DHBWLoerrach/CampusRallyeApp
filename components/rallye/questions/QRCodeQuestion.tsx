@@ -87,7 +87,7 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
                 teamId: team?.id ?? null,
                 questionId: question.id,
                 answeredCorrectly: true,
-                pointsAwarded: question.points,
+                pointsAwarded: question.point_value,
               });
             } catch (e) {
               console.error('Error submitting QR answer:', e);

@@ -43,7 +43,7 @@ type Fixtures = {
   answerRows: {
     question_id: number;
     team_id: number;
-    team_answer: string | null;
+    answer: string | null;
   }[];
   votedQuestions: {
     question_id: number;
@@ -75,13 +75,13 @@ function applyFilters<T extends Record<string, any>>(
 }
 
 function resolveSelectResult(table: string, filters: SelectFilter[]) {
-  if (table === 'join_rallye_questions') {
+  if (table === 'rallye_questions') {
     return applyFilters(fixtures.joinRows, filters);
   }
-  if (table === 'rallye_team') {
+  if (table === 'teams') {
     return applyFilters(fixtures.teamRows, filters);
   }
-  if (table === 'team_questions') {
+  if (table === 'team_answers') {
     return applyFilters(fixtures.answerRows, filters);
   }
   return [];
@@ -144,10 +144,10 @@ function baseFixtures(): Fixtures {
       { id: 4, rallye_id: 1, name: 'Team B' },
     ],
     answerRows: [
-      { question_id: 101, team_id: 3, team_answer: 'Answer A' },
-      { question_id: 101, team_id: 4, team_answer: 'Answer B' },
-      { question_id: 102, team_id: 3, team_answer: '    ' },
-      { question_id: 102, team_id: 4, team_answer: 'Only one candidate' },
+      { question_id: 101, team_id: 3, answer: 'Answer A' },
+      { question_id: 101, team_id: 4, answer: 'Answer B' },
+      { question_id: 102, team_id: 3, answer: '    ' },
+      { question_id: 102, team_id: 4, answer: 'Only one candidate' },
     ],
     votedQuestions: [],
     voteError: null,
@@ -293,7 +293,7 @@ describe('Voting', () => {
     expect(queryByText('voting.ended.title')).toBeNull();
   });
 
-  it('loads voting questions from join_rallye_questions with is_voting=true', async () => {
+  it('loads voting questions from rallye_questions with is_voting=true', async () => {
     const { getByText, queryByText } = render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
@@ -303,7 +303,7 @@ describe('Voting', () => {
     });
 
     const joinCall = selectCalls.find(
-      (call) => call.table === 'join_rallye_questions'
+      (call) => call.table === 'rallye_questions'
     );
     expect(joinCall).toBeDefined();
     expect(joinCall?.filters).toContainEqual({
@@ -392,10 +392,10 @@ describe('Voting', () => {
       },
     ];
     fixtures.answerRows = [
-      { question_id: 101, team_id: 3, team_answer: 'Answer A' },
-      { question_id: 101, team_id: 4, team_answer: 'Answer B' },
-      { question_id: 103, team_id: 3, team_answer: 'Answer C' },
-      { question_id: 103, team_id: 4, team_answer: 'Answer D' },
+      { question_id: 101, team_id: 3, answer: 'Answer A' },
+      { question_id: 101, team_id: 4, answer: 'Answer B' },
+      { question_id: 103, team_id: 3, answer: 'Answer C' },
+      { question_id: 103, team_id: 4, answer: 'Answer D' },
     ];
 
     let resolveVote: (value: { error: null }) => void = () => {};
@@ -484,8 +484,8 @@ describe('Voting', () => {
       },
     ];
     fixtures.answerRows = [
-      { question_id: 201, team_id: 3, team_answer: 'Geocaching Answer A' },
-      { question_id: 201, team_id: 4, team_answer: 'Geocaching Answer B' },
+      { question_id: 201, team_id: 3, answer: 'Geocaching Answer A' },
+      { question_id: 201, team_id: 4, answer: 'Geocaching Answer B' },
     ];
 
     const { getByText } = render(
@@ -512,8 +512,8 @@ describe('Voting', () => {
       },
     ];
     fixtures.answerRows = [
-      { question_id: 301, team_id: 3, team_answer: '3_301.jpg' },
-      { question_id: 301, team_id: 4, team_answer: '4_301.jpg' },
+      { question_id: 301, team_id: 3, answer: '3_301.jpg' },
+      { question_id: 301, team_id: 4, answer: '4_301.jpg' },
     ];
 
     const { getByText, UNSAFE_queryByType } = render(
@@ -543,8 +543,8 @@ describe('Voting', () => {
       },
     ];
     fixtures.answerRows = [
-      { question_id: 302, team_id: 3, team_answer: 'Choice A' },
-      { question_id: 302, team_id: 4, team_answer: 'Choice B' },
+      { question_id: 302, team_id: 3, answer: 'Choice A' },
+      { question_id: 302, team_id: 4, answer: 'Choice B' },
     ];
 
     const { getByText } = render(
@@ -578,7 +578,7 @@ describe('Voting', () => {
 
   it('shows an unavailable state when no question has two candidates', async () => {
     fixtures.answerRows = [
-      { question_id: 101, team_id: 3, team_answer: 'Only one answer' },
+      { question_id: 101, team_id: 3, answer: 'Only one answer' },
     ];
 
     const { getByText, queryByText } = render(

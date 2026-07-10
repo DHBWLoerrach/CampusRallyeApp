@@ -14,8 +14,8 @@ jest.mock('@/services/storage/answerStorage', () => ({
 const mockPointsGet = jest.fn(() => 0);
 const mockPointsSet = jest.fn();
 const mockGotoNextQuestion = jest.fn(async () => {});
-const mockRallyeGet = jest.fn((): { end_time: string | null } => ({
-  end_time: null,
+const mockRallyeGet = jest.fn((): { rallye_end: string | null } => ({
+  rallye_end: null,
 }));
 jest.mock('@/services/storage/Store', () => ({
   store$: {
@@ -39,7 +39,7 @@ describe('submitAnswerAndAdvance', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPointsGet.mockReturnValue(0);
-    mockRallyeGet.mockReturnValue({ end_time: null });
+    mockRallyeGet.mockReturnValue({ rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
   });
 
@@ -75,7 +75,7 @@ describe('submitAnswerAndAdvance', () => {
 
   it('saves the answer when an end time is set', async () => {
     mockRallyeGet.mockReturnValue({
-      end_time: '14:30:00',
+      rallye_end: '14:30:00',
     });
 
     const result = await submitAnswerAndAdvance({
@@ -122,7 +122,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
     jest.clearAllMocks();
     mockIsConnected = true;
     mockPointsGet.mockReturnValue(0);
-    mockRallyeGet.mockReturnValue({ end_time: null });
+    mockRallyeGet.mockReturnValue({ rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
     mockUploadPhotoAnswer.mockResolvedValue({ filePath: '1_2.jpg' });
   });
@@ -177,7 +177,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
 
   it('uploads and saves the photo when an end time is set', async () => {
     mockRallyeGet.mockReturnValue({
-      end_time: '14:30:00',
+      rallye_end: '14:30:00',
     });
 
     const result = await submitPhotoAnswerAndAdvance({

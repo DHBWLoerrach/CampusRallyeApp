@@ -37,8 +37,8 @@ const basePayload = {
   team_id: 1,
   question_id: 2,
   correct: true,
-  points: 3,
-  team_answer: 'answer',
+  team_points: 3,
+  answer: 'answer',
 };
 
 describe('offlineOutbox processOutbox', () => {
@@ -74,8 +74,8 @@ describe('offlineOutbox processOutbox', () => {
         team_id: 1,
         question_id: 2,
         correct: true,
-        points: 3,
-        team_answer: 'answer',
+        team_points: 3,
+        answer: 'answer',
       },
       { onConflict: 'team_id,question_id', ignoreDuplicates: true }
     );
@@ -134,62 +134,38 @@ describe('offlineOutbox processOutbox', () => {
     expect(outbox$.lastError.get()).toBe('db error');
   });
 
-  it('normalizes legacy { data: { teamId, ... } } format', async () => {
-    // Manually store a legacy queue item
-    const legacy = [
+  it('migrates queued V1 answers from the previous field names', async () => {
+    await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
       {
+        id: 'legacy-v1-answer',
         type: 'SAVE_ANSWER',
-        data: {
-          teamId: 5,
-          questionId: 10,
-          answeredCorrectly: true,
-          points: 7,
+        payloadVersion: 1,
+        createdAt: 1,
+        attempts: 0,
+        nextRetryAt: null,
+        payload: {
+          team_id: 7,
+          question_id: 13,
+          correct: true,
+          points: 5,
+          team_answer: 'offline answer',
         },
       },
-    ];
-    await setStorageItem(StorageKeys.OFFLINE_QUEUE, legacy);
+    ]);
 
     await processOutbox();
 
-    // Should have been normalized and processed
     expect(upsertMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        team_id: 5,
-        question_id: 10,
-        correct: true,
-        points: 7,
-      }),
-      { onConflict: 'team_id,question_id', ignoreDuplicates: true }
-    );
-  });
-
-  it('normalizes legacy { table: "team_questions", data: {...} } format', async () => {
-    const legacy = [
       {
-        table: 'team_questions',
-        data: {
-          team_id: 3,
-          question_id: 8,
-          correct: false,
-          points: 0,
-          team_answer: 'wrong',
-        },
+        team_id: 7,
+        question_id: 13,
+        correct: true,
+        team_points: 5,
+        answer: 'offline answer',
       },
-    ];
-    await setStorageItem(StorageKeys.OFFLINE_QUEUE, legacy);
-
-    await processOutbox();
-
-    expect(upsertMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        team_id: 3,
-        question_id: 8,
-        correct: false,
-        points: 0,
-        team_answer: 'wrong',
-      }),
       { onConflict: 'team_id,question_id', ignoreDuplicates: true }
     );
+    expect(await getStorageItem(StorageKeys.OFFLINE_QUEUE)).toEqual([]);
   });
 
   it('discards UPLOAD_PHOTO_ANSWER items', async () => {

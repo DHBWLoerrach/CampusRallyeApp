@@ -28,7 +28,7 @@ interface GeocachingMetadata {
   target_latitude: number;
   target_longitude: number;
   proximity_radius: number;
-  geocaching_input_type: 'text' | 'qr';
+  input_type: 'text' | 'qr';
 }
 
 function isPreparation(status?: RallyeStatus) {
@@ -84,7 +84,7 @@ const RallyeIndex = observer(function RallyeIndex() {
 
     const promise = (async () => {
       const { data: joinData, error: joinError } = await supabase
-        .from('join_rallye_questions')
+        .from('rallye_questions')
         .select('question_id')
         .eq('rallye_id', rallyeId);
       if (joinError) throw joinError;
@@ -114,7 +114,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         return;
       }
       const { data: answers, error: answerError } = await supabase
-        .from('answers')
+        .from('solution_options')
         .select('*')
         .in('question_id', questionIds);
       if (answerError) throw answerError;
@@ -142,7 +142,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       let answeredIds: number[] = [];
       if (!isTourMode && teamId) {
         const { data: answeredData, error: answeredError } = await supabase
-          .from('team_questions')
+          .from('team_answers')
           .select('question_id')
           .eq('team_id', teamId);
         if (answeredError) throw answeredError;
@@ -175,7 +175,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       if (geocachingQuestionIds.length > 0) {
         // Fetch geocaching metadata only for geocaching questions.
         const { data: geocachingData, error: geocachingError } = await supabase
-          .from('questions_geocaching')
+          .from('geocaching_questions')
           .select('*')
           .in('question_id', geocachingQuestionIds);
         if (geocachingError) throw geocachingError;
@@ -196,7 +196,7 @@ const RallyeIndex = observer(function RallyeIndex() {
             target_latitude: geo.target_latitude,
             target_longitude: geo.target_longitude,
             proximity_radius: geo.proximity_radius,
-            geocaching_input_type: geo.geocaching_input_type,
+            input_type: geo.input_type,
           }),
         };
       });
@@ -232,14 +232,14 @@ const RallyeIndex = observer(function RallyeIndex() {
     await new Promise((r) => setTimeout(r, 600));
     try {
       const { data, error } = await supabase
-        .from('rallye')
-        .select('status, end_time, name')
+        .from('rallyes')
+        .select('status, rallye_end, name')
         .eq('id', rallyeId)
         .single();
       if (error) throw error;
       if (data) {
         store$.rallye.status.set(data.status);
-        store$.rallye.end_time.set(data.end_time);
+        store$.rallye.rallye_end.set(data.rallye_end);
         if (data.name) store$.rallye.name.set(data.name);
       }
     } catch (e) {

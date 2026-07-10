@@ -162,7 +162,12 @@ describe('QuestionRenderer', () => {
     ['picture', 'ImageQuestion'],
     ['geocaching', 'GeocachingQuestion'],
   ])('renders %s question type as %s component', (type, componentName) => {
-    const question = { id: 1, question_type: type, question: 'Q1', points: 5 };
+    const question = {
+      id: 1,
+      question_type: type,
+      question: 'Q1',
+      point_value: 5,
+    };
 
     const { getByText, queryAllByText } = render(
       <QuestionRenderer question={question} />
@@ -181,7 +186,7 @@ describe('QuestionRenderer', () => {
       id: 1,
       question_type: 'nonexistent_type',
       question: 'Q1',
-      points: 5,
+      point_value: 5,
     };
 
     const { getAllByText } = render(<QuestionRenderer question={question} />);
@@ -193,7 +198,7 @@ describe('QuestionRenderer', () => {
   });
 
   it('shows unknown type fallback when question_type is undefined', () => {
-    const question = { id: 1, question: 'Q1', points: 5 };
+    const question = { id: 1, question: 'Q1', point_value: 5 };
 
     const { getAllByText } = render(<QuestionRenderer question={question} />);
 
@@ -203,8 +208,18 @@ describe('QuestionRenderer', () => {
   });
 
   it('keeps the new question visible after flip completes', () => {
-    const q1 = { id: 1, question_type: 'knowledge', question: 'Q1', points: 5 };
-    const q2 = { id: 2, question_type: 'picture', question: 'Q2', points: 5 };
+    const q1 = {
+      id: 1,
+      question_type: 'knowledge',
+      question: 'Q1',
+      point_value: 5,
+    };
+    const q2 = {
+      id: 2,
+      question_type: 'picture',
+      question: 'Q2',
+      point_value: 5,
+    };
 
     const { getByTestId, getByText, queryByTestId, queryByText, rerender } =
       render(<QuestionRenderer question={q1} />);
@@ -240,8 +255,18 @@ describe('QuestionRenderer', () => {
   });
 
   it('keeps both faces mounted when a flip spring is canceled', () => {
-    const q1 = { id: 1, question_type: 'knowledge', question: 'Q1', points: 5 };
-    const q2 = { id: 2, question_type: 'picture', question: 'Q2', points: 5 };
+    const q1 = {
+      id: 1,
+      question_type: 'knowledge',
+      question: 'Q1',
+      point_value: 5,
+    };
+    const q2 = {
+      id: 2,
+      question_type: 'picture',
+      question: 'Q2',
+      point_value: 5,
+    };
 
     const { getByTestId, getByText, rerender } = render(
       <QuestionRenderer question={q1} />

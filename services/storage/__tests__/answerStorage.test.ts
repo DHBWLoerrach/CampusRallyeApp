@@ -34,14 +34,14 @@ describe('saveAnswer', () => {
   it('writes idempotently via upsert on team and question', async () => {
     const result = await saveAnswer(7, 13, true, 5, 'foo');
 
-    expect(mockFrom).toHaveBeenCalledWith('team_questions');
+    expect(mockFrom).toHaveBeenCalledWith('team_answers');
     expect(mockUpsert).toHaveBeenCalledWith(
       {
         team_id: 7,
         question_id: 13,
         correct: true,
-        points: 5,
-        team_answer: 'foo',
+        team_points: 5,
+        answer: 'foo',
       },
       { onConflict: 'team_id,question_id', ignoreDuplicates: true }
     );
@@ -59,8 +59,8 @@ describe('saveAnswer', () => {
       team_id: 7,
       question_id: 13,
       correct: false,
-      points: 0,
-      team_answer: 'bar',
+      team_points: 0,
+      answer: 'bar',
     });
     expect(result).toEqual({ status: 'queued' });
   });

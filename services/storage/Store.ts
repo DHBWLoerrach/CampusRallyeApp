@@ -8,7 +8,7 @@ import {
   getCurrentTeam,
   clearCurrentTeam,
   teamExists,
-  setTimePlayed,
+  setPlayTime,
 } from './teamStorage';
 import { startOutbox } from './offlineOutbox';
 import { AnswerRow, Question, Team } from '@/types/rallye';
@@ -87,14 +87,14 @@ export const store$ = observable({
         const team = store$.team.get();
         const isTourMode = store$.isTourMode.get();
         if (rallye && team && !isTourMode) {
-          await setTimePlayed(rallye.id, team.id);
+          await setPlayTime(rallye.id, team.id);
           Logger.info(
             'Store',
-            `Rallye finished, time_played set for team: ${team.id}`
+            `Rallye finished, play_time set for team: ${team.id}`
           );
         }
       } catch (err) {
-        Logger.error('Store', 'Error setting time_played', err);
+        Logger.error('Store', 'Error setting play_time', err);
       }
     } else {
       store$.questionIndex.set(nextIndex);
@@ -112,7 +112,7 @@ export const store$ = observable({
     } catch {}
     // Note: We intentionally do not persist questionIndex. Question ordering is randomized
     // on fetch; resuming by index is therefore not stable. Progress is derived from Supabase
-    // `team_questions` (team mode) and in-memory state (tour mode).
+    // `team_answers` (team mode) and in-memory state (tour mode).
   },
 
   reset: () => {

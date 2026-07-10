@@ -143,7 +143,7 @@ const baseQuestion: Question = {
   id: 42,
   question: 'Take a photo of the library',
   question_type: 'upload',
-  points: 10,
+  point_value: 10,
   hint: null,
 };
 

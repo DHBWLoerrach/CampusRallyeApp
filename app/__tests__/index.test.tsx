@@ -14,15 +14,15 @@ import {
   teamExists,
 } from '@/services/storage/teamStorage';
 import {
-  getRallyePasswordSheetSession,
-  setRallyePasswordSheetSession,
-} from '@/services/rallyePasswordSheetSession';
+  getRallyeCodeSheetSession,
+  setRallyeCodeSheetSession,
+} from '@/services/rallyeCodeSheetSession';
 import { store$ } from '@/services/storage/Store';
 import type { Rallye } from '@/types/rallye';
 
 const mockRouterPush = jest.fn();
 const mockAppStateSubscriptionRemove = jest.fn();
-let mockPasswordSheetSession: unknown = null;
+let mockCodeSheetSession: unknown = null;
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
@@ -42,20 +42,20 @@ jest.mock('@/components/ui/CollapsibleHeroHeader', () => {
   };
 });
 
-jest.mock('@/components/ui/RallyePasswordSheet', () => ({
+jest.mock('@/components/ui/RallyeCodeSheet', () => ({
   __esModule: true,
-  isPasswordRequired: (
-    rallye: { password?: string | null } | null | undefined
-  ) => !!(rallye?.password ?? '').trim().length,
+  isRallyeCodeRequired: (
+    rallye: { rallye_code?: string | null } | null | undefined
+  ) => !!(rallye?.rallye_code ?? '').trim().length,
 }));
 
-jest.mock('@/services/rallyePasswordSheetSession', () => ({
-  clearRallyePasswordSheetSession: jest.fn(() => {
-    mockPasswordSheetSession = null;
+jest.mock('@/services/rallyeCodeSheetSession', () => ({
+  clearRallyeCodeSheetSession: jest.fn(() => {
+    mockCodeSheetSession = null;
   }),
-  getRallyePasswordSheetSession: jest.fn(() => mockPasswordSheetSession),
-  setRallyePasswordSheetSession: jest.fn((session: unknown) => {
-    mockPasswordSheetSession = session;
+  getRallyeCodeSheetSession: jest.fn(() => mockCodeSheetSession),
+  setRallyeCodeSheetSession: jest.fn((session: unknown) => {
+    mockCodeSheetSession = session;
   }),
 }));
 
@@ -170,13 +170,13 @@ const mockedTeamExists = teamExists as jest.MockedFunction<typeof teamExists>;
 const mockedClearCurrentTeam = clearCurrentTeam as jest.MockedFunction<
   typeof clearCurrentTeam
 >;
-const mockedSetRallyePasswordSheetSession =
-  setRallyePasswordSheetSession as jest.MockedFunction<
-    typeof setRallyePasswordSheetSession
+const mockedSetRallyeCodeSheetSession =
+  setRallyeCodeSheetSession as jest.MockedFunction<
+    typeof setRallyeCodeSheetSession
   >;
-const mockedGetRallyePasswordSheetSession =
-  getRallyePasswordSheetSession as jest.MockedFunction<
-    typeof getRallyePasswordSheetSession
+const mockedGetRallyeCodeSheetSession =
+  getRallyeCodeSheetSession as jest.MockedFunction<
+    typeof getRallyeCodeSheetSession
   >;
 
 describe('Welcome', () => {
@@ -196,7 +196,7 @@ describe('Welcome', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
-    mockPasswordSheetSession = null;
+    mockCodeSheetSession = null;
     Object.defineProperty(AppState, 'currentState', {
       configurable: true,
       value: 'active',
@@ -226,9 +226,9 @@ describe('Welcome', () => {
       name: 'Campus Tour',
       department_id: 1,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'tour',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
@@ -255,16 +255,18 @@ describe('Welcome', () => {
       name: 'Informatik Rallye',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      departmentEntries: [{ department: mockDepartment, rallyes: [departmentRallye] }],
+      departmentEntries: [
+        { department: mockDepartment, rallyes: [departmentRallye] },
+      ],
     });
     mockedSetCurrentRallye.mockResolvedValue();
 
@@ -290,16 +292,18 @@ describe('Welcome', () => {
       name: '   ',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
-      departmentEntries: [{ department: mockDepartment, rallyes: [unnamedRallye] }],
+      departmentEntries: [
+        { department: mockDepartment, rallyes: [unnamedRallye] },
+      ],
     });
     mockedSetCurrentRallye.mockResolvedValue();
 
@@ -358,9 +362,9 @@ describe('Welcome', () => {
       name: 'Department Rallye',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
     const existingTeam = { id: 7, name: 'Team' };
@@ -390,15 +394,15 @@ describe('Welcome', () => {
     expect(store$.team.set).toHaveBeenLastCalledWith(existingTeam);
   });
 
-  it('opens password sheet route for department rallye with password', async () => {
-    const passwordRallye: Rallye = {
+  it('opens the code sheet route for a protected department rallye', async () => {
+    const codeRallye: Rallye = {
       id: 6,
       name: 'Protected Rallye',
       department_id: mockDepartment.id,
       status: 'running',
-      password: 'secret',
+      rallye_code: 'secret',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
@@ -406,7 +410,7 @@ describe('Welcome', () => {
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       departmentEntries: [
-        { department: mockDepartment, rallyes: [passwordRallye] },
+        { department: mockDepartment, rallyes: [codeRallye] },
       ],
     });
 
@@ -420,26 +424,26 @@ describe('Welcome', () => {
       fireEvent.press(getByText('rallye.join'));
     });
 
-    expect(mockedSetRallyePasswordSheetSession).toHaveBeenCalledWith(
+    expect(mockedSetRallyeCodeSheetSession).toHaveBeenCalledWith(
       expect.objectContaining({
-        rallye: passwordRallye,
+        rallye: codeRallye,
         onJoin: expect.any(Function),
       })
     );
-    expect(mockRouterPush).toHaveBeenCalledWith('/rallye-password-sheet');
-    expect(mockedGetRallyePasswordSheetSession).toHaveBeenCalled();
+    expect(mockRouterPush).toHaveBeenCalledWith('/rallye-code-sheet');
+    expect(mockedGetRallyeCodeSheetSession).toHaveBeenCalled();
     expect(mockedSetCurrentRallye).not.toHaveBeenCalled();
   });
 
-  it('does not stack password sheets on repeated protected rallye taps', async () => {
-    const passwordRallye: Rallye = {
+  it('does not stack code sheets on repeated protected rallye taps', async () => {
+    const codeRallye: Rallye = {
       id: 6,
       name: 'Protected Rallye',
       department_id: mockDepartment.id,
       status: 'running',
-      password: 'secret',
+      rallye_code: 'secret',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
@@ -447,7 +451,7 @@ describe('Welcome', () => {
     mockedGetLocationDashboardData.mockResolvedValue({
       tourModeRallye: null,
       departmentEntries: [
-        { department: mockDepartment, rallyes: [passwordRallye] },
+        { department: mockDepartment, rallyes: [codeRallye] },
       ],
     });
 
@@ -461,7 +465,7 @@ describe('Welcome', () => {
       fireEvent.press(getByText('rallye.join'));
     });
 
-    expect(mockedSetRallyePasswordSheetSession).toHaveBeenCalledTimes(1);
+    expect(mockedSetRallyeCodeSheetSession).toHaveBeenCalledTimes(1);
     expect(mockRouterPush).toHaveBeenCalledTimes(1);
   });
 
@@ -471,9 +475,9 @@ describe('Welcome', () => {
       name: 'Rallye A',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
     const rallyeB: Rallye = {
@@ -481,9 +485,9 @@ describe('Welcome', () => {
       name: 'Rallye B',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
@@ -512,9 +516,9 @@ describe('Welcome', () => {
       name: 'Rallye A',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
     const secondDepartment = {
@@ -528,9 +532,9 @@ describe('Welcome', () => {
       name: 'Rallye B',
       department_id: secondDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
@@ -590,9 +594,9 @@ describe('Welcome', () => {
       name: 'New Rallye',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 
@@ -640,9 +644,9 @@ describe('Welcome', () => {
       name: 'Initial Rallye',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
     const refreshedRallye: Rallye = {
@@ -650,9 +654,9 @@ describe('Welcome', () => {
       name: 'Refreshed Rallye',
       department_id: mockDepartment.id,
       status: 'running',
-      password: '',
+      rallye_code: '',
       mode: 'department',
-      end_time: null,
+      rallye_end: null,
       created_at: '2024-01-01T00:00:00Z',
     };
 

@@ -28,13 +28,13 @@ export interface Question {
   id: number;
   question: string;
   question_type: QuestionType;
-  points: number;
+  point_value: number;
   hint?: string | null;
   bucket_path?: string | null;
   target_latitude?: number | null;
   target_longitude?: number | null;
   proximity_radius?: number | null;
-  geocaching_input_type?: GeocachingInputType | null;
+  input_type?: GeocachingInputType | null;
 }
 
 export interface AnswerRow {
@@ -71,15 +71,15 @@ export interface RallyeDbRow {
   name: string;
   department_id: number | null;
   status: RallyeStatus;
-  password: string | null;
+  rallye_code: string | null;
   /** PostgreSQL `time without time zone`, serialized as `HH:mm:ss`. */
-  end_time: string | null;
+  rallye_end: string | null;
   created_at: string;
 }
 
 export type RallyeStorageRow = Pick<
   RallyeDbRow,
-  'id' | 'name' | 'department_id' | 'status' | 'password' | 'end_time'
+  'id' | 'name' | 'department_id' | 'status' | 'rallye_code' | 'rallye_end'
 >;
 
 export interface Rallye extends RallyeDbRow {
@@ -91,5 +91,5 @@ export interface Team {
   name: string;
   rallye_id?: number;
   points?: number;
-  time_played?: string | null;
+  play_time?: string | null;
 }

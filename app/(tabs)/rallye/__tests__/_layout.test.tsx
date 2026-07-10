@@ -28,7 +28,7 @@ type StackToolbarButtonProps = {
   onPress?: () => void;
 };
 
-let mockRallye: { status: string; end_time: string | null } | null = null;
+let mockRallye: { status: string; rallye_end: string | null } | null = null;
 let mockIsTourMode = false;
 let mockEnabled = true;
 
@@ -106,7 +106,7 @@ describe('RallyeStackLayout', () => {
   beforeEach(() => {
     mockRallye = {
       status: 'running',
-      end_time: '14:30:00',
+      rallye_end: '14:30:00',
     };
     mockIsTourMode = false;
     mockEnabled = true;

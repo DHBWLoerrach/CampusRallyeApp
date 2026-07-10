@@ -140,10 +140,10 @@ jest.mock('@/services/storage/Store', () => ({
         name: 'Tour Mode',
         status: 'running',
         mode: 'tour',
-        end_time: null,
+        rallye_end: null,
       })),
       status: { set: jest.fn() },
-      end_time: { set: jest.fn() },
+      rallye_end: { set: jest.fn() },
       name: { set: jest.fn() },
     },
     team: { get: jest.fn(() => null) },
@@ -170,7 +170,7 @@ describe('RallyeIndex', () => {
       name: 'Tour Mode',
       status: 'running',
       mode: 'tour',
-      end_time: null,
+      rallye_end: null,
     });
     (store$.team.get as jest.Mock).mockReturnValue(null);
     (store$.questionIndex.get as jest.Mock).mockReturnValue(0);
@@ -197,13 +197,13 @@ describe('RallyeIndex', () => {
   it('does not expose pull-to-refresh while answering questions', () => {
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
     (store$.questions.get as jest.Mock).mockReturnValue([
-      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+      { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
     ]);
     (store$.currentQuestion.get as jest.Mock).mockReturnValue({
       id: 1,
       question: 'Q1',
       question_type: 'knowledge',
-      points: 1,
+      point_value: 1,
     });
 
     render(<RallyeIndex />);
@@ -219,19 +219,19 @@ describe('RallyeIndex', () => {
       name: 'Campus Rallye',
       status: 'running',
       mode: 'classic',
-      end_time: '14:30:00',
+      rallye_end: '14:30:00',
     });
     (store$.team.get as jest.Mock).mockReturnValue({ id: 2, name: 'Team A' });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(false);
     (store$.questions.get as jest.Mock).mockReturnValue([
-      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+      { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
     ]);
     (store$.currentQuestion.get as jest.Mock).mockReturnValue({
       id: 1,
       question: 'Q1',
       question_type: 'knowledge',
-      points: 1,
+      point_value: 1,
     });
 
     render(<RallyeIndex />);
@@ -249,18 +249,18 @@ describe('RallyeIndex', () => {
       name: 'Campus Tour',
       status: 'running',
       mode: 'tour',
-      end_time: '14:30:00',
+      rallye_end: '14:30:00',
     });
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
     (store$.questions.get as jest.Mock).mockReturnValue([
-      { id: 1, question: 'Q1', question_type: 'knowledge', points: 1 },
+      { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
     ]);
     (store$.currentQuestion.get as jest.Mock).mockReturnValue({
       id: 1,
       question: 'Q1',
       question_type: 'knowledge',
-      points: 1,
+      point_value: 1,
     });
 
     render(<RallyeIndex />);
