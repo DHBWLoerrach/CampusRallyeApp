@@ -177,6 +177,7 @@ export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
 let syncPromise: Promise<void> | null = null;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 const BACKGROUND_FAILURE_RETRY_MS = 1_000;
+const MAX_FAILURES_PER_PASS = 3;
 
 function clearRetryTimer() {
   if (retryTimer === null) return;
@@ -239,8 +240,11 @@ export function processOutbox() {
       }
 
       const remaining: OfflineActionV1[] = [];
+      const deferredAfterFailureBudget: OfflineActionV1[] = [];
       const processedIds = new Set<string>();
-      for (const action of queue) {
+      let failureCount = 0;
+      for (let index = 0; index < queue.length; index++) {
+        const action = queue[index];
         if (action.nextRetryAt && Date.now() < action.nextRetryAt) {
           remaining.push(action);
           continue;
@@ -276,11 +280,33 @@ export function processOutbox() {
             lastError,
           });
           outbox$.lastError.set(lastError);
+          failureCount += 1;
+
+          if (failureCount >= MAX_FAILURES_PER_PASS) {
+            const deferUntil = Date.now() + backoffMs(1);
+            for (const pendingAction of queue.slice(index + 1)) {
+              const alreadyDeferred =
+                pendingAction.nextRetryAt !== null &&
+                pendingAction.nextRetryAt > Date.now();
+              deferredAfterFailureBudget.push(
+                alreadyDeferred
+                  ? pendingAction
+                  : { ...pendingAction, nextRetryAt: deferUntil }
+              );
+            }
+            break;
+          }
         }
       }
 
       const latestQueue = await readQueue();
-      const mergedById = new Map(remaining.map((item) => [item.id, item]));
+      const prioritizedRemaining = [
+        ...deferredAfterFailureBudget,
+        ...remaining,
+      ];
+      const mergedById = new Map(
+        prioritizedRemaining.map((item) => [item.id, item])
+      );
       for (const item of latestQueue) {
         if (processedIds.has(item.id) || mergedById.has(item.id)) continue;
         mergedById.set(item.id, item);

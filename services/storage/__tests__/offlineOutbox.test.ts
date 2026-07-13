@@ -400,6 +400,44 @@ describe('offlineOutbox processOutbox', () => {
       expect(queue?.[0]?.id).toBe('fails');
     });
 
+    it('limits systemic failures per pass and rotates untried items fairly', async () => {
+      await setStorageItem(
+        StorageKeys.OFFLINE_QUEUE,
+        Array.from({ length: 20 }, (_, index) =>
+          queuedAnswer({ id: `queued-${index}`, questionId: index })
+        )
+      );
+      upsertMock.mockResolvedValue({
+        error: { message: 'backend unavailable' },
+      });
+
+      await processOutbox();
+
+      expect(upsertMock).toHaveBeenCalledTimes(3);
+      let queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+      expect(queue).toHaveLength(20);
+      expect(queue?.[0]?.id).toBe('queued-3');
+      expect(queue?.slice(-3).map((item) => item.id)).toEqual([
+        'queued-0',
+        'queued-1',
+        'queued-2',
+      ]);
+      expect(jest.getTimerCount()).toBe(1);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      await flushMicrotasks();
+
+      expect(upsertMock).toHaveBeenCalledTimes(6);
+      queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+      expect(queue?.[0]?.id).toBe('queued-6');
+      expect(queue?.slice(-3).map((item) => item.id)).toEqual([
+        'queued-3',
+        'queued-4',
+        'queued-5',
+      ]);
+      expect(jest.getTimerCount()).toBe(1);
+    });
+
     it('does not run a scheduled retry while offline and resumes when online', async () => {
       await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
         queuedAnswer({
