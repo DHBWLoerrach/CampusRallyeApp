@@ -46,6 +46,25 @@ function backoffMs(attempts: number) {
   return Math.min(60_000, 1000 * 2 ** Math.max(0, attempts - 1));
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function redactStructuredValue(
+  message: string,
+  fieldNames: string[],
+  value: string
+) {
+  if (!value) return message;
+
+  const fields = fieldNames.map(escapeRegExp).join('|');
+  const pattern = new RegExp(
+    `(\\b["']?(?:${fields})["']?\\s*(?:(?:=|:)\\s*)?["']?)${escapeRegExp(value)}(["']?)`,
+    'gi'
+  );
+  return message.replace(pattern, '$1[redacted]$2');
+}
+
 function errorMessage(error: unknown, payload?: SaveAnswerPayload) {
   let message =
     error &&
@@ -56,14 +75,17 @@ function errorMessage(error: unknown, payload?: SaveAnswerPayload) {
       : String(error ?? 'Unknown error');
 
   if (payload) {
-    const sensitiveValues = [
-      payload.answer,
-      String(payload.team_id),
-      String(payload.question_id),
-    ].filter(Boolean);
-    for (const value of sensitiveValues) {
-      message = message.split(value).join('[redacted]');
-    }
+    message = redactStructuredValue(message, ['answer'], payload.answer);
+    message = redactStructuredValue(
+      message,
+      ['team_id', 'teamId', 'team'],
+      String(payload.team_id)
+    );
+    message = redactStructuredValue(
+      message,
+      ['question_id', 'questionId', 'question'],
+      String(payload.question_id)
+    );
   }
 
   return message.slice(0, 500);

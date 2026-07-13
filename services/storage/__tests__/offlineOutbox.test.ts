@@ -470,5 +470,27 @@ describe('offlineOutbox processOutbox', () => {
       expect(queue?.[0]?.lastError).not.toContain('question 2');
       expect(outbox$.lastError.get()).toHaveLength(500);
     });
+
+    it('redacts only structured payload fields when values are short', async () => {
+      outbox$.online.set(false);
+      await enqueueSaveAnswer({
+        ...basePayload,
+        answer: '42',
+      });
+      outbox$.online.set(true);
+      upsertMock.mockResolvedValueOnce({
+        error: {
+          message:
+            "Connection timeout after 4200ms (code 12); team_id=1 question_id: 2 answer='42'",
+        },
+      });
+
+      await processOutbox();
+
+      const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+      expect(queue?.[0]?.lastError).toBe(
+        "Connection timeout after 4200ms (code 12); team_id=[redacted] question_id: [redacted] answer='[redacted]'"
+      );
+    });
   });
 });
