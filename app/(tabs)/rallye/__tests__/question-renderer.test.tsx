@@ -1,6 +1,6 @@
 import React from 'react';
-import { act, render } from '@testing-library/react-native';
-import { StyleSheet } from 'react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Alert, StyleSheet } from 'react-native';
 
 const springCallbacks: ((finished?: boolean) => void)[] = [];
 
@@ -28,6 +28,14 @@ const QuestionRenderer = jest.requireActual('../question-renderer').default;
 
 // -- Mocks -------------------------------------------------------------------
 
+const mockSubmitAnswerAndAdvance = jest.fn();
+const mockGotoNextQuestion = jest.fn();
+
+jest.mock('@/services/storage/answerSubmission', () => ({
+  submitAnswerAndAdvance: (...args: unknown[]) =>
+    mockSubmitAnswerAndAdvance(...args),
+}));
+
 jest.mock('@/utils/LanguageContext', () => ({
   useLanguage: () => ({
     t: (key: string, params?: Record<string, string>) =>
@@ -37,7 +45,8 @@ jest.mock('@/utils/LanguageContext', () => ({
 
 jest.mock('@/services/storage/Store', () => ({
   store$: {
-    gotoNextQuestion: jest.fn(),
+    team: { get: jest.fn(() => ({ id: 7 })) },
+    gotoNextQuestion: (...args: unknown[]) => mockGotoNextQuestion(...args),
   },
 }));
 
@@ -68,11 +77,19 @@ jest.mock('@/components/ui/UIButton', () => {
     default: ({
       children,
       onPress,
+      disabled,
+      loading,
     }: {
       children: React.ReactNode;
       onPress?: () => void;
+      disabled?: boolean;
+      loading?: boolean;
     }) => (
-      <Pressable onPress={onPress}>
+      <Pressable
+        onPress={onPress}
+        disabled={disabled || loading}
+        accessibilityRole="button"
+      >
         <Text>{children}</Text>
       </Pressable>
     ),
@@ -149,9 +166,17 @@ jest.mock('@/components/rallye/questions/GeocachingQuestion', () => ({
 // -- Tests --------------------------------------------------------------------
 
 describe('QuestionRenderer', () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
     springCallbacks.length = 0;
+    mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it.each([
@@ -205,6 +230,87 @@ describe('QuestionRenderer', () => {
     expect(
       getAllByText('question.unknown.title').length
     ).toBeGreaterThanOrEqual(1);
+  });
+
+  it('persists an unknown-type skip before advancing', async () => {
+    const question = {
+      id: 12,
+      question_type: 'nonexistent_type',
+      question: 'Q1',
+      point_value: 5,
+    };
+    const { getByText } = render(<QuestionRenderer question={question} />);
+
+    fireEvent.press(getByText('question.skip'));
+
+    await waitFor(() =>
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
+        teamId: 7,
+        questionId: 12,
+        pointsAwarded: 0,
+      })
+    );
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+  });
+
+  it('suppresses duplicate unknown-type skip submissions while pending', async () => {
+    let resolveSubmission: ((value: { status: 'sent' }) => void) | undefined;
+    mockSubmitAnswerAndAdvance.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveSubmission = resolve;
+        })
+    );
+    const { getByText } = render(
+      <QuestionRenderer
+        question={{ id: 12, question_type: 'nonexistent_type' }}
+      />
+    );
+    const skipButton = getByText('question.skip');
+
+    fireEvent.press(skipButton);
+    fireEvent.press(skipButton);
+
+    expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+    await act(async () => resolveSubmission?.({ status: 'sent' }));
+  });
+
+  it('alerts and keeps an unknown question visible when skip persistence fails', async () => {
+    mockSubmitAnswerAndAdvance.mockRejectedValue(new Error('save failed'));
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByText } = render(
+      <QuestionRenderer
+        question={{ id: 12, question_type: 'nonexistent_type' }}
+      />
+    );
+
+    fireEvent.press(getByText('question.skip'));
+
+    await waitFor(() =>
+      expect(alertSpy).toHaveBeenCalledWith(
+        'common.errorTitle',
+        'question.error.saveAnswer'
+      )
+    );
+    expect(getByText('question.unknown.title')).toBeTruthy();
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+
+  it('does not submit or advance an unknown question without a numeric ID', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByText } = render(
+      <QuestionRenderer
+        question={{ id: 'invalid', question_type: 'nonexistent_type' }}
+      />
+    );
+
+    fireEvent.press(getByText('question.skip'));
+
+    await waitFor(() => expect(alertSpy).toHaveBeenCalled());
+    expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+    alertSpy.mockRestore();
   });
 
   it('keeps the new question visible after flip completes', () => {

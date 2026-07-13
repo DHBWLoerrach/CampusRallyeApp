@@ -17,6 +17,7 @@ jest.mock('@/components/rallye/questions/Compass3DArrow', () => {
 });
 
 const mockSubmitAnswerAndAdvance = jest.fn();
+const mockGotoNextQuestion = jest.fn();
 jest.mock('@/services/storage/answerSubmission', () => ({
   submitAnswerAndAdvance: (...args: unknown[]) =>
     mockSubmitAnswerAndAdvance(...args),
@@ -26,7 +27,7 @@ jest.mock('@/services/storage/Store', () => ({
   store$: {
     team: { get: jest.fn(() => ({ id: 1 })) },
     answers: { get: jest.fn(() => []) },
-    gotoNextQuestion: jest.fn(),
+    gotoNextQuestion: (...args: unknown[]) => mockGotoNextQuestion(...args),
   },
 }));
 
@@ -272,6 +273,70 @@ describe('GeocachingQuestion', () => {
 
     expect(getByText('geocaching.error.noCoordinates')).toBeTruthy();
     expect(getByText('question.skip')).toBeTruthy();
+  });
+
+  it('persists a missing-coordinate skip before advancing', async () => {
+    const question = {
+      ...baseQuestion,
+      target_latitude: undefined,
+      target_longitude: undefined,
+    } as any;
+    const { getByText } = render(<GeocachingQuestion question={question} />);
+
+    fireEvent.press(getByText('question.skip'));
+
+    await waitFor(() =>
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
+        teamId: 1,
+        questionId: 42,
+        pointsAwarded: 0,
+      })
+    );
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+  });
+
+  it('suppresses duplicate missing-coordinate skips while pending', async () => {
+    let resolveSubmission: ((value: { status: 'sent' }) => void) | undefined;
+    mockSubmitAnswerAndAdvance.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveSubmission = resolve;
+        })
+    );
+    const question = {
+      ...baseQuestion,
+      target_latitude: undefined,
+      target_longitude: undefined,
+    } as any;
+    const { getByText } = render(<GeocachingQuestion question={question} />);
+    const skipButton = getByText('question.skip');
+
+    fireEvent.press(skipButton);
+    fireEvent.press(skipButton);
+
+    expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+    await act(async () => resolveSubmission?.({ status: 'sent' }));
+  });
+
+  it('alerts and keeps the missing-coordinate question visible when skip persistence fails', async () => {
+    mockSubmitAnswerAndAdvance.mockRejectedValue(new Error('save failed'));
+    const question = {
+      ...baseQuestion,
+      target_latitude: undefined,
+      target_longitude: undefined,
+    } as any;
+    const { getByText } = render(<GeocachingQuestion question={question} />);
+
+    fireEvent.press(getByText('question.skip'));
+
+    await waitFor(() =>
+      expect(alertSpy).toHaveBeenCalledWith(
+        'common.errorTitle',
+        'question.error.saveAnswer'
+      )
+    );
+    expect(getByText('geocaching.error.noCoordinates')).toBeTruthy();
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
   });
 
   // -- Rendering: location denied --------------------------------------------

@@ -517,6 +517,24 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     }
   };
 
+  const handleMissingCoordinatesSkip = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      await submitAnswerAndAdvance({
+        teamId: team?.id ?? null,
+        questionId: question.id,
+        pointsAwarded: 0,
+      });
+    } catch (e) {
+      Logger.error('Geocaching', 'Error submitting missing-coordinate skip', e);
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // -- Render: missing coordinates --------------------------------------------
 
   if (!hasCoordinates) {
@@ -532,7 +550,11 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             </ThemedText>
           </InfoBox>
           <InfoBox mb={0}>
-            <UIButton onPress={() => store$.gotoNextQuestion()}>
+            <UIButton
+              onPress={handleMissingCoordinatesSkip}
+              loading={submitting}
+              disabled={submitting}
+            >
               {t('question.skip')}
             </UIButton>
           </InfoBox>

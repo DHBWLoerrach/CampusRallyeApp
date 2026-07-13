@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, View } from 'react-native';
 import Animated, {
   interpolate,
   Extrapolation,
@@ -20,6 +20,7 @@ import GeocachingQuestion from '@/components/rallye/questions/GeocachingQuestion
 import UIButton from '@/components/ui/UIButton';
 import { useLanguage } from '@/utils/LanguageContext';
 import { store$ } from '@/services/storage/Store';
+import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 
 const components: Record<string, any> = {
   knowledge: SkillQuestion,
@@ -51,7 +52,42 @@ export default function QuestionRenderer({ question }: { question: any }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [frontQuestion, setFrontQuestion] = useState(question);
   const [backQuestion, setBackQuestion] = useState<any | null>(null);
+  const [skippingQuestionId, setSkippingQuestionId] = useState<number | null>(
+    null
+  );
+  const skippingQuestionIdRef = useRef<number | null>(null);
   const flip = useSharedValue(0); // 0 (front) ↔ 180 (back)
+
+  const handleUnknownQuestionSkip = async (q: any, type: unknown) => {
+    const questionId = q?.id;
+    console.error('Unknown question type:', { id: questionId, type });
+
+    if (typeof questionId !== 'number' || !Number.isFinite(questionId)) {
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
+      return;
+    }
+    if (skippingQuestionIdRef.current !== null) return;
+
+    skippingQuestionIdRef.current = questionId;
+    setSkippingQuestionId(questionId);
+    try {
+      await submitAnswerAndAdvance({
+        teamId: store$.team.get()?.id ?? null,
+        questionId,
+        pointsAwarded: 0,
+      });
+    } catch (error) {
+      console.error(
+        'Failed to persist unknown question skip:',
+        { id: questionId, type },
+        error
+      );
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
+    } finally {
+      skippingQuestionIdRef.current = null;
+      setSkippingQuestionId(null);
+    }
+  };
 
   // Stable callbacks for runOnJS — avoids anonymous closures on the UI thread
   const onFlipToBack = useCallback(() => {
@@ -146,13 +182,9 @@ export default function QuestionRenderer({ question }: { question: any }) {
               {t('question.unknown.message', { type: String(type) })}
             </ThemedText>
             <UIButton
-              onPress={() => {
-                console.error('Unknown question type:', {
-                  id: q?.id,
-                  type,
-                });
-                store$.gotoNextQuestion();
-              }}
+              onPress={() => void handleUnknownQuestionSkip(q, type)}
+              loading={skippingQuestionId === q?.id}
+              disabled={skippingQuestionId !== null}
             >
               {t('question.skip')}
             </UIButton>
