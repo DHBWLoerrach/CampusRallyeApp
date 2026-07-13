@@ -138,6 +138,7 @@ export const translations = {
       'Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch {{cost}} Punkt(e).',
     'hint.confirm.confirm': 'Ja, ich möchte einen Tipp',
     'hint.title': 'Tipp',
+    'hint.error.save': 'Der Tipp konnte nicht gespeichert werden.',
     'confirm.answer.title': 'Sicherheitsfrage',
     'confirm.answer.message':
       'Willst du wirklich "{{answer}}" als Antwort abschicken?',
@@ -305,6 +306,7 @@ export const translations = {
       'Are you sure you want to receive a hint? This will cost you {{cost}} point(s).',
     'hint.confirm.confirm': 'Yes, I want a hint',
     'hint.title': 'Hint',
+    'hint.error.save': 'The hint could not be saved.',
     'confirm.answer.title': 'Security question',
     'confirm.answer.message':
       'Do you really want to submit "{{answer}}" as your answer?',

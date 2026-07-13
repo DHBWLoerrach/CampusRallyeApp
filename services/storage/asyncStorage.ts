@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const StorageKeys = {
   CURRENT_RALLYE: 'currentRallye',
   TEAM: 'team',
+  USED_HINTS: 'usedHints',
   OFFLINE_QUEUE: 'offlineQueue',
   SELECTED_LOCATION: 'selectedLocation',
 } as const;

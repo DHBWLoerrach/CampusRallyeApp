@@ -6,9 +6,7 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { confirm } from '@/utils/ConfirmAlert';
-
-/** Cost of using a hint in points */
-const HINT_COST = 1;
+import { HINT_COST, markHintUsed } from '@/services/storage/hintStorage';
 
 export default function Hint({ hint }: { hint: string }) {
   const { t } = useLanguage();
@@ -16,6 +14,8 @@ export default function Hint({ hint }: { hint: string }) {
     store$.currentQuestion.get()
   ) as any;
   const questionId = currentQuestion?.id as number | undefined;
+  const rallyeId = useSelector(() => store$.rallye.get()?.id);
+  const teamId = useSelector(() => store$.team.get()?.id);
   const alreadyUsed = useSelector(() =>
     questionId != null ? store$.usedHints[questionId].get() === true : false
   );
@@ -38,14 +38,20 @@ export default function Hint({ hint }: { hint: string }) {
     });
     if (!confirmed) return;
 
-    // Mark hint as used for this question
-    store$.usedHints[questionId].set(true);
+    try {
+      if (teamId != null) {
+        if (rallyeId == null) {
+          throw new Error('Cannot persist hint without a rallye ID');
+        }
+        await markHintUsed({ rallyeId, teamId, questionId });
+      }
 
-    // Deduct points from accumulated total (not per-question object mutation)
-    const currentPoints = store$.points.get();
-    store$.points.set(Math.max(0, currentPoints - HINT_COST));
-
-    Alert.alert(t('hint.title'), hint);
+      store$.usedHints[questionId].set(true);
+      Alert.alert(t('hint.title'), hint);
+    } catch (error) {
+      console.error('Failed to persist hint usage', error);
+      Alert.alert(t('common.errorTitle'), t('hint.error.save'));
+    }
   };
 
   return (

@@ -4,9 +4,35 @@ import {
   saveAnswer,
   uploadPhotoAnswer,
 } from '@/services/storage/answerStorage';
+import { applyHintCost, hasUsedHint } from '@/services/storage/hintStorage';
 
 export type SubmitOutcome =
   { status: 'local' } | { status: 'sent' } | { status: 'queued' };
+
+async function getEffectivePoints(options: {
+  teamId: number | null;
+  questionId: number;
+  pointsAwarded: number;
+}): Promise<number> {
+  const { teamId, questionId, pointsAwarded } = options;
+  const usedInMemory = store$.usedHints[questionId].get() === true;
+
+  if (!teamId || usedInMemory) {
+    return applyHintCost(pointsAwarded, usedInMemory);
+  }
+
+  const rallyeId = store$.rallye.get()?.id;
+  if (rallyeId == null) {
+    throw new Error('Cannot read hint usage without a rallye ID');
+  }
+
+  const usedPersistently = await hasUsedHint({
+    rallyeId,
+    teamId,
+    questionId,
+  });
+  return applyHintCost(pointsAwarded, usedPersistently);
+}
 
 export async function submitAnswerAndAdvance(options: {
   teamId: number | null;
@@ -15,10 +41,15 @@ export async function submitAnswerAndAdvance(options: {
   answerText?: string;
 }): Promise<SubmitOutcome> {
   const { teamId, questionId, pointsAwarded, answerText } = options;
+  const effectivePoints = await getEffectivePoints({
+    teamId,
+    questionId,
+    pointsAwarded,
+  });
 
   if (!teamId) {
-    if (pointsAwarded > 0) {
-      store$.points.set((store$.points.get() as number) + pointsAwarded);
+    if (effectivePoints > 0) {
+      store$.points.set((store$.points.get() as number) + effectivePoints);
     }
     await store$.gotoNextQuestion();
     return { status: 'local' };
@@ -27,12 +58,12 @@ export async function submitAnswerAndAdvance(options: {
   const result = await saveAnswer(
     teamId,
     questionId,
-    pointsAwarded,
+    effectivePoints,
     answerText ?? ''
   );
 
-  if (pointsAwarded > 0) {
-    store$.points.set((store$.points.get() as number) + pointsAwarded);
+  if (effectivePoints > 0) {
+    store$.points.set((store$.points.get() as number) + effectivePoints);
   }
   await store$.gotoNextQuestion();
   return { status: result.status };
@@ -53,16 +84,27 @@ export async function submitPhotoAnswerAndAdvance(options: {
   const net = await NetInfo.fetch();
   if (!net.isConnected) return { status: 'requires_online' };
 
+  const effectivePoints = await getEffectivePoints({
+    teamId,
+    questionId,
+    pointsAwarded,
+  });
+
   const { filePath } = await uploadPhotoAnswer({
     imageUri,
     teamId,
     questionId,
   });
 
-  const result = await saveAnswer(teamId, questionId, pointsAwarded, filePath);
+  const result = await saveAnswer(
+    teamId,
+    questionId,
+    effectivePoints,
+    filePath
+  );
 
-  if (pointsAwarded > 0) {
-    store$.points.set((store$.points.get() as number) + pointsAwarded);
+  if (effectivePoints > 0) {
+    store$.points.set((store$.points.get() as number) + effectivePoints);
   }
   await store$.gotoNextQuestion();
   return { status: result.status };

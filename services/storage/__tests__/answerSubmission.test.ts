@@ -6,22 +6,42 @@ import {
 // --- Mocks ---
 const mockSaveAnswer = jest.fn();
 const mockUploadPhotoAnswer = jest.fn();
+const mockHasUsedHint = jest.fn();
 jest.mock('@/services/storage/answerStorage', () => ({
   saveAnswer: (...args: unknown[]) => mockSaveAnswer(...args),
   uploadPhotoAnswer: (...args: unknown[]) => mockUploadPhotoAnswer(...args),
 }));
 
+jest.mock('@/services/storage/hintStorage', () => ({
+  applyHintCost: (pointsAwarded: number, hintUsed: boolean) =>
+    Math.max(0, pointsAwarded - (hintUsed ? 1 : 0)),
+  hasUsedHint: (...args: unknown[]) => mockHasUsedHint(...args),
+}));
+
 const mockPointsGet = jest.fn(() => 0);
 const mockPointsSet = jest.fn();
 const mockGotoNextQuestion = jest.fn(async () => {});
-const mockRallyeGet = jest.fn((): { rallye_end: string | null } => ({
-  rallye_end: null,
-}));
+const mockUsedHintGet = jest.fn(() => false);
+const mockRallyeGet = jest.fn(
+  (): {
+    id: number;
+    rallye_end: string | null;
+  } => ({
+    id: 10,
+    rallye_end: null,
+  })
+);
 jest.mock('@/services/storage/Store', () => ({
   store$: {
     rallye: {
       get: () => mockRallyeGet(),
     },
+    usedHints: new Proxy(
+      {},
+      {
+        get: () => ({ get: () => mockUsedHintGet() }),
+      }
+    ),
     points: {
       get: () => mockPointsGet(),
       set: (v: number) => mockPointsSet(v),
@@ -39,7 +59,9 @@ describe('submitAnswerAndAdvance', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPointsGet.mockReturnValue(0);
-    mockRallyeGet.mockReturnValue({ rallye_end: null });
+    mockUsedHintGet.mockReturnValue(false);
+    mockHasUsedHint.mockResolvedValue(false);
+    mockRallyeGet.mockReturnValue({ id: 10, rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
   });
 
@@ -73,6 +95,7 @@ describe('submitAnswerAndAdvance', () => {
 
   it('saves the answer when an end time is set', async () => {
     mockRallyeGet.mockReturnValue({
+      id: 10,
       rallye_end: '14:30:00',
     });
 
@@ -110,6 +133,86 @@ describe('submitAnswerAndAdvance', () => {
 
     expect(result).toEqual({ status: 'queued' });
   });
+
+  it('subtracts one point from persisted and local points for a used hint', async () => {
+    mockPointsGet.mockReturnValue(10);
+    mockUsedHintGet.mockReturnValue(true);
+
+    await submitAnswerAndAdvance({
+      teamId: 42,
+      questionId: 7,
+      pointsAwarded: 3,
+    });
+
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, 2, '');
+    expect(mockPointsSet).toHaveBeenCalledWith(12);
+  });
+
+  it.each([
+    [1, 0],
+    [0, 0],
+  ])(
+    'clamps %i awarded point(s) at %i after hint cost',
+    async (points, expected) => {
+      mockUsedHintGet.mockReturnValue(true);
+
+      await submitAnswerAndAdvance({
+        teamId: 42,
+        questionId: 7,
+        pointsAwarded: points,
+      });
+
+      expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, expected, '');
+      expect(mockPointsSet).not.toHaveBeenCalled();
+    }
+  );
+
+  it('uses the in-memory hint marker in tour mode', async () => {
+    mockPointsGet.mockReturnValue(5);
+    mockUsedHintGet.mockReturnValue(true);
+
+    await submitAnswerAndAdvance({
+      teamId: null,
+      questionId: 7,
+      pointsAwarded: 3,
+    });
+
+    expect(mockHasUsedHint).not.toHaveBeenCalled();
+    expect(mockPointsSet).toHaveBeenCalledWith(7);
+  });
+
+  it('applies persisted hint use after the in-memory state was reset', async () => {
+    mockHasUsedHint.mockResolvedValue(true);
+
+    await submitAnswerAndAdvance({
+      teamId: 42,
+      questionId: 7,
+      pointsAwarded: 3,
+    });
+
+    expect(mockHasUsedHint).toHaveBeenCalledWith({
+      rallyeId: 10,
+      teamId: 42,
+      questionId: 7,
+    });
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, 2, '');
+  });
+
+  it('rejects without saving or advancing when persisted hint state cannot be read', async () => {
+    mockHasUsedHint.mockRejectedValue(new Error('storage unavailable'));
+
+    await expect(
+      submitAnswerAndAdvance({
+        teamId: 42,
+        questionId: 7,
+        pointsAwarded: 3,
+      })
+    ).rejects.toThrow('storage unavailable');
+
+    expect(mockSaveAnswer).not.toHaveBeenCalled();
+    expect(mockPointsSet).not.toHaveBeenCalled();
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+  });
 });
 
 describe('submitPhotoAnswerAndAdvance', () => {
@@ -117,7 +220,9 @@ describe('submitPhotoAnswerAndAdvance', () => {
     jest.clearAllMocks();
     mockIsConnected = true;
     mockPointsGet.mockReturnValue(0);
-    mockRallyeGet.mockReturnValue({ rallye_end: null });
+    mockUsedHintGet.mockReturnValue(false);
+    mockHasUsedHint.mockResolvedValue(false);
+    mockRallyeGet.mockReturnValue({ id: 10, rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
     mockUploadPhotoAnswer.mockResolvedValue({ filePath: '1_2.jpg' });
   });
@@ -172,6 +277,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
 
   it('uploads and saves the photo when an end time is set', async () => {
     mockRallyeGet.mockReturnValue({
+      id: 10,
       rallye_end: '14:30:00',
     });
 
@@ -186,5 +292,20 @@ describe('submitPhotoAnswerAndAdvance', () => {
     expect(mockUploadPhotoAnswer).toHaveBeenCalled();
     expect(mockSaveAnswer).toHaveBeenCalled();
     expect(mockGotoNextQuestion).toHaveBeenCalled();
+  });
+
+  it('subtracts one point from a photo answer when the hint was used', async () => {
+    mockPointsGet.mockReturnValue(5);
+    mockHasUsedHint.mockResolvedValue(true);
+
+    await submitPhotoAnswerAndAdvance({
+      teamId: 42,
+      questionId: 3,
+      pointsAwarded: 10,
+      imageUri: '/tmp/photo.jpg',
+    });
+
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 3, 9, '1_2.jpg');
+    expect(mockPointsSet).toHaveBeenCalledWith(14);
   });
 });
