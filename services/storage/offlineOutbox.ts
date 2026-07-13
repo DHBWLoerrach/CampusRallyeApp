@@ -43,7 +43,30 @@ function createId() {
 
 function backoffMs(attempts: number) {
   // 1s, 2s, 4s, ... capped at 60s
-  return Math.min(60_000, 1000 * 2 ** Math.max(0, attempts));
+  return Math.min(60_000, 1000 * 2 ** Math.max(0, attempts - 1));
+}
+
+function errorMessage(error: unknown, payload?: SaveAnswerPayload) {
+  let message =
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+      ? error.message
+      : String(error ?? 'Unknown error');
+
+  if (payload) {
+    const sensitiveValues = [
+      payload.answer,
+      String(payload.team_id),
+      String(payload.question_id),
+    ].filter(Boolean);
+    for (const value of sensitiveValues) {
+      message = message.split(value).join('[redacted]');
+    }
+  }
+
+  return message.slice(0, 500);
 }
 
 function normalizeQueueItem(raw: any): OfflineActionV1 | null {
@@ -125,13 +148,50 @@ export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
   };
   queue.push(action);
   await writeQueue(queue);
+  if (outbox$.online.get()) runProcessOutboxSafely();
   return action;
 }
 
 let syncPromise: Promise<void> | null = null;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearRetryTimer() {
+  if (retryTimer === null) return;
+  clearTimeout(retryTimer);
+  retryTimer = null;
+}
+
+function scheduleNextRetry(queue: OfflineActionV1[]) {
+  clearRetryTimer();
+  if (!outbox$.online.get() || queue.length === 0) return;
+
+  const nextRetryAt = queue.reduce((earliest, action) => {
+    const retryAt = action.nextRetryAt ?? Date.now();
+    return Math.min(earliest, retryAt);
+  }, Number.POSITIVE_INFINITY);
+
+  retryTimer = setTimeout(
+    () => {
+      retryTimer = null;
+      runProcessOutboxSafely();
+    },
+    Math.max(0, nextRetryAt - Date.now())
+  );
+}
+
+function handleBackgroundError(error: unknown) {
+  outbox$.lastError.set(errorMessage(error));
+}
+
+function runProcessOutboxSafely() {
+  void processOutbox().catch(handleBackgroundError);
+}
 
 export function processOutbox() {
-  if (!outbox$.online.get()) return Promise.resolve();
+  if (!outbox$.online.get()) {
+    clearRetryTimer();
+    return Promise.resolve();
+  }
   if (syncPromise) return syncPromise;
 
   syncPromise = (async () => {
@@ -140,7 +200,10 @@ export function processOutbox() {
 
     try {
       const queue = await readQueue();
-      if (queue.length === 0) return;
+      if (queue.length === 0) {
+        clearRetryTimer();
+        return;
+      }
 
       const remaining: OfflineActionV1[] = [];
       const processedIds = new Set<string>();
@@ -172,7 +235,7 @@ export function processOutbox() {
         } catch (error: any) {
           const attempts = (action.attempts || 0) + 1;
           const nextRetryAt = Date.now() + backoffMs(attempts);
-          const lastError = String(error?.message ?? error ?? 'Unknown error');
+          const lastError = errorMessage(error, action.payload);
           remaining.push({
             ...action,
             attempts,
@@ -180,8 +243,6 @@ export function processOutbox() {
             lastError,
           });
           outbox$.lastError.set(lastError);
-          // Stop processing on first failure to avoid thrashing.
-          break;
         }
       }
 
@@ -194,6 +255,7 @@ export function processOutbox() {
       const merged = Array.from(mergedById.values());
 
       await writeQueue(merged);
+      scheduleNextRetry(merged);
       if (merged.length === 0) {
         outbox$.lastSyncedAt.set(Date.now());
       }
@@ -207,29 +269,35 @@ export function processOutbox() {
 }
 
 let started = false;
+
+function updateOnlineState(online: boolean) {
+  outbox$.online.set(online);
+  if (!online) {
+    clearRetryTimer();
+    return;
+  }
+  runProcessOutboxSafely();
+}
+
+function refreshOnlineState() {
+  void NetInfo.fetch()
+    .then((state) => updateOnlineState(!!state.isConnected))
+    .catch(handleBackgroundError);
+}
+
 export function startOutbox() {
   if (started) return;
   started = true;
 
-  void NetInfo.fetch().then((state) => {
-    const online = !!state.isConnected;
-    outbox$.online.set(online);
-    if (online) void processOutbox();
-  });
+  refreshOnlineState();
 
   NetInfo.addEventListener((state) => {
-    const online = !!state.isConnected;
-    outbox$.online.set(online);
-    if (online) void processOutbox();
+    updateOnlineState(!!state.isConnected);
   });
 
   AppState.addEventListener('change', (s) => {
     if (s !== 'active') return;
-    void NetInfo.fetch().then((state) => {
-      const online = !!state.isConnected;
-      outbox$.online.set(online);
-      if (online) void processOutbox();
-    });
+    refreshOnlineState();
   });
 
   // Initial processing is triggered by NetInfo.fetch() above (only if online).

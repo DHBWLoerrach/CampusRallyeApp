@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+import { AppState } from 'react-native';
 import {
   StorageKeys,
   getStorageItem,
@@ -8,6 +10,7 @@ import {
   enqueueSaveAnswer,
   outbox$,
   processOutbox,
+  startOutbox,
 } from '@/services/storage/offlineOutbox';
 
 const mockFrom = jest.fn();
@@ -21,6 +24,12 @@ jest.mock('@/utils/Supabase', () => ({
 
 function flushPromises() {
   return new Promise<void>((resolve) => setImmediate(() => resolve()));
+}
+
+async function flushMicrotasks() {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 }
 
 function createDeferred<T>() {
@@ -40,9 +49,33 @@ const basePayload = {
   answer: 'answer',
 };
 
+function queuedAnswer({
+  id,
+  questionId,
+  attempts = 0,
+  nextRetryAt = null,
+}: {
+  id: string;
+  questionId: number;
+  attempts?: number;
+  nextRetryAt?: number | null;
+}) {
+  return {
+    id,
+    type: 'SAVE_ANSWER' as const,
+    payloadVersion: 1 as const,
+    createdAt: Date.now(),
+    attempts,
+    nextRetryAt,
+    payload: { ...basePayload, question_id: questionId },
+  };
+}
+
 describe('offlineOutbox processOutbox', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockFrom.mockReset();
+    upsertMock.mockReset();
     await AsyncStorage.clear();
     outbox$.online.set(true);
     outbox$.syncing.set(false);
@@ -58,7 +91,9 @@ describe('offlineOutbox processOutbox', () => {
   });
 
   it('prevents overlapping sync runs', async () => {
+    outbox$.online.set(false);
     await enqueueSaveAnswer({ ...basePayload });
+    outbox$.online.set(true);
     const deferred = createDeferred<{ error: null }>();
     upsertMock.mockReturnValueOnce(deferred.promise);
 
@@ -83,7 +118,9 @@ describe('offlineOutbox processOutbox', () => {
   });
 
   it('keeps items enqueued during an active sync', async () => {
+    outbox$.online.set(false);
     await enqueueSaveAnswer({ ...basePayload, question_id: 10 });
+    outbox$.online.set(true);
     const deferred = createDeferred<{ error: null }>();
     upsertMock.mockReturnValueOnce(deferred.promise);
 
@@ -119,7 +156,9 @@ describe('offlineOutbox processOutbox', () => {
   });
 
   it('increments attempts and sets lastError on failure', async () => {
+    outbox$.online.set(false);
     await enqueueSaveAnswer({ ...basePayload });
+    outbox$.online.set(true);
     upsertMock.mockResolvedValueOnce({ error: { message: 'db error' } });
 
     await processOutbox();
@@ -203,5 +242,223 @@ describe('offlineOutbox processOutbox', () => {
     // Queue should be empty after normalization dropped the item
     const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
     expect(queue).toHaveLength(0);
+  });
+
+  it('catches rejected NetInfo and AppState background work', async () => {
+    const netInfoFetch = NetInfo.fetch as jest.Mock;
+    const addNetInfoListener = NetInfo.addEventListener as jest.Mock;
+    const addAppStateListener = AppState.addEventListener as jest.Mock;
+
+    netInfoFetch.mockRejectedValueOnce(new Error('initial fetch failed'));
+    startOutbox();
+    await flushPromises();
+    expect(outbox$.lastError.get()).toBe('initial fetch failed');
+
+    const netInfoListener = addNetInfoListener.mock.calls[0][0];
+    (AsyncStorage.getItem as jest.Mock).mockRejectedValueOnce(
+      new Error('network sync failed')
+    );
+    netInfoListener({ isConnected: true });
+    await flushPromises();
+    expect(outbox$.lastError.get()).toBe('network sync failed');
+
+    const appStateListener = addAppStateListener.mock.calls[0][1];
+    netInfoFetch.mockRejectedValueOnce(new Error('app refresh failed'));
+    appStateListener('active');
+    await flushPromises();
+    expect(outbox$.lastError.get()).toBe('app refresh failed');
+  });
+
+  describe('retry scheduler', () => {
+    const now = new Date('2026-07-13T10:00:00.000Z');
+
+    beforeEach(() => {
+      jest.useFakeTimers({ doNotFake: ['setImmediate'] });
+      jest.setSystemTime(now);
+    });
+
+    afterEach(() => {
+      outbox$.online.set(false);
+      jest.clearAllTimers();
+      jest.useRealTimers();
+    });
+
+    it('starts processing after an online enqueue without awaiting the remote sync', async () => {
+      const deferred = createDeferred<{ error: null }>();
+      upsertMock.mockReturnValueOnce(deferred.promise);
+
+      const action = await enqueueSaveAnswer({ ...basePayload });
+      await flushMicrotasks();
+
+      const remoteCallCount = upsertMock.mock.calls.length;
+      deferred.resolve({ error: null });
+      await flushMicrotasks();
+
+      expect(action.payload).toEqual(basePayload);
+      expect(remoteCallCount).toBe(1);
+    });
+
+    it('schedules the first retry for exactly one second after a failure', async () => {
+      outbox$.online.set(false);
+      await enqueueSaveAnswer({ ...basePayload });
+      outbox$.online.set(true);
+      upsertMock.mockResolvedValueOnce({ error: { message: 'temporary' } });
+
+      await processOutbox();
+
+      const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+      expect(queue?.[0]).toMatchObject({
+        attempts: 1,
+        nextRetryAt: now.getTime() + 1_000,
+        lastError: 'temporary',
+      });
+      expect(jest.getTimerCount()).toBe(1);
+    });
+
+    it('retries when the scheduled delay elapses and removes a successful item', async () => {
+      await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+        queuedAnswer({
+          id: 'retry-me',
+          questionId: 10,
+          attempts: 1,
+          nextRetryAt: now.getTime() + 1_000,
+        }),
+      ]);
+
+      await processOutbox();
+      expect(upsertMock).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      await flushMicrotasks();
+
+      expect(upsertMock).toHaveBeenCalledTimes(1);
+      expect(await getStorageItem(StorageKeys.OFFLINE_QUEUE)).toEqual([]);
+    });
+
+    it('uses capped exponential delays and keeps retrying beyond five failures', async () => {
+      outbox$.online.set(false);
+      await enqueueSaveAnswer({ ...basePayload });
+      outbox$.online.set(true);
+      upsertMock.mockResolvedValue({ error: { message: 'still offline' } });
+
+      await processOutbox();
+      const expectedDelays = [1_000, 2_000, 4_000, 8_000, 16_000, 32_000];
+
+      for (const delay of expectedDelays) {
+        const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+        expect(queue?.[0]?.nextRetryAt).toBe(Date.now() + delay);
+        expect(jest.getTimerCount()).toBe(1);
+        await jest.advanceTimersByTimeAsync(delay);
+        await flushMicrotasks();
+      }
+
+      const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+      expect(queue?.[0]?.attempts).toBe(7);
+      expect(queue?.[0]?.nextRetryAt).toBe(Date.now() + 60_000);
+      expect(jest.getTimerCount()).toBe(1);
+    });
+
+    it('keeps one active sync and one retry timer across concurrent passes', async () => {
+      await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+        queuedAnswer({ id: 'one', questionId: 10 }),
+      ]);
+      const deferred = createDeferred<{ error: { message: string } }>();
+      upsertMock.mockReturnValueOnce(deferred.promise);
+
+      const first = processOutbox();
+      const second = processOutbox();
+      await flushMicrotasks();
+
+      const remoteCallCount = upsertMock.mock.calls.length;
+      const timerCountDuringSync = jest.getTimerCount();
+      deferred.resolve({ error: { message: 'temporary' } });
+      await Promise.all([first, second]);
+
+      expect(remoteCallCount).toBe(1);
+      expect(timerCountDuringSync).toBe(0);
+      expect(jest.getTimerCount()).toBe(1);
+    });
+
+    it('continues syncing later due items after one item fails', async () => {
+      await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+        queuedAnswer({ id: 'fails', questionId: 10 }),
+        queuedAnswer({ id: 'succeeds', questionId: 11 }),
+      ]);
+      upsertMock
+        .mockResolvedValueOnce({ error: { message: 'temporary' } })
+        .mockResolvedValueOnce({ error: null });
+
+      await processOutbox();
+
+      expect(upsertMock).toHaveBeenCalledTimes(2);
+      expect(upsertMock.mock.calls[1][0].question_id).toBe(11);
+      const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+      expect(queue).toHaveLength(1);
+      expect(queue?.[0]?.id).toBe('fails');
+    });
+
+    it('does not run a scheduled retry while offline and resumes when online', async () => {
+      await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+        queuedAnswer({
+          id: 'offline-retry',
+          questionId: 10,
+          attempts: 1,
+          nextRetryAt: now.getTime() + 1_000,
+        }),
+      ]);
+
+      await processOutbox();
+      outbox$.online.set(false);
+      await jest.advanceTimersByTimeAsync(1_000);
+      await flushMicrotasks();
+      expect(upsertMock).not.toHaveBeenCalled();
+
+      outbox$.online.set(true);
+      await processOutbox();
+      expect(upsertMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('catches rejected timer-triggered processing without an unhandled rejection', async () => {
+      await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+        queuedAnswer({
+          id: 'timer-storage-failure',
+          questionId: 10,
+          attempts: 1,
+          nextRetryAt: now.getTime() + 1_000,
+        }),
+      ]);
+      await processOutbox();
+      (AsyncStorage.getItem as jest.Mock).mockRejectedValueOnce(
+        new Error('timer storage failed')
+      );
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      await flushMicrotasks();
+
+      expect(outbox$.lastError.get()).toBe('timer storage failed');
+    });
+
+    it('bounds persisted errors without exposing answer payload data', async () => {
+      outbox$.online.set(false);
+      await enqueueSaveAnswer({
+        ...basePayload,
+        answer: 'PRIVATE_ANSWER_VALUE',
+      });
+      outbox$.online.set(true);
+      upsertMock.mockResolvedValueOnce({
+        error: {
+          message: `team 1 question 2 answer PRIVATE_ANSWER_VALUE failed ${'x'.repeat(700)}`,
+        },
+      });
+
+      await processOutbox();
+
+      const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+      expect(queue?.[0]?.lastError).toHaveLength(500);
+      expect(queue?.[0]?.lastError).not.toContain('PRIVATE_ANSWER_VALUE');
+      expect(queue?.[0]?.lastError).not.toContain('team 1');
+      expect(queue?.[0]?.lastError).not.toContain('question 2');
+      expect(outbox$.lastError.get()).toHaveLength(500);
+    });
   });
 });
