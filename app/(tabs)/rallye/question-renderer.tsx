@@ -60,13 +60,14 @@ export default function QuestionRenderer({ question }: { question: any }) {
 
   const handleUnknownQuestionSkip = async (q: any, type: unknown) => {
     const questionId = q?.id;
+    if (skippingQuestionIdRef.current !== null) return;
+
     console.error('Unknown question type:', { id: questionId, type });
 
     if (typeof questionId !== 'number' || !Number.isFinite(questionId)) {
       Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
       return;
     }
-    if (skippingQuestionIdRef.current !== null) return;
 
     skippingQuestionIdRef.current = questionId;
     setSkippingQuestionId(questionId);

@@ -272,6 +272,7 @@ describe('QuestionRenderer', () => {
     fireEvent.press(skipButton);
 
     expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     await act(async () => resolveSubmission?.({ status: 'sent' }));
   });
 
