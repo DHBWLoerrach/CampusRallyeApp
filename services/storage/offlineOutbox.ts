@@ -7,7 +7,6 @@ import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
 export type SaveAnswerPayload = {
   team_id: number;
   question_id: number;
-  correct: boolean;
   team_points: number;
   answer: string;
 };
@@ -15,7 +14,6 @@ export type SaveAnswerPayload = {
 type LegacySaveAnswerPayload = {
   team_id: number;
   question_id: number;
-  correct: boolean;
   points: number;
   team_answer: string;
 };
@@ -59,7 +57,6 @@ function normalizeQueueItem(raw: any): OfflineActionV1 | null {
     if (
       typeof p.team_id === 'number' &&
       typeof p.question_id === 'number' &&
-      typeof p.correct === 'boolean' &&
       typeof p.team_points === 'number' &&
       typeof p.answer === 'string'
     ) {
@@ -71,7 +68,6 @@ function normalizeQueueItem(raw: any): OfflineActionV1 | null {
     if (
       typeof p.team_id === 'number' &&
       typeof p.question_id === 'number' &&
-      typeof p.correct === 'boolean' &&
       typeof p.points === 'number' &&
       typeof p.team_answer === 'string'
     ) {
@@ -80,7 +76,6 @@ function normalizeQueueItem(raw: any): OfflineActionV1 | null {
         payload: {
           team_id: p.team_id,
           question_id: p.question_id,
-          correct: p.correct,
           team_points: p.points,
           answer: p.team_answer,
         },
@@ -167,7 +162,6 @@ export function processOutbox() {
             {
               team_id: p.team_id,
               question_id: p.question_id,
-              correct: p.correct,
               team_points: p.team_points,
               answer: p.answer,
             },

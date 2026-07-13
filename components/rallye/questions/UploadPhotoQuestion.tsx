@@ -225,7 +225,6 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
       await submitAnswerAndAdvance({
         teamId: team?.id ?? null,
         questionId: question.id,
-        answeredCorrectly: false,
         pointsAwarded: 0,
       });
     } catch (error) {
@@ -307,7 +306,6 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
         await submitAnswerAndAdvance({
           teamId: null,
           questionId: question.id,
-          answeredCorrectly: true,
           pointsAwarded: question.point_value,
         });
         return;

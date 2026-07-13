@@ -32,14 +32,13 @@ describe('saveAnswer', () => {
   });
 
   it('writes idempotently via upsert on team and question', async () => {
-    const result = await saveAnswer(7, 13, true, 5, 'foo');
+    const result = await saveAnswer(7, 13, 5, 'foo');
 
     expect(mockFrom).toHaveBeenCalledWith('team_answers');
     expect(mockUpsert).toHaveBeenCalledWith(
       {
         team_id: 7,
         question_id: 13,
-        correct: true,
         team_points: 5,
         answer: 'foo',
       },
@@ -53,12 +52,11 @@ describe('saveAnswer', () => {
       error: new Error('network unavailable'),
     });
 
-    const result = await saveAnswer(7, 13, false, 0, 'bar');
+    const result = await saveAnswer(7, 13, 0, 'bar');
 
     expect(mockEnqueueSaveAnswer).toHaveBeenCalledWith({
       team_id: 7,
       question_id: 13,
-      correct: false,
       team_points: 0,
       answer: 'bar',
     });

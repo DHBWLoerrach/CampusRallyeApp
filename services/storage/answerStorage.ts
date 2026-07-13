@@ -7,7 +7,6 @@ export type SaveAnswerResult = { status: 'sent' | 'queued' };
 export async function saveAnswer(
   teamId: number,
   questionId: number,
-  answeredCorrectly: boolean,
   teamPoints: number,
   answer: string = ''
 ): Promise<SaveAnswerResult> {
@@ -16,7 +15,6 @@ export async function saveAnswer(
       {
         team_id: teamId,
         question_id: questionId,
-        correct: answeredCorrectly,
         team_points: teamPoints,
         answer,
       },
@@ -30,7 +28,6 @@ export async function saveAnswer(
       await enqueueSaveAnswer({
         team_id: teamId,
         question_id: questionId,
-        correct: answeredCorrectly,
         team_points: teamPoints,
         answer,
       });

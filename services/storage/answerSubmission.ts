@@ -6,19 +6,15 @@ import {
 } from '@/services/storage/answerStorage';
 
 export type SubmitOutcome =
-  | { status: 'local' }
-  | { status: 'sent' }
-  | { status: 'queued' };
+  { status: 'local' } | { status: 'sent' } | { status: 'queued' };
 
 export async function submitAnswerAndAdvance(options: {
   teamId: number | null;
   questionId: number;
-  answeredCorrectly: boolean;
   pointsAwarded: number;
   answerText?: string;
 }): Promise<SubmitOutcome> {
-  const { teamId, questionId, answeredCorrectly, pointsAwarded, answerText } =
-    options;
+  const { teamId, questionId, pointsAwarded, answerText } = options;
 
   if (!teamId) {
     if (pointsAwarded > 0) {
@@ -31,7 +27,6 @@ export async function submitAnswerAndAdvance(options: {
   const result = await saveAnswer(
     teamId,
     questionId,
-    answeredCorrectly,
     pointsAwarded,
     answerText ?? ''
   );
@@ -44,9 +39,7 @@ export async function submitAnswerAndAdvance(options: {
 }
 
 export type SubmitPhotoOutcome =
-  | { status: 'sent' }
-  | { status: 'queued' }
-  | { status: 'requires_online' };
+  { status: 'sent' } | { status: 'queued' } | { status: 'requires_online' };
 
 export async function submitPhotoAnswerAndAdvance(options: {
   teamId: number | null;
@@ -66,13 +59,7 @@ export async function submitPhotoAnswerAndAdvance(options: {
     questionId,
   });
 
-  const result = await saveAnswer(
-    teamId,
-    questionId,
-    true,
-    pointsAwarded,
-    filePath
-  );
+  const result = await saveAnswer(teamId, questionId, pointsAwarded, filePath);
 
   if (pointsAwarded > 0) {
     store$.points.set((store$.points.get() as number) + pointsAwarded);

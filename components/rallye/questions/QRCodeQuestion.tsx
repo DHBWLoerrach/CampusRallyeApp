@@ -38,7 +38,6 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
       await submitAnswerAndAdvance({
         teamId: team?.id ?? null,
         questionId: question.id,
-        answeredCorrectly: false,
         pointsAwarded: 0,
       });
     } catch (e) {
@@ -86,7 +85,6 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
               await submitAnswerAndAdvance({
                 teamId: team?.id ?? null,
                 questionId: question.id,
-                answeredCorrectly: true,
                 pointsAwarded: question.point_value,
               });
             } catch (e) {

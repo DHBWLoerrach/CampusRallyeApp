@@ -334,7 +334,6 @@ describe('UploadPhotoQuestion', () => {
         expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
           teamId: 1,
           questionId: 42,
-          answeredCorrectly: false,
           pointsAwarded: 0,
         });
       });

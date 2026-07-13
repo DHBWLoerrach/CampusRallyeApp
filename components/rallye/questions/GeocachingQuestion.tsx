@@ -426,7 +426,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       await submitAnswerAndAdvance({
         teamId: team?.id ?? null,
         questionId: question.id,
-        answeredCorrectly: isCorrect,
         pointsAwarded: isCorrect ? question.point_value : 0,
         answerText: trimmed,
       });
@@ -471,7 +470,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                 await submitAnswerAndAdvance({
                   teamId: team?.id ?? null,
                   questionId: question.id,
-                  answeredCorrectly: true,
                   pointsAwarded: question.point_value,
                   answerText: data,
                 });
@@ -509,7 +507,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       await submitAnswerAndAdvance({
         teamId: team?.id ?? null,
         questionId: question.id,
-        answeredCorrectly: false,
         pointsAwarded: 0,
       });
     } catch (e) {

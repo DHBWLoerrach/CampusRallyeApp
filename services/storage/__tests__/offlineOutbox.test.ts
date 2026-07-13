@@ -36,7 +36,6 @@ function createDeferred<T>() {
 const basePayload = {
   team_id: 1,
   question_id: 2,
-  correct: true,
   team_points: 3,
   answer: 'answer',
 };
@@ -73,7 +72,6 @@ describe('offlineOutbox processOutbox', () => {
       {
         team_id: 1,
         question_id: 2,
-        correct: true,
         team_points: 3,
         answer: 'answer',
       },
@@ -134,6 +132,30 @@ describe('offlineOutbox processOutbox', () => {
     expect(outbox$.lastError.get()).toBe('db error');
   });
 
+  it('omits the deprecated correctness field from queued answers', async () => {
+    await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+      {
+        id: 'queued-answer',
+        type: 'SAVE_ANSWER',
+        payloadVersion: 1,
+        createdAt: 1,
+        attempts: 0,
+        nextRetryAt: null,
+        payload: {
+          ...basePayload,
+          correct: true,
+        },
+      },
+    ]);
+
+    await processOutbox();
+
+    expect(upsertMock).toHaveBeenCalledWith(basePayload, {
+      onConflict: 'team_id,question_id',
+      ignoreDuplicates: true,
+    });
+  });
+
   it('migrates queued V1 answers from the previous field names', async () => {
     await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
       {
@@ -146,7 +168,6 @@ describe('offlineOutbox processOutbox', () => {
         payload: {
           team_id: 7,
           question_id: 13,
-          correct: true,
           points: 5,
           team_answer: 'offline answer',
         },
@@ -159,7 +180,6 @@ describe('offlineOutbox processOutbox', () => {
       {
         team_id: 7,
         question_id: 13,
-        correct: true,
         team_points: 5,
         answer: 'offline answer',
       },

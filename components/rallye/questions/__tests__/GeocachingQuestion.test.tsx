@@ -388,7 +388,6 @@ describe('GeocachingQuestion', () => {
         expect.objectContaining({
           teamId: 1,
           questionId: 42,
-          answeredCorrectly: true,
           pointsAwarded: 10,
           answerText: 'secret code',
         })
@@ -436,7 +435,6 @@ describe('GeocachingQuestion', () => {
         expect.objectContaining({
           teamId: 1,
           questionId: 42,
-          answeredCorrectly: true,
           pointsAwarded: 10,
           answerText: 'secret code',
         })
@@ -482,7 +480,6 @@ describe('GeocachingQuestion', () => {
     await waitFor(() => {
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
         expect.objectContaining({
-          answeredCorrectly: false,
           pointsAwarded: 0,
           answerText: 'wrong answer',
         })
@@ -603,7 +600,6 @@ describe('GeocachingQuestion', () => {
       expect(confirm).toHaveBeenCalled();
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
         expect.objectContaining({
-          answeredCorrectly: false,
           pointsAwarded: 0,
         })
       );
@@ -677,7 +673,6 @@ describe('GeocachingQuestion', () => {
         expect.objectContaining({
           teamId: 1,
           questionId: 42,
-          answeredCorrectly: false,
           pointsAwarded: 0,
         })
       );
@@ -740,7 +735,6 @@ describe('GeocachingQuestion', () => {
         expect.objectContaining({
           teamId: 1,
           questionId: 42,
-          answeredCorrectly: true,
           pointsAwarded: 10,
           answerText: scannedValue,
         })

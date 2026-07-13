@@ -47,7 +47,6 @@ describe('submitAnswerAndAdvance', () => {
     const result = await submitAnswerAndAdvance({
       teamId: null,
       questionId: 1,
-      answeredCorrectly: true,
       pointsAwarded: 5,
     });
 
@@ -62,13 +61,12 @@ describe('submitAnswerAndAdvance', () => {
     const result = await submitAnswerAndAdvance({
       teamId: 42,
       questionId: 7,
-      answeredCorrectly: true,
       pointsAwarded: 3,
       answerText: 'hello',
     });
 
     expect(result).toEqual({ status: 'sent' });
-    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, true, 3, 'hello');
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, 3, 'hello');
     expect(mockPointsSet).toHaveBeenCalledWith(13);
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
@@ -81,12 +79,11 @@ describe('submitAnswerAndAdvance', () => {
     const result = await submitAnswerAndAdvance({
       teamId: 42,
       questionId: 7,
-      answeredCorrectly: true,
       pointsAwarded: 2,
     });
 
     expect(result).toEqual({ status: 'sent' });
-    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, true, 2, '');
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, 2, '');
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
 
@@ -94,7 +91,6 @@ describe('submitAnswerAndAdvance', () => {
     const result = await submitAnswerAndAdvance({
       teamId: 42,
       questionId: 7,
-      answeredCorrectly: false,
       pointsAwarded: 0,
     });
 
@@ -109,7 +105,6 @@ describe('submitAnswerAndAdvance', () => {
     const result = await submitAnswerAndAdvance({
       teamId: 42,
       questionId: 7,
-      answeredCorrectly: true,
       pointsAwarded: 2,
     });
 
@@ -170,7 +165,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
       teamId: 42,
       questionId: 3,
     });
-    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 3, true, 10, '1_2.jpg');
+    expect(mockSaveAnswer).toHaveBeenCalledWith(42, 3, 10, '1_2.jpg');
     expect(mockPointsSet).toHaveBeenCalledWith(15);
     expect(mockGotoNextQuestion).toHaveBeenCalled();
   });
