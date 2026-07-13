@@ -43,7 +43,7 @@ function createId() {
 
 function backoffMs(attempts: number) {
   // 1s, 2s, 4s, ... capped at 60s
-  return Math.min(60_000, 1000 * 2 ** Math.max(0, attempts - 1));
+  return Math.min(60_000, 1000 * 2 ** (attempts - 1));
 }
 
 function escapeRegExp(value: string) {
