@@ -267,6 +267,9 @@ describe('offlineOutbox processOutbox', () => {
     appStateListener('active');
     await flushPromises();
     expect(outbox$.lastError.get()).toBe('app refresh failed');
+
+    outbox$.online.set(false);
+    await processOutbox();
   });
 
   describe('retry scheduler', () => {
@@ -418,7 +421,7 @@ describe('offlineOutbox processOutbox', () => {
       expect(upsertMock).toHaveBeenCalledTimes(1);
     });
 
-    it('catches rejected timer-triggered processing without an unhandled rejection', async () => {
+    it('reschedules after rejected timer-triggered processing', async () => {
       await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
         queuedAnswer({
           id: 'timer-storage-failure',
@@ -436,6 +439,13 @@ describe('offlineOutbox processOutbox', () => {
       await flushMicrotasks();
 
       expect(outbox$.lastError.get()).toBe('timer storage failed');
+      expect(jest.getTimerCount()).toBe(1);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      await flushMicrotasks();
+
+      expect(upsertMock).toHaveBeenCalledTimes(1);
+      expect(await getStorageItem(StorageKeys.OFFLINE_QUEUE)).toEqual([]);
     });
 
     it('bounds persisted errors without exposing answer payload data', async () => {

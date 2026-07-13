@@ -154,6 +154,7 @@ export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
 
 let syncPromise: Promise<void> | null = null;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
+const BACKGROUND_FAILURE_RETRY_MS = 1_000;
 
 function clearRetryTimer() {
   if (retryTimer === null) return;
@@ -161,26 +162,36 @@ function clearRetryTimer() {
   retryTimer = null;
 }
 
-function scheduleNextRetry(queue: OfflineActionV1[]) {
+function scheduleProcessAt(timestamp: number) {
   clearRetryTimer();
-  if (!outbox$.online.get() || queue.length === 0) return;
-
-  const nextRetryAt = queue.reduce((earliest, action) => {
-    const retryAt = action.nextRetryAt ?? Date.now();
-    return Math.min(earliest, retryAt);
-  }, Number.POSITIVE_INFINITY);
+  if (!outbox$.online.get()) return;
 
   retryTimer = setTimeout(
     () => {
       retryTimer = null;
       runProcessOutboxSafely();
     },
-    Math.max(0, nextRetryAt - Date.now())
+    Math.max(0, timestamp - Date.now())
   );
+}
+
+function scheduleNextRetry(queue: OfflineActionV1[]) {
+  if (queue.length === 0) {
+    clearRetryTimer();
+    return;
+  }
+
+  const nextRetryAt = queue.reduce((earliest, action) => {
+    const retryAt = action.nextRetryAt ?? Date.now();
+    return Math.min(earliest, retryAt);
+  }, Number.POSITIVE_INFINITY);
+
+  scheduleProcessAt(nextRetryAt);
 }
 
 function handleBackgroundError(error: unknown) {
   outbox$.lastError.set(errorMessage(error));
+  scheduleProcessAt(Date.now() + BACKGROUND_FAILURE_RETRY_MS);
 }
 
 function runProcessOutboxSafely() {
