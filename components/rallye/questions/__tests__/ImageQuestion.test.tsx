@@ -4,10 +4,17 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import ImageQuestion from '../ImageQuestion';
 import type { Question } from '@/types/rallye';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
+import { getQuestionPictureUrl } from '@/services/storage/questionStorage';
 import { confirmAnswer } from '@/utils/ConfirmAlert';
 
 jest.mock('@/services/storage/answerSubmission', () => ({
   submitAnswerAndAdvance: jest.fn(),
+}));
+
+jest.mock('@/services/storage/questionStorage', () => ({
+  getQuestionPictureUrl: jest.fn(
+    (path?: string) => path && `https://example.test/${path}`
+  ),
 }));
 
 let mockTeam: { id: number } | null = { id: 1 };
@@ -33,18 +40,6 @@ jest.mock('@/utils/AppStyles', () => ({
 
 jest.mock('@/utils/ConfirmAlert', () => ({
   confirmAnswer: jest.fn(() => Promise.resolve(true)),
-}));
-
-jest.mock('@/utils/Supabase', () => ({
-  supabase: {
-    storage: {
-      from: () => ({
-        getPublicUrl: (path: string) => ({
-          data: { publicUrl: `https://example.test/${path}` },
-        }),
-      }),
-    },
-  },
 }));
 
 jest.mock('@/utils/useKeyboard', () => ({
@@ -144,6 +139,7 @@ describe('ImageQuestion', () => {
     expect(UNSAFE_getByType(Image).props.source.uri).toBe(
       'https://example.test/building.jpg'
     );
+    expect(getQuestionPictureUrl).toHaveBeenCalledWith('building.jpg');
   });
 
   it('renders no picture when the question has no bucket path', () => {

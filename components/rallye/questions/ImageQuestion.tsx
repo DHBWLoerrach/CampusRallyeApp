@@ -8,9 +8,9 @@ import { confirmAnswer } from '@/utils/ConfirmAlert';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { getAnswerKeyForQuestion } from '@/utils/answerRows';
-import { supabase } from '@/utils/Supabase';
 import { useKeyboard } from '@/utils/useKeyboard';
 import { store$ } from '@/services/storage/Store';
+import { getQuestionPictureUrl } from '@/services/storage/questionStorage';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
@@ -24,13 +24,10 @@ export default function ImageQuestion({ question }: QuestionProps) {
   const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
   const { submitting, submit } = useAnswerSubmission(question);
-  const pictureUri = useMemo(() => {
-    if (!question.bucket_path) return null;
-    const result = supabase.storage
-      .from('question-pictures')
-      .getPublicUrl(question.bucket_path);
-    return result?.data?.publicUrl ?? null;
-  }, [question.bucket_path]);
+  const pictureUri = useMemo(
+    () => getQuestionPictureUrl(question.bucket_path),
+    [question.bucket_path]
+  );
   const s = useAppStyles();
   const { keyboardHeight, keyboardVisible } = useKeyboard();
 
