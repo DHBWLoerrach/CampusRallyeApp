@@ -22,7 +22,7 @@ moving on.
 | 004 | Fix the AGENTS.md pointer to the empty `locales/` directory | P2 | S | — | DONE |
 | 005 | Guard German/English translation key parity with a test | P2 | S | — | DONE |
 | 006 | Fix the scoreboard's silent load failure and quadratic aggregation | P1 | S | — | DONE |
-| 007 | Add component tests for SkillQuestion and ImageQuestion | P1 | M | — | TODO |
+| 007 | Add component tests for SkillQuestion and ImageQuestion | P1 | M | — | DONE |
 | 008 | Extract the shared `useAnswerSubmission` hook | P2 | M | 007 | TODO |
 | 009 | Defer three.js evaluation until the 3D compass renders | P2 | M | — | TODO |
 | 010 | Move Supabase queries out of screens into the storage layer | P3 | L | 002, 006 | TODO |
