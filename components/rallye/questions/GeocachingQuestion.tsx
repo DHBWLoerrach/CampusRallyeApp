@@ -28,7 +28,7 @@ import { globalStyles } from '@/utils/GlobalStyles';
 import { useAppStyles } from '@/utils/AppStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useKeyboard } from '@/utils/useKeyboard';
-import { confirmAnswer, confirm } from '@/utils/ConfirmAlert';
+import { confirmAnswer } from '@/utils/ConfirmAlert';
 import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import Colors from '@/utils/Colors';
 import { Logger } from '@/utils/Logger';
@@ -40,6 +40,7 @@ import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
+import { useAnswerSubmission } from './useAnswerSubmission';
 
 // -- Constants ---------------------------------------------------------------
 
@@ -62,6 +63,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   const { t } = useLanguage();
   const s = useAppStyles();
   const { keyboardHeight, keyboardVisible } = useKeyboard();
+  const { surrender } = useAnswerSubmission(question);
   const team = store$.team.get();
   const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
 
@@ -493,28 +495,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   const handleSurrender = async () => {
     Logger.info('Geocaching', 'Surrender initiated');
-    const confirmed = await confirm({
-      title: t('confirm.surrender.title'),
-      message: t('confirm.surrender.message'),
-      confirmText: t('confirm.surrender.confirm'),
-      cancelText: t('common.cancel'),
-      destructive: true,
-    });
-    if (!confirmed) return;
-
-    setSubmitting(true);
-    try {
-      await submitAnswerAndAdvance({
-        teamId: team?.id ?? null,
-        questionId: question.id,
-        pointsAwarded: 0,
-      });
-    } catch (e) {
-      Logger.error('Geocaching', 'Error submitting surrender', e);
-      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
-    } finally {
-      setSubmitting(false);
-    }
+    await surrender();
   };
 
   const handleMissingCoordinatesSkip = async () => {
