@@ -17,4 +17,13 @@ describe('translations', () => {
     const missingInEn = deKeys.filter((key) => !enKeys.includes(key));
     expect(missingInEn).toEqual([]);
   });
+
+  it('has no empty translation values', () => {
+    const empty = (['de', 'en'] as const).flatMap((language) =>
+      Object.entries(translations[language])
+        .filter(([, value]) => value.trim().length === 0)
+        .map(([key]) => `${language}:${key}`)
+    );
+    expect(empty).toEqual([]);
+  });
 });
