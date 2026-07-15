@@ -55,6 +55,12 @@ export default function Scoreboard() {
   const [loadError, setLoadError] = useState(false);
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const highlightAccent = isDarkMode
+    ? 'rgba(226, 0, 26, 0.35)'
+    : Colors.dhbwRed;
+  const highlightBackground = isDarkMode
+    ? 'rgba(226, 0, 26, 0.03)'
+    : 'rgba(226, 0, 26, 0.025)';
   const s = useAppStyles();
   const { t } = useLanguage();
 
@@ -192,12 +198,6 @@ export default function Scoreboard() {
               const rowLabel = ownDurationText
                 ? `${baseRowLabel}, ${ownDurationText}`
                 : baseRowLabel;
-              const highlightAccent = isDarkMode
-                ? 'rgba(226, 0, 26, 0.35)'
-                : Colors.dhbwRed;
-              const highlightBackground = isDarkMode
-                ? 'rgba(226, 0, 26, 0.03)'
-                : 'rgba(226, 0, 26, 0.025)';
               return (
                 <View
                   key={team.id}
