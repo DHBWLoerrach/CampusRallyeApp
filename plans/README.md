@@ -26,7 +26,7 @@ moving on.
 | 008 | Extract the shared `useAnswerSubmission` hook | P2 | M | 007 | DONE |
 | 009 | Defer three.js evaluation until the 3D compass renders | P2 | M | — | DONE |
 | 010 | Move Supabase queries out of screens into the storage layer | P3 | L | 002, 006 | DONE |
-| 011 | Split the Welcome screen into a hook + session service | P3 | L | 001, 002 | TODO |
+| 011 | Split the Welcome screen into a hook + session service | P3 | L | 001, 002 | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
