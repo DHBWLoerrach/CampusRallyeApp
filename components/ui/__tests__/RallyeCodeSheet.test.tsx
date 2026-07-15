@@ -75,7 +75,9 @@ describe('RallyeCodeSheet', () => {
       />
     );
 
-    expect(getByLabelText('rallye.code.label').props.secureTextEntry).toBeFalsy();
+    expect(
+      getByLabelText('rallye.code.label').props.secureTextEntry
+    ).toBeFalsy();
   });
 
   it('keeps the content scrollable when the keyboard reduces available space', () => {

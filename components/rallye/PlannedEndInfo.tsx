@@ -6,9 +6,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import ThemedText from '@/components/themed/ThemedText';
 
 function formatPlannedEndTime(endTime: string, language: 'de' | 'en') {
-  const match = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/.exec(
-    endTime
-  );
+  const match = /^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/.exec(endTime);
   if (!match) return endTime;
 
   const [, hours, minutes, seconds = '00', fractionalSeconds = ''] = match;
@@ -16,7 +14,10 @@ function formatPlannedEndTime(endTime: string, language: 'de' | 'en') {
   const minute = Number(minutes);
   const second = Number(seconds);
   const isMidnightBoundary =
-    hour === 24 && minute === 0 && second === 0 && /^0*$/.test(fractionalSeconds);
+    hour === 24 &&
+    minute === 0 &&
+    second === 0 &&
+    /^0*$/.test(fractionalSeconds);
   if (
     hour > 24 ||
     minute > 59 ||
