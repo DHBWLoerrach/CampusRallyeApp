@@ -22,11 +22,12 @@ jest.mock('@/components/themed/ThemedText', () => {
 
 let mockTeams: any[] = [];
 let mockPoints: any[] = [];
+let mockTeamsError: any = null;
 jest.mock('@/utils/Supabase', () => ({
   supabase: {
     from: (table: string) => ({
       select: () => ({
-        eq: () => Promise.resolve({ data: mockTeams }),
+        eq: () => Promise.resolve({ data: mockTeams, error: mockTeamsError }),
         in: () => Promise.resolve({ data: mockPoints, error: null }),
       }),
     }),
@@ -85,6 +86,7 @@ describe('Scoreboard', () => {
   beforeEach(() => {
     mockTeams = [];
     mockPoints = [];
+    mockTeamsError = null;
     mockRallye = null;
     mockTeam = null;
   });
@@ -271,5 +273,76 @@ describe('Scoreboard', () => {
     expect(getByText('Solo')).toBeTruthy();
     // Points 42 rendered in team row
     expect(getByText(/42/)).toBeTruthy();
+  });
+
+  it('shows an error message when the teams query fails', async () => {
+    mockRallye = { id: 1, name: 'R', status: 'ended' };
+    mockTeams = [
+      {
+        id: '1',
+        name: 'Hidden Team',
+        created_at: '2024-01-01T10:00:00Z',
+        play_time: '2024-01-01T11:00:00Z',
+      },
+    ];
+    mockTeamsError = { message: 'denied' };
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    try {
+      const { getByText, queryByText } = render(<Scoreboard />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByText('scoreboard.error.load')).toBeTruthy();
+      expect(queryByText('Hidden Team')).toBeNull();
+      expect(consoleError).toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it('sums multiple answers per team into one total', async () => {
+    mockRallye = { id: 1, name: 'R', status: 'ended' };
+    mockTeams = [
+      {
+        id: '1',
+        name: 'Sum Team',
+        created_at: '2024-01-01T10:00:00Z',
+        play_time: '2024-01-01T11:00:00Z',
+      },
+    ];
+    mockPoints = [
+      { team_id: '1', team_points: 10 },
+      { team_id: '1', team_points: 5 },
+    ];
+
+    const { getByText } = render(<Scoreboard />);
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(getByText(/15/)).toBeTruthy();
+  });
+
+  it('shows zero points for a team with no answers', async () => {
+    mockRallye = { id: 1, name: 'R', status: 'ended' };
+    mockTeams = [
+      {
+        id: '1',
+        name: 'Zero Team',
+        created_at: '2024-01-01T10:00:00Z',
+        play_time: '2024-01-01T11:00:00Z',
+      },
+    ];
+
+    const { getByText } = render(<Scoreboard />);
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(getByText(/^0$/)).toBeTruthy();
   });
 });
