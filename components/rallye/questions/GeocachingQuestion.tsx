@@ -1,5 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -15,7 +23,6 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import Svg, { Path, Rect, Ellipse } from 'react-native-svg';
-import Compass3DArrow from './Compass3DArrow';
 import * as Location from 'expo-location';
 import { DeviceMotion } from 'expo-sensors';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -41,6 +48,10 @@ import Hint from '@/components/ui/Hint';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAnswerSubmission } from './useAnswerSubmission';
+
+// three.js is only needed for the navigation arrow. Load it lazily so it is not
+// evaluated for rallyes (or phases) that never show the 3D compass.
+const Compass3DArrow = lazy(() => import('./Compass3DArrow'));
 
 // -- Constants ---------------------------------------------------------------
 
@@ -667,11 +678,26 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                 </UIButton>
               </View>
             ) : (
-              <Compass3DArrow
-                angleRef={angleRef}
-                tiltXRef={tiltXRef}
-                tiltYRef={tiltYRef}
-              />
+              <Suspense
+                fallback={
+                  <View
+                    style={{
+                      width: 200,
+                      height: 200,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <ActivityIndicator size="large" color={Colors.dhbwRed} />
+                  </View>
+                }
+              >
+                <Compass3DArrow
+                  angleRef={angleRef}
+                  tiltXRef={tiltXRef}
+                  tiltYRef={tiltYRef}
+                />
+              </Suspense>
             )}
 
             {distance != null && (
