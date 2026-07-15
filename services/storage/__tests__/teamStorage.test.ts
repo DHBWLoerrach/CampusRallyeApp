@@ -12,6 +12,7 @@ import {
   createTeam,
   getCurrentTeam,
   setCurrentTeam,
+  teamExists,
 } from '../teamStorage';
 
 type QueryConstraint = {
@@ -168,5 +169,59 @@ describe('teamStorage.createTeam', () => {
 
     await expect(createTeam('Team X', 7)).rejects.toBe(error);
     await expect(getCurrentTeam(7)).resolves.toBeNull();
+  });
+});
+
+describe('teamStorage.teamExists', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('reports an existing team in its rallye', async () => {
+    useTableHandlers({
+      teams: (context) => {
+        expect(context.select).toBe('id');
+        expect(context.constraints).toEqual([
+          { column: 'id', value: 5 },
+          { column: 'rallye_id', value: 7 },
+        ]);
+        expect(context.terminal).toBe('maybeSingle');
+        return { data: { id: 5 }, error: null };
+      },
+    });
+
+    await expect(teamExists(7, 5)).resolves.toBe('exists');
+  });
+
+  it('reports a missing team', async () => {
+    useTableHandlers({
+      teams: () => ({ data: null, error: null }),
+    });
+
+    await expect(teamExists(7, 5)).resolves.toBe('missing');
+  });
+
+  it('reports an unknown result when the lookup fails', async () => {
+    const error = { message: 'lookup failed' };
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    useTableHandlers({
+      teams: () => ({ data: null, error }),
+    });
+
+    await expect(teamExists(7, 5)).resolves.toBe('unknown');
+    expect(consoleError).toHaveBeenCalledWith(
+      'Error checking team existence:',
+      error
+    );
+
+    consoleError.mockRestore();
+  });
+
+  it('reports missing without a lookup when an id is absent', async () => {
+    await expect(teamExists(0, 5)).resolves.toBe('missing');
+    await expect(teamExists(7, 0)).resolves.toBe('missing');
+    expect(mockFrom).not.toHaveBeenCalled();
   });
 });
