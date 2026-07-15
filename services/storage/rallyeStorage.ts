@@ -13,6 +13,8 @@ import {
   RallyeStorageRow,
   RallyeMode,
   RallyeStatus,
+  AnswerRow,
+  Question,
 } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
@@ -100,6 +102,112 @@ export async function getRallyeStatus(
     return null;
   }
   return data?.status ?? null;
+}
+
+export async function getRallyeQuestionIds(
+  rallyeId: number
+): Promise<number[]> {
+  const { data, error } = await supabase
+    .from('rallye_questions')
+    .select('question_id')
+    .eq('rallye_id', rallyeId);
+  if (error) throw error;
+  return (data ?? []).map((row) => row.question_id);
+}
+
+export async function getSolutionOptions(
+  questionIds: number[]
+): Promise<AnswerRow[]> {
+  const { data, error } = await supabase
+    .from('solution_options')
+    .select('*')
+    .in('question_id', questionIds);
+  if (error) throw error;
+  return (data ?? []) as AnswerRow[];
+}
+
+export async function getAnsweredQuestionIds(
+  teamId: number
+): Promise<number[]> {
+  const { data, error } = await supabase
+    .from('team_answers')
+    .select('question_id')
+    .eq('team_id', teamId);
+  if (error) throw error;
+  return (data ?? []).map((row) => row.question_id);
+}
+
+type QuestionDbRow = Omit<Question, 'question' | 'question_type'> & {
+  content: string;
+  type: Question['question_type'];
+};
+
+type GeocachingMetadata = Pick<
+  Question,
+  'target_latitude' | 'target_longitude' | 'proximity_radius' | 'input_type'
+> & { question_id: number };
+
+export async function getQuestionsWithGeocachingMetadata(
+  questionIds: number[]
+): Promise<Question[]> {
+  const { data, error } = await supabase
+    .from('questions')
+    .select('*')
+    .in('id', questionIds);
+  if (error) throw error;
+  const questions = (data ?? []) as QuestionDbRow[];
+  const geocachingIds = questions
+    .filter((question) => question.type === 'geocaching')
+    .map((question) => question.id);
+
+  let geocachingMap = new Map<number, GeocachingMetadata>();
+  if (geocachingIds.length > 0) {
+    const { data: metadata, error: metadataError } = await supabase
+      .from('geocaching_questions')
+      .select('*')
+      .in('question_id', geocachingIds);
+    if (metadataError) throw metadataError;
+    geocachingMap = new Map(
+      ((metadata ?? []) as GeocachingMetadata[]).map((row) => [
+        row.question_id,
+        row,
+      ])
+    );
+  }
+
+  return questions.map((question) => {
+    const metadata = geocachingMap.get(question.id);
+    return {
+      ...question,
+      question: question.content,
+      question_type: question.type,
+      ...(metadata && {
+        target_latitude: metadata.target_latitude,
+        target_longitude: metadata.target_longitude,
+        proximity_radius: metadata.proximity_radius,
+        input_type: metadata.input_type,
+      }),
+    };
+  });
+}
+
+export async function getRallyeDynamicFields(
+  rallyeId: number
+): Promise<Pick<RallyeDbRow, 'status' | 'rallye_end' | 'name'> | null> {
+  const { data, error } = await supabase
+    .from('rallyes')
+    .select('status, rallye_end, name')
+    .eq('id', rallyeId)
+    .single();
+  if (error) {
+    Logger.error(
+      'RallyeStorage',
+      'Error fetching dynamic rallye fields',
+      error
+    );
+    return null;
+  }
+  return data;
 }
 
 export async function getLocationDashboardData(
