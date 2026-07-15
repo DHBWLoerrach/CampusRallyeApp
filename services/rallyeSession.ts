@@ -10,12 +10,17 @@ import {
 } from '@/services/storage/teamStorage';
 import { Logger } from '@/utils/Logger';
 
-/** Starts a rallye session and rehydrates a previously stored team for it, if any. */
-export async function joinRallye(rallye: RallyeRow): Promise<void> {
+/** Clears any previous session state and activates `rallye` as the current one. */
+async function beginSession(rallye: RallyeRow): Promise<void> {
   store$.team.set(null);
   store$.reset();
   store$.rallye.set(rallye);
   await setCurrentRallye(rallye);
+}
+
+/** Starts a rallye session and rehydrates a previously stored team for it, if any. */
+export async function joinRallye(rallye: RallyeRow): Promise<void> {
+  await beginSession(rallye);
 
   try {
     const existingTeam = await getCurrentTeam(rallye.id);
@@ -44,9 +49,6 @@ export async function joinRallye(rallye: RallyeRow): Promise<void> {
 
 /** Starts a tour-mode session without a team. */
 export async function startTourMode(rallye: RallyeRow): Promise<void> {
-  store$.team.set(null);
-  store$.reset();
-  store$.rallye.set(rallye);
-  await setCurrentRallye(rallye);
+  await beginSession(rallye);
   store$.enabled.set(true);
 }
