@@ -28,7 +28,6 @@ import { useAppStyles } from '@/utils/AppStyles';
 import { confirm } from '@/utils/ConfirmAlert';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
 import {
-  setCurrentRallye,
   getLocationsWithJoinableRallyes,
   getLocationDashboardData,
   getSelectedLocation as getStoredLocation,
@@ -38,10 +37,9 @@ import {
   type RallyeRow,
 } from '@/services/storage/rallyeStorage';
 import {
-  getCurrentTeam,
-  teamExists,
-  clearCurrentTeam,
-} from '@/services/storage/teamStorage';
+  joinRallye as joinRallyeSession,
+  startTourMode,
+} from '@/services/rallyeSession';
 import {
   clearRallyeCodeSheetSession,
   getRallyeCodeSheetSession,
@@ -294,45 +292,14 @@ export default function Welcome() {
       Alert.alert(t('common.errorTitle'), t('welcome.tourModeUnavailable'));
       return;
     }
-    store$.team.set(null);
-    store$.reset();
-    store$.rallye.set(dashboardData.tourModeRallye);
-    await setCurrentRallye(dashboardData.tourModeRallye);
-    store$.enabled.set(true);
+    await startTourMode(dashboardData.tourModeRallye);
   };
 
-  const joinRallye = async (rallye: RallyeRow): Promise<boolean> => {
+  const handleJoinRallye = async (rallye: RallyeRow): Promise<boolean> => {
     if (joining) return false;
     setJoining(true);
     try {
-      store$.team.set(null);
-      store$.reset();
-      store$.rallye.set(rallye);
-      await setCurrentRallye(rallye);
-
-      try {
-        const existingTeam = await getCurrentTeam(rallye.id);
-        if (existingTeam) {
-          const exists = await teamExists(rallye.id, existingTeam.id);
-          if (exists === 'exists') {
-            store$.team.set(existingTeam);
-          } else if (exists === 'missing') {
-            await clearCurrentTeam(rallye.id);
-            store$.team.set(null);
-          } else {
-            store$.team.set(existingTeam);
-          }
-        }
-      } catch (rehydrateError) {
-        Logger.error(
-          'Welcome',
-          'Error rehydrating team after join',
-          rehydrateError
-        );
-        store$.team.set(null);
-      }
-
-      store$.enabled.set(true);
+      await joinRallyeSession(rallye);
       return true;
     } catch (error) {
       Logger.error('Welcome', 'Error joining rallye', error);
@@ -349,12 +316,12 @@ export default function Welcome() {
       if (getRallyeCodeSheetSession()) return;
       setRallyeCodeSheetSession({
         rallye,
-        onJoin: joinRallye,
+        onJoin: handleJoinRallye,
       });
       router.push('/rallye-code-sheet' as never);
       return;
     }
-    await joinRallye(rallye);
+    await handleJoinRallye(rallye);
   };
 
   const renderLoadingContent = () => (
