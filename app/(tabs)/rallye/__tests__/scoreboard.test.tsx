@@ -23,15 +23,12 @@ jest.mock('@/components/themed/ThemedText', () => {
 let mockTeams: any[] = [];
 let mockPoints: any[] = [];
 let mockTeamsError: any = null;
-jest.mock('@/utils/Supabase', () => ({
-  supabase: {
-    from: (table: string) => ({
-      select: () => ({
-        eq: () => Promise.resolve({ data: mockTeams, error: mockTeamsError }),
-        in: () => Promise.resolve({ data: mockPoints, error: null }),
-      }),
-    }),
-  },
+jest.mock('@/services/storage/scoreboardStorage', () => ({
+  getScoreboardData: jest.fn(() =>
+    mockTeamsError
+      ? Promise.reject(mockTeamsError)
+      : Promise.resolve({ teams: mockTeams, points: mockPoints })
+  ),
 }));
 
 jest.mock('@/utils/AppStyles', () => ({

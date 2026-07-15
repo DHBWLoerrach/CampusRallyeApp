@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
-import { supabase } from '@/utils/Supabase';
+import {
+  getScoreboardData,
+  type ScoreboardTeamRow,
+} from '@/services/storage/scoreboardStorage';
 import { globalStyles } from '@/utils/GlobalStyles';
 import Colors from '@/utils/Colors';
 import { useTheme } from '@/utils/ThemeContext';
@@ -13,11 +16,7 @@ import { ScreenScrollView } from '@/components/ui/Screen';
 import RallyeContextBar from '@/components/rallye/RallyeContextBar';
 import type { Translator } from '@/utils/i18n';
 
-type TeamRow = {
-  id: string;
-  name: string;
-  created_at: string;
-  play_time: string | null;
+type TeamRow = ScoreboardTeamRow & {
   total_points?: number;
   time_spent?: number | null;
   rank?: number;
@@ -72,26 +71,11 @@ export default function Scoreboard() {
       try {
         if (cancelled) return;
         setLoadError(false);
-        const { data, error: teamsError } = await supabase
-          .from('teams')
-          .select('id, name, created_at, play_time')
-          .eq('rallye_id', rallyeId);
-        if (teamsError) throw teamsError;
-        const teamRows = (data || []) as TeamRow[];
-
-        const teamIds = teamRows.map((t) => t.id);
-
-        const { data: teamPoints, error: pointsError } = await supabase
-          .from('team_answers')
-          .select('team_id, team_points')
-          .in('team_id', teamIds);
-        if (pointsError) throw pointsError;
+        const { teams: teamRows, points: teamPoints } =
+          await getScoreboardData(rallyeId);
 
         const pointsByTeamId = new Map<TeamRow['id'], number>();
-        for (const row of (teamPoints || []) as {
-          team_id: TeamRow['id'];
-          team_points: number;
-        }[]) {
+        for (const row of teamPoints) {
           pointsByTeamId.set(
             row.team_id,
             (pointsByTeamId.get(row.team_id) ?? 0) + row.team_points
