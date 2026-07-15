@@ -3,7 +3,13 @@ import { Alert, RefreshControl } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
 import { store$ } from '@/services/storage/Store';
-import { supabase } from '@/utils/Supabase';
+import {
+  getAnsweredQuestionIds,
+  getQuestionsWithGeocachingMetadata,
+  getRallyeDynamicFields,
+  getRallyeQuestionIds,
+  getSolutionOptions,
+} from '@/services/storage/rallyeStorage';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useAppStyles } from '@/utils/AppStyles';
@@ -22,14 +28,6 @@ import VStack from '@/components/ui/VStack';
 import UIButton from '@/components/ui/UIButton';
 import { ScreenScrollView } from '@/components/ui/Screen';
 import type { RallyeStatus } from '@/types/rallye';
-
-interface GeocachingMetadata {
-  question_id: number;
-  target_latitude: number;
-  target_longitude: number;
-  proximity_radius: number;
-  input_type: 'text' | 'qr';
-}
 
 function isPreparation(status?: RallyeStatus) {
   return status === 'draft' || status === 'ready';
@@ -83,13 +81,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     }
 
     const promise = (async () => {
-      const { data: joinData, error: joinError } = await supabase
-        .from('rallye_questions')
-        .select('question_id')
-        .eq('rallye_id', rallyeId);
-      if (joinError) throw joinError;
-
-      const ids = (joinData || []).map((row: any) => row.question_id);
+      const ids = await getRallyeQuestionIds(rallyeId);
       questionIdsCacheRef.current = { rallyeId, ids };
       return ids;
     })();
@@ -113,12 +105,8 @@ const RallyeIndex = observer(function RallyeIndex() {
         store$.answers.set([]);
         return;
       }
-      const { data: answers, error: answerError } = await supabase
-        .from('solution_options')
-        .select('*')
-        .in('question_id', questionIds);
-      if (answerError) throw answerError;
-      store$.answers.set(answers || []);
+      const answers = await getSolutionOptions(questionIds);
+      store$.answers.set(answers);
     } catch (error) {
       console.error('Error fetching rallye answers:', error);
     }
@@ -141,12 +129,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       // already answered for team mode
       let answeredIds: number[] = [];
       if (!isTourMode && teamId) {
-        const { data: answeredData, error: answeredError } = await supabase
-          .from('team_answers')
-          .select('question_id')
-          .eq('team_id', teamId);
-        if (answeredError) throw answeredError;
-        answeredIds = (answeredData || []).map((row: any) => row.question_id);
+        answeredIds = await getAnsweredQuestionIds(teamId);
       }
       // Track number of answered questions for progress display
       store$.answeredCount.set(answeredIds.length);
@@ -161,45 +144,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         ? questionIds
         : questionIds.filter((id: number) => !answeredIds.includes(id));
 
-      const { data: questionsData, error: questionsError } = await supabase
-        .from('questions')
-        .select('*')
-        .in('id', filteredIds);
-      if (questionsError) throw questionsError;
-
-      const geocachingQuestionIds = (questionsData || [])
-        .filter((q: any) => q.type === 'geocaching')
-        .map((q: any) => q.id);
-
-      let geocachingMap = new Map<number, GeocachingMetadata>();
-      if (geocachingQuestionIds.length > 0) {
-        // Fetch geocaching metadata only for geocaching questions.
-        const { data: geocachingData, error: geocachingError } = await supabase
-          .from('geocaching_questions')
-          .select('*')
-          .in('question_id', geocachingQuestionIds);
-        if (geocachingError) throw geocachingError;
-        geocachingMap = new Map(
-          (geocachingData || []).map(
-            (g: GeocachingMetadata) => [g.question_id, g] as const
-          )
-        );
-      }
-
-      const mapped = (questionsData || []).map((q: any) => {
-        const geo = geocachingMap.get(q.id);
-        return {
-          ...q,
-          question: q.content,
-          question_type: q.type,
-          ...(geo && {
-            target_latitude: geo.target_latitude,
-            target_longitude: geo.target_longitude,
-            proximity_radius: geo.proximity_radius,
-            input_type: geo.input_type,
-          }),
-        };
-      });
+      const mapped = await getQuestionsWithGeocachingMetadata(filteredIds);
 
       const previousQuestions = store$.questions.get();
       const previousCurrentQuestionId = store$.currentQuestion.get()?.id;
@@ -231,12 +176,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     // slight delay to avoid flicker
     await new Promise((r) => setTimeout(r, 600));
     try {
-      const { data, error } = await supabase
-        .from('rallyes')
-        .select('status, rallye_end, name')
-        .eq('id', rallyeId)
-        .single();
-      if (error) throw error;
+      const data = await getRallyeDynamicFields(rallyeId);
       if (data) {
         store$.rallye.status.set(data.status);
         store$.rallye.rallye_end.set(data.rallye_end);
