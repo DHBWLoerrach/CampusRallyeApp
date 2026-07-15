@@ -1,17 +1,5 @@
-import {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-  useEffectEvent,
-} from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  AppState,
-  AppStateStatus,
-  View,
-} from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
@@ -27,36 +15,17 @@ import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import { confirm } from '@/utils/ConfirmAlert';
 import { getSoftCtaButtonStyles } from '@/utils/buttonStyles';
-import {
-  getLocationsWithJoinableRallyes,
-  getLocationDashboardData,
-  getSelectedLocation as getStoredLocation,
-  setSelectedLocation as storeSelectedLocation,
-  clearSelectedLocation,
-  type LocationDashboardData,
-  type RallyeRow,
-} from '@/services/storage/rallyeStorage';
+import { type RallyeRow } from '@/services/storage/rallyeStorage';
 import {
   joinRallye as joinRallyeSession,
   startTourMode,
 } from '@/services/rallyeSession';
 import {
-  clearRallyeCodeSheetSession,
   getRallyeCodeSheetSession,
   setRallyeCodeSheetSession,
 } from '@/services/rallyeCodeSheetSession';
-import { Location } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
-
-type SelectionStep = 'location' | 'dashboard';
-const AUTO_REFRESH_INTERVAL = 60000;
-
-function createEmptyDashboardData(): LocationDashboardData {
-  return {
-    tourModeRallye: null,
-    departmentEntries: [],
-  };
-}
+import { useLocationDashboard } from '@/utils/useLocationDashboard';
 
 export default function Welcome() {
   const router = useRouter();
@@ -69,22 +38,18 @@ export default function Welcome() {
   const resumeRallye = useSelector(() => store$.rallye.get());
   const resumeTeam = useSelector(() => store$.team.get());
 
-  const [loading, setLoading] = useState(false);
   const [joining, setJoining] = useState(false);
-  const [online, setOnline] = useState(true);
-
-  const [selectionStep, setSelectionStep] = useState<SelectionStep>('location');
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null
-  );
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [dashboardData, setDashboardData] = useState<LocationDashboardData>(
-    () => createEmptyDashboardData()
-  );
-
-  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
-  const isInitializedRef = useRef<boolean>(false);
-  const initialSyncScheduledRef = useRef<boolean>(false);
+  const {
+    loading,
+    online,
+    selectionStep,
+    selectedLocation,
+    locations,
+    dashboardData,
+    initializeSelection,
+    handleLocationSelect,
+    handleBack,
+  } = useLocationDashboard();
 
   const stateBackground = isDarkMode
     ? Colors.darkMode.background
@@ -102,190 +67,6 @@ export default function Welcome() {
   const rallyeCardStyle = [dashboardCardStyle, { marginVertical: 4 }];
   const { buttonStyle: ctaButtonStyle, textStyle: ctaButtonTextStyle } =
     getSoftCtaButtonStyles(palette);
-
-  const applyDashboardData = useCallback((nextData: LocationDashboardData) => {
-    setDashboardData(nextData);
-  }, []);
-
-  const resetDashboard = useCallback(() => {
-    setDashboardData(createEmptyDashboardData());
-    clearRallyeCodeSheetSession();
-  }, []);
-
-  const loadDashboardData = useCallback(
-    async (locationId: number) => {
-      const data = await getLocationDashboardData(locationId);
-      applyDashboardData(data);
-    },
-    [applyDashboardData]
-  );
-
-  const initializeSelection = useCallback(async () => {
-    setLoading(true);
-    try {
-      const savedLoc = await getStoredLocation();
-      const locs = await getLocationsWithJoinableRallyes();
-      setLocations(locs);
-      setOnline(true);
-
-      const storedLoc = savedLoc
-        ? locs.find((location) => location.id === savedLoc.id)
-        : null;
-      const autoSelectedLoc = locs.length === 1 ? locs[0] : null;
-      const locationToSelect = storedLoc ?? autoSelectedLoc;
-
-      if (locationToSelect) {
-        if (!storedLoc && autoSelectedLoc) {
-          Logger.debug(
-            'AutoSelect',
-            'Only one location available, auto-selecting'
-          );
-        }
-
-        setSelectedLocation(locationToSelect);
-        await storeSelectedLocation(locationToSelect);
-        await loadDashboardData(locationToSelect.id);
-        setSelectionStep('dashboard');
-      } else {
-        if (savedLoc) {
-          await clearSelectedLocation();
-        }
-        setSelectedLocation(null);
-        resetDashboard();
-        setSelectionStep('location');
-      }
-    } catch (error) {
-      Logger.error('Welcome', 'Error initializing selection', error);
-      setOnline(false);
-      setSelectionStep('location');
-    } finally {
-      setLoading(false);
-      isInitializedRef.current = true;
-    }
-  }, [loadDashboardData, resetDashboard]);
-
-  useEffect(() => {
-    void initializeSelection();
-  }, [initializeSelection]);
-
-  const refreshCurrentData = useEffectEvent(async () => {
-    if (loading || !isInitializedRef.current) return;
-    if (store$.enabled.get()) return;
-    if (appStateRef.current !== 'active') return;
-    if (getRallyeCodeSheetSession()) return;
-
-    try {
-      const locs = await getLocationsWithJoinableRallyes();
-      setLocations(locs);
-      setOnline(true);
-
-      if (selectionStep === 'location') return;
-
-      if (!selectedLocation) {
-        setSelectionStep('location');
-        return;
-      }
-
-      const locStillValid = locs.find(
-        (location) => location.id === selectedLocation.id
-      );
-
-      if (!locStillValid) {
-        await clearSelectedLocation();
-        setSelectedLocation(null);
-        resetDashboard();
-        setSelectionStep('location');
-        return;
-      }
-
-      setSelectedLocation((currentLocation) => {
-        if (
-          currentLocation &&
-          currentLocation.id === locStillValid.id &&
-          currentLocation.name === locStillValid.name &&
-          currentLocation.default_rallye_id ===
-            locStillValid.default_rallye_id &&
-          currentLocation.created_at === locStillValid.created_at
-        ) {
-          return currentLocation;
-        }
-
-        return locStillValid;
-      });
-      await loadDashboardData(locStillValid.id);
-    } catch (error) {
-      Logger.error('AutoRefresh', 'Error refreshing data', error);
-    }
-  });
-
-  // Effect Events are intentionally non-reactive and must stay out of deps.
-  useEffect(() => {
-    if (
-      loading ||
-      !isInitializedRef.current ||
-      initialSyncScheduledRef.current
-    ) {
-      return;
-    }
-
-    initialSyncScheduledRef.current = true;
-
-    const initialSyncTimeout = setTimeout(() => {
-      void refreshCurrentData();
-    }, 2000);
-
-    return () => {
-      clearTimeout(initialSyncTimeout);
-    };
-  }, [loading]);
-
-  // Effect Events are intentionally non-reactive and must stay out of deps.
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      void refreshCurrentData();
-    }, AUTO_REFRESH_INTERVAL);
-
-    const appStateSubscription = AppState.addEventListener(
-      'change',
-      (nextAppState) => {
-        if (
-          appStateRef.current.match(/inactive|background/) &&
-          nextAppState === 'active'
-        ) {
-          void refreshCurrentData();
-        }
-        appStateRef.current = nextAppState;
-      }
-    );
-
-    return () => {
-      clearInterval(intervalId);
-      appStateSubscription.remove();
-    };
-  }, []);
-
-  const handleLocationSelect = async (location: Location) => {
-    setSelectedLocation(location);
-    setLoading(true);
-    try {
-      await storeSelectedLocation(location);
-      await loadDashboardData(location.id);
-      setSelectionStep('dashboard');
-    } catch (error) {
-      Logger.error('Welcome', 'Error loading location dashboard', error);
-      Alert.alert(t('common.errorTitle'), t('welcome.departmentLoadError'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBack = async () => {
-    if (selectionStep !== 'dashboard') return;
-    await clearSelectedLocation();
-    setSelectedLocation(null);
-    resetDashboard();
-    setSelectionStep('location');
-  };
 
   const handleTourModeSubmit = async () => {
     if (!dashboardData.tourModeRallye) {
