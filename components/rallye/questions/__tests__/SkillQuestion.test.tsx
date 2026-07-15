@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import SkillQuestion from '../SkillQuestion';
 import type { Question } from '@/types/rallye';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
@@ -114,5 +114,106 @@ describe('SkillQuestion', () => {
     const { getByText } = render(<SkillQuestion question={baseQuestion} />);
 
     expect(getByText('Wie viele Studiengänge gibt es?')).toBeTruthy();
+  });
+
+  it('awards the full point value for a correct answer', async () => {
+    const { getByPlaceholderText, getByText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+
+    fireEvent.changeText(
+      getByPlaceholderText('question.placeholder.answer'),
+      'Zwölf'
+    );
+    fireEvent.press(getByText('question.submit'));
+
+    await waitFor(() =>
+      expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
+        teamId: 1,
+        questionId: 42,
+        pointsAwarded: 10,
+        answerText: 'Zwölf',
+      })
+    );
+  });
+
+  it('awards zero points for a wrong answer but still submits', async () => {
+    const { getByPlaceholderText, getByText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+
+    fireEvent.changeText(
+      getByPlaceholderText('question.placeholder.answer'),
+      'Drei'
+    );
+    fireEvent.press(getByText('question.submit'));
+
+    await waitFor(() =>
+      expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
+        teamId: 1,
+        questionId: 42,
+        pointsAwarded: 0,
+        answerText: 'Drei',
+      })
+    );
+  });
+
+  it('grades case-insensitively and ignores surrounding whitespace', async () => {
+    const { getByPlaceholderText, getByText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+
+    fireEvent.changeText(
+      getByPlaceholderText('question.placeholder.answer'),
+      '  zWÖLF  '
+    );
+    fireEvent.press(getByText('question.submit'));
+
+    await waitFor(() =>
+      expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
+        teamId: 1,
+        questionId: 42,
+        pointsAwarded: 10,
+        answerText: 'zWÖLF',
+      })
+    );
+  });
+
+  it('does not submit when the confirmation is declined', async () => {
+    jest.mocked(confirmAnswer).mockResolvedValue(false);
+    const { getByPlaceholderText, getByText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+
+    fireEvent.changeText(
+      getByPlaceholderText('question.placeholder.answer'),
+      'Zwölf'
+    );
+    fireEvent.press(getByText('question.submit'));
+
+    await waitFor(() => expect(confirmAnswer).toHaveBeenCalled());
+    expect(submitAnswerAndAdvance).not.toHaveBeenCalled();
+  });
+
+  it('submits with a null teamId in tour mode', async () => {
+    mockTeam = null;
+    const { getByPlaceholderText, getByText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+
+    fireEvent.changeText(
+      getByPlaceholderText('question.placeholder.answer'),
+      'Zwölf'
+    );
+    fireEvent.press(getByText('question.submit'));
+
+    await waitFor(() =>
+      expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
+        teamId: null,
+        questionId: 42,
+        pointsAwarded: 10,
+        answerText: 'Zwölf',
+      })
+    );
   });
 });
