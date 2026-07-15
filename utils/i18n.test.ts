@@ -7,4 +7,14 @@ describe('translations', () => {
   it('defines the same keys in German and English', () => {
     expect(deKeys).toEqual(enKeys);
   });
+
+  it('has no English key missing from German', () => {
+    const missingInDe = enKeys.filter((key) => !deKeys.includes(key));
+    expect(missingInDe).toEqual([]);
+  });
+
+  it('has no German key missing from English', () => {
+    const missingInEn = deKeys.filter((key) => !enKeys.includes(key));
+    expect(missingInEn).toEqual([]);
+  });
 });
