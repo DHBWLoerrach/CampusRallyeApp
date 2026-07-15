@@ -174,8 +174,7 @@ export default function Scoreboard() {
           ) : (
             rows.map((team) => {
               const isOurTeam =
-                ourTeam?.id !== undefined &&
-                String(team.id) === String(ourTeam.id);
+                ourTeam?.id !== undefined && team.id === ourTeam.id;
               const ownDurationText =
                 isOurTeam && team.time_spent != null
                   ? t('scoreboard.ownDuration', {
