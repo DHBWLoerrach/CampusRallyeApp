@@ -79,15 +79,25 @@ export default function Scoreboard() {
           .in('team_id', teamIds);
         if (pointsError) throw pointsError;
 
-        let combined = teamRows.map((t) => {
-          const pts = (teamPoints || []).filter((p: any) => p.team_id === t.id);
-          const total_points = pts.reduce(
-            (acc: number, cur: any) => acc + cur.team_points,
-            0
+        const pointsByTeamId = new Map<TeamRow['id'], number>();
+        for (const row of (teamPoints || []) as {
+          team_id: TeamRow['id'];
+          team_points: number;
+        }[]) {
+          pointsByTeamId.set(
+            row.team_id,
+            (pointsByTeamId.get(row.team_id) ?? 0) + row.team_points
           );
-          const time_spent = calculateDuration(t.created_at, t.play_time);
-          return { ...t, total_points, time_spent } as TeamRow;
-        });
+        }
+
+        let combined = teamRows.map(
+          (t) =>
+            ({
+              ...t,
+              total_points: pointsByTeamId.get(t.id) ?? 0,
+              time_spent: calculateDuration(t.created_at, t.play_time),
+            }) as TeamRow
+        );
 
         combined.sort((a, b) => (b.total_points ?? 0) - (a.total_points ?? 0));
 
