@@ -7,7 +7,11 @@ jest.mock('@/utils/Supabase', () => ({
 }));
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getCurrentTeam, setCurrentTeam } from '../teamStorage';
+import {
+  clearCurrentTeam,
+  getCurrentTeam,
+  setCurrentTeam,
+} from '../teamStorage';
 
 type QueryConstraint = {
   column: string;
@@ -110,5 +114,27 @@ describe('teamStorage cache', () => {
       'team_7',
       JSON.stringify(team)
     );
+  });
+
+  it('removes the stored team for a rallye', async () => {
+    const team = { id: 5, name: 'Team X', rallye_id: 7 };
+    await setCurrentTeam(7, team);
+
+    await clearCurrentTeam(7);
+
+    await expect(getCurrentTeam(7)).resolves.toBeNull();
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith('team_7');
+  });
+
+  it('ignores cache operations without a rallye id', async () => {
+    const team = { id: 5, name: 'Team X', rallye_id: 7 };
+
+    await expect(getCurrentTeam(0)).resolves.toBeNull();
+    await expect(setCurrentTeam(0, team)).resolves.toBeNull();
+    await expect(clearCurrentTeam(0)).resolves.toBeNull();
+
+    expect(AsyncStorage.getItem).not.toHaveBeenCalled();
+    expect(AsyncStorage.setItem).not.toHaveBeenCalled();
+    expect(AsyncStorage.removeItem).not.toHaveBeenCalled();
   });
 });
