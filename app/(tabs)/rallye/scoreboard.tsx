@@ -52,6 +52,7 @@ export default function Scoreboard() {
   const rallyeStatus = rallye?.status;
   const ourTeam = useSelector(() => store$.team.get());
   const [rows, setRows] = useState<TeamRow[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
   const s = useAppStyles();
@@ -62,19 +63,21 @@ export default function Scoreboard() {
       return;
     (async () => {
       try {
-        let { data } = await supabase
+        setLoadError(false);
+        const { data, error: teamsError } = await supabase
           .from('teams')
           .select('id, name, created_at, play_time')
           .eq('rallye_id', rallyeId);
+        if (teamsError) throw teamsError;
         const teamRows = (data || []) as TeamRow[];
 
         const teamIds = teamRows.map((t) => t.id);
 
-        const { data: teamPoints, error } = await supabase
+        const { data: teamPoints, error: pointsError } = await supabase
           .from('team_answers')
           .select('team_id, team_points')
           .in('team_id', teamIds);
-        if (error) throw error;
+        if (pointsError) throw pointsError;
 
         let combined = teamRows.map((t) => {
           const pts = (teamPoints || []).filter((p: any) => p.team_id === t.id);
@@ -104,6 +107,8 @@ export default function Scoreboard() {
         setRows(combined);
       } catch (e) {
         console.error('Error loading scoreboard:', e);
+        setRows([]);
+        setLoadError(true);
       }
     })();
   }, [rallyeId, rallyeStatus]);
@@ -154,94 +159,102 @@ export default function Scoreboard() {
         </View>
 
         <ScrollView style={{ backgroundColor: palette.surface1 }}>
-          {rows.map((team) => {
-            const isOurTeam =
-              ourTeam?.id !== undefined &&
-              String(team.id) === String(ourTeam.id);
-            const ownDurationText =
-              isOurTeam && team.time_spent != null
-                ? t('scoreboard.ownDuration', {
-                    time: formatOwnDuration(team.time_spent, t),
-                  })
-                : null;
-            const baseRowLabel = t('scoreboard.rowLabel', {
-              rank: team.rank ?? '-',
-              team: team.group_name ?? '-',
-              points: team.total_points ?? '-',
-            });
-            const rowLabel = ownDurationText
-              ? `${baseRowLabel}, ${ownDurationText}`
-              : baseRowLabel;
-            const highlightAccent = isDarkMode
-              ? 'rgba(226, 0, 26, 0.35)'
-              : Colors.dhbwRed;
-            const highlightBackground = isDarkMode
-              ? 'rgba(226, 0, 26, 0.03)'
-              : 'rgba(226, 0, 26, 0.025)';
-            return (
-              <View
-                key={team.id}
-                accessible
-                accessibilityLabel={rowLabel}
-                style={[
-                  globalStyles.scoreboardStyles.row,
-                  s.listRow,
-                  isOurTeam && {
-                    backgroundColor: highlightBackground,
-                    borderLeftWidth: 3,
-                    borderLeftColor: highlightAccent,
-                    paddingLeft: 12,
-                  },
-                ]}
-              >
-                <ThemedText
+          {loadError ? (
+            <ThemedText style={[s.text, { padding: 16, textAlign: 'center' }]}>
+              {t('scoreboard.error.load')}
+            </ThemedText>
+          ) : (
+            rows.map((team) => {
+              const isOurTeam =
+                ourTeam?.id !== undefined &&
+                String(team.id) === String(ourTeam.id);
+              const ownDurationText =
+                isOurTeam && team.time_spent != null
+                  ? t('scoreboard.ownDuration', {
+                      time: formatOwnDuration(team.time_spent, t),
+                    })
+                  : null;
+              const baseRowLabel = t('scoreboard.rowLabel', {
+                rank: team.rank ?? '-',
+                team: team.group_name ?? '-',
+                points: team.total_points ?? '-',
+              });
+              const rowLabel = ownDurationText
+                ? `${baseRowLabel}, ${ownDurationText}`
+                : baseRowLabel;
+              const highlightAccent = isDarkMode
+                ? 'rgba(226, 0, 26, 0.35)'
+                : Colors.dhbwRed;
+              const highlightBackground = isDarkMode
+                ? 'rgba(226, 0, 26, 0.03)'
+                : 'rgba(226, 0, 26, 0.025)';
+              return (
+                <View
+                  key={team.id}
+                  accessible
+                  accessibilityLabel={rowLabel}
                   style={[
-                    globalStyles.scoreboardStyles.cell,
-                    s.text,
-                    isOurTeam && { fontWeight: '700' },
+                    globalStyles.scoreboardStyles.row,
+                    s.listRow,
+                    isOurTeam && {
+                      backgroundColor: highlightBackground,
+                      borderLeftWidth: 3,
+                      borderLeftColor: highlightAccent,
+                      paddingLeft: 12,
+                    },
                   ]}
                 >
-                  {team.rank === 1
-                    ? '🥇'
-                    : team.rank === 2
-                      ? '🥈'
-                      : team.rank === 3
-                        ? '🥉'
-                        : team.rank}
-                </ThemedText>
-                <ThemedText
-                  style={[
-                    globalStyles.scoreboardStyles.cellWide,
-                    s.text,
-                    isOurTeam && globalStyles.scoreboardStyles.cellHighlighted,
-                  ]}
-                >
-                  {team.group_name}
-                </ThemedText>
+                  <ThemedText
+                    style={[
+                      globalStyles.scoreboardStyles.cell,
+                      s.text,
+                      isOurTeam && { fontWeight: '700' },
+                    ]}
+                  >
+                    {team.rank === 1
+                      ? '🥇'
+                      : team.rank === 2
+                        ? '🥈'
+                        : team.rank === 3
+                          ? '🥉'
+                          : team.rank}
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      globalStyles.scoreboardStyles.cellWide,
+                      s.text,
+                      isOurTeam &&
+                        globalStyles.scoreboardStyles.cellHighlighted,
+                    ]}
+                  >
+                    {team.group_name}
+                  </ThemedText>
 
-                <ThemedText
-                  style={[
-                    globalStyles.scoreboardStyles.cell,
-                    s.text,
-                    isOurTeam && globalStyles.scoreboardStyles.cellHighlighted,
-                    isOurTeam && { fontWeight: '700' },
-                  ]}
-                >
-                  {team.total_points}
-                  {ownDurationText ? (
-                    <>
-                      {'\n'}
-                      <ThemedText
-                        style={[s.muted, { fontSize: 12, opacity: 0.7 }]}
-                      >
-                        {ownDurationText}
-                      </ThemedText>
-                    </>
-                  ) : null}
-                </ThemedText>
-              </View>
-            );
-          })}
+                  <ThemedText
+                    style={[
+                      globalStyles.scoreboardStyles.cell,
+                      s.text,
+                      isOurTeam &&
+                        globalStyles.scoreboardStyles.cellHighlighted,
+                      isOurTeam && { fontWeight: '700' },
+                    ]}
+                  >
+                    {team.total_points}
+                    {ownDurationText ? (
+                      <>
+                        {'\n'}
+                        <ThemedText
+                          style={[s.muted, { fontSize: 12, opacity: 0.7 }]}
+                        >
+                          {ownDurationText}
+                        </ThemedText>
+                      </>
+                    ) : null}
+                  </ThemedText>
+                </View>
+              );
+            })
+          )}
         </ScrollView>
       </View>
     </ScreenScrollView>
