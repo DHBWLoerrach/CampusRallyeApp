@@ -191,7 +191,8 @@ export async function getQuestionsWithGeocachingMetadata(
   });
 }
 
-export async function getRallyeDynamicFields(
+/** Fetches the rallye fields that can change while a rallye runs. Returns null on error. */
+export async function getRefreshableRallyeFields(
   rallyeId: number
 ): Promise<Pick<RallyeDbRow, 'status' | 'rallye_end' | 'name'> | null> {
   const { data, error } = await supabase
