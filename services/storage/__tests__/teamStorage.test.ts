@@ -11,7 +11,9 @@ import {
   clearCurrentTeam,
   createTeam,
   getCurrentTeam,
+  getTeamsByRallye,
   setCurrentTeam,
+  setPlayTime,
   teamExists,
 } from '../teamStorage';
 
@@ -223,5 +225,73 @@ describe('teamStorage.teamExists', () => {
     await expect(teamExists(0, 5)).resolves.toBe('missing');
     await expect(teamExists(7, 0)).resolves.toBe('missing');
     expect(mockFrom).not.toHaveBeenCalled();
+  });
+});
+
+describe('teamStorage.setPlayTime', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('updates the matching team and resolves even when Supabase reports an error', async () => {
+    useTableHandlers({
+      teams: (context) => {
+        expect(context.terminal).toBe('then');
+        expect(context.constraints).toEqual([
+          { column: 'id', value: 5 },
+          { column: 'rallye_id', value: 7 },
+        ]);
+        expect(context.update).toEqual({
+          play_time: expect.any(String),
+        });
+        const playTime = (context.update as { play_time: string }).play_time;
+        expect(new Date(playTime).getTime()).not.toBeNaN();
+        return { data: null, error: { message: 'denied' } };
+      },
+    });
+
+    // Intentional characterization of the current silent-failure contract.
+    await expect(setPlayTime(7, 5)).resolves.toBeUndefined();
+  });
+});
+
+describe('teamStorage.getTeamsByRallye', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns teams for the requested rallye', async () => {
+    const teams = [
+      { id: 5, name: 'Team X', rallye_id: 7 },
+      { id: 6, name: 'Team Y', rallye_id: 7 },
+    ];
+    useTableHandlers({
+      teams: (context) => {
+        expect(context.select).toBe('*');
+        expect(context.constraints).toEqual([
+          { column: 'rallye_id', value: 7 },
+        ]);
+        return { data: teams, error: null };
+      },
+    });
+
+    await expect(getTeamsByRallye(7)).resolves.toEqual(teams);
+  });
+
+  it('returns an empty list when Supabase has no data', async () => {
+    useTableHandlers({
+      teams: () => ({ data: null, error: null }),
+    });
+
+    await expect(getTeamsByRallye(7)).resolves.toEqual([]);
+  });
+
+  it('rejects when loading teams fails', async () => {
+    const error = new Error('boom');
+    useTableHandlers({
+      teams: () => ({ data: null, error }),
+    });
+
+    await expect(getTeamsByRallye(7)).rejects.toBe(error);
   });
 });
