@@ -9,6 +9,7 @@ jest.mock('@/utils/Supabase', () => ({
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   clearCurrentTeam,
+  createTeam,
   getCurrentTeam,
   setCurrentTeam,
 } from '../teamStorage';
@@ -136,5 +137,36 @@ describe('teamStorage cache', () => {
     expect(AsyncStorage.getItem).not.toHaveBeenCalled();
     expect(AsyncStorage.setItem).not.toHaveBeenCalled();
     expect(AsyncStorage.removeItem).not.toHaveBeenCalled();
+  });
+});
+
+describe('teamStorage.createTeam', () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+    jest.clearAllMocks();
+  });
+
+  it('returns and caches a newly created team', async () => {
+    const team = { id: 5, name: 'Team X', rallye_id: 7 };
+    useTableHandlers({
+      teams: (context) => {
+        expect(context.terminal).toBe('single');
+        expect(context.insert).toEqual({ name: 'Team X', rallye_id: 7 });
+        return { data: team, error: null };
+      },
+    });
+
+    await expect(createTeam('Team X', 7)).resolves.toEqual(team);
+    await expect(getCurrentTeam(7)).resolves.toEqual(team);
+  });
+
+  it('rejects a failed creation without caching a team', async () => {
+    const error = new Error('boom');
+    useTableHandlers({
+      teams: () => ({ data: null, error }),
+    });
+
+    await expect(createTeam('Team X', 7)).rejects.toBe(error);
+    await expect(getCurrentTeam(7)).resolves.toBeNull();
   });
 });
