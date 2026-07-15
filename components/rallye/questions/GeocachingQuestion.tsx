@@ -31,7 +31,7 @@ import { useKeyboard } from '@/utils/useKeyboard';
 import { confirmAnswer, confirm } from '@/utils/ConfirmAlert';
 import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import Colors from '@/utils/Colors';
-import Logger from '@/utils/Logger';
+import { Logger } from '@/utils/Logger';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import ThemedTextInput from '@/components/themed/ThemedTextInput';
