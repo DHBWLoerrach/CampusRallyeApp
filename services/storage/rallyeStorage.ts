@@ -15,6 +15,7 @@ import {
   RallyeStatus,
   AnswerRow,
   Question,
+  TeamId,
 } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
@@ -127,7 +128,7 @@ export async function getSolutionOptions(
 }
 
 export async function getAnsweredQuestionIds(
-  teamId: number
+  teamId: TeamId
 ): Promise<number[]> {
   const { data, error } = await supabase
     .from('team_answers')

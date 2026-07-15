@@ -1,4 +1,5 @@
 import { supabase } from '@/utils/Supabase';
+import type { TeamId } from '@/types/rallye';
 
 export type VotingQuestionJoinRow = {
   question_id: number;
@@ -9,20 +10,20 @@ export type VotingQuestionJoinRow = {
 };
 
 export type VotingTeamRow = {
-  id: number;
+  id: TeamId;
   name?: string | null;
   team_name?: string | null;
 };
 
 export type VotingTeamAnswerRow = {
   question_id: number;
-  team_id: number;
+  team_id: TeamId;
   answer: string | null;
 };
 
 export type VotedQuestionRow = { question_id: number };
 
-export async function getVotingSourceData(rallyeId: number, teamId: number) {
+export async function getVotingSourceData(rallyeId: number, teamId: TeamId) {
   const [questionResponse, teamResponse, votedQuestionResponse] =
     await Promise.all([
       supabase
@@ -50,7 +51,7 @@ export async function getVotingSourceData(rallyeId: number, teamId: number) {
 
 export async function getTeamAnswersForQuestions(
   questionIds: number[],
-  teamIds: number[]
+  teamIds: TeamId[]
 ): Promise<VotingTeamAnswerRow[]> {
   const { data, error } = await supabase
     .from('team_answers')
@@ -69,8 +70,8 @@ export async function castVote({
 }: {
   rallyeId: number;
   questionId: number;
-  votingTeamId: number;
-  votedForTeamId: number;
+  votingTeamId: TeamId;
+  votedForTeamId: TeamId;
 }): Promise<void> {
   const { error } = await supabase.rpc('cast_voting_vote', {
     rallye_id_param: rallyeId,
