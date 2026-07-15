@@ -1,11 +1,12 @@
 import { supabase } from '@/utils/Supabase';
 import { File } from 'expo-file-system';
 import { enqueueSaveAnswer } from './offlineOutbox';
+import type { TeamId } from '@/types/rallye';
 
 export type SaveAnswerResult = { status: 'sent' | 'queued' };
 
 export async function saveAnswer(
-  teamId: number,
+  teamId: TeamId,
   questionId: number,
   teamPoints: number,
   answer: string = ''
@@ -45,7 +46,7 @@ export async function uploadPhotoAnswer({
   questionId,
 }: {
   imageUri: string;
-  teamId: number;
+  teamId: TeamId;
   questionId: number;
 }): Promise<{ filePath: string }> {
   // Use the new expo-file-system File API (SDK 54+)

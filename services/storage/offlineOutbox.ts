@@ -3,16 +3,17 @@ import NetInfo from '@react-native-community/netinfo';
 import { observable } from '@legendapp/state';
 import { supabase } from '@/utils/Supabase';
 import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
+import type { TeamId } from '@/types/rallye';
 
 export type SaveAnswerPayload = {
-  team_id: number;
+  team_id: TeamId;
   question_id: number;
   team_points: number;
   answer: string;
 };
 
 type LegacySaveAnswerPayload = {
-  team_id: number;
+  team_id: TeamId;
   question_id: number;
   points: number;
   team_answer: string;

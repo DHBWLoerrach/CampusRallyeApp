@@ -114,28 +114,28 @@ describe('Scoreboard', () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'Alpha',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
       },
       {
-        id: '2',
+        id: 2,
         name: 'Beta',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:30:00Z',
       },
       {
-        id: '3',
+        id: 3,
         name: 'Gamma',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T12:00:00Z',
       },
     ];
     mockPoints = [
-      { team_id: '1', team_points: 30 },
-      { team_id: '2', team_points: 20 },
-      { team_id: '3', team_points: 10 },
+      { team_id: 1, team_points: 30 },
+      { team_id: 2, team_points: 20 },
+      { team_id: 3, team_points: 10 },
     ];
 
     const { getByText } = render(<Scoreboard />);
@@ -152,19 +152,19 @@ describe('Scoreboard', () => {
     mockRallye = { id: 1, name: 'R', status: 'results' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'A',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T12:00:00Z',
       },
       {
-        id: '2',
+        id: 2,
         name: 'B',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T10:30:00Z',
       },
       {
-        id: '3',
+        id: 3,
         name: 'C',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
@@ -173,9 +173,9 @@ describe('Scoreboard', () => {
     // A and B tie on points despite different play time; C has fewer points
     // and must land on rank 2, not 3 (dense ranking, no skipped rank).
     mockPoints = [
-      { team_id: '1', team_points: 10 },
-      { team_id: '2', team_points: 10 },
-      { team_id: '3', team_points: 5 },
+      { team_id: 1, team_points: 10 },
+      { team_id: 2, team_points: 10 },
+      { team_id: 3, team_points: 5 },
     ];
 
     const { getAllByText, getByText } = render(<Scoreboard />);
@@ -189,24 +189,24 @@ describe('Scoreboard', () => {
 
   it('highlights own team row', async () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
-    mockTeam = { id: '2', name: 'MyTeam' };
+    mockTeam = { id: 2, name: 'MyTeam' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'Other',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
       },
       {
-        id: '2',
+        id: 2,
         name: 'MyTeam',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
       },
     ];
     mockPoints = [
-      { team_id: '1', team_points: 20 },
-      { team_id: '2', team_points: 10 },
+      { team_id: 1, team_points: 20 },
+      { team_id: 2, team_points: 10 },
     ];
 
     const { getAllByText, getByText, queryByText } = render(<Scoreboard />);
@@ -221,24 +221,24 @@ describe('Scoreboard', () => {
 
   it('shows the own team play time as a retrospective, not for other teams', async () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
-    mockTeam = { id: '2', name: 'MyTeam' };
+    mockTeam = { id: 2, name: 'MyTeam' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'Other',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
       },
       {
-        id: '2',
+        id: 2,
         name: 'MyTeam',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T10:47:00Z',
       },
     ];
     mockPoints = [
-      { team_id: '1', team_points: 20 },
-      { team_id: '2', team_points: 10 },
+      { team_id: 1, team_points: 20 },
+      { team_id: 2, team_points: 10 },
     ];
 
     const { getAllByText } = render(<Scoreboard />);
@@ -254,13 +254,13 @@ describe('Scoreboard', () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'Solo',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
       },
     ];
-    mockPoints = [{ team_id: '1', team_points: 42 }];
+    mockPoints = [{ team_id: 1, team_points: 42 }];
 
     const { getByText } = render(<Scoreboard />);
     await act(async () => {
@@ -276,7 +276,7 @@ describe('Scoreboard', () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'Hidden Team',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
@@ -305,15 +305,15 @@ describe('Scoreboard', () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'Sum Team',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',
       },
     ];
     mockPoints = [
-      { team_id: '1', team_points: 10 },
-      { team_id: '1', team_points: 5 },
+      { team_id: 1, team_points: 10 },
+      { team_id: 1, team_points: 5 },
     ];
 
     const { getByText } = render(<Scoreboard />);
@@ -328,7 +328,7 @@ describe('Scoreboard', () => {
     mockRallye = { id: 1, name: 'R', status: 'ended' };
     mockTeams = [
       {
-        id: '1',
+        id: 1,
         name: 'Zero Team',
         created_at: '2024-01-01T10:00:00Z',
         play_time: '2024-01-01T11:00:00Z',

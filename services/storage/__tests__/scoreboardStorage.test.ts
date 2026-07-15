@@ -6,10 +6,8 @@ jest.mock('@/utils/Supabase', () => ({
 
 import { getScoreboardData } from '../scoreboardStorage';
 
-const teams = [
-  { id: '1', name: 'A', created_at: '2024-01-01', play_time: null },
-];
-const points = [{ team_id: '1', team_points: 5 }];
+const teams = [{ id: 1, name: 'A', created_at: '2024-01-01', play_time: null }];
+const points = [{ team_id: 1, team_points: 5 }];
 
 function useResults(teamsResult: unknown, pointsResult: unknown) {
   const teamsEq = jest.fn(() => Promise.resolve(teamsResult));
@@ -35,7 +33,7 @@ describe('scoreboardStorage', () => {
     expect(mockFrom).toHaveBeenNthCalledWith(1, 'teams');
     expect(mockFrom).toHaveBeenNthCalledWith(2, 'team_answers');
     expect(teamsEq).toHaveBeenCalledWith('rallye_id', 7);
-    expect(pointsIn).toHaveBeenCalledWith('team_id', ['1']);
+    expect(pointsIn).toHaveBeenCalledWith('team_id', [1]);
   });
 
   it('skips the points query when there are no teams', async () => {

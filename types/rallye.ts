@@ -86,8 +86,11 @@ export interface Rallye extends RallyeDbRow {
   mode: RallyeMode;
 }
 
+/** Primary key of a team (`teams.id`). Numeric — see `Team`. */
+export type TeamId = number;
+
 export interface Team {
-  id: number;
+  id: TeamId;
   name: string;
   rallye_id?: number;
   points?: number;

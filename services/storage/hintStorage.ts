@@ -3,13 +3,14 @@ import {
   setStorageItem,
   StorageKeys,
 } from '@/services/storage/asyncStorage';
+import type { TeamId } from '@/types/rallye';
 
 /** Cost of using a hint in points. */
 export const HINT_COST = 1;
 
 export type HintScope = {
   rallyeId: number;
-  teamId: number;
+  teamId: TeamId;
   questionId: number;
 };
 

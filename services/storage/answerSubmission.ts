@@ -5,12 +5,13 @@ import {
   uploadPhotoAnswer,
 } from '@/services/storage/answerStorage';
 import { applyHintCost, hasUsedHint } from '@/services/storage/hintStorage';
+import type { TeamId } from '@/types/rallye';
 
 export type SubmitOutcome =
   { status: 'local' } | { status: 'sent' } | { status: 'queued' };
 
 async function getEffectivePoints(options: {
-  teamId: number | null;
+  teamId: TeamId | null;
   questionId: number;
   pointsAwarded: number;
 }): Promise<number> {
@@ -35,7 +36,7 @@ async function getEffectivePoints(options: {
 }
 
 export async function submitAnswerAndAdvance(options: {
-  teamId: number | null;
+  teamId: TeamId | null;
   questionId: number;
   pointsAwarded: number;
   answerText?: string;
@@ -73,7 +74,7 @@ export type SubmitPhotoOutcome =
   { status: 'sent' } | { status: 'queued' } | { status: 'requires_online' };
 
 export async function submitPhotoAnswerAndAdvance(options: {
-  teamId: number | null;
+  teamId: TeamId | null;
   questionId: number;
   pointsAwarded: number;
   imageUri: string;

@@ -1,4 +1,5 @@
 import { supabase } from '@/utils/Supabase';
+import type { TeamId } from '@/types/rallye';
 import {
   StorageKeys,
   getStorageItem,
@@ -24,7 +25,7 @@ export async function clearCurrentTeam(rallyeId: number) {
   return removeStorageItem(`${StorageKeys.TEAM}_${rallyeId}`);
 }
 
-export async function setPlayTime(rallyeId: number, teamId: number) {
+export async function setPlayTime(rallyeId: number, teamId: TeamId) {
   await supabase
     .from('teams')
     .update({ play_time: new Date().toISOString() })
@@ -54,7 +55,7 @@ export async function getTeamsByRallye(rallyeId: number) {
 
 export async function teamExists(
   rallyeId: number,
-  teamId: number
+  teamId: TeamId
 ): Promise<TeamExistsResult> {
   if (!rallyeId || !teamId) return 'missing';
   const { data, error } = await supabase

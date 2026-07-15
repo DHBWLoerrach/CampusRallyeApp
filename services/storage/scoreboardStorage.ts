@@ -1,7 +1,8 @@
 import { supabase } from '@/utils/Supabase';
+import type { TeamId } from '@/types/rallye';
 
 export type ScoreboardTeamRow = {
-  id: string;
+  id: TeamId;
   name: string;
   created_at: string;
   play_time: string | null;
