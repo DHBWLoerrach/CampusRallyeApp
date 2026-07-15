@@ -11,12 +11,12 @@ import Colors from '@/utils/Colors';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { useLanguage } from '@/utils/LanguageContext';
 import { getAnswerKeyForQuestion } from '@/utils/answerRows';
-import { confirm } from '@/utils/ConfirmAlert';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
+import { useAnswerSubmission } from './useAnswerSubmission';
 
 export default function QRCodeQuestion({ question }: QuestionProps) {
   const cameraRef = useRef<CameraView | null>(null);
@@ -25,6 +25,7 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const [scanMode, setScanMode] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const { t } = useLanguage();
+  const { surrender } = useAnswerSubmission(question);
   const s = useAppStyles();
 
   const team = store$.team.get();
@@ -32,31 +33,8 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const correct = getAnswerKeyForQuestion(answers, question.id);
   const answerKeyReady = correct.length > 0;
 
-  const submitSurrender = async () => {
-    setScanMode(false);
-    try {
-      await submitAnswerAndAdvance({
-        teamId: team?.id ?? null,
-        questionId: question.id,
-        pointsAwarded: 0,
-      });
-    } catch (e) {
-      console.error('Error submitting surrender:', e);
-      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
-    }
-  };
-
-  const handleSurrender = async () => {
-    const confirmed = await confirm({
-      title: t('confirm.surrender.title'),
-      message: t('confirm.surrender.message'),
-      confirmText: t('confirm.surrender.confirm'),
-      cancelText: t('common.cancel'),
-      destructive: true,
-    });
-    if (!confirmed) return;
-    await submitSurrender();
-  };
+  const handleSurrender = () =>
+    surrender({ onConfirmed: () => setScanMode(false) });
 
   const handleQRCode = ({ data }: { data: string }) => {
     if (processingRef.current) return;

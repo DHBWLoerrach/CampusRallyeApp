@@ -12,7 +12,6 @@ import UIButton from '@/components/ui/UIButton';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
-import { confirm } from '@/utils/ConfirmAlert';
 import ThemedView from '@/components/themed/ThemedView';
 import ThemedText from '@/components/themed/ThemedText';
 import InfoBox from '@/components/ui/InfoBox';
@@ -20,6 +19,7 @@ import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 import { useSelector } from '@legendapp/state/react';
 import { outbox$ } from '@/services/storage/offlineOutbox';
+import { useAnswerSubmission } from './useAnswerSubmission';
 
 type Picture = { uri: string };
 
@@ -208,6 +208,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const mountedRef = useRef(true);
   const [permission, requestPermission] = useCameraPermissions();
   const { t } = useLanguage();
+  const { surrender } = useAnswerSubmission(question);
   const s = useAppStyles();
   const online = useSelector(() => outbox$.online.get());
 
@@ -219,30 +220,11 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
     };
   }, []);
 
-  const submitSurrender = async () => {
-    setPicture(null);
-    try {
-      await submitAnswerAndAdvance({
-        teamId: team?.id ?? null,
-        questionId: question.id,
-        pointsAwarded: 0,
-      });
-    } catch (error) {
-      console.error('Error surrendering:', error);
-      Alert.alert(t('common.errorTitle'), t('question.error.surrender'));
-    }
-  };
-
   const handleSurrender = async () => {
-    const confirmed = await confirm({
-      title: t('confirm.surrender.title'),
-      message: t('confirm.surrender.message'),
-      confirmText: t('confirm.surrender.confirm'),
-      cancelText: t('common.cancel'),
-      destructive: true,
+    await surrender({
+      errorMessageKey: 'question.error.surrender',
+      onConfirmed: () => setPicture(null),
     });
-    if (!confirmed) return;
-    await submitSurrender();
   };
 
   if (!permission) return <View />;
