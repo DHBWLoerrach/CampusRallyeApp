@@ -6,6 +6,28 @@ const globals = require('globals');
 module.exports = defineConfig([
   expoConfig,
   {
+    files: [
+      'app/**/*.{ts,tsx}',
+      'components/**/*.{ts,tsx}',
+      'utils/**/*.{ts,tsx}',
+    ],
+    ignores: ['utils/Supabase.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/utils/Supabase',
+              message:
+                'Access Supabase through services/storage/* instead of querying it from UI code.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: ['dist/*'],
   },
   {
