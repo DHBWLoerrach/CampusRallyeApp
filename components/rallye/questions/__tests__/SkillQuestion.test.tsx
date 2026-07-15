@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import SkillQuestion from '../SkillQuestion';
 import type { Question } from '@/types/rallye';
@@ -110,6 +111,10 @@ describe('SkillQuestion', () => {
     jest.mocked(submitAnswerAndAdvance).mockResolvedValue({ status: 'sent' });
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders the question text', () => {
     const { getByText } = render(<SkillQuestion question={baseQuestion} />);
 
@@ -214,6 +219,66 @@ describe('SkillQuestion', () => {
         pointsAwarded: 10,
         answerText: 'Zwölf',
       })
+    );
+  });
+
+  it('alerts instead of submitting when the answer is empty', () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByPlaceholderText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+
+    fireEvent(
+      getByPlaceholderText('question.placeholder.answer'),
+      'submitEditing'
+    );
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'common.errorTitle',
+      'question.error.enterAnswer'
+    );
+    expect(submitAnswerAndAdvance).not.toHaveBeenCalled();
+  });
+
+  it('alerts instead of submitting while the answer key is still loading', () => {
+    mockAnswers = [];
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByPlaceholderText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+    const input = getByPlaceholderText('question.placeholder.answer');
+
+    fireEvent.changeText(input, 'Zwölf');
+    fireEvent(input, 'submitEditing');
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      'question.error.pleaseWaitTitle',
+      'question.error.answerLoading'
+    );
+    expect(submitAnswerAndAdvance).not.toHaveBeenCalled();
+  });
+
+  it('shows an error alert when submission fails', async () => {
+    jest
+      .mocked(submitAnswerAndAdvance)
+      .mockRejectedValueOnce(new Error('save failed'));
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { getByPlaceholderText, getByText } = render(
+      <SkillQuestion question={baseQuestion} />
+    );
+
+    fireEvent.changeText(
+      getByPlaceholderText('question.placeholder.answer'),
+      'Zwölf'
+    );
+    fireEvent.press(getByText('question.submit'));
+
+    await waitFor(() =>
+      expect(alertSpy).toHaveBeenCalledWith(
+        'common.errorTitle',
+        'question.error.saveAnswer'
+      )
     );
   });
 });
