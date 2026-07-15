@@ -15,7 +15,7 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,css,json}\""
   },
   "dependencies": {
-    "@legendapp/state": "^3.0.0-beta.42",
+    "@legendapp/state": "^3.0.0-beta.48",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "12.0.1",
     "@react-native-vector-icons/fontawesome6": "^13.1.2",
