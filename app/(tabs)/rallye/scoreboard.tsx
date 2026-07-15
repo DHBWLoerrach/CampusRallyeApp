@@ -69,7 +69,6 @@ export default function Scoreboard() {
     let cancelled = false;
     (async () => {
       try {
-        if (cancelled) return;
         setLoadError(false);
         const { teams: teamRows, points: teamPoints } =
           await getScoreboardData(rallyeId);
@@ -112,7 +111,6 @@ export default function Scoreboard() {
         if (cancelled) return;
         console.error('Error loading scoreboard:', e);
         setRows([]);
-        if (cancelled) return;
         setLoadError(true);
       }
     })();
