@@ -10,7 +10,6 @@ import { useLanguage } from '@/utils/LanguageContext';
 import { getAnswerKeyForQuestion } from '@/utils/answerRows';
 import { supabase } from '@/utils/Supabase';
 import { useKeyboard } from '@/utils/useKeyboard';
-import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
 import { store$ } from '@/services/storage/Store';
 import ThemedScrollView from '@/components/themed/ThemedScrollView';
 import ThemedText from '@/components/themed/ThemedText';
@@ -19,11 +18,12 @@ import UIButton from '@/components/ui/UIButton';
 import Hint from '@/components/ui/Hint';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
+import { useAnswerSubmission } from './useAnswerSubmission';
 
 export default function ImageQuestion({ question }: QuestionProps) {
   const { t } = useLanguage();
   const [answer, setAnswer] = useState<string>('');
-  const [submitting, setSubmitting] = useState(false);
+  const { submitting, submit } = useAnswerSubmission(question);
   const pictureUri = useMemo(() => {
     if (!question.bucket_path) return null;
     const result = supabase.storage
@@ -34,30 +34,15 @@ export default function ImageQuestion({ question }: QuestionProps) {
   const s = useAppStyles();
   const { keyboardHeight, keyboardVisible } = useKeyboard();
 
-  const team = store$.team.get();
   const answers = useSelector(() => store$.answers.get() as AnswerRow[]);
   const correct = getAnswerKeyForQuestion(answers, question.id);
   const answerKeyReady = correct.length > 0;
 
   const handlePersist = async () => {
-    if (submitting) return;
-    setSubmitting(true);
     const trimmed = answer.trim();
     const isCorrect = trimmed.toLowerCase() === correct;
-    try {
-      await submitAnswerAndAdvance({
-        teamId: team?.id ?? null,
-        questionId: question.id,
-        pointsAwarded: isCorrect ? question.point_value : 0,
-        answerText: trimmed,
-      });
-      setAnswer('');
-    } catch (e) {
-      console.error('Error submitting answer:', e);
-      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
-    } finally {
-      setSubmitting(false);
-    }
+    const ok = await submit({ isCorrect, answerText: trimmed });
+    if (ok) setAnswer('');
   };
 
   const handleSubmit = async () => {
