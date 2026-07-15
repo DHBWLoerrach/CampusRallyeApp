@@ -191,4 +191,29 @@ describe('useAnswerSubmission', () => {
     expect(onConfirmed).toHaveBeenCalledTimes(1);
     expect(calls).toEqual(['confirm', 'onConfirmed', 'submit']);
   });
+
+  it('prevents concurrent surrender submissions before React rerenders', async () => {
+    let resolveSubmission: (() => void) | undefined;
+    jest.mocked(submitAnswerAndAdvance).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveSubmission = () => resolve({ status: 'sent' });
+        })
+    );
+    const { result } = renderHook(() => useAnswerSubmission(question));
+
+    let outcomes: boolean[] = [];
+    await act(async () => {
+      const first = result.current.surrender();
+      const second = result.current.surrender();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(submitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+      resolveSubmission?.();
+      outcomes = await Promise.all([first, second]);
+    });
+
+    expect(outcomes).toEqual(expect.arrayContaining([true, false]));
+  });
 });

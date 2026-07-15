@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import { store$ } from '@/services/storage/Store';
 import { submitAnswerAndAdvance } from '@/services/storage/answerSubmission';
@@ -22,6 +22,7 @@ type SurrenderOptions = {
 export function useAnswerSubmission(question: Question) {
   const { t } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const teamId = store$.team.get()?.id ?? null;
 
   const submit = useCallback(
@@ -30,7 +31,8 @@ export function useAnswerSubmission(question: Question) {
       answerText,
       errorMessageKey = 'question.error.saveAnswer',
     }: SubmitOptions): Promise<boolean> => {
-      if (submitting) return false;
+      if (submittingRef.current) return false;
+      submittingRef.current = true;
       setSubmitting(true);
       try {
         await submitAnswerAndAdvance({
@@ -49,10 +51,11 @@ export function useAnswerSubmission(question: Question) {
         Alert.alert(t('common.errorTitle'), t(errorMessageKey));
         return false;
       } finally {
+        submittingRef.current = false;
         setSubmitting(false);
       }
     },
-    [question.id, question.point_value, submitting, t, teamId]
+    [question.id, question.point_value, t, teamId]
   );
 
   const surrender = useCallback(
