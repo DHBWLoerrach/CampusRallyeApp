@@ -68,6 +68,8 @@ Voraussetzungen für die Weiterentwicklung dieses Projekts sind folgende:
 
 1. Zum Schluss muss noch die Konfiguration zu Supabase angepasst werden. Dazu ist zunächst die Datei `.env` im Projektverzeichnis zu erstellen. In `.env` müssen zwei Einträge vorgenommen werden:
 
+Als Vorlage dient die Datei `.env.example` im Projektverzeichnis: `cp .env.example .env` und die beiden Werte eintragen.
+
 ```
 EXPO_PUBLIC_SUPABASE_URL=http://SERVER:54321
 EXPO_PUBLIC_SUPABASE_ANON_KEY=SUPABASE_PUBLISHABLE_KEY
