@@ -18,8 +18,8 @@ import { Logger } from '@/utils/Logger';
 import {
   getAnsweredQuestionIds,
   getQuestionsWithGeocachingMetadata,
-  getRallyeDynamicFields,
   getRallyeQuestionIds,
+  getRefreshableRallyeFields,
   getSolutionOptions,
 } from '../rallyeStorage';
 
@@ -111,11 +111,11 @@ describe('rallye query storage', () => {
   it('returns dynamic rallye fields and degrades to null on error', async () => {
     const fields = { status: 'running', rallye_end: null, name: 'R' };
     useResults({ rallyes: { data: fields, error: null } });
-    await expect(getRallyeDynamicFields(2)).resolves.toEqual(fields);
+    await expect(getRefreshableRallyeFields(2)).resolves.toEqual(fields);
 
     const error = new Error('status failed');
     useResults({ rallyes: { data: null, error } });
-    await expect(getRallyeDynamicFields(2)).resolves.toBeNull();
+    await expect(getRefreshableRallyeFields(2)).resolves.toBeNull();
     expect(Logger.error).toHaveBeenCalledWith(
       'RallyeStorage',
       'Error fetching dynamic rallye fields',

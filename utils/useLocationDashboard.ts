@@ -46,20 +46,13 @@ export function useLocationDashboard() {
   const isInitializedRef = useRef(false);
   const initialSyncScheduledRef = useRef(false);
 
-  const applyDashboardData = useCallback(
-    (nextData: LocationDashboardData) => setDashboardData(nextData),
-    []
-  );
   const resetDashboard = useCallback(() => {
     setDashboardData(createEmptyDashboardData());
     clearRallyeCodeSheetSession();
   }, []);
-  const loadDashboardData = useCallback(
-    async (locationId: number) => {
-      applyDashboardData(await getLocationDashboardData(locationId));
-    },
-    [applyDashboardData]
-  );
+  const loadDashboardData = useCallback(async (locationId: number) => {
+    setDashboardData(await getLocationDashboardData(locationId));
+  }, []);
 
   const initializeSelection = useCallback(async () => {
     setLoading(true);

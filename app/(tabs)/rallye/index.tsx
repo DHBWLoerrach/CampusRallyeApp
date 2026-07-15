@@ -6,8 +6,8 @@ import { store$ } from '@/services/storage/Store';
 import {
   getAnsweredQuestionIds,
   getQuestionsWithGeocachingMetadata,
-  getRallyeDynamicFields,
   getRallyeQuestionIds,
+  getRefreshableRallyeFields,
   getSolutionOptions,
 } from '@/services/storage/rallyeStorage';
 import { globalStyles } from '@/utils/GlobalStyles';
@@ -176,7 +176,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     // slight delay to avoid flicker
     await new Promise((r) => setTimeout(r, 600));
     try {
-      const data = await getRallyeDynamicFields(rallyeId);
+      const data = await getRefreshableRallyeFields(rallyeId);
       if (data) {
         store$.rallye.status.set(data.status);
         store$.rallye.rallye_end.set(data.rallye_end);
