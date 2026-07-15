@@ -357,7 +357,7 @@ export default function Welcome() {
     await joinRallye(rallye);
   };
 
-  const LoadingContent = () => (
+  const renderLoadingContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.offline,
@@ -374,7 +374,7 @@ export default function Welcome() {
     </View>
   );
 
-  const OfflineContent = () => (
+  const renderOfflineContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.offline,
@@ -393,7 +393,7 @@ export default function Welcome() {
     </View>
   );
 
-  const LocationContent = () => (
+  const renderLocationContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.container,
@@ -437,7 +437,7 @@ export default function Welcome() {
     !!dashboardData.tourModeRallye ||
     dashboardData.departmentEntries.length > 0;
 
-  const DashboardContent = () => (
+  const renderDashboardContent = () => (
     <View
       style={[
         globalStyles.welcomeStyles.container,
@@ -554,8 +554,8 @@ export default function Welcome() {
   };
 
   const renderCurrentStep = () => {
-    if (selectionStep === 'location') return <LocationContent />;
-    return <DashboardContent />;
+    if (selectionStep === 'location') return renderLocationContent();
+    return renderDashboardContent();
   };
 
   return (
@@ -566,9 +566,9 @@ export default function Welcome() {
       showBackButton={selectionStep === 'dashboard' && locations.length > 1}
       onBackPress={handleBack}
     >
-      {loading && <LoadingContent />}
+      {loading && renderLoadingContent()}
       {!loading && online && renderCurrentStep()}
-      {!loading && !online && <OfflineContent />}
+      {!loading && !online && renderOfflineContent()}
     </CollapsibleHeroHeader>
   );
 }
