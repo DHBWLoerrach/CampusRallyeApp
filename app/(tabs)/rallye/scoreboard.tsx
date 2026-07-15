@@ -67,8 +67,10 @@ export default function Scoreboard() {
   useEffect(() => {
     if (!rallyeId || (rallyeStatus !== 'results' && rallyeStatus !== 'ended'))
       return;
+    let cancelled = false;
     (async () => {
       try {
+        if (cancelled) return;
         setLoadError(false);
         const { data, error: teamsError } = await supabase
           .from('teams')
@@ -120,13 +122,19 @@ export default function Scoreboard() {
           return { ...t, rank: currentRank, group_name: t.name };
         });
 
+        if (cancelled) return;
         setRows(combined);
       } catch (e) {
+        if (cancelled) return;
         console.error('Error loading scoreboard:', e);
         setRows([]);
+        if (cancelled) return;
         setLoadError(true);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [rallyeId, rallyeStatus]);
 
   return (
