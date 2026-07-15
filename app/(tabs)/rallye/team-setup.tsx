@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { observer, useSelector } from '@legendapp/state/react';
-import { supabase } from '@/utils/Supabase';
 import { store$ } from '@/services/storage/Store';
+import { createTeam } from '@/services/storage/teamStorage';
 import { globalStyles } from '@/utils/GlobalStyles';
 import UIButton from '@/components/ui/UIButton';
 import generateTeamName from '@/utils/RandomTeamNames';
-import { setCurrentTeam } from '@/services/storage/teamStorage';
 import ThemedText from '@/components/themed/ThemedText';
 import { useAppStyles } from '@/utils/AppStyles';
 import { Screen } from '@/components/ui/Screen';
@@ -19,20 +18,14 @@ const TeamSetup = observer(function TeamSetup() {
   const { t } = useLanguage();
   const router = useRouter();
   const rallye = useSelector(() => store$.rallye.get());
-  const createTeam = async () => {
+  const createTeamAndContinue = async () => {
     if (!rallye) return;
     setLoading(true);
     const teamName = generateTeamName();
     try {
-      const { data, error } = await supabase
-        .from('teams')
-        .insert({ name: teamName, rallye_id: rallye.id })
-        .select()
-        .single();
-      if (error) throw error;
+      const data = await createTeam(teamName, rallye.id);
       if (data) {
         store$.team.set(data);
-        await setCurrentTeam(rallye.id, data);
         // Briefly confirm the generated team name via the native sheet route.
         router.push('/(tabs)/rallye/team-name-sheet');
       }
@@ -57,7 +50,7 @@ const TeamSetup = observer(function TeamSetup() {
           >
             {t('teamSetup.message')}
           </ThemedText>
-          <UIButton disabled={loading} onPress={createTeam}>
+          <UIButton disabled={loading} onPress={createTeamAndContinue}>
             {t('teamSetup.button')}
           </UIButton>
         </View>

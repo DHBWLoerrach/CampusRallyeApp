@@ -2,13 +2,9 @@ import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import TeamSetup from '../team-setup';
 import { store$ } from '@/services/storage/Store';
-import { setCurrentTeam } from '@/services/storage/teamStorage';
+import { createTeam } from '@/services/storage/teamStorage';
 
 const mockRouterPush = jest.fn();
-const mockSingle = jest.fn(() =>
-  Promise.resolve({ data: { id: 5, name: 'Generated Team' }, error: null })
-);
-
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: mockRouterPush,
@@ -20,20 +16,8 @@ jest.mock('@legendapp/state/react', () => ({
   useSelector: (selector: () => unknown) => selector(),
 }));
 
-jest.mock('@/utils/Supabase', () => ({
-  supabase: {
-    from: jest.fn(() => ({
-      insert: jest.fn(() => ({
-        select: jest.fn(() => ({
-          single: mockSingle,
-        })),
-      })),
-    })),
-  },
-}));
-
 jest.mock('@/services/storage/teamStorage', () => ({
-  setCurrentTeam: jest.fn(() => Promise.resolve()),
+  createTeam: jest.fn(() => Promise.resolve({ id: 5, name: 'Generated Team' })),
 }));
 
 jest.mock('@/utils/RandomTeamNames', () => ({
@@ -109,11 +93,8 @@ describe('TeamSetup', () => {
     fireEvent.press(getByText('teamSetup.button'));
 
     await waitFor(() => {
+      expect(createTeam).toHaveBeenCalledWith('Generated Team', 1);
       expect(store$.team.set).toHaveBeenCalledWith({
-        id: 5,
-        name: 'Generated Team',
-      });
-      expect(setCurrentTeam).toHaveBeenCalledWith(1, {
         id: 5,
         name: 'Generated Team',
       });
