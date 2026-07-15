@@ -6,9 +6,7 @@ jest.mock('@/utils/Supabase', () => ({
 
 import { getScoreboardData } from '../scoreboardStorage';
 
-const teams = [
-  { id: 1, name: 'A', created_at: '2024-01-01', play_time: null },
-];
+const teams = [{ id: 1, name: 'A', created_at: '2024-01-01', play_time: null }];
 const points = [{ team_id: 1, team_points: 5 }];
 
 function useResults(teamsResult: unknown, pointsResult: unknown) {
