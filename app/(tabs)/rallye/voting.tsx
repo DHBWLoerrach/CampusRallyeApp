@@ -8,8 +8,13 @@ import {
 } from 'react-native';
 import { useSelector } from '@legendapp/state/react';
 import { store$ } from '@/services/storage/Store';
+import {
+  castVote,
+  getTeamAnswersForQuestions,
+  getVotingSourceData,
+  type VotingQuestionJoinRow,
+} from '@/services/storage/votingStorage';
 import UIButton from '@/components/ui/UIButton';
-import { supabase } from '@/utils/Supabase';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useLanguage } from '@/utils/LanguageContext';
@@ -19,38 +24,6 @@ import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 import { Screen } from '@/components/ui/Screen';
 import RallyeContextBar from '@/components/rallye/RallyeContextBar';
-
-type QuestionJoinRow = {
-  question_id: number;
-  questions:
-    | {
-        id: number;
-        content: string | null;
-        type: string | null;
-      }
-    | {
-        id: number;
-        content: string | null;
-        type: string | null;
-      }[]
-    | null;
-};
-
-type RallyeTeamRow = {
-  id: number;
-  name?: string | null;
-  team_name?: string | null;
-};
-
-type TeamAnswerRow = {
-  question_id: number;
-  team_id: number;
-  answer: string | null;
-};
-
-type VotedQuestionRow = {
-  question_id: number;
-};
 
 type VotingCandidate = {
   teamId: number;
@@ -68,7 +41,7 @@ type VotingQuestionGroup = {
 type VotingLoadState = 'loading' | 'ready' | 'unavailable' | 'error';
 
 function normalizeQuestionRow(
-  row: QuestionJoinRow
+  row: VotingQuestionJoinRow
 ): Omit<VotingQuestionGroup, 'candidates'> | null {
   const question = Array.isArray(row.questions)
     ? row.questions[0]
@@ -123,28 +96,11 @@ export default function Voting({
       }
 
       try {
-        const [questionResponse, teamResponse, votedQuestionResponse] =
-          await Promise.all([
-            supabase
-              .from('rallye_questions')
-              .select('question_id, questions!inner(id, content, type)')
-              .eq('rallye_id', rallyeId)
-              .eq('is_voting', true),
-            supabase.from('teams').select('id, name').eq('rallye_id', rallyeId),
-            supabase.rpc('get_voted_voting_question_ids', {
-              rallye_id_param: rallyeId,
-              voting_team_id_param: teamId,
-            }),
-          ]);
-
-        if (questionResponse.error) throw questionResponse.error;
-        if (teamResponse.error) throw teamResponse.error;
-        if (votedQuestionResponse.error) throw votedQuestionResponse.error;
-
-        const questionRows = (questionResponse.data || []) as QuestionJoinRow[];
-        const teamRows = (teamResponse.data || []) as RallyeTeamRow[];
-        const votedQuestions = (votedQuestionResponse.data ||
-          []) as VotedQuestionRow[];
+        const {
+          questionRows,
+          teamRows,
+          votedQuestionRows: votedQuestions,
+        } = await getVotingSourceData(rallyeId, teamId);
 
         const questions = questionRows
           .map(normalizeQuestionRow)
@@ -165,15 +121,10 @@ export default function Voting({
           return;
         }
 
-        const { data: answerData, error: answerError } = await supabase
-          .from('team_answers')
-          .select('question_id, team_id, answer')
-          .in(
-            'question_id',
-            questions.map((question) => question.questionId)
-          )
-          .in('team_id', candidateTeamIds);
-        if (answerError) throw answerError;
+        const answerData = await getTeamAnswersForQuestions(
+          questions.map((question) => question.questionId),
+          candidateTeamIds
+        );
 
         const votedQuestionIds = new Set<number>(
           votedQuestions.map((vote) => vote.question_id)
@@ -190,7 +141,7 @@ export default function Voting({
         }
 
         const groupedCandidates = new Map<number, VotingCandidate[]>();
-        for (const answer of (answerData || []) as TeamAnswerRow[]) {
+        for (const answer of answerData) {
           const teamAnswer =
             typeof answer.answer === 'string' ? answer.answer.trim() : '';
           if (!teamAnswer) continue;
@@ -272,13 +223,12 @@ export default function Voting({
     submittingVoteRef.current = true;
     try {
       setSendingResult(true);
-      const { error } = await supabase.rpc('cast_voting_vote', {
-        rallye_id_param: rallyeId,
-        question_id_param: currentQuestion.questionId,
-        voting_team_id_param: teamId,
-        voted_for_team_id_param: selectedTeam,
+      await castVote({
+        rallyeId,
+        questionId: currentQuestion.questionId,
+        votingTeamId: teamId,
+        votedForTeamId: selectedTeam,
       });
-      if (error) throw error;
       setCurrentVotingIdx((index) => index + 1);
       setSelectedTeam(null);
     } catch (error) {

@@ -4,3 +4,4 @@ export * from './teamStorage';
 export * from './answerStorage';
 export * from './questionStorage';
 export * from './scoreboardStorage';
+export * from './votingStorage';
