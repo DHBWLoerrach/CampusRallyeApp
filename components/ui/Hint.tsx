@@ -29,10 +29,13 @@ export default function Hint({ hint }: { hint: string }) {
       return;
     }
 
-    // Confirm before first use (costs points)
+    // Confirm before revealing a hint for the first time.
     const confirmed = await confirm({
       title: t('hint.confirm.title'),
-      message: t('hint.confirm.message', { cost: HINT_COST }),
+      message:
+        currentQuestion?.question_type === 'upload'
+          ? t('hint.confirm.freeMessage')
+          : t('hint.confirm.message', { cost: HINT_COST }),
       confirmText: t('hint.confirm.confirm'),
       cancelText: t('common.cancel'),
     });

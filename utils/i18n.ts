@@ -134,6 +134,8 @@ export const translations = {
       'Dieser Fragetyp wird aktuell nicht unterstützt: {{type}}',
     'question.skip': 'Frage überspringen',
     'hint.confirm.title': 'Sicherheitsfrage',
+    'hint.confirm.freeMessage':
+      'Möchtet ihr einen Tipp erhalten? Bei dieser Foto-Frage kostet euch der Tipp keine Punkte.',
     'hint.confirm.message':
       'Seid ihr sicher, dass ihr einen Tipp erhalten möchtet? Das kostet euch {{cost}} Punkt(e).',
     'hint.confirm.confirm': 'Ja, ich möchte einen Tipp',
@@ -303,6 +305,8 @@ export const translations = {
       'This question type is not supported yet: {{type}}',
     'question.skip': 'Skip question',
     'hint.confirm.title': 'Security question',
+    'hint.confirm.freeMessage':
+      'Would you like a hint? Hints for this photo question do not cost any points.',
     'hint.confirm.message':
       'Are you sure you want to receive a hint? This will cost you {{cost}} point(s).',
     'hint.confirm.confirm': 'Yes, I want a hint',

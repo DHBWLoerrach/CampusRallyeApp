@@ -10,6 +10,10 @@ const mockUsedHintSet = jest.fn();
 const mockPointsSet = jest.fn();
 const mockRallyeGet = jest.fn(() => ({ id: 10 }));
 const mockTeamGet = jest.fn((): { id: number } | null => ({ id: 20 }));
+const mockCurrentQuestionGet = jest.fn(() => ({
+  id: 30,
+  question_type: 'text',
+}));
 
 jest.mock('@/services/storage/hintStorage', () => ({
   HINT_COST: 1,
@@ -18,7 +22,7 @@ jest.mock('@/services/storage/hintStorage', () => ({
 
 jest.mock('@/services/storage/Store', () => ({
   store$: {
-    currentQuestion: { get: jest.fn(() => ({ id: 30 })) },
+    currentQuestion: { get: () => mockCurrentQuestionGet() },
     rallye: { get: () => mockRallyeGet() },
     team: { get: () => mockTeamGet() },
     usedHints: {
@@ -55,6 +59,7 @@ const mockedConfirm = jest.mocked(confirm);
 describe('Hint', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCurrentQuestionGet.mockReturnValue({ id: 30, question_type: 'text' });
     mockUsedHintGet.mockReturnValue(false);
     mockRallyeGet.mockReturnValue({ id: 10 });
     mockTeamGet.mockReturnValue({ id: 20 });
@@ -65,6 +70,35 @@ describe('Hint', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
+
+  it.each([
+    ['upload', 'hint.confirm.freeMessage'],
+    ['text', 'hint.confirm.message'],
+  ])(
+    'shows the appropriate cost message for %s questions',
+    async (questionType, message) => {
+      mockCurrentQuestionGet.mockReturnValue({
+        id: 30,
+        question_type: questionType,
+      });
+      mockedConfirm.mockResolvedValue(true);
+      const { getByRole } = render(<Hint hint="Secret hint" />);
+
+      fireEvent.press(getByRole('button'));
+
+      await waitFor(() =>
+        expect(Alert.alert).toHaveBeenCalledWith('hint.title', 'Secret hint')
+      );
+      expect(mockedConfirm).toHaveBeenCalledWith(
+        expect.objectContaining({ message })
+      );
+      expect(mockMarkHintUsed).toHaveBeenCalledWith({
+        rallyeId: 10,
+        teamId: 20,
+        questionId: 30,
+      });
+    }
+  );
 
   it('does not persist or reveal when confirmation is cancelled', async () => {
     mockedConfirm.mockResolvedValue(false);
