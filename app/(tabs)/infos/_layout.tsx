@@ -1,21 +1,13 @@
 import { Stack } from 'expo-router';
-import Colors from '@/utils/Colors';
+import { useInfoStackScreenOptions } from '@/components/infos/useInfoStackScreenOptions';
 import { useLanguage } from '@/utils/LanguageContext';
-import { useTheme } from '@/utils/ThemeContext';
 
 export default function InfosStackLayout() {
   const { t } = useLanguage();
-  const { isDarkMode } = useTheme();
-  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const screenOptions = useInfoStackScreenOptions();
 
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: palette.background },
-        headerTitleStyle: { color: palette.text },
-        headerTintColor: palette.text,
-      }}
-    >
+    <Stack screenOptions={screenOptions}>
       <Stack.Screen name="index" options={{ title: t('infos.title') }} />
       <Stack.Screen name="imprint" options={{ title: t('infos.imprint') }} />
       <Stack.Screen name="about" options={{ title: t('infos.about') }} />

@@ -1,23 +1,16 @@
 import { Stack, useRouter } from 'expo-router';
 import { HeaderBackButton } from 'expo-router/react-navigation';
-import Colors from '@/utils/Colors';
+import { useInfoStackScreenOptions } from '@/components/infos/useInfoStackScreenOptions';
 import { useLanguage } from '@/utils/LanguageContext';
-import { useTheme } from '@/utils/ThemeContext';
 
 export default function WelcomeInfosLayout() {
   const router = useRouter();
   const { t } = useLanguage();
-  const { isDarkMode } = useTheme();
-  const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
+  const screenOptions = useInfoStackScreenOptions();
 
   return (
     <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: palette.background },
-        headerTitleStyle: { color: palette.text },
-        headerTintColor: palette.text,
-        headerBackTitle: t('common.back'),
-      }}
+      screenOptions={{ ...screenOptions, headerBackTitle: t('common.back') }}
     >
       <Stack.Screen
         name="index"
