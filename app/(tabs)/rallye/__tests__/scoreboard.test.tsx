@@ -148,7 +148,7 @@ describe('Scoreboard', () => {
     expect(getByText('🥉')).toBeTruthy();
   });
 
-  it('ranks tied teams equally without skipping the next rank (dense ranking)', async () => {
+  it('skips the next rank after tied teams', async () => {
     mockRallye = { id: 1, name: 'R', status: 'results' };
     mockTeams = [
       {
@@ -171,20 +171,53 @@ describe('Scoreboard', () => {
       },
     ];
     // A and B tie on points despite different play time; C has fewer points
-    // and must land on rank 2, not 3 (dense ranking, no skipped rank).
+    // and must land on rank 3.
     mockPoints = [
       { team_id: 1, team_points: 10 },
       { team_id: 2, team_points: 10 },
       { team_id: 3, team_points: 5 },
     ];
 
-    const { getAllByText, getByText } = render(<Scoreboard />);
+    const { getAllByText, getByText, queryByText } = render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
 
     expect(getAllByText('🥇').length).toBe(2);
-    expect(getByText('🥈')).toBeTruthy();
+    expect(queryByText('🥈')).toBeNull();
+    expect(getByText('🥉')).toBeTruthy();
+  });
+
+  it('sorts tied teams alphabetically and skips ranks after multiple ties', async () => {
+    mockRallye = { id: 1, name: 'R', status: 'results' };
+    mockTeams = ['Zulu', 'beta', 'Alpha', 'delta', 'Charlie', 'Aaron'].map(
+      (name, index) => ({
+        id: index + 1,
+        name,
+        created_at: '2024-01-01T10:00:00Z',
+        play_time: null,
+      })
+    );
+    mockPoints = [30, 30, 30, 20, 20, 10].map((points, index) => ({
+      team_id: index + 1,
+      team_points: points,
+    }));
+
+    const { getAllByText, queryByText } = render(<Scoreboard />);
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(
+      getAllByText(/^(Alpha|beta|Zulu|Charlie|delta|Aaron)$/).map(
+        (node) => node.props.children
+      )
+    ).toEqual(['Alpha', 'beta', 'Zulu', 'Charlie', 'delta', 'Aaron']);
+    expect(getAllByText('🥇')).toHaveLength(3);
+    expect(queryByText('🥈')).toBeNull();
+    expect(queryByText('🥉')).toBeNull();
+    expect(getAllByText('4')).toHaveLength(2);
+    expect(getAllByText('6')).toHaveLength(1);
   });
 
   it('highlights own team row', async () => {

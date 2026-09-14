@@ -90,16 +90,19 @@ export default function Scoreboard() {
             }) as TeamRow
         );
 
-        combined.sort((a, b) => (b.total_points ?? 0) - (a.total_points ?? 0));
+        combined.sort(
+          (a, b) =>
+            (b.total_points ?? 0) - (a.total_points ?? 0) ||
+            a.name.localeCompare(b.name, 'de', { sensitivity: 'base' })
+        );
 
-        // Dense ranking: teams with equal points share a rank; the next
-        // distinct point value gets previousRank + 1 (no skipped ranks).
+        // Tied teams share a rank; the next distinct score uses its row position.
         let currentRank = 0;
         let previousPoints: number | null = null;
-        combined = combined.map((t) => {
+        combined = combined.map((t, index) => {
           const points = t.total_points ?? 0;
           if (previousPoints === null || points !== previousPoints) {
-            currentRank += 1;
+            currentRank = index + 1;
             previousPoints = points;
           }
           return { ...t, rank: currentRank, group_name: t.name };
