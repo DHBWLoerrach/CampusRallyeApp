@@ -4,6 +4,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import UploadPhotoQuestion from '../UploadPhotoQuestion';
 import { Question } from '@/types/rallye';
 import { confirm } from '@/utils/ConfirmAlert';
+import { store$ } from '@/services/storage/Store';
 
 const mockSubmitAnswerAndAdvance = jest.fn();
 const mockSubmitPhotoAnswerAndAdvance = jest.fn();
@@ -153,6 +154,9 @@ describe('UploadPhotoQuestion', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .mocked(store$.team.get)
+      .mockReturnValue({ id: 1 } as ReturnType<typeof store$.team.get>);
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockUseCameraPermissions.mockReturnValue([{ granted: true }, jest.fn()]);
@@ -246,7 +250,7 @@ describe('UploadPhotoQuestion', () => {
       });
     });
 
-    it('submits photo and advances on success', async () => {
+    it('submits photo with zero points and advances on success', async () => {
       const { getByTestId } = await renderWithPicture();
 
       fireEvent.press(getByTestId('button-envelope'));
@@ -255,10 +259,26 @@ describe('UploadPhotoQuestion', () => {
         expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledWith({
           teamId: 1,
           questionId: 42,
-          pointsAwarded: 10,
+          pointsAwarded: 0,
           imageUri: 'file://photo.jpg',
         });
       });
+    });
+
+    it('advances without awarding points when no team is selected', async () => {
+      jest.mocked(store$.team.get).mockReturnValue(null);
+      const { getByTestId } = await renderWithPicture();
+
+      fireEvent.press(getByTestId('button-envelope'));
+
+      await waitFor(() => {
+        expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
+          teamId: null,
+          questionId: 42,
+          pointsAwarded: 0,
+        });
+      });
+      expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
     });
 
     it('shows alert when photo requires online but user is offline', async () => {
