@@ -10,8 +10,10 @@ import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import type { TranslationKey } from '@/utils/i18n';
 
+type InfoOverviewItemKey = 'imprint' | 'about';
+
 type InfoOverviewItem = {
-  key: string;
+  key: InfoOverviewItemKey;
   eyebrowKey: TranslationKey;
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
@@ -146,8 +148,11 @@ function InfoNavigationCard({
   );
 }
 
+/** Both info stacks render this overview under their own path prefix. */
+type InfoBasePath = '/info' | '/infos';
+
 type InfoOverviewProps = {
-  basePath: string;
+  basePath: InfoBasePath;
 };
 
 export default function InfoOverview({ basePath }: InfoOverviewProps) {
