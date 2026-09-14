@@ -23,8 +23,7 @@ const CONTENT = {
   de: {
     heroEyebrow: 'Herausgeberin',
     heroTitle: 'Duale Hochschule Baden-Württemberg Lörrach',
-    heroBody:
-      'Hangstraße 46-50\n79539 Lörrach',
+    heroBody: 'Hangstraße 46-50\n79539 Lörrach',
     phoneLabel: 'Telefon',
     emailLabel: 'E-Mail',
     websiteLabel: 'Website',
@@ -44,8 +43,7 @@ const CONTENT = {
   en: {
     heroEyebrow: 'Publisher',
     heroTitle: 'Duale Hochschule Baden-Württemberg Lörrach',
-    heroBody:
-      'Hangstraße 46-50\n79539 Lörrach\nGermany',
+    heroBody: 'Hangstraße 46-50\n79539 Lörrach\nGermany',
     phoneLabel: 'Phone',
     emailLabel: 'Email',
     websiteLabel: 'Website',
@@ -112,10 +110,7 @@ export default function Imprint() {
         ]}
       >
         <View
-          style={[
-            styles.heroAccent,
-            { backgroundColor: Colors.dhbwRed },
-          ]}
+          style={[styles.heroAccent, { backgroundColor: Colors.dhbwRed }]}
         />
         <View style={styles.heroHeader}>
           <ThemedText
@@ -180,7 +175,9 @@ export default function Imprint() {
           </ThemedText>
           <InfoCard style={styles.denseCard} tone="subtle">
             <ThemedText variant="label">{content.authorityLabel}</ThemedText>
-            <ThemedText variant="bodyStrong">{content.authorityTitle}</ThemedText>
+            <ThemedText variant="bodyStrong">
+              {content.authorityTitle}
+            </ThemedText>
             <ThemedText selectable style={infoScreenStyles.bodyText}>
               {content.authorityBody}
             </ThemedText>

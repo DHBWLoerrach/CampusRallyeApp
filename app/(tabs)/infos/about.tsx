@@ -1,10 +1,6 @@
 import * as Application from 'expo-application';
 import React from 'react';
-import {
-  Linking,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 import {
   InfoCard,
   InfoLinkCard,
@@ -33,8 +29,7 @@ const CONTENT = {
       'Die Konzeption und Umsetzung erfolgt an der DHBW Lörrach durch Studierende im Rahmen von Studienarbeiten und Projekten am SZI unter Betreuung und Leitung von Ulrike Menke (Konzeptgestaltung und Projektbetreuung) und Prof. Dr. Erik Behrends (technische Umsetzung).',
     contributorsLabel: 'Mitwirkende',
     formerContributorsLabel: 'Ehemalige Beteiligte',
-    formerContributorsText:
-      'Von Seiten der DHBW Lörrach: Selina Quade',
+    formerContributorsText: 'Von Seiten der DHBW Lörrach: Selina Quade',
     studentContributorsLabel: 'Studierende nach Jahrgang',
     openSourceLabel: 'Open Source',
     openSourceText:
@@ -77,8 +72,7 @@ const CONTENT = {
     formerContributorsText: 'From DHBW Lörrach: Selina Quade',
     studentContributorsLabel: 'Students by cohort',
     openSourceLabel: 'Open source',
-    openSourceText:
-      'The current source code is publicly available on GitHub.',
+    openSourceText: 'The current source code is publicly available on GitHub.',
     openSourceTitle: 'Source code',
     repositoryLabel: 'View on GitHub',
     versionLabel: 'App version',
@@ -155,18 +149,14 @@ const styles = StyleSheet.create({
   },
 });
 
-function AppVersion({ label }) {
+function AppVersion({ label }: { label: string }) {
   const version = Application.nativeApplicationVersion ?? '?';
   const build = Application.nativeBuildVersion ?? '?';
 
   return (
     <View style={styles.versionRow}>
       <ThemedText variant="bodyStrong">{label}</ThemedText>
-      <ThemedText
-        selectable
-        variant="bodyStrong"
-        style={styles.versionValue}
-      >
+      <ThemedText selectable variant="bodyStrong" style={styles.versionValue}>
         {`${version} (${build})`}
       </ThemedText>
     </View>

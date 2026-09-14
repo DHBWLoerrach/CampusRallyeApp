@@ -1,8 +1,19 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
+import Imprint from '../imprint';
+import type { Language } from '@/utils/i18n';
+
+type ScreenProps = {
+  children: React.ReactNode;
+};
+
+type ThemedTextProps = {
+  children: React.ReactNode;
+  variant?: string;
+};
 
 jest.mock('@/components/ui/Screen', () => ({
-  ScreenScrollView: ({ children }) => {
+  ScreenScrollView: ({ children }: ScreenProps) => {
     const { View } = jest.requireActual('react-native');
     return <View>{children}</View>;
   },
@@ -10,13 +21,13 @@ jest.mock('@/components/ui/Screen', () => ({
 
 jest.mock('@/components/themed/ThemedText', () => ({
   __esModule: true,
-  default: ({ children, variant, ...rest }) => {
+  default: ({ children, variant, ...rest }: ThemedTextProps) => {
     const { Text } = jest.requireActual('react-native');
     return <Text {...rest}>{children}</Text>;
   },
 }));
 
-let mockLanguage = 'de';
+let mockLanguage: Language = 'de';
 
 jest.mock('@/utils/LanguageContext', () => ({
   useLanguage: () => ({ language: mockLanguage }),
@@ -26,8 +37,6 @@ jest.mock('@/utils/ThemeContext', () => ({
   useTheme: () => ({ isDarkMode: false }),
 }));
 
-const Imprint = require('../imprint').default;
-
 describe('Imprint info screen', () => {
   beforeEach(() => {
     mockLanguage = 'de';
@@ -36,7 +45,9 @@ describe('Imprint info screen', () => {
   it('renders the required imprint details in German', () => {
     const { getByText } = render(<Imprint />);
 
-    expect(getByText('Duale Hochschule Baden-Württemberg Lörrach')).toBeTruthy();
+    expect(
+      getByText('Duale Hochschule Baden-Württemberg Lörrach')
+    ).toBeTruthy();
     expect(getByText('Aufsicht und Anbieter')).toBeTruthy();
     expect(getByText(/Martina Klärle/)).toBeTruthy();
     expect(getByText(/Gerhard Jäger/)).toBeTruthy();

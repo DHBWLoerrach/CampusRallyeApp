@@ -11,8 +11,8 @@
     "lint": "expo lint",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "check:format": "prettier --check \"**/*.{js,ts,tsx,css,json}\"",
-    "format": "prettier --write \"**/*.{js,ts,tsx,css,json}\""
+    "check:format": "prettier --check \"**/*.{js,jsx,ts,tsx,css,json}\"",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,json}\""
   },
   "dependencies": {
     "@legendapp/state": "^3.0.0-beta.48",
