@@ -184,13 +184,11 @@ describe('Welcome', () => {
     id: 1,
     name: 'Test Org',
     default_rallye_id: null,
-    created_at: '2024-01-01T00:00:00Z',
   };
   const mockDepartment = {
     id: 1,
     name: 'Test Dept',
     location_id: 1,
-    created_at: '2024-01-01T00:00:00Z',
   };
 
   beforeEach(() => {

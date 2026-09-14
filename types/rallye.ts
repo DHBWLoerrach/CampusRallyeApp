@@ -52,14 +52,12 @@ export interface Location {
   id: number;
   name: string;
   default_rallye_id: number | null;
-  created_at: string;
 }
 
 export interface Department {
   id: number;
   name: string;
   location_id: number;
-  created_at: string;
 }
 
 export interface RallyeDbRow {

@@ -222,7 +222,10 @@ export async function getLocationDashboardData(
 
   const [tourModeRallye, departmentsResult] = await Promise.all([
     getTourModeRallyeForLocation(locId),
-    supabase.from('departments').select('*').eq('location_id', locId),
+    supabase
+      .from('departments')
+      .select('id, name, location_id')
+      .eq('location_id', locId),
   ]);
 
   if (departmentsResult.error) {
@@ -367,7 +370,7 @@ export async function getLocationsWithJoinableRallyes(): Promise<Location[]> {
 
   const { data: locations, error: locError } = await supabase
     .from('locations')
-    .select('*')
+    .select('id, name, default_rallye_id')
     .in('id', allLocIds);
 
   if (locError) {

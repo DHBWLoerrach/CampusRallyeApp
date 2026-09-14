@@ -183,13 +183,11 @@ describe('rallyeStorage.getLocationDashboardData', () => {
         id: 11,
         name: 'Informatik',
         location_id: locId,
-        created_at: '2024-01-01T00:00:00Z',
       },
       {
         id: 12,
         name: 'BWL',
         location_id: locId,
-        created_at: '2024-01-01T00:00:00Z',
       },
     ];
 
@@ -212,7 +210,7 @@ describe('rallyeStorage.getLocationDashboardData', () => {
       },
       departments: ({ select, constraints, single }) => {
         expect(single).toBe(false);
-        expect(select).toBe('*');
+        expect(select).toBe('id, name, location_id');
         const locFilter = constraints.find(
           (constraint) =>
             constraint.type === 'eq' && constraint.column === 'location_id'
@@ -359,7 +357,6 @@ describe('rallyeStorage.getLocationDashboardData', () => {
             id: 10,
             name: 'Informatik',
             location_id: locId,
-            created_at: '2024-01-01T00:00:00Z',
           },
         ],
         error: null,
@@ -424,7 +421,7 @@ describe('rallyeStorage.getLocationsWithJoinableRallyes', () => {
           };
         }
 
-        expect(select).toBe('*');
+        expect(select).toBe('id, name, default_rallye_id');
         expect(constraints).toContainEqual({
           type: 'in',
           column: 'id',
@@ -436,7 +433,6 @@ describe('rallyeStorage.getLocationsWithJoinableRallyes', () => {
               id: 2,
               name: 'Joinable Tour Location',
               default_rallye_id: 901,
-              created_at: '2024-01-01T00:00:00Z',
             },
           ],
           error: null,
@@ -449,7 +445,6 @@ describe('rallyeStorage.getLocationsWithJoinableRallyes', () => {
         id: 2,
         name: 'Joinable Tour Location',
         default_rallye_id: 901,
-        created_at: '2024-01-01T00:00:00Z',
       },
     ]);
   });

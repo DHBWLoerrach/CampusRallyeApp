@@ -33,7 +33,6 @@ const firstLocation = {
   id: 1,
   name: 'Campus A',
   default_rallye_id: null,
-  created_at: '2024-01-01T00:00:00Z',
 };
 const secondLocation = { ...firstLocation, id: 2, name: 'Campus B' };
 const emptyDashboard = { tourModeRallye: null, departmentEntries: [] };

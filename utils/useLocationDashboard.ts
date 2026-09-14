@@ -125,9 +125,7 @@ export function useLocationDashboard() {
           currentLocation &&
           currentLocation.id === locStillValid.id &&
           currentLocation.name === locStillValid.name &&
-          currentLocation.default_rallye_id ===
-            locStillValid.default_rallye_id &&
-          currentLocation.created_at === locStillValid.created_at
+          currentLocation.default_rallye_id === locStillValid.default_rallye_id
         )
           return currentLocation;
         return locStillValid;
