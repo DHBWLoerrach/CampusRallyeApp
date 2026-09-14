@@ -17,10 +17,20 @@ jest.mock('@/services/storage/teamStorage', () => ({
   getCurrentTeam: jest.fn(async () => null),
   clearCurrentTeam: jest.fn(async () => {}),
   teamExists: jest.fn(async () => 'exists'),
-  setTimePlayed: jest.fn(async () => {}),
+  setPlayTime: jest.fn(async () => {}),
+}));
+jest.mock('@/utils/Logger', () => ({
+  Logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 import { store$ } from '@/services/storage/Store';
+import { setPlayTime } from '@/services/storage/teamStorage';
+import { Logger } from '@/utils/Logger';
+
+const mockedSetPlayTime = jest.mocked(setPlayTime);
 
 // Wait for the async initialize() triggered at module load to finish.
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 50));
@@ -29,6 +39,8 @@ describe('store$ observable', () => {
   beforeEach(async () => {
     // Wait for auto-initialize, then reset to known state
     await flushPromises();
+    jest.clearAllMocks();
+    mockedSetPlayTime.mockResolvedValue(undefined);
     store$.reset();
     store$.enabled.set(false);
     store$.rallye.set(null);
@@ -182,6 +194,40 @@ describe('store$ observable', () => {
 
       expect(store$.allQuestionsAnswered.get()).toBe(true);
       expect(store$.questionIndex.get()).toBe(0); // wraps to 0
+    });
+
+    it('records the play time when a team finishes', async () => {
+      store$.questions.set([{ id: 1 }] as any);
+      store$.questionIndex.set(0);
+      store$.rallye.set({ id: 7, mode: 'department' } as any);
+      store$.team.set({ id: 5, name: 'Team' } as any);
+
+      await store$.gotoNextQuestion();
+
+      expect(mockedSetPlayTime).toHaveBeenCalledWith(7, 5);
+      expect(Logger.info).toHaveBeenCalledWith(
+        'Store',
+        'Rallye finished, play_time set for team: 5'
+      );
+    });
+
+    it('logs a play-time update error and still finishes', async () => {
+      const error = new Error('update failed');
+      mockedSetPlayTime.mockRejectedValueOnce(error);
+      store$.questions.set([{ id: 1 }] as any);
+      store$.questionIndex.set(0);
+      store$.rallye.set({ id: 7, mode: 'department' } as any);
+      store$.team.set({ id: 5, name: 'Team' } as any);
+
+      await expect(store$.gotoNextQuestion()).resolves.toBeUndefined();
+
+      expect(store$.allQuestionsAnswered.get()).toBe(true);
+      expect(Logger.info).not.toHaveBeenCalled();
+      expect(Logger.error).toHaveBeenCalledWith(
+        'Store',
+        'Error setting play_time',
+        error
+      );
     });
   });
 

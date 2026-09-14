@@ -26,11 +26,12 @@ export async function clearCurrentTeam(rallyeId: number) {
 }
 
 export async function setPlayTime(rallyeId: number, teamId: TeamId) {
-  await supabase
+  const { error } = await supabase
     .from('teams')
     .update({ play_time: new Date().toISOString() })
     .eq('id', teamId)
     .eq('rallye_id', rallyeId);
+  if (error) throw error;
 }
 
 export async function createTeam(teamName: string, rallyeId: number) {

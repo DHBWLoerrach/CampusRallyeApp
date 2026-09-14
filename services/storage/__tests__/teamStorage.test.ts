@@ -233,7 +233,8 @@ describe('teamStorage.setPlayTime', () => {
     jest.clearAllMocks();
   });
 
-  it('updates the matching team and resolves even when Supabase reports an error', async () => {
+  it('rejects when the play-time update fails', async () => {
+    const error = { message: 'denied' };
     useTableHandlers({
       teams: (context) => {
         expect(context.terminal).toBe('then');
@@ -246,12 +247,11 @@ describe('teamStorage.setPlayTime', () => {
         });
         const playTime = (context.update as { play_time: string }).play_time;
         expect(new Date(playTime).getTime()).not.toBeNaN();
-        return { data: null, error: { message: 'denied' } };
+        return { data: null, error };
       },
     });
 
-    // Intentional characterization of the current silent-failure contract.
-    await expect(setPlayTime(7, 5)).resolves.toBeUndefined();
+    await expect(setPlayTime(7, 5)).rejects.toBe(error);
   });
 });
 
