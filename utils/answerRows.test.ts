@@ -7,54 +7,25 @@ import {
 import type { AnswerRow } from '@/types/rallye';
 
 describe('answerRows helpers', () => {
-  it('reads answer text from fallback fields', () => {
+  it('reads answer text from solution option rows', () => {
     expect(
       getAnswerText({
         text: 'Mensa',
       } as Partial<AnswerRow>)
     ).toBe('Mensa');
-    expect(
-      getAnswerText({
-        answer: 'Belchenstrasse',
-      } as Partial<AnswerRow>)
-    ).toBe('Belchenstrasse');
-    expect(
-      getAnswerText({
-        content: 'Mensa',
-      } as Partial<AnswerRow>)
-    ).toBe('Mensa');
-    expect(
-      getAnswerText({
-        text: '',
-        answer: 'Belchenstrasse',
-      } as Partial<AnswerRow>)
-    ).toBe('Belchenstrasse');
-    expect(
-      getAnswerText({
-        text: '   ',
-        content: 'Mensa',
-      } as Partial<AnswerRow>)
-    ).toBe('Mensa');
+    expect(getAnswerText({ text: null } as Partial<AnswerRow>)).toBe('');
     expect(getAnswerText(null)).toBe('');
     expect(getAnswerText(undefined)).toBe('');
   });
 
-  it('accepts multiple correct flag formats', () => {
+  it('only accepts the boolean correct flag', () => {
     expect(isAnswerMarkedCorrect({ correct: true } as Partial<AnswerRow>)).toBe(
-      true
-    );
-    expect(
-      isAnswerMarkedCorrect({ is_correct: 'true' } as Partial<AnswerRow>)
-    ).toBe(true);
-    expect(isAnswerMarkedCorrect({ correct: 1 } as Partial<AnswerRow>)).toBe(
-      true
-    );
-    expect(isAnswerMarkedCorrect({ correct: 't' } as Partial<AnswerRow>)).toBe(
       true
     );
     expect(
       isAnswerMarkedCorrect({ correct: false } as Partial<AnswerRow>)
     ).toBe(false);
+    expect(isAnswerMarkedCorrect(undefined)).toBe(false);
   });
 
   it('matches numeric and string question IDs', () => {
@@ -81,22 +52,24 @@ describe('answerRows helpers', () => {
     ).toBe('');
   });
 
-  it('returns empty when multiple candidates have no explicit correct answer', () => {
+  it('returns empty when candidates have no correct answer', () => {
     const answers = [
       {
         id: 1,
         question_id: 10,
-        answer: 'Belchenstrasse',
+        text: 'Belchenstrasse',
+        correct: false,
       },
       {
         id: 2,
         question_id: 10,
-        answer: 'Mensa',
+        text: 'Mensa',
+        correct: false,
       },
       {
         id: 3,
         question_id: 99,
-        answer: 'Other',
+        text: 'Other',
         correct: true,
       },
     ] as AnswerRow[];
@@ -104,21 +77,17 @@ describe('answerRows helpers', () => {
     expect(getAnswerKeyForQuestion(answers, 10)).toBe('');
   });
 
-  it('falls back to the only candidate when no explicit correct answer exists', () => {
+  it('does not treat a single incorrect candidate as correct', () => {
     const answers = [
       {
         id: 1,
         question_id: 10,
-        answer: 'Belchenstrasse',
-      },
-      {
-        id: 2,
-        question_id: 99,
-        answer: 'Other',
+        text: 'Belchenstrasse',
+        correct: false,
       },
     ] as AnswerRow[];
 
-    expect(getAnswerKeyForQuestion(answers, 10)).toBe('belchenstrasse');
+    expect(getAnswerKeyForQuestion(answers, 10)).toBe('');
   });
 
   it('prefers explicitly marked correct answer', () => {
@@ -133,7 +102,7 @@ describe('answerRows helpers', () => {
         id: 2,
         question_id: 10,
         text: 'Right',
-        is_correct: 'true',
+        correct: true,
       },
     ] as AnswerRow[];
 

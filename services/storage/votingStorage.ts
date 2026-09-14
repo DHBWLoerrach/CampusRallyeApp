@@ -11,8 +11,7 @@ export type VotingQuestionJoinRow = {
 
 export type VotingTeamRow = {
   id: TeamId;
-  name?: string | null;
-  team_name?: string | null;
+  name: string;
 };
 
 export type VotingTeamAnswerRow = {

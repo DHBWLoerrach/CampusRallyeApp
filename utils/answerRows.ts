@@ -1,26 +1,9 @@
 import type { AnswerRow } from '@/types/rallye';
 
-function isTruthyFlag(value: unknown): boolean {
-  if (value === true || value === 1) return true;
-  if (typeof value !== 'string') return false;
-  const normalized = value.trim().toLowerCase();
-  return normalized === 'true' || normalized === '1' || normalized === 't';
-}
-
 export function getAnswerText(
   answer: Partial<AnswerRow> | null | undefined
 ): string {
-  if (!answer) return '';
-  const candidates = [answer.text, answer.answer, answer.content];
-  const nonEmpty = candidates.find(
-    (value): value is string =>
-      typeof value === 'string' && value.trim().length > 0
-  );
-  if (nonEmpty) return nonEmpty;
-
-  return (
-    candidates.find((value): value is string => typeof value === 'string') ?? ''
-  );
+  return answer?.text ?? '';
 }
 
 export function isSameQuestionId(
@@ -36,8 +19,7 @@ export function isSameQuestionId(
 export function isAnswerMarkedCorrect(
   answer: Partial<AnswerRow> | null | undefined
 ): boolean {
-  if (!answer) return false;
-  return isTruthyFlag(answer.correct) || isTruthyFlag(answer.is_correct);
+  return answer?.correct === true;
 }
 
 export function getAnswerKeyForQuestion(
@@ -49,18 +31,10 @@ export function getAnswerKeyForQuestion(
   );
   if (candidates.length === 0) return '';
 
-  const explicitCorrect = candidates.find((answer) =>
+  const correctAnswer = candidates.find((answer) =>
     isAnswerMarkedCorrect(answer)
   );
-  if (explicitCorrect) {
-    return getAnswerText(explicitCorrect).toLowerCase().trim();
-  }
+  if (!correctAnswer) return '';
 
-  // Only fallback when there is exactly one non-empty candidate.
-  const fallbackCandidates = candidates.filter(
-    (answer) => getAnswerText(answer).trim().length > 0
-  );
-  if (fallbackCandidates.length !== 1) return '';
-
-  return getAnswerText(fallbackCandidates[0]).toLowerCase().trim();
+  return getAnswerText(correctAnswer).toLowerCase().trim();
 }

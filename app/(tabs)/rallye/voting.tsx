@@ -131,13 +131,10 @@ export default function Voting({
         );
         const teamNameById = new Map<number, string>();
         for (const teamRow of otherTeams) {
-          const rawName =
-            typeof teamRow.name === 'string'
-              ? teamRow.name
-              : typeof teamRow.team_name === 'string'
-                ? teamRow.team_name
-                : '';
-          teamNameById.set(teamRow.id, rawName.trim() || `Team ${teamRow.id}`);
+          teamNameById.set(
+            teamRow.id,
+            teamRow.name.trim() || `Team ${teamRow.id}`
+          );
         }
 
         const groupedCandidates = new Map<number, VotingCandidate[]>();

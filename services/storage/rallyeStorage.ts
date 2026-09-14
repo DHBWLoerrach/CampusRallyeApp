@@ -121,7 +121,7 @@ export async function getSolutionOptions(
 ): Promise<AnswerRow[]> {
   const { data, error } = await supabase
     .from('solution_options')
-    .select('*')
+    .select('id, question_id, text, correct')
     .in('question_id', questionIds);
   if (error) throw error;
   return (data ?? []) as AnswerRow[];

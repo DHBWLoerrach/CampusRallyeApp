@@ -40,12 +40,8 @@ export interface Question {
 export interface AnswerRow {
   id: number;
   question_id: number | string;
-  text?: string | null;
-  answer?: string | null;
-  content?: string | null;
-  // Supabase data can represent this flag as boolean, numeric, or textual truthy values.
-  correct?: boolean | string | number | null;
-  is_correct?: boolean | string | number | null;
+  text: string | null;
+  correct: boolean;
 }
 
 export interface QuestionProps {
