@@ -24,6 +24,15 @@ const mockRouterPush = jest.fn();
 const mockAppStateSubscriptionRemove = jest.fn();
 let mockCodeSheetSession: unknown = null;
 
+jest.mock(
+  'react-native-safe-area-context',
+  () => jest.requireActual('react-native-safe-area-context/jest/mock').default
+);
+
+jest.mock('@/components/ui/IconSymbol', () => ({
+  IconSymbol: () => null,
+}));
+
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: mockRouterPush,
@@ -217,6 +226,36 @@ describe('Welcome', () => {
     jest.useRealTimers();
     jest.restoreAllMocks();
   });
+
+  it('opens public infos while the welcome screen is loading', async () => {
+    mockedGetSelectedLocation.mockReturnValue(new Promise(() => {}));
+    const { getByRole, getByText } = render(<Welcome />);
+
+    expect(getByText('common.loading')).toBeTruthy();
+    fireEvent.press(getByRole('button', { name: 'welcome.infos' }));
+
+    expect(mockRouterPush).toHaveBeenCalledWith('/info');
+  });
+
+  it.each(['location', 'dashboard', 'offline'])(
+    'keeps public infos accessible in the %s state',
+    async (state) => {
+      if (state === 'location') {
+        mockedGetLocationsWithJoinableRallyes.mockResolvedValue([]);
+      } else if (state === 'offline') {
+        mockedGetLocationsWithJoinableRallyes.mockRejectedValue(
+          new Error('Offline')
+        );
+      }
+      const { getByRole, queryByText } = render(<Welcome />);
+      await waitFor(() => expect(queryByText('common.loading')).toBeNull());
+
+      fireEvent.press(getByRole('button', { name: 'welcome.infos' }));
+
+      expect(mockRouterPush).toHaveBeenCalledWith('/info');
+      expect(store$.enabled.set).not.toHaveBeenCalled();
+    }
+  );
 
   it('shows tour mode when dashboard has only tour mode rallye', async () => {
     const tourModeRallye: Rallye = {

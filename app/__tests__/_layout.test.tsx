@@ -16,6 +16,7 @@ type StackScreenProps = {
 };
 
 const mockRouterReplace = jest.fn();
+let mockSegments: string[] = [];
 let mockErrorBoundaryError: Error | null = null;
 const mockErrorBoundaryReset = jest.fn();
 
@@ -30,7 +31,7 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({
     replace: mockRouterReplace,
   }),
-  useSegments: () => [],
+  useSegments: () => mockSegments,
 }));
 
 jest.mock('expo-router/react-navigation', () => ({
@@ -138,6 +139,28 @@ describe('RootLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockErrorBoundaryError = null;
+    mockSegments = [];
+  });
+
+  it.each([
+    { path: '/info', segments: ['info'] },
+    { path: '/info/imprint', segments: ['info', 'imprint'] },
+    { path: '/info/about', segments: ['info', 'about'] },
+  ])(
+    'allows the public route $path without a rallye participation',
+    ({ segments }) => {
+      mockSegments = segments;
+      render(<RootLayout />);
+
+      expect(mockRouterReplace).not.toHaveBeenCalled();
+    }
+  );
+
+  it('still redirects away from the rallye tabs without a participation', () => {
+    mockSegments = ['(tabs)', 'rallye'];
+    render(<RootLayout />);
+
+    expect(mockRouterReplace).toHaveBeenCalledWith('/');
   });
 
   it('registers the rallye code entry as a transparent modal instead of a form sheet', () => {

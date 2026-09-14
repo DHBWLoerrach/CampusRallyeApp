@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Colors from '@/utils/Colors';
 import { globalStyles } from '@/utils/GlobalStyles';
@@ -7,6 +14,7 @@ import UIButton from '@/components/ui/UIButton';
 import Card from '@/components/ui/Card';
 import { isRallyeCodeRequired } from '@/components/ui/RallyeCodeSheet';
 import { CollapsibleHeroHeader } from '@/components/ui/CollapsibleHeroHeader';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
 import { store$ } from '@/services/storage/Store';
@@ -307,16 +315,54 @@ export default function Welcome() {
   };
 
   return (
-    <CollapsibleHeroHeader
-      heroImage={require('../assets/images/app/dhbw-campus-header.png')}
-      logoImage={require('../assets/images/app/dhbw-logo.png')}
-      title={getHeaderTitle()}
-      showBackButton={selectionStep === 'dashboard' && locations.length > 1}
-      onBackPress={handleBack}
-    >
-      {loading && renderLoadingContent()}
-      {!loading && online && renderCurrentStep()}
-      {!loading && !online && renderOfflineContent()}
-    </CollapsibleHeroHeader>
+    <View style={[styles.screen, { backgroundColor: palette.background }]}>
+      <CollapsibleHeroHeader
+        heroImage={require('../assets/images/app/dhbw-campus-header.png')}
+        logoImage={require('../assets/images/app/dhbw-logo.png')}
+        title={getHeaderTitle()}
+        showBackButton={selectionStep === 'dashboard' && locations.length > 1}
+        onBackPress={handleBack}
+      >
+        {loading && renderLoadingContent()}
+        {!loading && online && renderCurrentStep()}
+        {!loading && !online && renderOfflineContent()}
+      </CollapsibleHeroHeader>
+      <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.footer}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('welcome.infos')}
+          onPress={() => router.push('/info')}
+          style={({ pressed }) => [styles.infoLink, pressed && styles.pressed]}
+        >
+          <IconSymbol name="info.circle" size={18} color={palette.textMuted} />
+          <ThemedText variant="bodySmall" style={{ color: palette.textMuted }}>
+            {t('welcome.infos')}
+          </ThemedText>
+        </Pressable>
+      </SafeAreaView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingTop: 4,
+    paddingBottom: 4,
+  },
+  infoLink: {
+    minHeight: 48,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  pressed: {
+    opacity: 0.65,
+  },
+});

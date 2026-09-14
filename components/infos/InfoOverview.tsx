@@ -4,61 +4,36 @@ import { useRouter } from 'expo-router';
 import { InfoCard, infoScreenStyles } from '@/components/infos/InfoCard';
 import ThemedText from '@/components/themed/ThemedText';
 import { ScreenScrollView } from '@/components/ui/Screen';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { IconSymbol, type IconSymbolName } from '@/components/ui/IconSymbol';
 import Colors from '@/utils/Colors';
 import { useLanguage } from '@/utils/LanguageContext';
 import { useTheme } from '@/utils/ThemeContext';
+import type { TranslationKey } from '@/utils/i18n';
 
-const CONTENT = {
-  de: {
-    heroEyebrow: 'Infos',
-    heroTitle: 'Rechtliches und Hintergrund',
-    heroBody:
-      'Hier findest du die rechtlichen Angaben zur App und den Hintergrund zu Projekt, Mitwirkenden und Version.',
-    items: [
-      {
-        key: 'imprint',
-        eyebrow: 'Rechtliches',
-        title: 'Impressum',
-        description: 'Kontakt, Anbieter und Pflichtangaben',
-        icon: 'building.2',
-        href: '/infos/imprint',
-      },
-      {
-        key: 'about',
-        eyebrow: 'Hintergrund',
-        title: 'Über diese App',
-        description: 'Projekt, Mitwirkende und Version',
-        icon: 'info.circle',
-        href: '/infos/about',
-      },
-    ],
-  },
-  en: {
-    heroEyebrow: 'Info',
-    heroTitle: 'Legal and project background',
-    heroBody:
-      'Find the app’s legal details here, together with context about the project, contributors, and version.',
-    items: [
-      {
-        key: 'imprint',
-        eyebrow: 'Legal',
-        title: 'Imprint',
-        description: 'Contact, provider, and mandatory details',
-        icon: 'building.2',
-        href: '/infos/imprint',
-      },
-      {
-        key: 'about',
-        eyebrow: 'Background',
-        title: 'About this app',
-        description: 'Project, contributors, and version',
-        icon: 'info.circle',
-        href: '/infos/about',
-      },
-    ],
-  },
+type InfoOverviewItem = {
+  key: string;
+  eyebrowKey: TranslationKey;
+  titleKey: TranslationKey;
+  descriptionKey: TranslationKey;
+  icon: IconSymbolName;
 };
+
+const ITEMS: InfoOverviewItem[] = [
+  {
+    key: 'imprint',
+    eyebrowKey: 'infos.imprintEyebrow',
+    titleKey: 'infos.imprint',
+    descriptionKey: 'infos.imprintDescription',
+    icon: 'building.2',
+  },
+  {
+    key: 'about',
+    eyebrowKey: 'infos.aboutEyebrow',
+    titleKey: 'infos.about',
+    descriptionKey: 'infos.aboutDescription',
+    icon: 'info.circle',
+  },
+];
 
 const styles = StyleSheet.create({
   heroCard: {
@@ -102,13 +77,21 @@ const styles = StyleSheet.create({
   },
 });
 
+type InfoNavigationCardProps = {
+  description: string;
+  eyebrow: string;
+  icon: IconSymbolName;
+  onPress: () => void;
+  title: string;
+};
+
 function InfoNavigationCard({
   description,
   eyebrow,
   icon,
   onPress,
   title,
-}) {
+}: InfoNavigationCardProps) {
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
 
@@ -152,19 +135,26 @@ function InfoNavigationCard({
             <ThemedText variant="bodyStrong">{title}</ThemedText>
             <ThemedText variant="muted">{description}</ThemedText>
           </View>
-          <IconSymbol name="chevron.right" size={20} color={palette.textMuted} />
+          <IconSymbol
+            name="chevron.right"
+            size={20}
+            color={palette.textMuted}
+          />
         </View>
       </Pressable>
     </View>
   );
 }
 
-export default function Infos() {
+type InfoOverviewProps = {
+  basePath: string;
+};
+
+export default function InfoOverview({ basePath }: InfoOverviewProps) {
   const router = useRouter();
   const { isDarkMode } = useTheme();
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
-  const content = CONTENT[language];
 
   return (
     <ScreenScrollView
@@ -184,34 +174,31 @@ export default function Infos() {
         ]}
       >
         <View
-          style={[
-            styles.heroAccent,
-            { backgroundColor: Colors.dhbwRed },
-          ]}
+          style={[styles.heroAccent, { backgroundColor: Colors.dhbwRed }]}
         />
         <View style={styles.heroHeader}>
           <ThemedText
             variant="caption"
             style={[infoScreenStyles.eyebrow, { color: Colors.dhbwRed }]}
           >
-            {content.heroEyebrow}
+            {t('infos.title')}
           </ThemedText>
-          <ThemedText variant="title">{content.heroTitle}</ThemedText>
+          <ThemedText variant="title">{t('infos.heroTitle')}</ThemedText>
           <ThemedText style={infoScreenStyles.bodyText}>
-            {content.heroBody}
+            {t('infos.heroBody')}
           </ThemedText>
         </View>
       </InfoCard>
 
       <View style={styles.navigationList}>
-        {content.items.map((item) => (
+        {ITEMS.map((item) => (
           <InfoNavigationCard
             key={item.key}
-            description={item.description}
-            eyebrow={item.eyebrow}
+            description={t(item.descriptionKey)}
+            eyebrow={t(item.eyebrowKey)}
             icon={item.icon}
-            onPress={() => router.push(item.href)}
-            title={item.title}
+            onPress={() => router.push(`${basePath}/${item.key}`)}
+            title={t(item.titleKey)}
           />
         ))}
       </View>

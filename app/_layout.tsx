@@ -194,6 +194,7 @@ function RootNavigator() {
           >
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="index" />
+              <Stack.Screen name="info" />
               <Stack.Screen name="(tabs)" />
               <Stack.Screen
                 name="rallye-code-sheet"
