@@ -5,6 +5,7 @@ import {
   uploadPhotoAnswer,
 } from '@/services/storage/answerStorage';
 import { applyHintCost, hasUsedHint } from '@/services/storage/hintStorage';
+import { getCorrectAnswerTextForQuestion } from '@/utils/answerRows';
 import type { TeamId } from '@/types/rallye';
 
 export type SubmitOutcome =
@@ -41,8 +42,16 @@ export async function submitAnswerAndAdvance(options: {
   pointsAwarded: number;
   isCorrect: boolean;
   answerText?: string;
+  showTourFeedback?: boolean;
 }): Promise<SubmitOutcome> {
-  const { teamId, questionId, pointsAwarded, isCorrect, answerText } = options;
+  const {
+    teamId,
+    questionId,
+    pointsAwarded,
+    isCorrect,
+    answerText,
+    showTourFeedback = true,
+  } = options;
   const effectivePoints = await getEffectivePoints({
     teamId,
     questionId,
@@ -54,7 +63,7 @@ export async function submitAnswerAndAdvance(options: {
       store$.points.set((store$.points.get() as number) + effectivePoints);
     }
     store$.countCorrectTourAnswer(isCorrect);
-    await store$.gotoNextQuestion();
+    await advanceOrShowTourFeedback(questionId, isCorrect, showTourFeedback);
     return { status: 'local' };
   }
 
@@ -69,8 +78,26 @@ export async function submitAnswerAndAdvance(options: {
     store$.points.set((store$.points.get() as number) + effectivePoints);
   }
   store$.countCorrectTourAnswer(isCorrect);
-  await store$.gotoNextQuestion();
+  await advanceOrShowTourFeedback(questionId, isCorrect, showTourFeedback);
   return { status: result.status };
+}
+
+async function advanceOrShowTourFeedback(
+  questionId: number,
+  isCorrect: boolean,
+  showTourFeedback: boolean
+): Promise<void> {
+  if (store$.isTourMode.get() && showTourFeedback) {
+    const correctAnswer = getCorrectAnswerTextForQuestion(
+      store$.answers.get(),
+      questionId
+    );
+    if (isCorrect || correctAnswer) {
+      store$.tourFeedback.set({ isCorrect, correctAnswer });
+      return;
+    }
+  }
+  await store$.gotoNextQuestion();
 }
 
 export type SubmitPhotoOutcome =

@@ -33,4 +33,12 @@ describe('translations', () => {
       'Möchtest du die Erkundung wirklich beenden?'
     );
   });
+
+  it('uses the requested German tour answer feedback', () => {
+    expect(translations.de['tour.feedback.correct']).toBe('Das ist richtig!');
+    expect(translations.de['tour.feedback.incorrect']).toBe('Leider falsch…');
+    expect(translations.de['tour.feedback.correctAnswer']).toBe(
+      'Die richtige Antwort lautet: {{answer}}'
+    );
+  });
 });

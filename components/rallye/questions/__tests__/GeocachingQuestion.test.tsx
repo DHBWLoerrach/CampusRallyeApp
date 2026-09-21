@@ -27,6 +27,7 @@ jest.mock('@/services/storage/Store', () => ({
   store$: {
     team: { get: jest.fn(() => ({ id: 1 })) },
     answers: { get: jest.fn(() => []) },
+    isTourMode: { get: jest.fn(() => false) },
     gotoNextQuestion: (...args: unknown[]) => mockGotoNextQuestion(...args),
   },
 }));
@@ -251,6 +252,8 @@ describe('GeocachingQuestion', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const storeMock = jest.requireMock('@/services/storage/Store');
+    storeMock.store$.isTourMode.get.mockReturnValue(false);
     mockUseCameraPermissions.mockReturnValue([{ granted: true }, jest.fn()]);
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     setupLocationMocks();
@@ -291,6 +294,7 @@ describe('GeocachingQuestion', () => {
         questionId: 42,
         pointsAwarded: 0,
         isCorrect: false,
+        showTourFeedback: false,
       })
     );
     expect(mockGotoNextQuestion).not.toHaveBeenCalled();
@@ -764,6 +768,49 @@ describe('GeocachingQuestion', () => {
         })
       );
     });
+  });
+
+  it('submits a correct tour QR scan without the old success alert', async () => {
+    const qrQuestion = { ...baseQuestion, input_type: 'qr' as const };
+    const storeMock = jest.requireMock('@/services/storage/Store');
+    storeMock.store$.isTourMode.get.mockReturnValue(true);
+    storeMock.store$.answers.get.mockReturnValue([
+      { question_id: 42, text: 'secret code', correct: true },
+    ]);
+    mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'local' });
+    mockWatchPositionAsync.mockImplementation(
+      async (_opts: any, cb: Function) => {
+        cb({
+          coords: {
+            latitude: qrQuestion.target_latitude!,
+            longitude: qrQuestion.target_longitude!,
+            accuracy: 5,
+          },
+        });
+        return { remove: jest.fn() };
+      }
+    );
+
+    const { getByText, getByTestId } = render(
+      <GeocachingQuestion question={qrQuestion} />
+    );
+    await waitFor(() => expect(getByText('question.qr.scan')).toBeTruthy());
+
+    fireEvent.press(getByText('question.qr.scan'));
+    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+      data: 'secret code',
+    });
+
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
+        expect.objectContaining({ isCorrect: true, questionId: 42 })
+      );
+    });
+    expect(alertSpy).not.toHaveBeenCalledWith(
+      'common.ok',
+      'question.qr.correctMessage',
+      expect.any(Array)
+    );
   });
 
   it('accepts scanned QR values with trailing whitespace', async () => {

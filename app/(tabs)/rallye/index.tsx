@@ -46,6 +46,7 @@ const RallyeIndex = observer(function RallyeIndex() {
   const totalQuestions = useSelector(() => store$.totalQuestions.get());
   const answeredCount = useSelector(() => store$.answeredCount.get());
   const correctAnswerCount = useSelector(() => store$.correctAnswerCount.get());
+  const tourFeedback = useSelector(() => store$.tourFeedback.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
   const points = useSelector(() => store$.points.get());
@@ -65,6 +66,18 @@ const RallyeIndex = observer(function RallyeIndex() {
     rallyeId: number;
     promise: Promise<number[]>;
   } | null>(null);
+  const continuingTourRef = useRef(false);
+
+  const continueTour = async () => {
+    if (continuingTourRef.current) return;
+    continuingTourRef.current = true;
+    try {
+      await store$.gotoNextQuestion();
+      store$.tourFeedback.set(null);
+    } finally {
+      continuingTourRef.current = false;
+    }
+  };
 
   useEffect(() => {
     tRef.current = t;
@@ -298,6 +311,47 @@ const RallyeIndex = observer(function RallyeIndex() {
               {t('common.refresh')}
             </UIButton>
           </InfoBox>
+        </VStack>
+      </ScreenScrollView>
+    );
+  }
+
+  if (isTourMode && tourFeedback) {
+    return (
+      <ScreenScrollView
+        padding="none"
+        edges={['bottom']}
+        contentContainerStyle={[
+          globalStyles.default.refreshContainer,
+          globalStyles.rallyeStatesStyles.container,
+        ]}
+      >
+        <VStack style={{ width: '100%' }} gap={2}>
+          <InfoBox mb={2}>
+            <ThemedText
+              variant="title"
+              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+            >
+              {t(
+                tourFeedback.isCorrect
+                  ? 'tour.feedback.correct'
+                  : 'tour.feedback.incorrect'
+              )}
+            </ThemedText>
+            {!tourFeedback.isCorrect ? (
+              <ThemedText
+                variant="body"
+                style={[globalStyles.rallyeStatesStyles.infoSubtitle, s.muted]}
+              >
+                {t('tour.feedback.correctAnswer', {
+                  answer: tourFeedback.correctAnswer,
+                })}
+              </ThemedText>
+            ) : null}
+          </InfoBox>
+          <UIButton onPress={() => void continueTour()}>
+            {t('common.next')}
+          </UIButton>
         </VStack>
       </ScreenScrollView>
     );

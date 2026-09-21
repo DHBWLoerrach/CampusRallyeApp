@@ -26,6 +26,13 @@ export function getAnswerKeyForQuestion(
   answers: AnswerRow[],
   questionId: number
 ): string {
+  return getCorrectAnswerTextForQuestion(answers, questionId).toLowerCase();
+}
+
+export function getCorrectAnswerTextForQuestion(
+  answers: AnswerRow[],
+  questionId: number
+): string {
   const candidates = answers.filter((answer) =>
     isSameQuestionId(answer.question_id, questionId)
   );
@@ -36,5 +43,5 @@ export function getAnswerKeyForQuestion(
   );
   if (!correctAnswer) return '';
 
-  return getAnswerText(correctAnswer).toLowerCase().trim();
+  return getAnswerText(correctAnswer).trim();
 }

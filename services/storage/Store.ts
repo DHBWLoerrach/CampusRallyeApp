@@ -58,6 +58,10 @@ export const store$ = observable({
   answeredCount: 0,
   // Correct answers in tour mode (not persisted).
   correctAnswerCount: 0,
+  tourFeedback: null as {
+    isCorrect: boolean;
+    correctAnswer: string;
+  } | null,
   points: 0,
   allQuestionsAnswered: false,
   answers: [] as AnswerRow[],
@@ -131,6 +135,7 @@ export const store$ = observable({
     store$.totalQuestions.set(0);
     store$.answeredCount.set(0);
     store$.correctAnswerCount.set(0);
+    store$.tourFeedback.set(null);
     store$.usedHints.set({});
   },
 

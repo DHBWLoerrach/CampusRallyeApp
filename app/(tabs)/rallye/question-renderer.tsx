@@ -77,6 +77,7 @@ export default function QuestionRenderer({ question }: { question: any }) {
         questionId,
         pointsAwarded: 0,
         isCorrect: false,
+        showTourFeedback: false,
       });
     } catch (error) {
       console.error(

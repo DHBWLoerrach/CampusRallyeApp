@@ -14,6 +14,7 @@ jest.mock('@/services/storage/Store', () => ({
   store$: {
     team: { get: jest.fn(() => ({ id: 1 })) },
     answers: { get: jest.fn(() => []) },
+    isTourMode: { get: jest.fn(() => false) },
   },
 }));
 
@@ -132,6 +133,7 @@ describe('QRCodeQuestion', () => {
     storeMock.store$.answers.get.mockReturnValue([
       { question_id: 42, text: 'secret code', correct: true },
     ]);
+    storeMock.store$.isTourMode.get.mockReturnValue(false);
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
 
@@ -170,6 +172,30 @@ describe('QRCodeQuestion', () => {
         isCorrect: true,
       });
     });
+  });
+
+  it('submits a correct tour QR scan without the old success alert', async () => {
+    const storeMock = jest.requireMock('@/services/storage/Store');
+    storeMock.store$.isTourMode.get.mockReturnValue(true);
+    const { getByText, getByTestId } = render(
+      <QRCodeQuestion question={baseQuestion} />
+    );
+
+    fireEvent.press(getByText('question.qr.scan'));
+    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+      data: 'secret code',
+    });
+
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
+        expect.objectContaining({ isCorrect: true, questionId: 42 })
+      );
+    });
+    expect(alertSpy).not.toHaveBeenCalledWith(
+      'common.ok',
+      'question.qr.correctMessage',
+      expect.any(Array)
+    );
   });
 
   it('keeps the QR scan lock active while a successful submit is still in flight', async () => {

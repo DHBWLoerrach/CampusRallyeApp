@@ -12,6 +12,7 @@ type SubmitOptions = {
   isCorrect: boolean;
   answerText?: string;
   errorMessageKey?: TranslationKey;
+  showTourFeedback?: boolean;
 };
 
 type SurrenderOptions = {
@@ -30,6 +31,7 @@ export function useAnswerSubmission(question: Question) {
       isCorrect,
       answerText,
       errorMessageKey = 'question.error.saveAnswer',
+      showTourFeedback,
     }: SubmitOptions): Promise<boolean> => {
       if (submittingRef.current) return false;
       submittingRef.current = true;
@@ -41,6 +43,7 @@ export function useAnswerSubmission(question: Question) {
           pointsAwarded: isCorrect ? question.point_value : 0,
           isCorrect,
           answerText,
+          ...(showTourFeedback === false ? { showTourFeedback: false } : {}),
         });
         return true;
       } catch (error) {
@@ -73,7 +76,11 @@ export function useAnswerSubmission(question: Question) {
       });
       if (!confirmed) return false;
       onConfirmed?.();
-      return submit({ isCorrect: false, errorMessageKey });
+      return submit({
+        isCorrect: false,
+        errorMessageKey,
+        showTourFeedback: false,
+      });
     },
     [submit, t]
   );

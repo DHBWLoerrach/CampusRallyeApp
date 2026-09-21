@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { store$ } from '@/services/storage/Store';
 import RallyeIndex from '../index';
 
@@ -29,7 +29,11 @@ jest.mock('@legendapp/state/react', () => ({
 jest.mock('@/utils/LanguageContext', () => ({
   useLanguage: () => ({
     t: (key: string, params?: Record<string, string | number>) =>
-      params ? `${key}:${params.correct}/${params.total}` : key,
+      params && 'answer' in params
+        ? `${key}:${params.answer}`
+        : params
+          ? `${key}:${params.correct}/${params.total}`
+          : key,
   }),
 }));
 
@@ -155,6 +159,8 @@ jest.mock('@/services/storage/Store', () => ({
     currentQuestion: { get: jest.fn(() => null), set: jest.fn() },
     points: { get: jest.fn(() => 12), set: jest.fn() },
     correctAnswerCount: { get: jest.fn(() => 3), set: jest.fn() },
+    tourFeedback: { get: jest.fn(() => null), set: jest.fn() },
+    gotoNextQuestion: jest.fn(async () => {}),
     allQuestionsAnswered: { get: jest.fn(() => true), set: jest.fn() },
     isTourMode: { get: jest.fn(() => true) },
     answers: { get: jest.fn(() => []), set: jest.fn() },
@@ -182,6 +188,7 @@ describe('RallyeIndex', () => {
     (store$.currentQuestion.get as jest.Mock).mockReturnValue(null);
     (store$.points.get as jest.Mock).mockReturnValue(12);
     (store$.correctAnswerCount.get as jest.Mock).mockReturnValue(3);
+    (store$.tourFeedback.get as jest.Mock).mockReturnValue(null);
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(true);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
     (store$.answers.get as jest.Mock).mockReturnValue([]);
@@ -204,6 +211,48 @@ describe('RallyeIndex', () => {
     const { getByText } = render(<RallyeIndex />);
 
     expect(getByText('rallye.correctAnswers:3/5')).toBeTruthy();
+  });
+
+  it('shows the correct tour result until Weiter advances', async () => {
+    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
+    (store$.questions.get as jest.Mock).mockReturnValue([
+      { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
+    ]);
+    (store$.tourFeedback.get as jest.Mock).mockReturnValue({
+      isCorrect: true,
+      correctAnswer: '',
+    });
+
+    const { getByText, queryByText } = render(<RallyeIndex />);
+
+    expect(getByText('tour.feedback.correct')).toBeTruthy();
+    expect(queryByText('tour.feedback.correctAnswer:')).toBeNull();
+    expect(mockQuestionRenderer).not.toHaveBeenCalled();
+    expect(store$.gotoNextQuestion).not.toHaveBeenCalled();
+
+    fireEvent.press(getByText('common.next'));
+
+    await waitFor(() => {
+      expect(store$.gotoNextQuestion).toHaveBeenCalledTimes(1);
+      expect(store$.tourFeedback.set).toHaveBeenCalledWith(null);
+    });
+  });
+
+  it('shows the correct answer after an incorrect tour response', () => {
+    (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
+    (store$.questions.get as jest.Mock).mockReturnValue([
+      { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
+    ]);
+    (store$.tourFeedback.get as jest.Mock).mockReturnValue({
+      isCorrect: false,
+      correctAnswer: 'Bibliothek',
+    });
+
+    const { getByText } = render(<RallyeIndex />);
+
+    expect(getByText('tour.feedback.incorrect')).toBeTruthy();
+    expect(getByText('tour.feedback.correctAnswer:Bibliothek')).toBeTruthy();
+    expect(store$.gotoNextQuestion).not.toHaveBeenCalled();
   });
 
   it('does not expose pull-to-refresh while answering questions', () => {

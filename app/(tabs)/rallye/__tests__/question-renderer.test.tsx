@@ -249,6 +249,7 @@ describe('QuestionRenderer', () => {
         questionId: 12,
         pointsAwarded: 0,
         isCorrect: false,
+        showTourFeedback: false,
       })
     );
     expect(mockGotoNextQuestion).not.toHaveBeenCalled();

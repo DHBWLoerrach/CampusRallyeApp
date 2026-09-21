@@ -99,6 +99,9 @@ export const translations = {
     'rallye.allAnswered.simple': 'Alle Fragen beantwortet',
     'rallye.correctAnswers':
       '{{correct}} von {{total}} Fragen richtig beantwortet',
+    'tour.feedback.correct': 'Das ist richtig!',
+    'tour.feedback.incorrect': 'Leider falsch…',
+    'tour.feedback.correctAnswer': 'Die richtige Antwort lautet: {{answer}}',
     'rallye.backToStart': 'Zurück zum Start',
     'rallye.plannedEnd': 'geplant bis {{time}} Uhr',
     'rallye.teamLabel': 'Team: {{team}}',
@@ -285,6 +288,9 @@ export const translations = {
     'rallye.allAnswered.simple': 'All questions answered',
     'rallye.correctAnswers':
       '{{correct}} of {{total}} questions answered correctly',
+    'tour.feedback.correct': 'That is correct!',
+    'tour.feedback.incorrect': 'Unfortunately, that is incorrect…',
+    'tour.feedback.correctAnswer': 'The correct answer is: {{answer}}',
     'rallye.backToStart': 'Back to start',
     'rallye.plannedEnd': 'planned until {{time}}',
     'rallye.teamLabel': 'Team: {{team}}',

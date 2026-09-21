@@ -36,6 +36,25 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const handleSurrender = () =>
     surrender({ onConfirmed: () => setScanMode(false) });
 
+  const submitCorrectQRCode = async () => {
+    processingRef.current = true;
+    submittingRef.current = true;
+    try {
+      await submitAnswerAndAdvance({
+        teamId: team?.id ?? null,
+        questionId: question.id,
+        pointsAwarded: question.point_value,
+        isCorrect: true,
+      });
+    } catch (e) {
+      console.error('Error submitting QR answer:', e);
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
+    } finally {
+      submittingRef.current = false;
+      processingRef.current = false;
+    }
+  };
+
   const handleQRCode = ({ data }: { data: string }) => {
     if (processingRef.current) return;
     if (!answerKeyReady) {
@@ -52,32 +71,15 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
       return;
     }
 
+    if (store$.isTourMode.get()) {
+      void submitCorrectQRCode();
+      return;
+    }
+
     Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
       {
         text: t('common.next'),
-        onPress: () => {
-          processingRef.current = true;
-          submittingRef.current = true;
-          void (async () => {
-            try {
-              await submitAnswerAndAdvance({
-                teamId: team?.id ?? null,
-                questionId: question.id,
-                pointsAwarded: question.point_value,
-                isCorrect: true,
-              });
-            } catch (e) {
-              console.error('Error submitting QR answer:', e);
-              Alert.alert(
-                t('common.errorTitle'),
-                t('question.error.saveAnswer')
-              );
-            } finally {
-              submittingRef.current = false;
-              processingRef.current = false;
-            }
-          })();
-        },
+        onPress: () => void submitCorrectQRCode(),
       },
     ]);
   };

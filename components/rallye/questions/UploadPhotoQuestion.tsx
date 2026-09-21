@@ -290,6 +290,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
           questionId: question.id,
           pointsAwarded: 0,
           isCorrect: false,
+          showTourFeedback: false,
         });
         return;
       }

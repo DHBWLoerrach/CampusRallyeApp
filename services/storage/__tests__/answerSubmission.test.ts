@@ -22,6 +22,12 @@ const mockPointsGet = jest.fn(() => 0);
 const mockPointsSet = jest.fn();
 const mockGotoNextQuestion = jest.fn(async () => {});
 const mockCountCorrectTourAnswer = jest.fn();
+const mockIsTourModeGet = jest.fn(() => false);
+const mockAnswersGet = jest.fn(
+  () =>
+    [] as { id: number; question_id: number; text: string; correct: boolean }[]
+);
+const mockTourFeedbackSet = jest.fn();
 const mockUsedHintGet = jest.fn(() => false);
 const mockRallyeGet = jest.fn(
   (): {
@@ -49,6 +55,9 @@ jest.mock('@/services/storage/Store', () => ({
     },
     countCorrectTourAnswer: (...args: unknown[]) =>
       mockCountCorrectTourAnswer(...args),
+    isTourMode: { get: () => mockIsTourModeGet() },
+    answers: { get: () => mockAnswersGet() },
+    tourFeedback: { set: (value: unknown) => mockTourFeedbackSet(value) },
     gotoNextQuestion: () => mockGotoNextQuestion(),
   },
 }));
@@ -66,6 +75,8 @@ describe('submitAnswerAndAdvance', () => {
     mockHasUsedHint.mockResolvedValue(false);
     mockRallyeGet.mockReturnValue({ id: 10, rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
+    mockIsTourModeGet.mockReturnValue(false);
+    mockAnswersGet.mockReturnValue([]);
   });
 
   it('returns "local" and advances without saving when no teamId', async () => {
@@ -80,6 +91,60 @@ describe('submitAnswerAndAdvance', () => {
     expect(mockSaveAnswer).not.toHaveBeenCalled();
     expect(mockPointsSet).toHaveBeenCalledWith(5);
     expect(mockGotoNextQuestion).toHaveBeenCalled();
+  });
+
+  it('shows correct tour feedback before advancing', async () => {
+    mockIsTourModeGet.mockReturnValue(true);
+
+    const result = await submitAnswerAndAdvance({
+      teamId: null,
+      questionId: 1,
+      pointsAwarded: 5,
+      isCorrect: true,
+    });
+
+    expect(result).toEqual({ status: 'local' });
+    expect(mockTourFeedbackSet).toHaveBeenCalledWith({
+      isCorrect: true,
+      correctAnswer: '',
+    });
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+  });
+
+  it('shows the original answer text after an incorrect tour answer', async () => {
+    mockIsTourModeGet.mockReturnValue(true);
+    mockAnswersGet.mockReturnValue([
+      { id: 1, question_id: 1, text: '  Bibliothek  ', correct: true },
+    ]);
+
+    await submitAnswerAndAdvance({
+      teamId: null,
+      questionId: 1,
+      pointsAwarded: 0,
+      isCorrect: false,
+      answerText: 'Mensa',
+    });
+
+    expect(mockTourFeedbackSet).toHaveBeenCalledWith({
+      isCorrect: false,
+      correctAnswer: 'Bibliothek',
+    });
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+  });
+
+  it('advances a surrendered tour question without answer feedback', async () => {
+    mockIsTourModeGet.mockReturnValue(true);
+
+    await submitAnswerAndAdvance({
+      teamId: null,
+      questionId: 1,
+      pointsAwarded: 0,
+      isCorrect: false,
+      showTourFeedback: false,
+    });
+
+    expect(mockTourFeedbackSet).not.toHaveBeenCalled();
+    expect(mockGotoNextQuestion).toHaveBeenCalledTimes(1);
   });
 
   it('saves to backend and adds points when team exists', async () => {

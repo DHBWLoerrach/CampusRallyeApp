@@ -475,32 +475,33 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
     } else {
       Logger.info('Geocaching', 'QR answer correct!');
+      if (store$.isTourMode.get()) {
+        void submitCorrectQRCode(data);
+        return;
+      }
       Alert.alert(t('common.ok'), t('question.qr.correctMessage'), [
         {
           text: t('common.next'),
-          onPress: () => {
-            void (async () => {
-              try {
-                await submitAnswerAndAdvance({
-                  teamId: team?.id ?? null,
-                  questionId: question.id,
-                  pointsAwarded: question.point_value,
-                  isCorrect: true,
-                  answerText: data,
-                });
-              } catch (e) {
-                Logger.error('Geocaching', 'Error submitting QR answer', e);
-                Alert.alert(
-                  t('common.errorTitle'),
-                  t('question.error.saveAnswer')
-                );
-              } finally {
-                processingRef.current = false;
-              }
-            })();
-          },
+          onPress: () => void submitCorrectQRCode(data),
         },
       ]);
+    }
+  };
+
+  const submitCorrectQRCode = async (data: string) => {
+    try {
+      await submitAnswerAndAdvance({
+        teamId: team?.id ?? null,
+        questionId: question.id,
+        pointsAwarded: question.point_value,
+        isCorrect: true,
+        answerText: data,
+      });
+    } catch (e) {
+      Logger.error('Geocaching', 'Error submitting QR answer', e);
+      Alert.alert(t('common.errorTitle'), t('question.error.saveAnswer'));
+    } finally {
+      processingRef.current = false;
     }
   };
 
@@ -521,6 +522,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         questionId: question.id,
         pointsAwarded: 0,
         isCorrect: false,
+        showTourFeedback: false,
       });
     } catch (e) {
       Logger.error('Geocaching', 'Error submitting missing-coordinate skip', e);

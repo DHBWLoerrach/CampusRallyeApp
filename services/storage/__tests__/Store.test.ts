@@ -105,6 +105,7 @@ describe('store$ observable', () => {
       store$.totalQuestions.set(10);
       store$.answeredCount.set(5);
       store$.correctAnswerCount.set(3);
+      store$.tourFeedback.set({ isCorrect: false, correctAnswer: 'Mensa' });
       store$.usedHints.set({ 1: true });
 
       store$.reset();
@@ -117,6 +118,7 @@ describe('store$ observable', () => {
       expect(store$.totalQuestions.get()).toBe(0);
       expect(store$.answeredCount.get()).toBe(0);
       expect(store$.correctAnswerCount.get()).toBe(0);
+      expect(store$.tourFeedback.get()).toBeNull();
       expect(store$.usedHints.get()).toEqual({});
     });
   });
