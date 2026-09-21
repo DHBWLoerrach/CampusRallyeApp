@@ -29,7 +29,7 @@ Eine spielbare Zusammenstellung von Fragen für eine Campus-Tour oder einen Bere
 _Vermeiden_: Tour
 
 **Campus-Tour**:
-Eine Rallye, die ein Standort als freie Erkundungstour verwendet, ohne Teams, Spielzeit oder gespeicherte Antworten.
+Eine Rallye, die ein Standort als freie Erkundungstour verwendet, ohne Teams, Spielzeit oder gespeicherte Antworten. Eine Campus-Tour enthält keine Upload-Fragen.
 _Vermeiden_: Erkundungsmodus, Tour-Mode
 
 **Team-Rallye**:
