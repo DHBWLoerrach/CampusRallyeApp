@@ -95,7 +95,10 @@ jest.mock('expo-sensors', () => ({
 }));
 
 // Mock expo-camera
-const mockUseCameraPermissions = jest.fn(() => [{ granted: true }, jest.fn()]);
+const mockUseCameraPermissions = jest.fn(() => [
+  { granted: true, canAskAgain: true },
+  jest.fn(),
+]);
 jest.mock('expo-camera', () => {
   const ReactActual = jest.requireActual('react');
   const { View } = jest.requireActual('react-native');
@@ -263,7 +266,10 @@ describe('GeocachingQuestion', () => {
     jest.clearAllMocks();
     const storeMock = jest.requireMock('@/services/storage/Store');
     storeMock.store$.isTourMode.get.mockReturnValue(false);
-    mockUseCameraPermissions.mockReturnValue([{ granted: true }, jest.fn()]);
+    mockUseCameraPermissions.mockReturnValue([
+      { granted: true, canAskAgain: true },
+      jest.fn(),
+    ]);
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     setupLocationMocks();
   });
@@ -724,7 +730,10 @@ describe('GeocachingQuestion', () => {
       ...baseQuestion,
       input_type: 'qr' as const,
     };
-    mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
+    mockUseCameraPermissions.mockReturnValue([
+      { granted: false, canAskAgain: true },
+      jest.fn(),
+    ]);
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
     mockWatchPositionAsync.mockImplementation(

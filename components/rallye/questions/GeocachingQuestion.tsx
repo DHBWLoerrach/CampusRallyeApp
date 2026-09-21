@@ -100,7 +100,8 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   // QR state (for QR input mode)
   const [scanMode, setScanMode] = useState(false);
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [cameraPermission, requestCameraPermission, getCameraPermission] =
+    useCameraPermissions();
   const processingRef = useRef(false);
 
   // Mutable ref for the 3D arrow angle — written by sensor callbacks, read by Canvas
@@ -825,7 +826,9 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       <ThemedView variant="background" style={s.screen}>
         <CameraPermissionPrompt
           questionText={question.question}
+          canAskAgain={cameraPermission.canAskAgain}
           onRequestPermission={requestCameraPermission}
+          onRefreshPermission={getCameraPermission}
           onSurrender={handleSurrender}
         />
       </ThemedView>

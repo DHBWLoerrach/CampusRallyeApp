@@ -24,7 +24,7 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
   const processingRef = useRef(false);
   const submittingRef = useRef(false);
   const [scanMode, setScanMode] = useState(false);
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
   const { t } = useLanguage();
   const { surrender } = useAnswerSubmission(question);
   const s = useAppStyles();
@@ -98,7 +98,9 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
       <ThemedView variant="background" style={s.screen}>
         <CameraPermissionPrompt
           questionText={question.question}
+          canAskAgain={permission.canAskAgain}
           onRequestPermission={requestPermission}
+          onRefreshPermission={getPermission}
           onSurrender={handleSurrender}
         />
       </ThemedView>

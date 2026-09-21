@@ -320,7 +320,10 @@ describe('UploadPhotoQuestion', () => {
 
   describe('Permission handling', () => {
     it('shows permission request UI when not granted', () => {
-      mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
+      mockUseCameraPermissions.mockReturnValue([
+        { granted: false, canAskAgain: true },
+        jest.fn(),
+      ]);
 
       const { getByText } = render(
         <UploadPhotoQuestion question={baseQuestion} />

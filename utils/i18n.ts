@@ -136,6 +136,9 @@ export const translations = {
     'question.qr.correctMessage': 'Das ist der richtige QR-Code!',
     'question.camera.needAccess': 'Wir brauchen Zugriff auf die Kamera',
     'question.camera.allow': 'Zugriff auf Kamera erlauben',
+    'question.camera.deniedInSettings':
+      'Der Kamerazugriff wurde abgelehnt. Du kannst ihn in den Einstellungen erlauben.',
+    'question.camera.openSettings': 'Einstellungen öffnen',
     'question.qr.hideCamera': 'Kamera ausblenden',
     'question.qr.scan': 'QR-Code scannen',
     'question.photo.take': 'Foto aufnehmen',
@@ -331,6 +334,9 @@ export const translations = {
     'question.qr.correctMessage': 'This is the correct QR code!',
     'question.camera.needAccess': 'We need access to the camera',
     'question.camera.allow': 'Allow access to camera',
+    'question.camera.deniedInSettings':
+      'Camera access was denied. You can allow it in the settings.',
+    'question.camera.openSettings': 'Open settings',
     'question.qr.hideCamera': 'Hide Camera',
     'question.qr.scan': 'Scan QR code',
     'question.photo.take': 'Take photo',

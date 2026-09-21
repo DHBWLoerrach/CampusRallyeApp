@@ -207,7 +207,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const [sending, setSending] = useState(false);
   const cameraRef = useRef<CameraView | null>(null);
   const mountedRef = useRef(true);
-  const [permission, requestPermission] = useCameraPermissions();
+  const [permission, requestPermission, getPermission] = useCameraPermissions();
   const { t } = useLanguage();
   const { surrender } = useAnswerSubmission(question);
   const s = useAppStyles();
@@ -235,7 +235,9 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
       <QuestionLayout hint={question.hint} s={s}>
         <CameraPermissionPrompt
           questionText={question.question}
+          canAskAgain={permission.canAskAgain}
           onRequestPermission={requestPermission}
+          onRefreshPermission={getPermission}
           onSurrender={handleSurrender}
         />
       </QuestionLayout>

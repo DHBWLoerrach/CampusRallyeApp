@@ -34,7 +34,10 @@ jest.mock('@/utils/ConfirmAlert', () => ({
   confirm: jest.fn(() => Promise.resolve(true)),
 }));
 
-const mockUseCameraPermissions = jest.fn(() => [{ granted: true }, jest.fn()]);
+const mockUseCameraPermissions = jest.fn(() => [
+  { granted: true, canAskAgain: true },
+  jest.fn(),
+]);
 jest.mock('expo-camera', () => {
   const ReactActual = jest.requireActual('react');
   const { View } = jest.requireActual('react-native');
@@ -128,7 +131,10 @@ describe('QRCodeQuestion', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCameraPermissions.mockReturnValue([{ granted: true }, jest.fn()]);
+    mockUseCameraPermissions.mockReturnValue([
+      { granted: true, canAskAgain: true },
+      jest.fn(),
+    ]);
     const storeMock = jest.requireMock('@/services/storage/Store');
     storeMock.store$.answers.get.mockReturnValue([
       { question_id: 42, text: 'secret code', correct: true },
@@ -143,7 +149,10 @@ describe('QRCodeQuestion', () => {
   });
 
   it('allows surrender when camera access is denied', async () => {
-    mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
+    mockUseCameraPermissions.mockReturnValue([
+      { granted: false, canAskAgain: true },
+      jest.fn(),
+    ]);
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
     const { getByText } = render(<QRCodeQuestion question={baseQuestion} />);

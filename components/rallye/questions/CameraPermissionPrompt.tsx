@@ -1,5 +1,5 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useEffect } from 'react';
+import { AppState, Linking, View } from 'react-native';
 import { globalStyles } from '@/utils/GlobalStyles';
 import { useAppStyles } from '@/utils/AppStyles';
 import { useLanguage } from '@/utils/LanguageContext';
@@ -9,20 +9,46 @@ import UIButton from '@/components/ui/UIButton';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 
+type PermissionResult = { granted: boolean; canAskAgain: boolean };
+
 type CameraPermissionPromptProps = {
   questionText: string;
-  onRequestPermission: () => void;
+  /** False once the OS no longer shows the permission dialog. */
+  canAskAgain: boolean;
+  onRequestPermission: () => Promise<PermissionResult>;
+  /** Re-reads the permission status without prompting the user. */
+  onRefreshPermission: () => void;
   onSurrender: () => void;
 };
 
 /** Shown by camera-based questions while camera access is not granted. */
 export default function CameraPermissionPrompt({
   questionText,
+  canAskAgain,
   onRequestPermission,
+  onRefreshPermission,
   onSurrender,
 }: CameraPermissionPromptProps) {
   const { t } = useLanguage();
   const s = useAppStyles();
+
+  // Access may have been granted in the system settings meanwhile
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') onRefreshPermission();
+    });
+    return () => subscription.remove();
+  }, [onRefreshPermission]);
+
+  const handleOpenSettings = async () => {
+    // A stale canAskAgain=false can hide a dialog the OS would show again
+    // (e.g. after "Ask every time"); a truly blocked request resolves
+    // immediately without UI, so only then send the user to the settings.
+    const result = await onRequestPermission();
+    if (!result.granted && !result.canAskAgain) {
+      await Linking.openSettings();
+    }
+  };
 
   return (
     <VStack
@@ -42,11 +68,19 @@ export default function CameraPermissionPrompt({
       </InfoBox>
       <InfoBox mb={0}>
         <ThemedText style={[{ textAlign: 'center', marginBottom: 10 }, s.text]}>
-          {t('question.camera.needAccess')}
+          {canAskAgain
+            ? t('question.camera.needAccess')
+            : t('question.camera.deniedInSettings')}
         </ThemedText>
-        <UIButton onPress={onRequestPermission}>
-          {t('question.camera.allow')}
-        </UIButton>
+        {canAskAgain ? (
+          <UIButton onPress={() => void onRequestPermission()}>
+            {t('question.camera.allow')}
+          </UIButton>
+        ) : (
+          <UIButton onPress={() => void handleOpenSettings()}>
+            {t('question.camera.openSettings')}
+          </UIButton>
+        )}
         <View style={{ marginTop: 10 }}>
           <UIButton
             icon="face-frown-open"
