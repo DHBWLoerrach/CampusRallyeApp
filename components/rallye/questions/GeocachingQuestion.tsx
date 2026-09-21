@@ -9,7 +9,9 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   StyleSheet,
   View,
@@ -68,6 +70,8 @@ const normalizeDeg = (deg: number): number => ((deg % 360) + 360) % 360;
 
 type Phase = 'navigating' | 'answering';
 
+type TrackingStart = 'started' | 'denied' | 'blocked' | 'skipped';
+
 // -- Component ---------------------------------------------------------------
 
 export default function GeocachingQuestion({ question }: QuestionProps) {
@@ -88,6 +92,8 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // one; treat that as "no evidence of a bad compass" instead of accuracy 0.
   const [headingAccuracy, setHeadingAccuracy] = useState<number | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
+  // False once the OS no longer shows the location permission dialog
+  const [locationCanAskAgain, setLocationCanAskAgain] = useState(true);
   const [calibrationSkipped, setCalibrationSkipped] = useState(false);
   const showCalibration =
     headingAccuracy !== null &&
@@ -202,28 +208,31 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     deviceMotionSubRef.current = null;
   }, []);
 
-  const startTracking = useCallback(async () => {
-    if (!hasCoordinates) return;
+  const startTracking = useCallback(async (): Promise<TrackingStart> => {
+    if (!hasCoordinates) return 'skipped';
     const sessionId = trackingSessionRef.current + 1;
     trackingSessionRef.current = sessionId;
     const isStale = () => trackingSessionRef.current !== sessionId;
     stopTracking();
 
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (isStale()) return;
+    const { status, canAskAgain } =
+      await Location.requestForegroundPermissionsAsync();
+    if (isStale()) return 'skipped';
     Logger.debug('Geocaching', `Location permission status: ${status}`);
     if (status !== 'granted') {
       Logger.warn('Geocaching', 'Location permission denied');
+      setLocationCanAskAgain(canAskAgain);
       setLocationDenied(true);
-      return;
+      return canAskAgain ? 'denied' : 'blocked';
     }
+    setLocationCanAskAgain(true);
 
     // Seed initial position immediately so heading callback can compute bearing
     try {
       const initialPos = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      if (isStale()) return;
+      if (isStale()) return 'skipped';
       lastPositionRef.current = {
         latitude: initialPos.coords.latitude,
         longitude: initialPos.coords.longitude,
@@ -272,7 +281,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     );
     if (isStale()) {
       positionSub.remove();
-      return;
+      return 'skipped';
     }
     positionSubRef.current = positionSub;
 
@@ -295,7 +304,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     });
     if (isStale()) {
       headingSub.remove();
-      return;
+      return 'skipped';
     }
     headingSubRef.current = headingSub;
 
@@ -319,9 +328,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     });
     if (isStale()) {
       deviceMotionSub.remove();
-      return;
+      return 'skipped';
     }
     deviceMotionSubRef.current = deviceMotionSub;
+    return 'started';
   }, [
     hasCoordinates,
     radius,
@@ -341,6 +351,20 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       stopTracking();
     };
   }, [phase, startTracking, stopTracking]);
+
+  // Location access may have been granted in the system settings meanwhile
+  useEffect(() => {
+    if (!locationDenied) return;
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState !== 'active') return;
+      void Location.getForegroundPermissionsAsync().then(({ granted }) => {
+        if (!granted) return;
+        setLocationDenied(false);
+        void startTracking();
+      });
+    });
+    return () => subscription.remove();
+  }, [locationDenied, startTracking]);
 
   // Auto-skip calibration after timeout
   useEffect(() => {
@@ -517,6 +541,17 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     await surrender();
   };
 
+  const handleRetryLocation = async () => {
+    // A stale canAskAgain=false can hide a dialog the OS would show again;
+    // only open the settings when the new request is still blocked.
+    const openSettingsIfBlocked = !locationCanAskAgain;
+    setLocationDenied(false);
+    const result = await startTracking();
+    if (result === 'blocked' && openSettingsIfBlocked) {
+      await Linking.openSettings();
+    }
+  };
+
   const handleMissingCoordinatesSkip = async () => {
     if (submitting) return;
 
@@ -576,17 +611,16 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
               variant="title"
               style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
             >
-              {t('geocaching.error.locationDenied')}
+              {locationCanAskAgain
+                ? t('geocaching.error.locationDenied')
+                : t('geocaching.error.locationDeniedInSettings')}
             </ThemedText>
           </InfoBox>
           <InfoBox mb={0}>
-            <UIButton
-              onPress={() => {
-                setLocationDenied(false);
-                void startTracking();
-              }}
-            >
-              {t('geocaching.retryPermission')}
+            <UIButton onPress={() => void handleRetryLocation()}>
+              {locationCanAskAgain
+                ? t('geocaching.retryPermission')
+                : t('geocaching.openSettings')}
             </UIButton>
           </InfoBox>
           <InfoBox mb={0}>

@@ -1,9 +1,10 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, AppState, Linking } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import GeocachingQuestion from '../GeocachingQuestion';
 import { Question } from '@/types/rallye';
 import { confirm } from '@/utils/ConfirmAlert';
+import { formatDistance, haversineDistance } from '@/utils/geo';
 
 // -- Mocks -------------------------------------------------------------------
 
@@ -67,6 +68,7 @@ const mockWatchPositionAsync = jest.fn();
 const mockWatchHeadingAsync = jest.fn();
 const mockGetCurrentPositionAsync = jest.fn();
 const mockRequestForegroundPermissionsAsync = jest.fn();
+const mockGetForegroundPermissionsAsync = jest.fn();
 const mockDeviceMotionAddListener = jest.fn((_listener: unknown) => ({
   remove: jest.fn(),
 }));
@@ -75,6 +77,8 @@ const mockDeviceMotionSetUpdateInterval = jest.fn((_interval: number) => {});
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: (...args: unknown[]) =>
     mockRequestForegroundPermissionsAsync(...args),
+  getForegroundPermissionsAsync: (...args: unknown[]) =>
+    mockGetForegroundPermissionsAsync(...args),
   getCurrentPositionAsync: (...args: unknown[]) =>
     mockGetCurrentPositionAsync(...args),
   watchPositionAsync: (...args: unknown[]) => mockWatchPositionAsync(...args),
@@ -237,12 +241,23 @@ const baseQuestion: Question = {
 
 function setupLocationMocks(opts?: {
   permissionStatus?: string;
+  canAskAgain?: boolean;
   initialPosition?: { latitude: number; longitude: number };
 }) {
   const status = opts?.permissionStatus ?? 'granted';
+  const canAskAgain = opts?.canAskAgain ?? true;
   const pos = opts?.initialPosition ?? { latitude: 47.0, longitude: 7.0 };
 
-  mockRequestForegroundPermissionsAsync.mockResolvedValue({ status });
+  mockRequestForegroundPermissionsAsync.mockResolvedValue({
+    status,
+    canAskAgain,
+    granted: status === 'granted',
+  });
+  mockGetForegroundPermissionsAsync.mockResolvedValue({
+    status,
+    canAskAgain,
+    granted: status === 'granted',
+  });
 
   mockGetCurrentPositionAsync.mockResolvedValue({
     coords: { latitude: pos.latitude, longitude: pos.longitude, accuracy: 10 },
@@ -374,6 +389,102 @@ describe('GeocachingQuestion', () => {
 
     expect(getByText('geocaching.retryPermission')).toBeTruthy();
     expect(getByText('common.surrender')).toBeTruthy();
+  });
+
+  describe('when location access can no longer be requested', () => {
+    const currentPosition = { latitude: 47.0, longitude: 7.0 };
+    const expectedDistance = formatDistance(
+      haversineDistance(
+        currentPosition.latitude,
+        currentPosition.longitude,
+        baseQuestion.target_latitude!,
+        baseQuestion.target_longitude!
+      )
+    );
+    let openSettingsSpy: jest.SpyInstance;
+
+    // Grant access and report a position so the navigation shows a distance
+    function grantLocation() {
+      setupLocationMocks({ initialPosition: currentPosition });
+      mockWatchPositionAsync.mockImplementation(
+        async (_opts: unknown, cb: Function) => {
+          cb({ coords: { ...currentPosition, accuracy: 5 } });
+          return { remove: jest.fn() };
+        }
+      );
+    }
+
+    beforeEach(() => {
+      openSettingsSpy = jest
+        .spyOn(Linking, 'openSettings')
+        .mockResolvedValue(undefined);
+      setupLocationMocks({ permissionStatus: 'denied', canAskAgain: false });
+    });
+
+    afterEach(() => {
+      openSettingsSpy.mockRestore();
+    });
+
+    it('opens the settings from the blocked screen', async () => {
+      const { findByText } = render(
+        <GeocachingQuestion question={baseQuestion} />
+      );
+
+      expect(
+        await findByText('geocaching.error.locationDeniedInSettings')
+      ).toBeTruthy();
+
+      fireEvent.press(await findByText('geocaching.openSettings'));
+
+      await waitFor(() => expect(openSettingsSpy).toHaveBeenCalledTimes(1));
+    });
+
+    it('starts navigating instead of opening settings when the block was stale', async () => {
+      const { findByText } = render(
+        <GeocachingQuestion question={baseQuestion} />
+      );
+      const settingsButton = await findByText('geocaching.openSettings');
+
+      grantLocation();
+      fireEvent.press(settingsButton);
+
+      expect(await findByText(expectedDistance)).toBeTruthy();
+      expect(openSettingsSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not jump to the settings when a retried dialog is denied again', async () => {
+      setupLocationMocks({ permissionStatus: 'denied' });
+      const { findByText } = render(
+        <GeocachingQuestion question={baseQuestion} />
+      );
+      const retryButton = await findByText('geocaching.retryPermission');
+
+      setupLocationMocks({ permissionStatus: 'denied', canAskAgain: false });
+      fireEvent.press(retryButton);
+
+      expect(await findByText('geocaching.openSettings')).toBeTruthy();
+      expect(openSettingsSpy).not.toHaveBeenCalled();
+    });
+
+    it('resumes navigating when access was granted in the settings', async () => {
+      const { findByText } = render(
+        <GeocachingQuestion question={baseQuestion} />
+      );
+      await findByText('geocaching.openSettings');
+
+      // Simulate returning from the system settings
+      const changeListeners = jest
+        .mocked(AppState.addEventListener)
+        .mock.calls.filter(([type]) => type === 'change');
+      const appStateListener = changeListeners.at(-1)?.[1];
+
+      grantLocation();
+      await act(async () => {
+        appStateListener?.('active');
+      });
+
+      expect(await findByText(expectedDistance)).toBeTruthy();
+    });
   });
 
   // -- Rendering: navigation phase -------------------------------------------
