@@ -119,6 +119,9 @@ export const translations = {
     'teamSetup.error.message':
       'Team konnte nicht erstellt werden. Bitte erneut versuchen.',
     'team.sheetTitle': 'Euer Team',
+    'team.deleted.title': 'Team nicht mehr vorhanden',
+    'team.deleted.message':
+      'Euer Team existiert nicht mehr, vermutlich wurde die Rallye zurückgesetzt. Bitte legt ein neues Team an.',
     'question.submit': 'Antwort senden',
     'question.options.loading': 'Antwortoptionen werden geladen…',
     'question.placeholder.answer': 'Deine Antwort...',
@@ -307,6 +310,9 @@ export const translations = {
     'teamSetup.button': 'Create team',
     'teamSetup.error.message': 'Team could not be created. Please try again.',
     'team.sheetTitle': 'Your Team',
+    'team.deleted.title': 'Team no longer exists',
+    'team.deleted.message':
+      'Your team no longer exists, probably because the rally was reset. Please create a new team.',
     'question.submit': 'Submit answer',
     'question.options.loading': 'Loading answer options…',
     'question.placeholder.answer': 'Your answer...',

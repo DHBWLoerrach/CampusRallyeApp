@@ -64,6 +64,8 @@ jest.mock('@/services/storage/Store', () => ({
   },
 }));
 
+jest.mock('@/components/rallye/TeamDeletedNotice', () => () => null);
+
 jest.mock('@/utils/ThemeContext', () => {
   return {
     ThemeContext: MockReact.createContext({

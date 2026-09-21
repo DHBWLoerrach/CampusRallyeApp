@@ -25,6 +25,7 @@ import { useAppStyles } from '@/utils/AppStyles';
 import ThemedText from '@/components/themed/ThemedText';
 import UIButton from '@/components/ui/UIButton';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
+import TeamDeletedNotice from '@/components/rallye/TeamDeletedNotice';
 
 // Keep the native splash screen visible while we load fonts and initialize navigation.
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -184,6 +185,7 @@ function RootNavigator() {
     <ThemeProvider value={navTheme}>
       <ThemeContext.Provider value={{ isDarkMode: isDark, mode, setMode }}>
         <LanguageProvider>
+          <TeamDeletedNotice />
           <ErrorBoundary
             onError={(error, info) => {
               console.error('Unhandled app error:', error, info);
