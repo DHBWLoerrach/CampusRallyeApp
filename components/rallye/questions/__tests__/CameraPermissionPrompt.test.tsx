@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppState, Linking } from 'react-native';
+import { Linking } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import CameraPermissionPrompt from '../CameraPermissionPrompt';
 
@@ -126,28 +126,6 @@ describe('CameraPermissionPrompt', () => {
       expect(props.onRequestPermission).toHaveBeenCalledTimes(1)
     );
     expect(openSettingsSpy).not.toHaveBeenCalled();
-  });
-
-  it('re-reads the permission when the app returns to the foreground', () => {
-    const remove = jest.fn();
-    let listener: ((state: string) => void) | undefined;
-    jest
-      .spyOn(AppState, 'addEventListener')
-      .mockImplementation((_type, handler) => {
-        listener = handler as (state: string) => void;
-        return { remove };
-      });
-
-    const { props, unmount } = renderPrompt(false);
-
-    listener?.('background');
-    expect(props.onRefreshPermission).not.toHaveBeenCalled();
-
-    listener?.('active');
-    expect(props.onRefreshPermission).toHaveBeenCalledTimes(1);
-
-    unmount();
-    expect(remove).toHaveBeenCalled();
   });
 
   it('lets the team surrender without camera access', () => {

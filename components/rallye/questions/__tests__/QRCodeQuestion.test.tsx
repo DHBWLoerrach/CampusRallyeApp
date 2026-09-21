@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, AppState, type AppStateStatus } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import QRCodeQuestion from '../QRCodeQuestion';
 import type { Question } from '@/types/rallye';
@@ -34,10 +34,13 @@ jest.mock('@/utils/ConfirmAlert', () => ({
   confirm: jest.fn(() => Promise.resolve(true)),
 }));
 
-const mockUseCameraPermissions = jest.fn(() => [
-  { granted: true, canAskAgain: true },
-  jest.fn(),
-]);
+type CameraPermission = { granted: boolean; canAskAgain: boolean };
+type PermissionMethod = () => Promise<CameraPermission>;
+
+const mockUseCameraPermissions = jest.fn<
+  [CameraPermission, PermissionMethod, PermissionMethod?],
+  []
+>(() => [{ granted: true, canAskAgain: true }, jest.fn()]);
 jest.mock('expo-camera', () => {
   const ReactActual = jest.requireActual('react');
   const { View } = jest.requireActual('react-native');
@@ -145,7 +148,7 @@ describe('QRCodeQuestion', () => {
 
   afterEach(() => {
     jest.useRealTimers();
-    alertSpy.mockRestore();
+    jest.restoreAllMocks();
   });
 
   it('allows surrender when camera access is denied', async () => {
@@ -172,6 +175,51 @@ describe('QRCodeQuestion', () => {
         })
       );
     });
+  });
+
+  it('can scan after camera access is granted in settings', async () => {
+    let appStateListener: ((state: AppStateStatus) => void) | undefined;
+    jest
+      .spyOn(AppState, 'addEventListener')
+      .mockImplementation((_type, listener) => {
+        appStateListener = listener;
+        return { remove: jest.fn() };
+      });
+
+    let systemPermission = { granted: false, canAskAgain: false };
+    function usePermissionsAfterSettings(): [
+      CameraPermission,
+      PermissionMethod,
+      PermissionMethod,
+    ] {
+      const [permission, setPermission] = React.useState(systemPermission);
+      const requestPermission = React.useCallback(
+        async () => systemPermission,
+        []
+      );
+      const getPermission = React.useCallback(async () => {
+        setPermission(systemPermission);
+        return systemPermission;
+      }, []);
+      return [permission, requestPermission, getPermission];
+    }
+    mockUseCameraPermissions.mockImplementation(usePermissionsAfterSettings);
+
+    const { getByText, getByTestId, queryByText } = render(
+      <QRCodeQuestion question={baseQuestion} />
+    );
+    expect(getByText('question.camera.openSettings')).toBeTruthy();
+
+    appStateListener?.('background');
+    systemPermission = { granted: true, canAskAgain: true };
+    await act(async () => {
+      appStateListener?.('active');
+    });
+
+    expect(getByText('question.qr.scan')).toBeTruthy();
+    expect(queryByText('question.camera.openSettings')).toBeNull();
+    fireEvent.press(getByText('question.qr.scan'));
+    expect(getByTestId('camera-view')).toBeTruthy();
   });
 
   it('accepts scanned QR values with trailing whitespace', async () => {
