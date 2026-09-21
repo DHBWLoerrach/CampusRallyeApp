@@ -17,6 +17,7 @@ export const translations = {
     'common.surrender': 'Aufgeben',
     'common.loading': 'Lade…',
     'common.offline': 'Offline',
+    'common.openSettings': 'Einstellungen öffnen',
     'a11y.languageToggle': 'Sprache wechseln',
     'a11y.languageToggleHint': 'Wechselt zwischen Deutsch und Englisch.',
     'a11y.languageToggleCurrent': 'Sprache wechseln, aktuell {{language}}',
@@ -138,7 +139,6 @@ export const translations = {
     'question.camera.allow': 'Zugriff auf Kamera erlauben',
     'question.camera.deniedInSettings':
       'Der Kamerazugriff wurde abgelehnt. Du kannst ihn in den Einstellungen erlauben.',
-    'question.camera.openSettings': 'Einstellungen öffnen',
     'question.qr.hideCamera': 'Kamera ausblenden',
     'question.qr.scan': 'QR-Code scannen',
     'question.photo.take': 'Foto aufnehmen',
@@ -200,7 +200,6 @@ export const translations = {
       'Standortzugriff wurde verweigert. Dieser Fragetyp benötigt GPS.',
     'geocaching.error.locationDeniedInSettings':
       'Standortzugriff wurde verweigert. Du kannst ihn in den Einstellungen erlauben.',
-    'geocaching.openSettings': 'Einstellungen öffnen',
     'geocaching.instruction.text':
       'Finde zuerst das Ziel, um dann die Antwort einzugeben!',
     'geocaching.instruction.qr':
@@ -222,6 +221,7 @@ export const translations = {
     'common.surrender': 'Surrender',
     'common.loading': 'Loading…',
     'common.offline': 'Offline',
+    'common.openSettings': 'Open settings',
     'a11y.languageToggle': 'Switch language',
     'a11y.languageToggleHint': 'Switches between German and English.',
     'a11y.languageToggleCurrent': 'Switch language, currently {{language}}',
@@ -339,7 +339,6 @@ export const translations = {
     'question.camera.allow': 'Allow access to camera',
     'question.camera.deniedInSettings':
       'Camera access was denied. You can allow it in the settings.',
-    'question.camera.openSettings': 'Open settings',
     'question.qr.hideCamera': 'Hide Camera',
     'question.qr.scan': 'Scan QR code',
     'question.photo.take': 'Take photo',
@@ -401,7 +400,6 @@ export const translations = {
       'Location access was denied. This question type requires GPS.',
     'geocaching.error.locationDeniedInSettings':
       'Location access was denied. You can allow it in the settings.',
-    'geocaching.openSettings': 'Open settings',
     'geocaching.instruction.text':
       'Find the destination first, then enter the answer!',
     'geocaching.instruction.qr':

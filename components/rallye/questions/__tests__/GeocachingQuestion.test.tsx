@@ -432,7 +432,7 @@ describe('GeocachingQuestion', () => {
         await findByText('geocaching.error.locationDeniedInSettings')
       ).toBeTruthy();
 
-      fireEvent.press(await findByText('geocaching.openSettings'));
+      fireEvent.press(await findByText('common.openSettings'));
 
       await waitFor(() => expect(openSettingsSpy).toHaveBeenCalledTimes(1));
     });
@@ -441,7 +441,7 @@ describe('GeocachingQuestion', () => {
       const { findByText } = render(
         <GeocachingQuestion question={baseQuestion} />
       );
-      const settingsButton = await findByText('geocaching.openSettings');
+      const settingsButton = await findByText('common.openSettings');
 
       grantLocation();
       fireEvent.press(settingsButton);
@@ -460,7 +460,7 @@ describe('GeocachingQuestion', () => {
       setupLocationMocks({ permissionStatus: 'denied', canAskAgain: false });
       fireEvent.press(retryButton);
 
-      expect(await findByText('geocaching.openSettings')).toBeTruthy();
+      expect(await findByText('common.openSettings')).toBeTruthy();
       expect(openSettingsSpy).not.toHaveBeenCalled();
     });
 
@@ -468,7 +468,7 @@ describe('GeocachingQuestion', () => {
       const { findByText } = render(
         <GeocachingQuestion question={baseQuestion} />
       );
-      await findByText('geocaching.openSettings');
+      await findByText('common.openSettings');
 
       // Simulate returning from the system settings
       const changeListeners = jest

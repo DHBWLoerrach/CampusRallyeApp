@@ -621,7 +621,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             <UIButton onPress={() => void handleRetryLocation()}>
               {locationCanAskAgain
                 ? t('geocaching.retryPermission')
-                : t('geocaching.openSettings')}
+                : t('common.openSettings')}
             </UIButton>
           </InfoBox>
           <InfoBox mb={0}>

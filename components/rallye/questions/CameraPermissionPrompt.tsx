@@ -78,7 +78,7 @@ export default function CameraPermissionPrompt({
           </UIButton>
         ) : (
           <UIButton onPress={() => void handleOpenSettings()}>
-            {t('question.camera.openSettings')}
+            {t('common.openSettings')}
           </UIButton>
         )}
         <View style={{ marginTop: 10 }}>

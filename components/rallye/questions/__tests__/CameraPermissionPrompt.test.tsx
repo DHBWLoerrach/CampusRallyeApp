@@ -94,7 +94,7 @@ describe('CameraPermissionPrompt', () => {
 
     expect(getByText('Take a group photo')).toBeTruthy();
     expect(getByText('question.camera.needAccess')).toBeTruthy();
-    expect(queryByText('question.camera.openSettings')).toBeNull();
+    expect(queryByText('common.openSettings')).toBeNull();
 
     fireEvent.press(getByText('question.camera.allow'));
 
@@ -108,7 +108,7 @@ describe('CameraPermissionPrompt', () => {
     expect(getByText('question.camera.deniedInSettings')).toBeTruthy();
     expect(queryByText('question.camera.allow')).toBeNull();
 
-    fireEvent.press(getByText('question.camera.openSettings'));
+    fireEvent.press(getByText('common.openSettings'));
 
     await waitFor(() => expect(openSettingsSpy).toHaveBeenCalledTimes(1));
     expect(props.onRequestPermission).toHaveBeenCalledTimes(1);
@@ -120,7 +120,7 @@ describe('CameraPermissionPrompt', () => {
       canAskAgain: true,
     });
 
-    fireEvent.press(getByText('question.camera.openSettings'));
+    fireEvent.press(getByText('common.openSettings'));
 
     await waitFor(() =>
       expect(props.onRequestPermission).toHaveBeenCalledTimes(1)

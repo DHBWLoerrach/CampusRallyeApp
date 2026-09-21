@@ -208,7 +208,7 @@ describe('QRCodeQuestion', () => {
     const { getByText, getByTestId, queryByText } = render(
       <QRCodeQuestion question={baseQuestion} />
     );
-    expect(getByText('question.camera.openSettings')).toBeTruthy();
+    expect(getByText('common.openSettings')).toBeTruthy();
 
     appStateListener?.('background');
     systemPermission = { granted: true, canAskAgain: true };
@@ -217,7 +217,7 @@ describe('QRCodeQuestion', () => {
     });
 
     expect(getByText('question.qr.scan')).toBeTruthy();
-    expect(queryByText('question.camera.openSettings')).toBeNull();
+    expect(queryByText('common.openSettings')).toBeNull();
     fireEvent.press(getByText('question.qr.scan'));
     expect(getByTestId('camera-view')).toBeTruthy();
   });
