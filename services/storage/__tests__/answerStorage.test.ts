@@ -73,6 +73,21 @@ describe('saveAnswer', () => {
     });
     expect(result).toEqual({ status: 'queued' });
   });
+
+  it('reports a deleted team instead of enqueueing the answer', async () => {
+    mockUpsert.mockResolvedValue({
+      error: {
+        code: '23503',
+        message:
+          'insert or update on table "team_answers" violates foreign key constraint "team_answers_team_id_fkey"',
+      },
+    });
+
+    const result = await saveAnswer(7, 13, 5, 'foo');
+
+    expect(mockEnqueueSaveAnswer).not.toHaveBeenCalled();
+    expect(result).toEqual({ status: 'team_missing' });
+  });
 });
 
 describe('uploadPhotoAnswer', () => {

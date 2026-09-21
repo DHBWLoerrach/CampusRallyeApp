@@ -3,6 +3,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { observable } from '@legendapp/state';
 import { supabase } from '@/utils/Supabase';
 import { StorageKeys, getStorageItem, setStorageItem } from './asyncStorage';
+import { isMissingTeamError } from './missingTeamError';
 import type { TeamId } from '@/types/rallye';
 
 export type SaveAnswerPayload = {
@@ -90,18 +91,6 @@ function errorMessage(error: unknown, payload?: SaveAnswerPayload) {
   }
 
   return message.slice(0, 500);
-}
-
-// The team was deleted server-side (e.g. the rallye was reset), so the answer
-// can never be stored and retrying would keep it in the queue forever.
-function isMissingTeamError(error: unknown) {
-  if (!error || typeof error !== 'object') return false;
-  const { code, message } = error as { code?: unknown; message?: unknown };
-  return (
-    code === '23503' &&
-    typeof message === 'string' &&
-    message.includes('team_answers_team_id_fkey')
-  );
 }
 
 function normalizeQueueItem(raw: any): OfflineActionV1 | null {

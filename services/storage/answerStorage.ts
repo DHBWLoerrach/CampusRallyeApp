@@ -1,9 +1,10 @@
 import { supabase } from '@/utils/Supabase';
+import { isMissingTeamError } from './missingTeamError';
 import { enqueueSaveAnswer } from './offlineOutbox';
 import { preparePhotoUpload } from './preparePhotoUpload';
 import type { TeamId } from '@/types/rallye';
 
-export type SaveAnswerResult = { status: 'sent' | 'queued' };
+export type SaveAnswerResult = { status: 'sent' | 'queued' | 'team_missing' };
 
 export async function saveAnswer(
   teamId: TeamId,
@@ -24,6 +25,8 @@ export async function saveAnswer(
     if (error) throw error;
     return { status: 'sent' };
   } catch (error) {
+    // Queueing is pointless: the outbox would drop the answer anyway.
+    if (isMissingTeamError(error)) return { status: 'team_missing' };
     console.error('Error saving answer:', error);
     try {
       await enqueueSaveAnswer({

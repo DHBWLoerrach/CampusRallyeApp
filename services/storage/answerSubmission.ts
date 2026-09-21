@@ -9,7 +9,10 @@ import { getCorrectAnswerTextForQuestion } from '@/utils/answerRows';
 import type { TeamId } from '@/types/rallye';
 
 export type SubmitOutcome =
-  { status: 'local' } | { status: 'sent' } | { status: 'queued' };
+  | { status: 'local' }
+  | { status: 'sent' }
+  | { status: 'queued' }
+  | { status: 'team_missing' };
 
 async function getEffectivePoints(options: {
   teamId: TeamId | null;
@@ -101,7 +104,10 @@ async function advanceOrShowTourFeedback(
 }
 
 export type SubmitPhotoOutcome =
-  { status: 'sent' } | { status: 'queued' } | { status: 'requires_online' };
+  | { status: 'sent' }
+  | { status: 'queued' }
+  | { status: 'team_missing' }
+  | { status: 'requires_online' };
 
 export async function submitPhotoAnswerAndAdvance(options: {
   teamId: TeamId | null;
