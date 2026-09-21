@@ -245,7 +245,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     // Stack the buttons when their labels no longer fit side by side
     // (e.g. with large accessibility font sizes) instead of breaking words.
-    flexWrap: 'wrap',
+    // wrap-reverse puts the primary action above the cancel button.
+    flexWrap: 'wrap-reverse',
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 24,
