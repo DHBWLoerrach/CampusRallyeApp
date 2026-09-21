@@ -39,6 +39,7 @@ export function useAnswerSubmission(question: Question) {
           teamId,
           questionId: question.id,
           pointsAwarded: isCorrect ? question.point_value : 0,
+          isCorrect,
           answerText,
         });
         return true;

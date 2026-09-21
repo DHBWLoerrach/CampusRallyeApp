@@ -21,6 +21,7 @@ jest.mock('@/services/storage/hintStorage', () => ({
 const mockPointsGet = jest.fn(() => 0);
 const mockPointsSet = jest.fn();
 const mockGotoNextQuestion = jest.fn(async () => {});
+const mockCountCorrectTourAnswer = jest.fn();
 const mockUsedHintGet = jest.fn(() => false);
 const mockRallyeGet = jest.fn(
   (): {
@@ -46,6 +47,8 @@ jest.mock('@/services/storage/Store', () => ({
       get: () => mockPointsGet(),
       set: (v: number) => mockPointsSet(v),
     },
+    countCorrectTourAnswer: (...args: unknown[]) =>
+      mockCountCorrectTourAnswer(...args),
     gotoNextQuestion: () => mockGotoNextQuestion(),
   },
 }));
@@ -70,6 +73,7 @@ describe('submitAnswerAndAdvance', () => {
       teamId: null,
       questionId: 1,
       pointsAwarded: 5,
+      isCorrect: true,
     });
 
     expect(result).toEqual({ status: 'local' });
@@ -84,6 +88,7 @@ describe('submitAnswerAndAdvance', () => {
       teamId: 42,
       questionId: 7,
       pointsAwarded: 3,
+      isCorrect: true,
       answerText: 'hello',
     });
 
@@ -103,6 +108,7 @@ describe('submitAnswerAndAdvance', () => {
       teamId: 42,
       questionId: 7,
       pointsAwarded: 2,
+      isCorrect: true,
     });
 
     expect(result).toEqual({ status: 'sent' });
@@ -115,6 +121,7 @@ describe('submitAnswerAndAdvance', () => {
       teamId: 42,
       questionId: 7,
       pointsAwarded: 0,
+      isCorrect: false,
     });
 
     expect(result).toEqual({ status: 'sent' });
@@ -129,6 +136,7 @@ describe('submitAnswerAndAdvance', () => {
       teamId: 42,
       questionId: 7,
       pointsAwarded: 2,
+      isCorrect: true,
     });
 
     expect(result).toEqual({ status: 'queued' });
@@ -142,6 +150,7 @@ describe('submitAnswerAndAdvance', () => {
       teamId: 42,
       questionId: 7,
       pointsAwarded: 3,
+      isCorrect: true,
     });
 
     expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, 2, '');
@@ -160,6 +169,7 @@ describe('submitAnswerAndAdvance', () => {
         teamId: 42,
         questionId: 7,
         pointsAwarded: points,
+        isCorrect: true,
       });
 
       expect(mockSaveAnswer).toHaveBeenCalledWith(42, 7, expected, '');
@@ -175,11 +185,44 @@ describe('submitAnswerAndAdvance', () => {
       teamId: null,
       questionId: 7,
       pointsAwarded: 3,
+      isCorrect: true,
     });
 
     expect(mockHasUsedHint).not.toHaveBeenCalled();
     expect(mockPointsSet).toHaveBeenCalledWith(7);
   });
+
+  it('records a correct tour answer even when hint cost reduces points to zero', async () => {
+    mockUsedHintGet.mockReturnValue(true);
+
+    await submitAnswerAndAdvance({
+      teamId: null,
+      questionId: 7,
+      pointsAwarded: 1,
+      isCorrect: true,
+    });
+
+    expect(mockCountCorrectTourAnswer).toHaveBeenCalledWith(true);
+  });
+
+  it.each([
+    ['without a team', null],
+    ['with a team', 42],
+  ] as const)(
+    'counts the answer before advancing %s',
+    async (_case, teamId) => {
+      await submitAnswerAndAdvance({
+        teamId,
+        questionId: 7,
+        pointsAwarded: 1,
+        isCorrect: true,
+      });
+
+      expect(
+        mockCountCorrectTourAnswer.mock.invocationCallOrder[0]
+      ).toBeLessThan(mockGotoNextQuestion.mock.invocationCallOrder[0]);
+    }
+  );
 
   it('applies persisted hint use after the in-memory state was reset', async () => {
     mockHasUsedHint.mockResolvedValue(true);
@@ -188,6 +231,7 @@ describe('submitAnswerAndAdvance', () => {
       teamId: 42,
       questionId: 7,
       pointsAwarded: 3,
+      isCorrect: true,
     });
 
     expect(mockHasUsedHint).toHaveBeenCalledWith({
@@ -206,6 +250,7 @@ describe('submitAnswerAndAdvance', () => {
         teamId: 42,
         questionId: 7,
         pointsAwarded: 3,
+        isCorrect: true,
       })
     ).rejects.toThrow('storage unavailable');
 

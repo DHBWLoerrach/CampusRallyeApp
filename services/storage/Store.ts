@@ -56,6 +56,8 @@ export const store$ = observable({
   totalQuestions: 0,
   // Number of questions already answered by the team (non-tour mode)
   answeredCount: 0,
+  // Correct answers in tour mode (not persisted).
+  correctAnswerCount: 0,
   points: 0,
   allQuestionsAnswered: false,
   answers: [] as AnswerRow[],
@@ -71,6 +73,11 @@ export const store$ = observable({
     }),
 
   isTourMode: () => store$.rallye.get()?.mode === 'tour',
+
+  countCorrectTourAnswer: (isCorrect: boolean) => {
+    if (!store$.isTourMode.get() || !isCorrect) return;
+    store$.correctAnswerCount.set(store$.correctAnswerCount.get() + 1);
+  },
 
   currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
 
@@ -123,6 +130,7 @@ export const store$ = observable({
     store$.answers.set([]);
     store$.totalQuestions.set(0);
     store$.answeredCount.set(0);
+    store$.correctAnswerCount.set(0);
     store$.usedHints.set({});
   },
 

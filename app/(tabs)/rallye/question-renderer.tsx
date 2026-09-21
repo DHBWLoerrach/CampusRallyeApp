@@ -76,6 +76,7 @@ export default function QuestionRenderer({ question }: { question: any }) {
         teamId: store$.team.get()?.id ?? null,
         questionId,
         pointsAwarded: 0,
+        isCorrect: false,
       });
     } catch (error) {
       console.error(

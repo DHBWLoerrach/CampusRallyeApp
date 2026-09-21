@@ -157,6 +157,19 @@ describe('QRCodeQuestion', () => {
         expect.any(Array)
       );
     });
+
+    const buttons = alertSpy.mock.calls.at(-1)?.[2] as
+      { onPress?: () => void }[] | undefined;
+    buttons?.[0]?.onPress?.();
+
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
+        teamId: 1,
+        questionId: 42,
+        pointsAwarded: 10,
+        isCorrect: true,
+      });
+    });
   });
 
   it('keeps the QR scan lock active while a successful submit is still in flight', async () => {

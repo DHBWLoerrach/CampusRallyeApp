@@ -137,6 +137,7 @@ describe('SkillQuestion', () => {
         teamId: 1,
         questionId: 42,
         pointsAwarded: 10,
+        isCorrect: true,
         answerText: 'Zwölf',
       })
     );
@@ -158,6 +159,7 @@ describe('SkillQuestion', () => {
         teamId: 1,
         questionId: 42,
         pointsAwarded: 0,
+        isCorrect: false,
         answerText: 'Drei',
       })
     );
@@ -179,6 +181,7 @@ describe('SkillQuestion', () => {
         teamId: 1,
         questionId: 42,
         pointsAwarded: 10,
+        isCorrect: true,
         answerText: 'zWÖLF',
       })
     );
@@ -217,6 +220,7 @@ describe('SkillQuestion', () => {
         teamId: null,
         questionId: 42,
         pointsAwarded: 10,
+        isCorrect: true,
         answerText: 'Zwölf',
       })
     );

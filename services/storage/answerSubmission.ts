@@ -39,9 +39,10 @@ export async function submitAnswerAndAdvance(options: {
   teamId: TeamId | null;
   questionId: number;
   pointsAwarded: number;
+  isCorrect: boolean;
   answerText?: string;
 }): Promise<SubmitOutcome> {
-  const { teamId, questionId, pointsAwarded, answerText } = options;
+  const { teamId, questionId, pointsAwarded, isCorrect, answerText } = options;
   const effectivePoints = await getEffectivePoints({
     teamId,
     questionId,
@@ -52,6 +53,7 @@ export async function submitAnswerAndAdvance(options: {
     if (effectivePoints > 0) {
       store$.points.set((store$.points.get() as number) + effectivePoints);
     }
+    store$.countCorrectTourAnswer(isCorrect);
     await store$.gotoNextQuestion();
     return { status: 'local' };
   }
@@ -66,6 +68,7 @@ export async function submitAnswerAndAdvance(options: {
   if (effectivePoints > 0) {
     store$.points.set((store$.points.get() as number) + effectivePoints);
   }
+  store$.countCorrectTourAnswer(isCorrect);
   await store$.gotoNextQuestion();
   return { status: result.status };
 }

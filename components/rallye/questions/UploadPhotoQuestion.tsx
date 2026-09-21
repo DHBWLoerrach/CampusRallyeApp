@@ -289,6 +289,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
           teamId: null,
           questionId: question.id,
           pointsAwarded: 0,
+          isCorrect: false,
         });
         return;
       }

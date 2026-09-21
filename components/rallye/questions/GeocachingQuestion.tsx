@@ -440,6 +440,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         teamId: team?.id ?? null,
         questionId: question.id,
         pointsAwarded: isCorrect ? question.point_value : 0,
+        isCorrect,
         answerText: trimmed,
       });
       setAnswer('');
@@ -484,6 +485,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
                   teamId: team?.id ?? null,
                   questionId: question.id,
                   pointsAwarded: question.point_value,
+                  isCorrect: true,
                   answerText: data,
                 });
               } catch (e) {
@@ -518,6 +520,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
         teamId: team?.id ?? null,
         questionId: question.id,
         pointsAwarded: 0,
+        isCorrect: false,
       });
     } catch (e) {
       Logger.error('Geocaching', 'Error submitting missing-coordinate skip', e);

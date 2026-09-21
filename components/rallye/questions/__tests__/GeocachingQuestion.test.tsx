@@ -290,6 +290,7 @@ describe('GeocachingQuestion', () => {
         teamId: 1,
         questionId: 42,
         pointsAwarded: 0,
+        isCorrect: false,
       })
     );
     expect(mockGotoNextQuestion).not.toHaveBeenCalled();
@@ -454,6 +455,7 @@ describe('GeocachingQuestion', () => {
           teamId: 1,
           questionId: 42,
           pointsAwarded: 10,
+          isCorrect: true,
           answerText: 'secret code',
         })
       );
@@ -499,6 +501,7 @@ describe('GeocachingQuestion', () => {
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
         expect.objectContaining({
           pointsAwarded: 0,
+          isCorrect: false,
           answerText: 'wrong answer',
         })
       );
@@ -619,6 +622,7 @@ describe('GeocachingQuestion', () => {
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
         expect.objectContaining({
           pointsAwarded: 0,
+          isCorrect: false,
         })
       );
     });
@@ -692,6 +696,7 @@ describe('GeocachingQuestion', () => {
           teamId: 1,
           questionId: 42,
           pointsAwarded: 0,
+          isCorrect: false,
         })
       );
     });
@@ -754,6 +759,7 @@ describe('GeocachingQuestion', () => {
           teamId: 1,
           questionId: 42,
           pointsAwarded: 10,
+          isCorrect: true,
           answerText: scannedValue,
         })
       );

@@ -104,6 +104,7 @@ describe('store$ observable', () => {
       store$.answers.set([{ id: 1 }] as any);
       store$.totalQuestions.set(10);
       store$.answeredCount.set(5);
+      store$.correctAnswerCount.set(3);
       store$.usedHints.set({ 1: true });
 
       store$.reset();
@@ -115,7 +116,29 @@ describe('store$ observable', () => {
       expect(store$.answers.get()).toEqual([]);
       expect(store$.totalQuestions.get()).toBe(0);
       expect(store$.answeredCount.get()).toBe(0);
+      expect(store$.correctAnswerCount.get()).toBe(0);
       expect(store$.usedHints.get()).toEqual({});
+    });
+  });
+
+  // -- countCorrectTourAnswer -------------------------------------------------
+
+  describe('countCorrectTourAnswer', () => {
+    it('counts correct answers in tour mode', () => {
+      store$.rallye.set({ id: 1, mode: 'tour' } as any);
+
+      store$.countCorrectTourAnswer(true);
+
+      expect(store$.correctAnswerCount.get()).toBe(1);
+    });
+
+    it('does not count incorrect answers or team-rallye answers', () => {
+      store$.rallye.set({ id: 1, mode: 'tour' } as any);
+      store$.countCorrectTourAnswer(false);
+      store$.rallye.set({ id: 1, mode: 'department' } as any);
+      store$.countCorrectTourAnswer(true);
+
+      expect(store$.correctAnswerCount.get()).toBe(0);
     });
   });
 

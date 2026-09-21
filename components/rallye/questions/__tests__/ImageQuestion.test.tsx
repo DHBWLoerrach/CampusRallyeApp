@@ -166,6 +166,7 @@ describe('ImageQuestion', () => {
         teamId: 1,
         questionId: 7,
         pointsAwarded: 5,
+        isCorrect: true,
         answerText: 'Bibliothek',
       })
     );
@@ -187,6 +188,7 @@ describe('ImageQuestion', () => {
         teamId: 1,
         questionId: 7,
         pointsAwarded: 0,
+        isCorrect: false,
         answerText: 'Mensa',
       })
     );
@@ -208,6 +210,7 @@ describe('ImageQuestion', () => {
         teamId: 1,
         questionId: 7,
         pointsAwarded: 5,
+        isCorrect: true,
         answerText: 'bIBLIOTHEK',
       })
     );
@@ -246,6 +249,7 @@ describe('ImageQuestion', () => {
         teamId: null,
         questionId: 7,
         pointsAwarded: 5,
+        isCorrect: true,
         answerText: 'Bibliothek',
       })
     );

@@ -58,6 +58,7 @@ describe('useAnswerSubmission', () => {
       teamId: 1,
       questionId: 42,
       pointsAwarded: 10,
+      isCorrect: true,
       answerText: 'x',
     });
     expect(submitted).toBe(true);
@@ -78,6 +79,7 @@ describe('useAnswerSubmission', () => {
       teamId: 1,
       questionId: 42,
       pointsAwarded: 0,
+      isCorrect: false,
       answerText: 'x',
     });
     expect(submitted).toBe(true);

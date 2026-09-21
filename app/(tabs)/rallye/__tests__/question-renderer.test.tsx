@@ -248,6 +248,7 @@ describe('QuestionRenderer', () => {
         teamId: 7,
         questionId: 12,
         pointsAwarded: 0,
+        isCorrect: false,
       })
     );
     expect(mockGotoNextQuestion).not.toHaveBeenCalled();

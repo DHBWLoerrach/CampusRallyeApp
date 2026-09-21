@@ -276,6 +276,7 @@ describe('UploadPhotoQuestion', () => {
           teamId: null,
           questionId: 42,
           pointsAwarded: 0,
+          isCorrect: false,
         });
       });
       expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
@@ -355,6 +356,7 @@ describe('UploadPhotoQuestion', () => {
           teamId: 1,
           questionId: 42,
           pointsAwarded: 0,
+          isCorrect: false,
         });
       });
     });
