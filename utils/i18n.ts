@@ -95,9 +95,10 @@ export const translations = {
     'rallye.modal.noActive':
       'Keine aktiven Rallyes verfügbar. Bitte warte, bis eine Rallye gestartet wird.',
     'rallye.progress': 'Frage {{current}} von {{total}}',
-    'rallye.allAnswered.title': 'Alle Fragen beantwortet.',
+    'rallye.allAnswered.title': 'Erkundung des Campus beendet',
     'rallye.allAnswered.simple': 'Alle Fragen beantwortet',
-    'rallye.pointsAchieved': 'Erreichte Punkte: {{points}}',
+    'rallye.correctAnswers':
+      '{{correct}} von {{total}} Fragen richtig beantwortet',
     'rallye.backToStart': 'Zurück zum Start',
     'rallye.plannedEnd': 'geplant bis {{time}} Uhr',
     'rallye.teamLabel': 'Team: {{team}}',
@@ -278,9 +279,10 @@ export const translations = {
     'rallye.modal.noActive':
       'No active rallyes available. Please wait until a rallye starts.',
     'rallye.progress': 'Question {{current}} of {{total}}',
-    'rallye.allAnswered.title': 'All questions answered.',
+    'rallye.allAnswered.title': 'Campus exploration complete',
     'rallye.allAnswered.simple': 'All questions answered',
-    'rallye.pointsAchieved': 'Points achieved: {{points}}',
+    'rallye.correctAnswers':
+      '{{correct}} of {{total}} questions answered correctly',
     'rallye.backToStart': 'Back to start',
     'rallye.plannedEnd': 'planned until {{time}}',
     'rallye.teamLabel': 'Team: {{team}}',

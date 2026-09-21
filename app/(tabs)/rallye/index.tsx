@@ -45,6 +45,7 @@ const RallyeIndex = observer(function RallyeIndex() {
   const qsLen = useSelector(() => store$.questions.get().length);
   const totalQuestions = useSelector(() => store$.totalQuestions.get());
   const answeredCount = useSelector(() => store$.answeredCount.get());
+  const correctAnswerCount = useSelector(() => store$.correctAnswerCount.get());
   const questions = useSelector(() => store$.questions.get());
   const currentQuestion = useSelector(() => store$.currentQuestion.get());
   const points = useSelector(() => store$.points.get());
@@ -358,7 +359,10 @@ const RallyeIndex = observer(function RallyeIndex() {
                 { marginTop: 10 },
               ]}
             >
-              {t('rallye.pointsAchieved', { points })}
+              {t('rallye.correctAnswers', {
+                correct: correctAnswerCount,
+                total: totalQuestions,
+              })}
             </ThemedText>
           </InfoBox>
           <InfoBox mb={2}>

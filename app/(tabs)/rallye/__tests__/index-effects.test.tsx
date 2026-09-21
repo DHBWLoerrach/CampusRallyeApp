@@ -201,6 +201,7 @@ jest.mock('@/services/storage/Store', () => ({
     answeredCount: { get: jest.fn(() => 0), set: jest.fn() },
     currentQuestion: { get: jest.fn(() => null), set: jest.fn() },
     points: { get: jest.fn(() => 0), set: jest.fn() },
+    correctAnswerCount: { get: jest.fn(() => 0), set: jest.fn() },
     allQuestionsAnswered: { get: jest.fn(() => false), set: jest.fn() },
     isTourMode: { get: jest.fn(() => false) },
     answers: { get: jest.fn(() => []), set: jest.fn() },

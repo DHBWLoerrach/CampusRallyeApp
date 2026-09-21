@@ -28,7 +28,8 @@ jest.mock('@legendapp/state/react', () => ({
 
 jest.mock('@/utils/LanguageContext', () => ({
   useLanguage: () => ({
-    t: (key: string) => key,
+    t: (key: string, params?: Record<string, string | number>) =>
+      params ? `${key}:${params.correct}/${params.total}` : key,
   }),
 }));
 
@@ -153,6 +154,7 @@ jest.mock('@/services/storage/Store', () => ({
     answeredCount: { get: jest.fn(() => 0), set: jest.fn() },
     currentQuestion: { get: jest.fn(() => null), set: jest.fn() },
     points: { get: jest.fn(() => 12), set: jest.fn() },
+    correctAnswerCount: { get: jest.fn(() => 3), set: jest.fn() },
     allQuestionsAnswered: { get: jest.fn(() => true), set: jest.fn() },
     isTourMode: { get: jest.fn(() => true) },
     answers: { get: jest.fn(() => []), set: jest.fn() },
@@ -179,6 +181,7 @@ describe('RallyeIndex', () => {
     (store$.answeredCount.get as jest.Mock).mockReturnValue(0);
     (store$.currentQuestion.get as jest.Mock).mockReturnValue(null);
     (store$.points.get as jest.Mock).mockReturnValue(12);
+    (store$.correctAnswerCount.get as jest.Mock).mockReturnValue(3);
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(true);
     (store$.isTourMode.get as jest.Mock).mockReturnValue(true);
     (store$.answers.get as jest.Mock).mockReturnValue([]);
@@ -192,6 +195,15 @@ describe('RallyeIndex', () => {
     expect(store$.leaveRallye).toHaveBeenCalledTimes(1);
     expect(store$.reset).not.toHaveBeenCalled();
     expect(store$.enabled.set).not.toHaveBeenCalled();
+  });
+
+  it('shows the number of correctly answered questions in tour completion state', () => {
+    (store$.correctAnswerCount.get as jest.Mock).mockReturnValue(3);
+    (store$.totalQuestions.get as jest.Mock).mockReturnValue(5);
+
+    const { getByText } = render(<RallyeIndex />);
+
+    expect(getByText('rallye.correctAnswers:3/5')).toBeTruthy();
   });
 
   it('does not expose pull-to-refresh while answering questions', () => {
