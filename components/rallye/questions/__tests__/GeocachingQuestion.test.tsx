@@ -375,6 +375,28 @@ describe('GeocachingQuestion', () => {
     expect(getByText('common.surrender')).toBeTruthy();
   });
 
+  it('explains that the destination must be found before answering', async () => {
+    const { getByText } = render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
+
+    await waitFor(() => {
+      expect(getByText('geocaching.instruction.text')).toBeTruthy();
+    });
+  });
+
+  it('explains that the destination must be found before scanning', async () => {
+    const { getByText } = render(
+      <GeocachingQuestion
+        question={{ ...baseQuestion, input_type: 'qr' as const }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getByText('geocaching.instruction.qr')).toBeTruthy();
+    });
+  });
+
   it('starts location tracking on mount', async () => {
     render(<GeocachingQuestion question={baseQuestion} />);
 

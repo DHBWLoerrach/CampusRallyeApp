@@ -195,6 +195,10 @@ export const translations = {
       'Für diese Frage sind keine Zielkoordinaten hinterlegt.',
     'geocaching.error.locationDenied':
       'Standortzugriff wurde verweigert. Dieser Fragetyp benötigt GPS.',
+    'geocaching.instruction.text':
+      'Finde zuerst das Ziel, um dann die Antwort einzugeben!',
+    'geocaching.instruction.qr':
+      'Finde zuerst das Ziel, um dann den QR-Code zu scannen!',
     'geocaching.retryPermission': 'Standort erneut anfragen',
     'geocaching.skipCalibration': 'Überspringen',
   },
@@ -386,6 +390,10 @@ export const translations = {
       'No target coordinates are set for this question.',
     'geocaching.error.locationDenied':
       'Location access was denied. This question type requires GPS.',
+    'geocaching.instruction.text':
+      'Find the destination first, then enter the answer!',
+    'geocaching.instruction.qr':
+      'Find the destination first, then scan the QR code!',
     'geocaching.retryPermission': 'Request location again',
     'geocaching.skipCalibration': 'Skip',
   },

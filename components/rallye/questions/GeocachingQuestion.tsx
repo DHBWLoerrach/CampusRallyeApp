@@ -618,6 +618,14 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             >
               {question.question}
             </ThemedText>
+            <ThemedText
+              variant="body"
+              style={[s.text, { textAlign: 'left', marginTop: 8 }]}
+            >
+              {inputType === 'qr'
+                ? t('geocaching.instruction.qr')
+                : t('geocaching.instruction.text')}
+            </ThemedText>
           </InfoBox>
 
           {/* Arrow + distance — override maxHeight so calibration ∞ is not clipped */}
