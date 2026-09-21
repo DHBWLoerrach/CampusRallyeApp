@@ -8,6 +8,13 @@ import { formatDistance, haversineDistance } from '@/utils/geo';
 
 // -- Mocks -------------------------------------------------------------------
 
+// Jest cannot evaluate the dynamic import used by the lazy compass.
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  lazy: () =>
+    jest.requireMock('@/components/rallye/questions/Compass3DArrow').default,
+}));
+
 // Replace the 3D canvas component with a simple View so Jest doesn't need WebGL
 jest.mock('@/components/rallye/questions/Compass3DArrow', () => {
   const { View } = jest.requireActual('react-native');
@@ -16,15 +23,6 @@ jest.mock('@/components/rallye/questions/Compass3DArrow', () => {
     default: () => <View testID="compass-3d-arrow" />,
   };
 });
-
-// Jest cannot run dynamic import(), so resolve the lazy arrow from the mock above
-jest.mock('@/components/rallye/questions/loadCompass3DArrow', () => ({
-  __esModule: true,
-  default: () =>
-    Promise.resolve(
-      jest.requireMock('@/components/rallye/questions/Compass3DArrow')
-    ),
-}));
 
 const mockSubmitAnswerAndAdvance = jest.fn();
 const mockGotoNextQuestion = jest.fn();
