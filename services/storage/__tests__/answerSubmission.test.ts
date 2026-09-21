@@ -12,6 +12,11 @@ jest.mock('@/services/storage/answerStorage', () => ({
   uploadPhotoAnswer: (...args: unknown[]) => mockUploadPhotoAnswer(...args),
 }));
 
+const mockClearCurrentTeam = jest.fn();
+jest.mock('@/services/storage/teamStorage', () => ({
+  clearCurrentTeam: (...args: unknown[]) => mockClearCurrentTeam(...args),
+}));
+
 jest.mock('@/services/storage/hintStorage', () => ({
   applyHintCost: (pointsAwarded: number, hintUsed: boolean) =>
     Math.max(0, pointsAwarded - (hintUsed ? 1 : 0)),
@@ -28,6 +33,9 @@ const mockAnswersGet = jest.fn(
     [] as { id: number; question_id: number; text: string; correct: boolean }[]
 );
 const mockTourFeedbackSet = jest.fn();
+const mockReset = jest.fn();
+const mockTeamSet = jest.fn();
+const mockTeamDeletedSet = jest.fn();
 const mockUsedHintGet = jest.fn(() => false);
 const mockRallyeGet = jest.fn(
   (): {
@@ -59,6 +67,9 @@ jest.mock('@/services/storage/Store', () => ({
     answers: { get: () => mockAnswersGet() },
     tourFeedback: { set: (value: unknown) => mockTourFeedbackSet(value) },
     gotoNextQuestion: () => mockGotoNextQuestion(),
+    reset: () => mockReset(),
+    team: { set: (value: unknown) => mockTeamSet(value) },
+    teamDeleted: { set: (value: unknown) => mockTeamDeletedSet(value) },
   },
 }));
 
@@ -205,6 +216,25 @@ describe('submitAnswerAndAdvance', () => {
     });
 
     expect(result).toEqual({ status: 'queued' });
+  });
+
+  it('drops the local team without scoring or advancing when it was deleted', async () => {
+    mockSaveAnswer.mockResolvedValue({ status: 'team_missing' });
+
+    const result = await submitAnswerAndAdvance({
+      teamId: 42,
+      questionId: 7,
+      pointsAwarded: 2,
+      isCorrect: true,
+    });
+
+    expect(result).toEqual({ status: 'team_missing' });
+    expect(mockClearCurrentTeam).toHaveBeenCalledWith(10);
+    expect(mockReset).toHaveBeenCalled();
+    expect(mockTeamSet).toHaveBeenCalledWith(null);
+    expect(mockTeamDeletedSet).toHaveBeenCalledWith(true);
+    expect(mockPointsSet).not.toHaveBeenCalled();
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
   });
 
   it('subtracts one point from persisted and local points for a used hint', async () => {
@@ -417,5 +447,23 @@ describe('submitPhotoAnswerAndAdvance', () => {
 
     expect(mockSaveAnswer).toHaveBeenCalledWith(42, 3, 9, '1_2.jpg');
     expect(mockPointsSet).toHaveBeenCalledWith(14);
+  });
+
+  it('drops the local team without scoring or advancing when it was deleted', async () => {
+    mockSaveAnswer.mockResolvedValue({ status: 'team_missing' });
+
+    const result = await submitPhotoAnswerAndAdvance({
+      teamId: 42,
+      questionId: 3,
+      pointsAwarded: 10,
+      imageUri: '/tmp/photo.jpg',
+    });
+
+    expect(result).toEqual({ status: 'team_missing' });
+    expect(mockClearCurrentTeam).toHaveBeenCalledWith(10);
+    expect(mockTeamSet).toHaveBeenCalledWith(null);
+    expect(mockTeamDeletedSet).toHaveBeenCalledWith(true);
+    expect(mockPointsSet).not.toHaveBeenCalled();
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
   });
 });

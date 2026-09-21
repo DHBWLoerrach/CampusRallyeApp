@@ -5,6 +5,7 @@ import {
   uploadPhotoAnswer,
 } from '@/services/storage/answerStorage';
 import { applyHintCost, hasUsedHint } from '@/services/storage/hintStorage';
+import { clearCurrentTeam } from '@/services/storage/teamStorage';
 import { getCorrectAnswerTextForQuestion } from '@/utils/answerRows';
 import type { TeamId } from '@/types/rallye';
 
@@ -37,6 +38,16 @@ async function getEffectivePoints(options: {
     questionId,
   });
   return applyHintCost(pointsAwarded, usedPersistently);
+}
+
+// The team was deleted server-side (e.g. the rallye was reset). Forget it
+// locally so the team can set up a new one instead of answering into the void.
+async function forgetDeletedTeam(): Promise<void> {
+  const rallyeId = store$.rallye.get()?.id;
+  if (rallyeId != null) await clearCurrentTeam(rallyeId);
+  store$.reset();
+  store$.team.set(null);
+  store$.teamDeleted.set(true);
 }
 
 export async function submitAnswerAndAdvance(options: {
@@ -76,6 +87,10 @@ export async function submitAnswerAndAdvance(options: {
     effectivePoints,
     answerText ?? ''
   );
+  if (result.status === 'team_missing') {
+    await forgetDeletedTeam();
+    return result;
+  }
 
   if (effectivePoints > 0) {
     store$.points.set((store$.points.get() as number) + effectivePoints);
@@ -139,6 +154,10 @@ export async function submitPhotoAnswerAndAdvance(options: {
     effectivePoints,
     filePath
   );
+  if (result.status === 'team_missing') {
+    await forgetDeletedTeam();
+    return result;
+  }
 
   if (effectivePoints > 0) {
     store$.points.set((store$.points.get() as number) + effectivePoints);
