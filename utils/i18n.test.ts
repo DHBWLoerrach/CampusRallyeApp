@@ -26,4 +26,11 @@ describe('translations', () => {
     );
     expect(empty).toEqual([]);
   });
+
+  it('uses the requested German wording for ending a campus tour', () => {
+    expect(translations.de['confirm.tourExit.title']).toBe('Erkundung beenden');
+    expect(translations.de['confirm.tourExit.message']).toBe(
+      'Möchtest du die Erkundung wirklich beenden?'
+    );
+  });
 });

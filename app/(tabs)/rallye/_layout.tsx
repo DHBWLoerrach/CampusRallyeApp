@@ -29,8 +29,10 @@ export default function RallyeStackLayout() {
   const handleLeaveRallye = () => {
     void (async () => {
       const confirmed = await confirm({
-        title: t('confirm.exit.title'),
-        message: t('confirm.exit.message'),
+        title: t(isTourMode ? 'confirm.tourExit.title' : 'confirm.exit.title'),
+        message: t(
+          isTourMode ? 'confirm.tourExit.message' : 'confirm.exit.message'
+        ),
         confirmText: t('confirm.exit.confirm'),
         cancelText: t('common.cancel'),
         destructive: true,

@@ -184,6 +184,25 @@ describe('RallyeStackLayout', () => {
     });
   });
 
+  it('uses the exploration confirmation in tour mode', async () => {
+    mockIsTourMode = true;
+    render(<RallyeStackLayout />);
+
+    const buttonProps = mockStackToolbarButton.mock.calls.at(
+      -1
+    )?.[0] as StackToolbarButtonProps;
+    buttonProps.onPress?.();
+
+    await waitFor(() => {
+      expect(confirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'confirm.tourExit.title',
+          message: 'confirm.tourExit.message',
+        })
+      );
+    });
+  });
+
   it('registers the team name confirmation as a native form sheet', () => {
     render(<RallyeStackLayout />);
 

@@ -164,6 +164,8 @@ export const translations = {
     'confirm.exit.message':
       'Möchtest du die Teilnahme an der Rallye wirklich beenden? Die Teamzuordnung auf diesem Gerät wird gelöscht.',
     'confirm.exit.confirm': 'Beenden',
+    'confirm.tourExit.title': 'Erkundung beenden',
+    'confirm.tourExit.message': 'Möchtest du die Erkundung wirklich beenden?',
     'scoreboard.rowLabel': 'Platz {{rank}}, Team {{team}}, Punkte {{points}}',
     'scoreboard.ownDuration': 'Ihr wart {{time}} unterwegs',
     'scoreboard.durationMinutes': '{{minutes}} Min.',
@@ -347,6 +349,8 @@ export const translations = {
     'confirm.exit.message':
       'Do you really want to end participation? The team assignment on this device will be removed.',
     'confirm.exit.confirm': 'End',
+    'confirm.tourExit.title': 'End exploration',
+    'confirm.tourExit.message': 'Do you really want to end the exploration?',
     'scoreboard.rowLabel': 'Rank {{rank}}, Team {{team}}, Points {{points}}',
     'scoreboard.ownDuration': 'You took {{time}}',
     'scoreboard.durationMinutes': '{{minutes}} min',
