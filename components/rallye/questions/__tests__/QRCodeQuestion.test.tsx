@@ -142,6 +142,29 @@ describe('QRCodeQuestion', () => {
     alertSpy.mockRestore();
   });
 
+  it('allows surrender when camera access is denied', async () => {
+    mockUseCameraPermissions.mockReturnValue([{ granted: false }, jest.fn()]);
+    mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
+
+    const { getByText } = render(<QRCodeQuestion question={baseQuestion} />);
+
+    expect(getByText('Scan the hidden marker')).toBeTruthy();
+    expect(getByText('question.camera.needAccess')).toBeTruthy();
+
+    fireEvent.press(getByText('common.surrender'));
+
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
+        expect.objectContaining({
+          teamId: 1,
+          questionId: 42,
+          pointsAwarded: 0,
+          isCorrect: false,
+        })
+      );
+    });
+  });
+
   it('accepts scanned QR values with trailing whitespace', async () => {
     const { getByText, getByTestId } = render(
       <QRCodeQuestion question={baseQuestion} />

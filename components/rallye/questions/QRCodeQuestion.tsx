@@ -17,6 +17,7 @@ import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAppStyles } from '@/utils/AppStyles';
 import { useAnswerSubmission } from './useAnswerSubmission';
+import CameraPermissionPrompt from './CameraPermissionPrompt';
 
 export default function QRCodeQuestion({ question }: QuestionProps) {
   const cameraRef = useRef<CameraView | null>(null);
@@ -94,13 +95,12 @@ export default function QRCodeQuestion({ question }: QuestionProps) {
 
   if (!permission.granted) {
     return (
-      <ThemedView variant="background" style={globalStyles.default.container}>
-        <ThemedText style={{ textAlign: 'center', marginBottom: 10 }}>
-          {t('question.camera.needAccess')}
-        </ThemedText>
-        <UIButton onPress={requestPermission}>
-          {t('question.camera.allow')}
-        </UIButton>
+      <ThemedView variant="background" style={s.screen}>
+        <CameraPermissionPrompt
+          questionText={question.question}
+          onRequestPermission={requestPermission}
+          onSurrender={handleSurrender}
+        />
       </ThemedView>
     );
   }

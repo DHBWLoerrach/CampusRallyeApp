@@ -49,6 +49,7 @@ import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAnswerSubmission } from './useAnswerSubmission';
 import loadCompass3DArrow from './loadCompass3DArrow';
+import CameraPermissionPrompt from './CameraPermissionPrompt';
 
 const Compass3DArrow = lazy(loadCompass3DArrow);
 
@@ -821,24 +822,12 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   if (!cameraPermission.granted) {
     return (
-      <ThemedView variant="background" style={globalStyles.default.container}>
-        <VStack style={{ width: '100%', alignItems: 'center' }} gap={2}>
-          <InfoBox mb={0}>
-            <ThemedText style={{ textAlign: 'center' }}>
-              {t('question.camera.needAccess')}
-            </ThemedText>
-          </InfoBox>
-          <InfoBox mb={0}>
-            <UIButton onPress={requestCameraPermission}>
-              {t('question.camera.allow')}
-            </UIButton>
-          </InfoBox>
-          <InfoBox mb={0}>
-            <UIButton color={Colors.dhbwGray} onPress={handleSurrender}>
-              {t('common.surrender')}
-            </UIButton>
-          </InfoBox>
-        </VStack>
+      <ThemedView variant="background" style={s.screen}>
+        <CameraPermissionPrompt
+          questionText={question.question}
+          onRequestPermission={requestCameraPermission}
+          onSurrender={handleSurrender}
+        />
       </ThemedView>
     );
   }

@@ -20,6 +20,7 @@ import { useAppStyles } from '@/utils/AppStyles';
 import { useSelector } from '@legendapp/state/react';
 import { outbox$ } from '@/services/storage/offlineOutbox';
 import { useAnswerSubmission } from './useAnswerSubmission';
+import CameraPermissionPrompt from './CameraPermissionPrompt';
 
 type Picture = { uri: string };
 
@@ -232,41 +233,11 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   if (!permission.granted) {
     return (
       <QuestionLayout hint={question.hint} s={s}>
-        <VStack
-          style={[
-            globalStyles.default.container,
-            { alignItems: 'stretch', flex: 0, flexGrow: 0 },
-          ]}
-          gap={2}
-        >
-          <InfoBox mb={0}>
-            <ThemedText
-              variant="title"
-              style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-            >
-              {question.question}
-            </ThemedText>
-          </InfoBox>
-          <InfoBox mb={0}>
-            <ThemedText
-              style={[{ textAlign: 'center', marginBottom: 10 }, s.text]}
-            >
-              {t('question.camera.needAccess')}
-            </ThemedText>
-            <UIButton onPress={requestPermission}>
-              {t('question.camera.allow')}
-            </UIButton>
-            <View style={{ marginTop: 10 }}>
-              <UIButton
-                icon="face-frown-open"
-                color={Colors.dhbwGray}
-                onPress={handleSurrender}
-              >
-                {t('common.surrender')}
-              </UIButton>
-            </View>
-          </InfoBox>
-        </VStack>
+        <CameraPermissionPrompt
+          questionText={question.question}
+          onRequestPermission={requestPermission}
+          onSurrender={handleSurrender}
+        />
       </QuestionLayout>
     );
   }
