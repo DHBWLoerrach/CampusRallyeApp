@@ -92,6 +92,18 @@ function errorMessage(error: unknown, payload?: SaveAnswerPayload) {
   return message.slice(0, 500);
 }
 
+// The team was deleted server-side (e.g. the rallye was reset), so the answer
+// can never be stored and retrying would keep it in the queue forever.
+function isMissingTeamError(error: unknown) {
+  if (!error || typeof error !== 'object') return false;
+  const { code, message } = error as { code?: unknown; message?: unknown };
+  return (
+    code === '23503' &&
+    typeof message === 'string' &&
+    message.includes('team_answers_team_id_fkey')
+  );
+}
+
 function normalizeQueueItem(raw: any): OfflineActionV1 | null {
   if (!raw || typeof raw !== 'object') return null;
 
@@ -271,6 +283,10 @@ export function processOutbox() {
           if (error) throw error;
           processedIds.add(action.id);
         } catch (error: any) {
+          if (isMissingTeamError(error)) {
+            processedIds.add(action.id);
+            continue;
+          }
           const attempts = (action.attempts || 0) + 1;
           const nextRetryAt = Date.now() + backoffMs(attempts);
           const lastError = errorMessage(error, action.payload);

@@ -171,6 +171,46 @@ describe('offlineOutbox processOutbox', () => {
     expect(outbox$.lastError.get()).toBe('db error');
   });
 
+  it('discards answers of a team that no longer exists', async () => {
+    await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+      queuedAnswer({ id: 'deleted-team', questionId: 10 }),
+      queuedAnswer({ id: 'valid', questionId: 11 }),
+    ]);
+    upsertMock.mockResolvedValueOnce({
+      error: {
+        code: '23503',
+        message:
+          'insert or update on table "team_answers" violates foreign key constraint "team_answers_team_id_fkey"',
+      },
+    });
+
+    await processOutbox();
+
+    expect(upsertMock).toHaveBeenCalledTimes(2);
+    expect(await getStorageItem(StorageKeys.OFFLINE_QUEUE)).toEqual([]);
+    expect(outbox$.queueCount.get()).toBe(0);
+    expect(outbox$.lastError.get()).toBeNull();
+  });
+
+  it('keeps retrying other foreign key violations', async () => {
+    await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+      queuedAnswer({ id: 'missing-question', questionId: 10 }),
+    ]);
+    upsertMock.mockResolvedValueOnce({
+      error: {
+        code: '23503',
+        message:
+          'insert or update on table "team_answers" violates foreign key constraint "team_answers_question_id_fkey"',
+      },
+    });
+
+    await processOutbox();
+
+    const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+    expect(queue).toHaveLength(1);
+    expect(queue![0].attempts).toBe(1);
+  });
+
   it('omits the deprecated correctness field from queued answers', async () => {
     await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
       {
