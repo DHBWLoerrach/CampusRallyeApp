@@ -243,6 +243,9 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
+    // Stack the buttons when their labels no longer fit side by side
+    // (e.g. with large accessibility font sizes) instead of breaking words.
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 24,
@@ -250,14 +253,15 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   cancelButton: {
-    flex: 1,
+    flexGrow: 1,
     minHeight: 44,
   },
   cancelButtonText: {
     textDecorationLine: 'none',
   },
   joinButton: {
-    flex: 1,
+    flexGrow: 1,
     minHeight: 44,
+    marginLeft: 0,
   },
 });
