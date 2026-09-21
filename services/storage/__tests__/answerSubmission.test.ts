@@ -12,6 +12,12 @@ jest.mock('@/services/storage/answerStorage', () => ({
   uploadPhotoAnswer: (...args: unknown[]) => mockUploadPhotoAnswer(...args),
 }));
 
+const mockGetRefreshableRallyeFields = jest.fn();
+jest.mock('@/services/storage/rallyeStorage', () => ({
+  getRefreshableRallyeFields: (...args: unknown[]) =>
+    mockGetRefreshableRallyeFields(...args),
+}));
+
 const mockClearCurrentTeam = jest.fn();
 jest.mock('@/services/storage/teamStorage', () => ({
   clearCurrentTeam: (...args: unknown[]) => mockClearCurrentTeam(...args),
@@ -36,6 +42,9 @@ const mockTourFeedbackSet = jest.fn();
 const mockReset = jest.fn();
 const mockTeamSet = jest.fn();
 const mockTeamDeletedSet = jest.fn();
+const mockRallyeStatusSet = jest.fn();
+const mockRallyeEndSet = jest.fn();
+const mockRallyeNameSet = jest.fn();
 const mockUsedHintGet = jest.fn(() => false);
 const mockRallyeGet = jest.fn(
   (): {
@@ -50,6 +59,9 @@ jest.mock('@/services/storage/Store', () => ({
   store$: {
     rallye: {
       get: () => mockRallyeGet(),
+      status: { set: (value: unknown) => mockRallyeStatusSet(value) },
+      rallye_end: { set: (value: unknown) => mockRallyeEndSet(value) },
+      name: { set: (value: unknown) => mockRallyeNameSet(value) },
     },
     usedHints: new Proxy(
       {},
@@ -235,6 +247,43 @@ describe('submitAnswerAndAdvance', () => {
     expect(mockTeamDeletedSet).toHaveBeenCalledWith(true);
     expect(mockPointsSet).not.toHaveBeenCalled();
     expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+  });
+
+  it('refreshes the rallye status after dropping a deleted team', async () => {
+    mockSaveAnswer.mockResolvedValue({ status: 'team_missing' });
+    mockGetRefreshableRallyeFields.mockResolvedValue({
+      status: 'draft',
+      rallye_end: null,
+      name: 'Campus Rallye',
+    });
+
+    await submitAnswerAndAdvance({
+      teamId: 42,
+      questionId: 7,
+      pointsAwarded: 2,
+      isCorrect: true,
+    });
+
+    expect(mockGetRefreshableRallyeFields).toHaveBeenCalledWith(10);
+    expect(mockRallyeStatusSet).toHaveBeenCalledWith('draft');
+    expect(mockRallyeEndSet).toHaveBeenCalledWith(null);
+    expect(mockRallyeNameSet).toHaveBeenCalledWith('Campus Rallye');
+  });
+
+  it('keeps the known rallye status when refreshing it fails', async () => {
+    mockSaveAnswer.mockResolvedValue({ status: 'team_missing' });
+    mockGetRefreshableRallyeFields.mockResolvedValue(null);
+
+    const result = await submitAnswerAndAdvance({
+      teamId: 42,
+      questionId: 7,
+      pointsAwarded: 2,
+      isCorrect: true,
+    });
+
+    expect(result).toEqual({ status: 'team_missing' });
+    expect(mockTeamSet).toHaveBeenCalledWith(null);
+    expect(mockRallyeStatusSet).not.toHaveBeenCalled();
   });
 
   it('subtracts one point from persisted and local points for a used hint', async () => {

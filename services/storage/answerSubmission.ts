@@ -5,6 +5,7 @@ import {
   uploadPhotoAnswer,
 } from '@/services/storage/answerStorage';
 import { applyHintCost, hasUsedHint } from '@/services/storage/hintStorage';
+import { getRefreshableRallyeFields } from '@/services/storage/rallyeStorage';
 import { clearCurrentTeam } from '@/services/storage/teamStorage';
 import { getCorrectAnswerTextForQuestion } from '@/utils/answerRows';
 import type { TeamId } from '@/types/rallye';
@@ -48,6 +49,17 @@ async function forgetDeletedTeam(): Promise<void> {
   store$.reset();
   store$.team.set(null);
   store$.teamDeleted.set(true);
+  if (rallyeId != null) await refreshRallyeFields(rallyeId);
+}
+
+// A reset moves the rallye back to draft; without a refresh the stale
+// "running" status would offer to create a team in a draft rallye.
+async function refreshRallyeFields(rallyeId: number): Promise<void> {
+  const data = await getRefreshableRallyeFields(rallyeId);
+  if (!data) return;
+  store$.rallye.status.set(data.status);
+  store$.rallye.rallye_end.set(data.rallye_end);
+  if (data.name) store$.rallye.name.set(data.name);
 }
 
 export async function submitAnswerAndAdvance(options: {
