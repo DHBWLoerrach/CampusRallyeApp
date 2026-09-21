@@ -82,9 +82,16 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   // Location state
   const [distance, setDistance] = useState<number | null>(null);
-  const [headingAccuracy, setHeadingAccuracy] = useState(0);
+  // null until the first heading reading arrives. Android only emits heading
+  // events when the azimuth changes, so a device held still may never report
+  // one; treat that as "no evidence of a bad compass" instead of accuracy 0.
+  const [headingAccuracy, setHeadingAccuracy] = useState<number | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
   const [calibrationSkipped, setCalibrationSkipped] = useState(false);
+  const showCalibration =
+    headingAccuracy !== null &&
+    headingAccuracy < MIN_HEADING_ACCURACY &&
+    !calibrationSkipped;
 
   // Answer state (for text input mode)
   const [answer, setAnswer] = useState('');
@@ -335,8 +342,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   // Auto-skip calibration after timeout
   useEffect(() => {
-    if (calibrationSkipped) return;
-    if (headingAccuracy >= MIN_HEADING_ACCURACY) return;
+    if (!showCalibration) return;
 
     const timer = setTimeout(() => {
       Logger.info(
@@ -347,12 +353,10 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     }, CALIBRATION_TIMEOUT_S * 1_000);
 
     return () => clearTimeout(timer);
-  }, [calibrationSkipped, headingAccuracy]);
+  }, [headingAccuracy, showCalibration]);
 
   // Animate figure-8 path for calibration illustration
   useEffect(() => {
-    const showCalibration =
-      headingAccuracy < MIN_HEADING_ACCURACY && !calibrationSkipped;
     if (!showCalibration) return;
 
     // Horizontal: smooth oscillation
@@ -388,7 +392,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       -1,
       false
     );
-  }, [calibrationSkipped, fig8Rotate, fig8X, fig8Y, headingAccuracy]);
+  }, [fig8Rotate, fig8X, fig8Y, showCalibration]);
 
   const fig8Style = useAnimatedStyle(() => ({
     transform: [
@@ -596,9 +600,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
   // -- Render: navigation phase -----------------------------------------------
 
   if (phase === 'navigating') {
-    const showCalibration =
-      headingAccuracy < MIN_HEADING_ACCURACY && !calibrationSkipped;
-
     return (
       <ThemedView
         variant="background"

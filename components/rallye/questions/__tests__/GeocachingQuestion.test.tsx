@@ -16,6 +16,15 @@ jest.mock('@/components/rallye/questions/Compass3DArrow', () => {
   };
 });
 
+// Jest cannot run dynamic import(), so resolve the lazy arrow from the mock above
+jest.mock('@/components/rallye/questions/loadCompass3DArrow', () => ({
+  __esModule: true,
+  default: () =>
+    Promise.resolve(
+      jest.requireMock('@/components/rallye/questions/Compass3DArrow')
+    ),
+}));
+
 const mockSubmitAnswerAndAdvance = jest.fn();
 const mockGotoNextQuestion = jest.fn();
 jest.mock('@/services/storage/answerSubmission', () => ({
@@ -395,6 +404,32 @@ describe('GeocachingQuestion', () => {
     await waitFor(() => {
       expect(getByText('geocaching.instruction.qr')).toBeTruthy();
     });
+  });
+
+  it('shows the arrow without calibration while no heading reading has arrived', async () => {
+    const { findByTestId, queryByText } = render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
+
+    await waitFor(() => expect(mockWatchHeadingAsync).toHaveBeenCalled());
+
+    expect(await findByTestId('compass-3d-arrow')).toBeTruthy();
+    expect(queryByText('geocaching.calibrate')).toBeNull();
+  });
+
+  it('asks for calibration when the compass reports an unreliable heading', async () => {
+    const { findByText, queryByTestId } = render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
+
+    await waitFor(() => expect(mockWatchHeadingAsync).toHaveBeenCalled());
+    const headingCallback = mockWatchHeadingAsync.mock.calls[0][0];
+    act(() => {
+      headingCallback({ trueHeading: 90, magHeading: 90, accuracy: 0 });
+    });
+
+    expect(await findByText('geocaching.calibrate')).toBeTruthy();
+    expect(queryByTestId('compass-3d-arrow')).toBeNull();
   });
 
   it('starts location tracking on mount', async () => {
