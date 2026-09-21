@@ -1,12 +1,23 @@
-import { saveAnswer } from '@/services/storage/answerStorage';
+import {
+  saveAnswer,
+  uploadPhotoAnswer,
+} from '@/services/storage/answerStorage';
 
 const mockFrom = jest.fn();
 const mockUpsert = jest.fn();
 const mockEnqueueSaveAnswer = jest.fn();
+const mockStorageFrom = jest.fn();
+const mockUpload = jest.fn();
+const mockPreparePhotoUpload = jest.fn();
+
+jest.mock('../preparePhotoUpload', () => ({
+  preparePhotoUpload: (...args: unknown[]) => mockPreparePhotoUpload(...args),
+}));
 
 jest.mock('@/utils/Supabase', () => ({
   supabase: {
     from: (...args: unknown[]) => mockFrom(...args),
+    storage: { from: (...args: unknown[]) => mockStorageFrom(...args) },
   },
 }));
 
@@ -61,5 +72,59 @@ describe('saveAnswer', () => {
       answer: 'bar',
     });
     expect(result).toEqual({ status: 'queued' });
+  });
+});
+
+describe('uploadPhotoAnswer', () => {
+  const options = {
+    imageUri: 'file://original.jpg',
+    teamId: 7,
+    questionId: 13,
+  };
+  const processedBytes = new Uint8Array([255, 216, 255, 217]);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPreparePhotoUpload.mockResolvedValue(processedBytes);
+    mockStorageFrom.mockReturnValue({ upload: mockUpload });
+    mockUpload.mockResolvedValue({ error: null });
+  });
+
+  it('uploads the prepared JPEG bytes with the existing team/question path', async () => {
+    await expect(uploadPhotoAnswer(options)).resolves.toEqual({
+      filePath: '7_13.jpg',
+    });
+
+    expect(mockPreparePhotoUpload).toHaveBeenCalledWith(options.imageUri);
+    expect(mockStorageFrom).toHaveBeenCalledWith('upload-photos');
+    expect(mockUpload).toHaveBeenCalledWith('7_13.jpg', processedBytes, {
+      upsert: false,
+      contentType: 'image/jpeg',
+    });
+  });
+
+  it('does not upload if photo preparation fails', async () => {
+    mockPreparePhotoUpload.mockRejectedValue(new Error('Photo exceeds 10 MB'));
+
+    await expect(uploadPhotoAnswer(options)).rejects.toThrow(
+      'Photo exceeds 10 MB'
+    );
+    expect(mockUpload).not.toHaveBeenCalled();
+  });
+
+  it('still treats an already uploaded photo as a successful retry', async () => {
+    mockUpload.mockResolvedValue({
+      error: { message: 'The resource already exists' },
+    });
+
+    await expect(uploadPhotoAnswer(options)).resolves.toEqual({
+      filePath: '7_13.jpg',
+    });
+  });
+
+  it('propagates other upload errors', async () => {
+    mockUpload.mockResolvedValue({ error: new Error('Network failure') });
+
+    await expect(uploadPhotoAnswer(options)).rejects.toThrow('Network failure');
   });
 });
