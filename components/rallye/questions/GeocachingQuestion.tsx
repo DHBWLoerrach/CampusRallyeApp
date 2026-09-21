@@ -48,10 +48,9 @@ import Hint from '@/components/ui/Hint';
 import InfoBox from '@/components/ui/InfoBox';
 import VStack from '@/components/ui/VStack';
 import { useAnswerSubmission } from './useAnswerSubmission';
+import loadCompass3DArrow from './loadCompass3DArrow';
 
-// three.js is only needed for the navigation arrow. Load it lazily so it is not
-// evaluated for rallyes (or phases) that never show the 3D compass.
-const Compass3DArrow = lazy(() => import('./Compass3DArrow'));
+const Compass3DArrow = lazy(loadCompass3DArrow);
 
 // -- Constants ---------------------------------------------------------------
 
