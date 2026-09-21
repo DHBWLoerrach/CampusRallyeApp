@@ -6,7 +6,7 @@ import {
 } from '@/services/storage/answerStorage';
 import { applyHintCost, hasUsedHint } from '@/services/storage/hintStorage';
 import { getRefreshableRallyeFields } from '@/services/storage/rallyeStorage';
-import { clearCurrentTeam } from '@/services/storage/teamStorage';
+import { clearCurrentTeam, teamExists } from '@/services/storage/teamStorage';
 import { getCorrectAnswerTextForQuestion } from '@/utils/answerRows';
 import type { TeamId } from '@/types/rallye';
 
@@ -153,6 +153,14 @@ export async function submitPhotoAnswerAndAdvance(options: {
     questionId,
     pointsAwarded,
   });
+
+  // Check before uploading so a deleted team leaves no orphaned photo behind.
+  // Only a definitive "missing" stops the upload; "unknown" proceeds.
+  const rallyeId = store$.rallye.get()?.id;
+  if (rallyeId != null && (await teamExists(rallyeId, teamId)) === 'missing') {
+    await forgetDeletedTeam();
+    return { status: 'team_missing' };
+  }
 
   const { filePath } = await uploadPhotoAnswer({
     imageUri,

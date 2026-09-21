@@ -19,8 +19,10 @@ jest.mock('@/services/storage/rallyeStorage', () => ({
 }));
 
 const mockClearCurrentTeam = jest.fn();
+const mockTeamExists = jest.fn();
 jest.mock('@/services/storage/teamStorage', () => ({
   clearCurrentTeam: (...args: unknown[]) => mockClearCurrentTeam(...args),
+  teamExists: (...args: unknown[]) => mockTeamExists(...args),
 }));
 
 jest.mock('@/services/storage/hintStorage', () => ({
@@ -414,6 +416,7 @@ describe('submitPhotoAnswerAndAdvance', () => {
     mockRallyeGet.mockReturnValue({ id: 10, rallye_end: null });
     mockSaveAnswer.mockResolvedValue({ status: 'sent' });
     mockUploadPhotoAnswer.mockResolvedValue({ filePath: '1_2.jpg' });
+    mockTeamExists.mockResolvedValue('exists');
   });
 
   it('returns requires_online when no teamId', async () => {
@@ -481,6 +484,39 @@ describe('submitPhotoAnswerAndAdvance', () => {
     expect(mockUploadPhotoAnswer).toHaveBeenCalled();
     expect(mockSaveAnswer).toHaveBeenCalled();
     expect(mockGotoNextQuestion).toHaveBeenCalled();
+  });
+
+  it('does not upload the photo when the team was deleted', async () => {
+    mockTeamExists.mockResolvedValue('missing');
+
+    const result = await submitPhotoAnswerAndAdvance({
+      teamId: 42,
+      questionId: 3,
+      pointsAwarded: 10,
+      imageUri: '/tmp/photo.jpg',
+    });
+
+    expect(result).toEqual({ status: 'team_missing' });
+    expect(mockTeamExists).toHaveBeenCalledWith(10, 42);
+    expect(mockUploadPhotoAnswer).not.toHaveBeenCalled();
+    expect(mockSaveAnswer).not.toHaveBeenCalled();
+    expect(mockTeamSet).toHaveBeenCalledWith(null);
+    expect(mockTeamDeletedSet).toHaveBeenCalledWith(true);
+    expect(mockGotoNextQuestion).not.toHaveBeenCalled();
+  });
+
+  it('uploads the photo when the team check is inconclusive', async () => {
+    mockTeamExists.mockResolvedValue('unknown');
+
+    const result = await submitPhotoAnswerAndAdvance({
+      teamId: 42,
+      questionId: 3,
+      pointsAwarded: 10,
+      imageUri: '/tmp/photo.jpg',
+    });
+
+    expect(result).toEqual({ status: 'sent' });
+    expect(mockUploadPhotoAnswer).toHaveBeenCalled();
   });
 
   it('subtracts one point from a photo answer when the hint was used', async () => {
