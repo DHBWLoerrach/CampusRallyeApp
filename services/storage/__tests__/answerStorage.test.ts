@@ -85,6 +85,35 @@ describe('getTeamProgress', () => {
     await expect(getTeamProgress(7)).resolves.toMatchObject({ points: 2 });
   });
 
+  it('keeps an answer that is synchronized while the progress loads', async () => {
+    const answer = {
+      team_id: 7,
+      question_id: 1,
+      team_points: 3,
+      answer: 'A',
+    };
+    let synced = false;
+    // The outbox moves the answer to the server right after the first read.
+    const readAfterSync = <T>(before: T, after: T) => {
+      const result = synced ? after : before;
+      synced = true;
+      return Promise.resolve(result);
+    };
+    const eq = jest.fn(() =>
+      readAfterSync(
+        { data: [], error: null },
+        { data: [{ question_id: 1, team_points: 3 }], error: null }
+      )
+    );
+    mockFrom.mockReturnValue({ select: jest.fn(() => ({ eq })) });
+    mockGetQueuedAnswers.mockImplementation(() => readAfterSync([answer], []));
+
+    await expect(getTeamProgress(7)).resolves.toEqual({
+      answeredQuestionIds: [1],
+      points: 3,
+    });
+  });
+
   it('throws when the stored answers cannot be loaded', async () => {
     const error = new Error('offline');
     mockStoredAnswers({ data: null, error });

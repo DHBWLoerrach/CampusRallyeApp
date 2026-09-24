@@ -49,6 +49,9 @@ export type TeamProgress = {
 };
 
 export async function getTeamProgress(teamId: TeamId): Promise<TeamProgress> {
+  // Read the queue first: an answer synchronized in between is then either
+  // still in this snapshot or already on the server, never missing from both.
+  const queuedAnswers = await getQueuedAnswers(teamId);
   const { data, error } = await supabase
     .from('team_answers')
     .select('question_id, team_points')
@@ -60,7 +63,7 @@ export async function getTeamProgress(teamId: TeamId): Promise<TeamProgress> {
   // they are neither offered nor scored twice. The server ignores duplicate
   // answers, so a stored row wins over a queued one.
   const pointsByQuestion = new Map<number, number>();
-  for (const answer of await getQueuedAnswers(teamId)) {
+  for (const answer of queuedAnswers) {
     pointsByQuestion.set(answer.question_id, answer.team_points);
   }
   for (const row of rows) {
