@@ -12,7 +12,7 @@
 
 - `npm run start`: start Expo Go with cache clear.
 - `npm run android` / `npm run ios`: run dev builds on device or simulator.
-- `npm run web`: run the web target.
+- `npm run web`: run the web target. Web is not a supported platform (`app.json` targets iOS and Android only); native-only APIs such as `expo-file-system` are not expected to work there.
 - `npm test`: execute the Jest test suite once.
 - `npm run test:watch`: run Jest in watch mode.
 - `npm run lint`: run ESLint via Expo.
