@@ -85,6 +85,7 @@ export async function submitAnswerAndAdvance(options: {
   });
 
   if (!teamId) {
+    if (!store$.isCurrentQuestion(questionId)) return { status: 'local' };
     if (effectivePoints > 0) {
       store$.points.set((store$.points.get() as number) + effectivePoints);
     }
@@ -103,6 +104,7 @@ export async function submitAnswerAndAdvance(options: {
     await forgetDeletedTeam();
     return result;
   }
+  if (!store$.isCurrentQuestion(questionId)) return { status: result.status };
 
   if (effectivePoints > 0) {
     store$.points.set((store$.points.get() as number) + effectivePoints);
@@ -178,6 +180,7 @@ export async function submitPhotoAnswerAndAdvance(options: {
     await forgetDeletedTeam();
     return result;
   }
+  if (!store$.isCurrentQuestion(questionId)) return { status: result.status };
 
   if (effectivePoints > 0) {
     store$.points.set((store$.points.get() as number) + effectivePoints);

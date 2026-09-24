@@ -85,6 +85,12 @@ export const store$ = observable({
 
   currentQuestion: () => store$.questions.get()[store$.questionIndex.get()],
 
+  // A late submission for a question the session has already moved past must
+  // neither award points nor advance again.
+  isCurrentQuestion: (questionId: number) =>
+    !store$.allQuestionsAnswered.get() &&
+    store$.currentQuestion.get()?.id === questionId,
+
   gotoNextQuestion: async () => {
     if (store$.questions.get().length === 0) return;
     let nextIndex = store$.questionIndex.get() + 1;

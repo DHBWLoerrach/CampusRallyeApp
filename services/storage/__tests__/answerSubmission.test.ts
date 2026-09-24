@@ -81,6 +81,7 @@ jest.mock('@/services/storage/Store', () => ({
     answers: { get: () => mockAnswersGet() },
     tourFeedback: { set: (value: unknown) => mockTourFeedbackSet(value) },
     gotoNextQuestion: () => mockGotoNextQuestion(),
+    isCurrentQuestion: () => true,
     reset: () => mockReset(),
     team: { set: (value: unknown) => mockTeamSet(value) },
     teamDeleted: { set: (value: unknown) => mockTeamDeletedSet(value) },
