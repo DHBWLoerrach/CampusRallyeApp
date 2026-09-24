@@ -633,6 +633,25 @@ describe('Welcome', () => {
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
   });
 
+  it('refreshes the rallyes when the app returns from the background', async () => {
+    jest.useFakeTimers();
+    render(<Welcome />);
+    await waitFor(() => {
+      expect(mockedGetLocationsWithJoinableRallyes).toHaveBeenCalledTimes(1);
+    });
+    const appStateListener = (AppState.addEventListener as jest.Mock).mock
+      .calls[0][1];
+
+    await act(async () => {
+      appStateListener('background');
+      appStateListener('active');
+    });
+
+    await waitFor(() => {
+      expect(mockedGetLocationsWithJoinableRallyes).toHaveBeenCalledTimes(2);
+    });
+  });
+
   it('performs one delayed sync without falling into a 2-second refresh loop', async () => {
     jest.useFakeTimers();
 

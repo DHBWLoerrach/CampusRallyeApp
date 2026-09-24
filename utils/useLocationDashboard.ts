@@ -155,12 +155,12 @@ export function useLocationDashboard() {
     const appStateSubscription = AppState.addEventListener(
       'change',
       (nextAppState) => {
-        if (
-          appStateRef.current.match(/inactive|background/) &&
-          nextAppState === 'active'
-        )
-          void refreshCurrentData();
+        const returnedToForeground =
+          !!appStateRef.current.match(/inactive|background/) &&
+          nextAppState === 'active';
+        // Update first: the refresh bails out unless the app is active.
         appStateRef.current = nextAppState;
+        if (returnedToForeground) void refreshCurrentData();
       }
     );
     return () => {
