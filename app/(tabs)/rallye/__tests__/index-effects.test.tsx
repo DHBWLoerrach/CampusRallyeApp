@@ -396,6 +396,21 @@ describe('RallyeIndex effects', () => {
     }
   });
 
+  it('does not request the rallye status after leaving the screen', async () => {
+    jest.useFakeTimers();
+    const { unmount } = render(<RallyeIndex />);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(100);
+    });
+
+    unmount();
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(1_000);
+    });
+
+    expect(tableCallCount('rallyes')).toBe(0);
+  });
+
   it('clears the stored rallye end when the refreshed rallye has none', async () => {
     render(<RallyeIndex />);
 

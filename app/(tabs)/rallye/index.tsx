@@ -78,6 +78,9 @@ const RallyeIndex = observer(function RallyeIndex() {
     promise: Promise<number[]>;
   } | null>(null);
   const continuingTourRef = useRef(false);
+  const refreshDelayTimersRef = useRef(
+    new Set<ReturnType<typeof setTimeout>>()
+  );
 
   const continueTour = async () => {
     if (continuingTourRef.current) return;
@@ -93,6 +96,16 @@ const RallyeIndex = observer(function RallyeIndex() {
   useEffect(() => {
     tRef.current = t;
   }, [t]);
+
+  // A refresh still waiting for its delay after unmount is dropped; leaving
+  // the rallye screen must not trigger further status requests.
+  useEffect(() => {
+    const refreshDelayTimers = refreshDelayTimersRef.current;
+    return () => {
+      for (const timer of refreshDelayTimers) clearTimeout(timer);
+      refreshDelayTimers.clear();
+    };
+  }, []);
 
   const getQuestionIds = useCallback(async (): Promise<number[]> => {
     if (!rallyeId) return [];
@@ -210,7 +223,13 @@ const RallyeIndex = observer(function RallyeIndex() {
     if (!rallyeId) return;
     setLoading(true);
     // slight delay to avoid flicker
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(() => {
+        refreshDelayTimersRef.current.delete(timer);
+        resolve();
+      }, 600);
+      refreshDelayTimersRef.current.add(timer);
+    });
     try {
       const data = await getRefreshableRallyeFields(rallyeId);
       if (data && isActiveRallye(rallyeId)) {
