@@ -56,8 +56,9 @@ export async function getTeamProgress(teamId: TeamId): Promise<TeamProgress> {
   if (error) throw error;
   const rows = data ?? [];
 
-  // Answers still waiting in the offline queue already count locally. The
-  // server ignores duplicate answers, so a stored row wins over a queued one.
+  // Answers still waiting in the offline queue already count as answered, so
+  // they are neither offered nor scored twice. The server ignores duplicate
+  // answers, so a stored row wins over a queued one.
   const pointsByQuestion = new Map<number, number>();
   for (const answer of await getQueuedAnswers(teamId)) {
     pointsByQuestion.set(answer.question_id, answer.team_points);
@@ -69,7 +70,7 @@ export async function getTeamProgress(teamId: TeamId): Promise<TeamProgress> {
   let points = 0;
   for (const value of pointsByQuestion.values()) points += value;
   return {
-    answeredQuestionIds: rows.map((row) => row.question_id),
+    answeredQuestionIds: [...pointsByQuestion.keys()],
     points,
   };
 }

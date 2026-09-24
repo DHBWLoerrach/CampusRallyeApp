@@ -52,13 +52,25 @@ describe('getTeamProgress', () => {
       { team_id: 7, question_id: 3, team_points: 4, answer: 'queued' },
     ]);
 
-    await expect(getTeamProgress(7)).resolves.toEqual({
-      answeredQuestionIds: [1, 2],
-      points: 7,
-    });
+    await expect(getTeamProgress(7)).resolves.toMatchObject({ points: 7 });
     expect(mockFrom).toHaveBeenCalledWith('team_answers');
     expect(eq).toHaveBeenCalledWith('team_id', 7);
     expect(mockGetQueuedAnswers).toHaveBeenCalledWith(7);
+  });
+
+  it('treats still queued answers as answered', async () => {
+    mockStoredAnswers({
+      data: [{ question_id: 1, team_points: 3 }],
+      error: null,
+    });
+    mockGetQueuedAnswers.mockResolvedValue([
+      { team_id: 7, question_id: 1, team_points: 3, answer: 'synced' },
+      { team_id: 7, question_id: 2, team_points: 0, answer: 'queued' },
+    ]);
+
+    const { answeredQuestionIds } = await getTeamProgress(7);
+
+    expect([...answeredQuestionIds].sort()).toEqual([1, 2]);
   });
 
   it('counts the stored points when an answer is also still queued', async () => {

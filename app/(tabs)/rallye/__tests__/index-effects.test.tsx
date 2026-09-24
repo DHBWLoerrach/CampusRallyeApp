@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { act, render, waitFor } from '@testing-library/react-native';
 import RallyeIndex from '../index';
 import { store$ } from '@/services/storage/Store';
+import { StorageKeys, setStorageItem } from '@/services/storage/asyncStorage';
 
 let mockTeam: { id: number; name: string } | null = null;
 let mockJoinQuestionIds = [{ question_id: 1 }];
@@ -364,6 +365,35 @@ describe('RallyeIndex effects', () => {
     await waitFor(() => {
       expect(store$.points.set).toHaveBeenCalledWith(5);
     });
+  });
+
+  it('does not offer a question again whose answer is still queued', async () => {
+    mockTeam = { id: 7, name: 'Team 7' };
+    mockJoinQuestionIds = [{ question_id: 1 }, { question_id: 2 }];
+    mockAnsweredQuestionIds = [{ question_id: 1, team_points: 3 }];
+    await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+      {
+        id: 'queued-answer',
+        type: 'SAVE_ANSWER',
+        payloadVersion: 1,
+        createdAt: 1,
+        attempts: 0,
+        nextRetryAt: null,
+        payload: { team_id: 7, question_id: 2, team_points: 3, answer: 'B' },
+      },
+    ]);
+
+    try {
+      render(<RallyeIndex />);
+
+      await waitFor(() => {
+        expect(store$.allQuestionsAnswered.set).toHaveBeenCalledWith(true);
+      });
+      expect(store$.points.set).toHaveBeenCalledWith(6);
+      expect(store$.questions.set).not.toHaveBeenCalled();
+    } finally {
+      await setStorageItem(StorageKeys.OFFLINE_QUEUE, []);
+    }
   });
 
   it('clears the stored rallye end when the refreshed rallye has none', async () => {
