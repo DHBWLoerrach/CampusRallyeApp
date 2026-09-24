@@ -159,8 +159,20 @@ async function writeQueue(queue: OfflineActionV1[]) {
   outbox$.queueCount.set(queue.length);
 }
 
+let queueLock: Promise<void> = Promise.resolve();
+
+// Serializes read-modify-write cycles on the persisted queue. Without it, a
+// concurrent writer can overwrite a queue that already contains a new answer.
+function withQueueLock<T>(task: () => Promise<T>): Promise<T> {
+  const result = queueLock.then(task);
+  queueLock = result.then(
+    () => undefined,
+    () => undefined
+  );
+  return result;
+}
+
 export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
-  const queue = await readQueue();
   const action: OfflineActionV1 = {
     id: createId(),
     type: 'SAVE_ANSWER',
@@ -170,8 +182,11 @@ export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
     nextRetryAt: null,
     payload,
   };
-  queue.push(action);
-  await writeQueue(queue);
+  await withQueueLock(async () => {
+    const queue = await readQueue();
+    queue.push(action);
+    await writeQueue(queue);
+  });
   if (outbox$.online.get()) runProcessOutboxSafely();
   return action;
 }
@@ -235,7 +250,7 @@ export function processOutbox() {
     outbox$.lastError.set(null);
 
     try {
-      const queue = await readQueue();
+      const queue = await withQueueLock(readQueue);
       if (queue.length === 0) {
         clearRetryTimer();
         return;
@@ -305,21 +320,23 @@ export function processOutbox() {
         }
       }
 
-      const latestQueue = await readQueue();
-      const prioritizedRemaining = [
-        ...deferredAfterFailureBudget,
-        ...remaining,
-      ];
-      const mergedById = new Map(
-        prioritizedRemaining.map((item) => [item.id, item])
-      );
-      for (const item of latestQueue) {
-        if (processedIds.has(item.id) || mergedById.has(item.id)) continue;
-        mergedById.set(item.id, item);
-      }
-      const merged = Array.from(mergedById.values());
-
-      await writeQueue(merged);
+      const merged = await withQueueLock(async () => {
+        const latestQueue = await readQueue();
+        const prioritizedRemaining = [
+          ...deferredAfterFailureBudget,
+          ...remaining,
+        ];
+        const mergedById = new Map(
+          prioritizedRemaining.map((item) => [item.id, item])
+        );
+        for (const item of latestQueue) {
+          if (processedIds.has(item.id) || mergedById.has(item.id)) continue;
+          mergedById.set(item.id, item);
+        }
+        const mergedQueue = Array.from(mergedById.values());
+        await writeQueue(mergedQueue);
+        return mergedQueue;
+      });
       scheduleNextRetry(merged);
       if (merged.length === 0) {
         outbox$.lastSyncedAt.set(Date.now());

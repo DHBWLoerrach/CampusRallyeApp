@@ -139,6 +139,53 @@ describe('offlineOutbox processOutbox', () => {
     expect(queue?.[0]?.payload?.question_id).toBe(11);
   });
 
+  it('keeps an answer enqueued while a sync persists its result', async () => {
+    await setStorageItem(StorageKeys.OFFLINE_QUEUE, [
+      queuedAnswer({ id: 'synced', questionId: 10 }),
+    ]);
+    const upsert = createDeferred<{ error: null }>();
+    upsertMock.mockReturnValueOnce(upsert.promise);
+    const setItemMock = AsyncStorage.setItem as jest.Mock;
+    const realSetItem = setItemMock.getMockImplementation()!;
+    const syncWriteStarted = createDeferred<void>();
+    const releaseSyncWrite = createDeferred<void>();
+    setItemMock.mockImplementationOnce(async (key: string, value: string) => {
+      syncWriteStarted.resolve();
+      await releaseSyncWrite.promise;
+      return realSetItem(key, value);
+    });
+
+    const syncPromise = processOutbox();
+    await flushPromises();
+    // Keep the pending answer queued so only the sync under test runs.
+    outbox$.online.set(false);
+    upsert.resolve({ error: null });
+    await syncWriteStarted.promise;
+
+    const enqueuePromise = enqueueSaveAnswer({
+      ...basePayload,
+      question_id: 11,
+    });
+    await flushPromises();
+    releaseSyncWrite.resolve();
+    await Promise.all([syncPromise, enqueuePromise]);
+
+    const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+    expect(queue?.map((item) => item.payload.question_id)).toEqual([11]);
+  });
+
+  it('keeps all answers enqueued concurrently', async () => {
+    outbox$.online.set(false);
+
+    await Promise.all([
+      enqueueSaveAnswer({ ...basePayload, question_id: 10 }),
+      enqueueSaveAnswer({ ...basePayload, question_id: 11 }),
+    ]);
+
+    const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
+    expect(queue?.map((item) => item.payload.question_id)).toEqual([10, 11]);
+  });
+
   it('does nothing when offline', async () => {
     outbox$.online.set(false);
     await enqueueSaveAnswer({ ...basePayload });
@@ -331,7 +378,7 @@ describe('offlineOutbox processOutbox', () => {
       upsertMock.mockReturnValueOnce(deferred.promise);
 
       const action = await enqueueSaveAnswer({ ...basePayload });
-      await flushMicrotasks();
+      await flushPromises();
 
       const remoteCallCount = upsertMock.mock.calls.length;
       deferred.resolve({ error: null });
@@ -410,7 +457,7 @@ describe('offlineOutbox processOutbox', () => {
 
       const first = processOutbox();
       const second = processOutbox();
-      await flushMicrotasks();
+      await flushPromises();
 
       const remoteCallCount = upsertMock.mock.calls.length;
       const timerCountDuringSync = jest.getTimerCount();
