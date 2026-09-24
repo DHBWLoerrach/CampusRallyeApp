@@ -12,6 +12,11 @@ let mockSolutionOptionsResults: {
   data: any[] | null;
   error: Error | null;
 }[] = [];
+let mockRallyeFields = {
+  status: 'running',
+  rallye_end: null as string | null,
+  name: 'Rallye 1',
+};
 let mockGeocachingData: {
   data: any[] | null;
   error: Error | null;
@@ -19,6 +24,13 @@ let mockGeocachingData: {
   data: [],
   error: null,
 };
+
+// Lets a test hold back the response of one table until it releases it.
+const mockTableGates: Record<string, Promise<void>> = {};
+async function mockResponse<T>(table: string, response: T): Promise<T> {
+  await mockTableGates[table];
+  return response;
+}
 
 const mockFrom = jest.fn((table: string) => {
   if (table === 'rallye_questions') {
@@ -38,7 +50,8 @@ const mockFrom = jest.fn((table: string) => {
     return {
       select: jest.fn(() => ({
         in: jest.fn(() =>
-          Promise.resolve(
+          mockResponse(
+            table,
             mockSolutionOptionsResults.shift() ?? { data: [], error: null }
           )
         ),
@@ -60,7 +73,7 @@ const mockFrom = jest.fn((table: string) => {
     return {
       select: jest.fn(() => ({
         in: jest.fn(() =>
-          Promise.resolve({
+          mockResponse(table, {
             data: mockQuestionsData,
             error: null,
           })
@@ -82,8 +95,8 @@ const mockFrom = jest.fn((table: string) => {
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           single: jest.fn(() =>
-            Promise.resolve({
-              data: { status: 'running', rallye_end: null, name: 'Rallye 1' },
+            mockResponse(table, {
+              data: mockRallyeFields,
               error: null,
             })
           ),
@@ -232,6 +245,14 @@ describe('RallyeIndex effects', () => {
     mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
     mockGeocachingData = { data: [], error: null };
     mockSolutionOptionsResults = [];
+    mockRallyeFields = {
+      status: 'running',
+      rallye_end: null,
+      name: 'Rallye 1',
+    };
+    for (const table of Object.keys(mockTableGates)) {
+      delete mockTableGates[table];
+    }
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
 
@@ -287,6 +308,47 @@ describe('RallyeIndex effects', () => {
 
     expect(store$.answers.set).toHaveBeenCalledWith(options);
   });
+
+  it.each([
+    ['rallye fields', 'rallyes', () => store$.rallye.status.set],
+    ['solution options', 'solution_options', () => store$.answers.set],
+    ['questions', 'questions', () => store$.questions.set],
+  ])(
+    'ignores late %s of a rallye that is no longer active',
+    async (_, table, getSetter) => {
+      let releaseResponse!: () => void;
+      mockTableGates[table] = new Promise((resolve) => {
+        releaseResponse = resolve;
+      });
+      mockRallyeFields = { status: 'ended', rallye_end: null, name: 'A' };
+      const rallyeGet = store$.rallye.get as jest.Mock;
+      const originalRallyeGet = rallyeGet.getMockImplementation();
+
+      try {
+        const { unmount } = render(<RallyeIndex />);
+        await waitFor(() => expect(tableCallCount(table)).toBeGreaterThan(0));
+
+        // Leaving unmounts the rallye tabs; the user then joins another rallye
+        // while the request of the previous one is still pending.
+        unmount();
+        rallyeGet.mockImplementation(() => ({
+          id: 2,
+          name: 'B',
+          status: 'running',
+          mode: 'department',
+          rallye_end: null,
+        }));
+        await act(async () => {
+          releaseResponse();
+          await new Promise((resolve) => setTimeout(resolve, 700));
+        });
+
+        expect(getSetter()).not.toHaveBeenCalled();
+      } finally {
+        rallyeGet.mockImplementation(originalRallyeGet);
+      }
+    }
+  );
 
   it('clears the stored rallye end when the refreshed rallye has none', async () => {
     render(<RallyeIndex />);

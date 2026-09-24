@@ -33,6 +33,12 @@ function isPreparation(status?: RallyeStatus) {
   return status === 'draft' || status === 'ready';
 }
 
+// Requests can outlive a rallye switch; their late responses must not
+// overwrite the session of the rallye that is active now.
+function isActiveRallye(rallyeId: number) {
+  return store$.rallye.get()?.id === rallyeId;
+}
+
 // 2s, 4s, 8s, ... capped at 30s
 function answersRetryDelayMs(attempt: number) {
   return Math.min(30_000, 2_000 * 2 ** attempt);
@@ -120,11 +126,13 @@ const RallyeIndex = observer(function RallyeIndex() {
     if (!rallyeId) return true;
     try {
       const questionIds = await getQuestionIds();
+      if (!isActiveRallye(rallyeId)) return true;
       if (questionIds.length === 0) {
         store$.answers.set([]);
         return true;
       }
       const answers = await getSolutionOptions(questionIds);
+      if (!isActiveRallye(rallyeId)) return true;
       store$.answers.set(answers);
       return true;
     } catch (error) {
@@ -138,6 +146,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     setLoading(true);
     try {
       const questionIds = await getQuestionIds();
+      if (!isActiveRallye(rallyeId)) return;
       // Track total number of questions for progress display
       store$.totalQuestions.set(questionIds.length);
       if (questionIds.length === 0) {
@@ -151,6 +160,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       let answeredIds: number[] = [];
       if (!isTourMode && teamId) {
         answeredIds = await getAnsweredQuestionIds(teamId);
+        if (!isActiveRallye(rallyeId)) return;
       }
       // Track number of answered questions for progress display
       store$.answeredCount.set(answeredIds.length);
@@ -166,6 +176,7 @@ const RallyeIndex = observer(function RallyeIndex() {
         : questionIds.filter((id: number) => !answeredIds.includes(id));
 
       const mapped = await getQuestionsWithGeocachingMetadata(filteredIds);
+      if (!isActiveRallye(rallyeId)) return;
 
       const previousQuestions = store$.questions.get();
       const previousCurrentQuestionId = store$.currentQuestion.get()?.id;
@@ -182,6 +193,7 @@ const RallyeIndex = observer(function RallyeIndex() {
       store$.questionIndex.set(safeQuestionIndex);
     } catch (err) {
       console.error('Fehler beim Laden der Fragen:', err);
+      if (!isActiveRallye(rallyeId)) return;
       Alert.alert(
         tRef.current('common.errorTitle'),
         tRef.current('rallye.error.loadQuestions')
@@ -198,7 +210,7 @@ const RallyeIndex = observer(function RallyeIndex() {
     await new Promise((r) => setTimeout(r, 600));
     try {
       const data = await getRefreshableRallyeFields(rallyeId);
-      if (data) {
+      if (data && isActiveRallye(rallyeId)) {
         store$.rallye.status.set(data.status);
         store$.rallye.rallye_end.set(data.rallye_end);
         if (data.name) store$.rallye.name.set(data.name);
