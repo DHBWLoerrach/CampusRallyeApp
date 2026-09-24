@@ -33,6 +33,11 @@ function isPreparation(status?: RallyeStatus) {
   return status === 'draft' || status === 'ready';
 }
 
+// 2s, 4s, 8s, ... capped at 30s
+function answersRetryDelayMs(attempt: number) {
+  return Math.min(30_000, 2_000 * 2 ** attempt);
+}
+
 const RallyeIndex = observer(function RallyeIndex() {
   const { t } = useLanguage();
   const tRef = useRef(t);
@@ -111,18 +116,20 @@ const RallyeIndex = observer(function RallyeIndex() {
     }
   }, [rallyeId]);
 
-  const loadAnswers = useCallback(async () => {
-    if (!rallyeId) return;
+  const loadAnswers = useCallback(async (): Promise<boolean> => {
+    if (!rallyeId) return true;
     try {
       const questionIds = await getQuestionIds();
       if (questionIds.length === 0) {
         store$.answers.set([]);
-        return;
+        return true;
       }
       const answers = await getSolutionOptions(questionIds);
       store$.answers.set(answers);
+      return true;
     } catch (error) {
       console.error('Error fetching rallye answers:', error);
+      return false;
     }
   }, [getQuestionIds, rallyeId]);
 
@@ -210,11 +217,30 @@ const RallyeIndex = observer(function RallyeIndex() {
 
   useEffect(() => {
     if (!rallyeId) return;
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+    // Questions stay locked without their solution options, so keep retrying
+    // instead of waiting for a manual refresh the question screen lacks.
+    const scheduleAnswersRetry = (attempt: number) => {
+      if (cancelled) return;
+      retryTimer = setTimeout(() => {
+        void loadAnswers().then((loaded) => {
+          if (!loaded) scheduleAnswersRetry(attempt + 1);
+        });
+      }, answersRetryDelayMs(attempt));
+    };
+
     void (async () => {
-      await loadAnswers();
+      if (!(await loadAnswers())) scheduleAnswersRetry(0);
       // Ensure we refresh dynamic rallye fields like name/status
       await refreshStatus();
     })();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimer);
+    };
   }, [loadAnswers, rallyeId, refreshStatus]);
 
   const onRefresh = async () => {

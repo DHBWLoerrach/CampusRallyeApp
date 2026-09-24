@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'react-native';
-import { render, waitFor } from '@testing-library/react-native';
+import { act, render, waitFor } from '@testing-library/react-native';
 import RallyeIndex from '../index';
 import { store$ } from '@/services/storage/Store';
 
@@ -8,6 +8,10 @@ let mockTeam: { id: number; name: string } | null = null;
 let mockJoinQuestionIds = [{ question_id: 1 }];
 let mockAnsweredQuestionIds: { question_id: number }[] = [];
 let mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
+let mockSolutionOptionsResults: {
+  data: any[] | null;
+  error: Error | null;
+}[] = [];
 let mockGeocachingData: {
   data: any[] | null;
   error: Error | null;
@@ -33,7 +37,11 @@ const mockFrom = jest.fn((table: string) => {
   if (table === 'solution_options') {
     return {
       select: jest.fn(() => ({
-        in: jest.fn(() => Promise.resolve({ data: [], error: null })),
+        in: jest.fn(() =>
+          Promise.resolve(
+            mockSolutionOptionsResults.shift() ?? { data: [], error: null }
+          )
+        ),
       })),
     };
   }
@@ -223,11 +231,13 @@ describe('RallyeIndex effects', () => {
     mockAnsweredQuestionIds = [];
     mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
     mockGeocachingData = { data: [], error: null };
+    mockSolutionOptionsResults = [];
     alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
 
   afterEach(() => {
     alertSpy.mockRestore();
+    jest.useRealTimers();
   });
 
   it('reuses cached question ids and does not re-fetch answers/status on team change', async () => {
@@ -255,6 +265,27 @@ describe('RallyeIndex effects', () => {
     expect(tableCallCount('rallye_questions')).toBe(
       questionJoinCallsAfterMount
     );
+  });
+
+  it('retries loading solution options after a failed attempt', async () => {
+    jest.useFakeTimers();
+    const options = [{ id: 5, question_id: 1, text: 'A', correct: true }];
+    mockSolutionOptionsResults = [
+      { data: null, error: new Error('network request failed') },
+      { data: options, error: null },
+    ];
+
+    render(<RallyeIndex />);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(1_000);
+    });
+    expect(store$.answers.set).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(2_000);
+    });
+
+    expect(store$.answers.set).toHaveBeenCalledWith(options);
   });
 
   it('clears the stored rallye end when the refreshed rallye has none', async () => {
