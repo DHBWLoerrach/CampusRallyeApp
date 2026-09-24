@@ -104,10 +104,10 @@ export const store$ = observable({
         const team = store$.team.get();
         const isTourMode = store$.isTourMode.get();
         if (rallye && team && !isTourMode) {
-          await setPlayTime(rallye.id, team.id);
+          const status = await setPlayTime(rallye.id, team.id);
           Logger.info(
             'Store',
-            `Rallye finished, play_time set for team: ${team.id}`
+            `Rallye finished, play_time ${status} for team: ${team.id}`
           );
         }
       } catch (err) {

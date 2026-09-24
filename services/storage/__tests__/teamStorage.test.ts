@@ -6,6 +6,12 @@ jest.mock('@/utils/Supabase', () => ({
   },
 }));
 
+const mockEnqueueSetPlayTime = jest.fn();
+
+jest.mock('../offlineOutbox', () => ({
+  enqueueSetPlayTime: (...args: unknown[]) => mockEnqueueSetPlayTime(...args),
+}));
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   clearCurrentTeam,
@@ -229,12 +235,22 @@ describe('teamStorage.teamExists', () => {
 });
 
 describe('teamStorage.setPlayTime', () => {
+  const finishedAt = new Date('2026-09-24T10:00:00.000Z');
+  let consoleErrorSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers({ now: finishedAt });
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockEnqueueSetPlayTime.mockResolvedValue(undefined);
   });
 
-  it('rejects when the play-time update fails', async () => {
-    const error = { message: 'denied' };
+  afterEach(() => {
+    jest.useRealTimers();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('stores the finish time of the team', async () => {
     useTableHandlers({
       teams: (context) => {
         expect(context.terminal).toBe('then');
@@ -243,15 +259,41 @@ describe('teamStorage.setPlayTime', () => {
           { column: 'rallye_id', value: 7 },
         ]);
         expect(context.update).toEqual({
-          play_time: expect.any(String),
+          play_time: finishedAt.toISOString(),
         });
-        const playTime = (context.update as { play_time: string }).play_time;
-        expect(new Date(playTime).getTime()).not.toBeNaN();
-        return { data: null, error };
+        return { data: null, error: null };
       },
     });
 
-    await expect(setPlayTime(7, 5)).rejects.toBe(error);
+    await expect(setPlayTime(7, 5)).resolves.toBe('sent');
+    expect(mockEnqueueSetPlayTime).not.toHaveBeenCalled();
+  });
+
+  it('queues the finish time of the call when the update fails', async () => {
+    useTableHandlers({
+      teams: () => {
+        // A slow failing request must not shift the queued finish time.
+        jest.setSystemTime(new Date('2026-09-24T10:05:00.000Z'));
+        return { data: null, error: { message: 'network request failed' } };
+      },
+    });
+
+    await expect(setPlayTime(7, 5)).resolves.toBe('queued');
+    expect(mockEnqueueSetPlayTime).toHaveBeenCalledWith({
+      rallye_id: 7,
+      team_id: 5,
+      play_time: finishedAt.toISOString(),
+    });
+  });
+
+  it('rejects when the finish time can neither be stored nor queued', async () => {
+    const queueError = new Error('storage full');
+    useTableHandlers({
+      teams: () => ({ data: null, error: { message: 'offline' } }),
+    });
+    mockEnqueueSetPlayTime.mockRejectedValue(queueError);
+
+    await expect(setPlayTime(7, 5)).rejects.toBe(queueError);
   });
 });
 

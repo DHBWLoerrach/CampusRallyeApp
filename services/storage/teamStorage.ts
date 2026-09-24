@@ -6,6 +6,7 @@ import {
   setStorageItem,
   removeStorageItem,
 } from './asyncStorage';
+import { enqueueSetPlayTime } from './offlineOutbox';
 
 export type TeamExistsResult = 'exists' | 'missing' | 'unknown';
 
@@ -25,13 +26,29 @@ export async function clearCurrentTeam(rallyeId: number) {
   return removeStorageItem(`${StorageKeys.TEAM}_${rallyeId}`);
 }
 
-export async function setPlayTime(rallyeId: number, teamId: TeamId) {
-  const { error } = await supabase
-    .from('teams')
-    .update({ play_time: new Date().toISOString() })
-    .eq('id', teamId)
-    .eq('rallye_id', rallyeId);
-  if (error) throw error;
+export async function setPlayTime(
+  rallyeId: number,
+  teamId: TeamId
+): Promise<'sent' | 'queued'> {
+  // Capture the finish time now so a later retry does not shift it.
+  const playTime = new Date().toISOString();
+  try {
+    const { error } = await supabase
+      .from('teams')
+      .update({ play_time: playTime })
+      .eq('id', teamId)
+      .eq('rallye_id', rallyeId);
+    if (error) throw error;
+    return 'sent';
+  } catch (error) {
+    console.error('Error setting play time:', error);
+    await enqueueSetPlayTime({
+      rallye_id: rallyeId,
+      team_id: teamId,
+      play_time: playTime,
+    });
+    return 'queued';
+  }
 }
 
 export async function createTeam(teamName: string, rallyeId: number) {

@@ -8,6 +8,7 @@ import {
 } from '@/services/storage/asyncStorage';
 import {
   enqueueSaveAnswer,
+  enqueueSetPlayTime,
   getQueuedAnswers,
   outbox$,
   processOutbox,
@@ -191,10 +192,46 @@ describe('offlineOutbox processOutbox', () => {
     outbox$.online.set(false);
     await enqueueSaveAnswer({ ...basePayload, question_id: 10 });
     await enqueueSaveAnswer({ ...basePayload, team_id: 2, question_id: 11 });
+    await enqueueSetPlayTime({
+      rallye_id: 3,
+      team_id: 1,
+      play_time: '2026-09-24T10:00:00.000Z',
+    });
 
     await expect(getQueuedAnswers(1)).resolves.toEqual([
       { ...basePayload, question_id: 10 },
     ]);
+  });
+
+  it('sends a queued finish time with its original timestamp', async () => {
+    const eqMock = jest.fn();
+    const updateQuery = {
+      eq: eqMock.mockImplementation(() => updateQuery),
+      then: (resolve: (result: { error: null }) => unknown) =>
+        Promise.resolve({ error: null }).then(resolve),
+    };
+    const updateMock = jest.fn(() => updateQuery);
+    mockFrom.mockImplementation((table: string) =>
+      table === 'teams' ? { update: updateMock } : { upsert: upsertMock }
+    );
+    outbox$.online.set(false);
+    await enqueueSetPlayTime({
+      rallye_id: 3,
+      team_id: 1,
+      play_time: '2026-09-24T10:00:00.000Z',
+    });
+    outbox$.online.set(true);
+
+    await processOutbox();
+
+    expect(updateMock).toHaveBeenCalledWith({
+      play_time: '2026-09-24T10:00:00.000Z',
+    });
+    expect(eqMock.mock.calls).toEqual([
+      ['id', 1],
+      ['rallye_id', 3],
+    ]);
+    expect(await getStorageItem(StorageKeys.OFFLINE_QUEUE)).toEqual([]);
   });
 
   it('does nothing when offline', async () => {

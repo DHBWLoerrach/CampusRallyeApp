@@ -20,16 +20,32 @@ type LegacySaveAnswerPayload = {
   team_answer: string;
 };
 
-export type OfflineActionV1 = {
+export type SetPlayTimePayload = {
+  rallye_id: number;
+  team_id: TeamId;
+  play_time: string;
+};
+
+type OfflineActionBase = {
   id: string;
-  type: 'SAVE_ANSWER';
   payloadVersion: 1;
   createdAt: number;
   attempts: number;
   nextRetryAt: number | null;
-  payload: SaveAnswerPayload;
   lastError?: string;
 };
+
+type SaveAnswerAction = OfflineActionBase & {
+  type: 'SAVE_ANSWER';
+  payload: SaveAnswerPayload;
+};
+
+type SetPlayTimeAction = OfflineActionBase & {
+  type: 'SET_PLAY_TIME';
+  payload: SetPlayTimePayload;
+};
+
+export type OfflineActionV1 = SaveAnswerAction | SetPlayTimeAction;
 
 export const outbox$ = observable({
   online: true,
@@ -130,6 +146,17 @@ function normalizeQueueItem(raw: any): OfflineActionV1 | null {
     }
   }
 
+  if (raw.type === 'SET_PLAY_TIME' && raw.payloadVersion === 1 && raw.payload) {
+    const p = raw.payload as Partial<SetPlayTimePayload>;
+    if (
+      typeof p.rallye_id === 'number' &&
+      typeof p.team_id === 'number' &&
+      typeof p.play_time === 'string'
+    ) {
+      return raw as SetPlayTimeAction;
+    }
+  }
+
   // Legacy: UPLOAD_PHOTO_ANSWER is intentionally unsupported (online-only)
   if (raw.type === 'UPLOAD_PHOTO_ANSWER') return null;
 
@@ -172,22 +199,42 @@ function withQueueLock<T>(task: () => Promise<T>): Promise<T> {
   return result;
 }
 
-export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
-  const action: OfflineActionV1 = {
+function createActionBase(): OfflineActionBase {
+  return {
     id: createId(),
-    type: 'SAVE_ANSWER',
     payloadVersion: 1,
     createdAt: Date.now(),
     attempts: 0,
     nextRetryAt: null,
-    payload,
   };
+}
+
+async function enqueueAction(action: OfflineActionV1) {
   await withQueueLock(async () => {
     const queue = await readQueue();
     queue.push(action);
     await writeQueue(queue);
   });
   if (outbox$.online.get()) runProcessOutboxSafely();
+}
+
+export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
+  const action: SaveAnswerAction = {
+    ...createActionBase(),
+    type: 'SAVE_ANSWER',
+    payload,
+  };
+  await enqueueAction(action);
+  return action;
+}
+
+export async function enqueueSetPlayTime(payload: SetPlayTimePayload) {
+  const action: SetPlayTimeAction = {
+    ...createActionBase(),
+    type: 'SET_PLAY_TIME',
+    payload,
+  };
+  await enqueueAction(action);
   return action;
 }
 
@@ -195,9 +242,33 @@ export async function getQueuedAnswers(
   teamId: TeamId
 ): Promise<SaveAnswerPayload[]> {
   const queue = await withQueueLock(readQueue);
-  return queue
-    .map((action) => action.payload)
-    .filter((payload) => payload.team_id === teamId);
+  return queue.flatMap((action) =>
+    action.type === 'SAVE_ANSWER' && action.payload.team_id === teamId
+      ? [action.payload]
+      : []
+  );
+}
+
+function sendAction(action: OfflineActionV1) {
+  if (action.type === 'SET_PLAY_TIME') {
+    const p = action.payload;
+    return supabase
+      .from('teams')
+      .update({ play_time: p.play_time })
+      .eq('id', p.team_id)
+      .eq('rallye_id', p.rallye_id);
+  }
+
+  const p = action.payload;
+  return supabase.from('team_answers').upsert(
+    {
+      team_id: p.team_id,
+      question_id: p.question_id,
+      team_points: p.team_points,
+      answer: p.answer,
+    },
+    { onConflict: 'team_id,question_id', ignoreDuplicates: true }
+  );
 }
 
 let syncPromise: Promise<void> | null = null;
@@ -277,22 +348,7 @@ export function processOutbox() {
         }
 
         try {
-          if (action.type !== 'SAVE_ANSWER') {
-            processedIds.add(action.id);
-            // Unknown action types are discarded to prevent a stuck queue.
-            continue;
-          }
-
-          const p = action.payload;
-          const { error } = await supabase.from('team_answers').upsert(
-            {
-              team_id: p.team_id,
-              question_id: p.question_id,
-              team_points: p.team_points,
-              answer: p.answer,
-            },
-            { onConflict: 'team_id,question_id', ignoreDuplicates: true }
-          );
+          const { error } = await sendAction(action);
           if (error) throw error;
           processedIds.add(action.id);
         } catch (error: any) {
@@ -302,7 +358,10 @@ export function processOutbox() {
           }
           const attempts = (action.attempts || 0) + 1;
           const nextRetryAt = Date.now() + backoffMs(attempts);
-          const lastError = errorMessage(error, action.payload);
+          const lastError = errorMessage(
+            error,
+            action.type === 'SAVE_ANSWER' ? action.payload : undefined
+          );
           remaining.push({
             ...action,
             attempts,

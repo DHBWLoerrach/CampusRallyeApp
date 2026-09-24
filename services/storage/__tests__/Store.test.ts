@@ -40,7 +40,7 @@ describe('store$ observable', () => {
     // Wait for auto-initialize, then reset to known state
     await flushPromises();
     jest.clearAllMocks();
-    mockedSetPlayTime.mockResolvedValue(undefined);
+    mockedSetPlayTime.mockResolvedValue('sent');
     store$.reset();
     store$.enabled.set(false);
     store$.rallye.set(null);
@@ -232,7 +232,7 @@ describe('store$ observable', () => {
       expect(mockedSetPlayTime).toHaveBeenCalledWith(7, 5);
       expect(Logger.info).toHaveBeenCalledWith(
         'Store',
-        'Rallye finished, play_time set for team: 5'
+        'Rallye finished, play_time sent for team: 5'
       );
     });
 
