@@ -145,6 +145,11 @@ export const translations = {
     'question.photo.switch': 'Kamera wechseln',
     'question.photo.new': 'Neues Foto',
     'question.photo.send': 'Foto senden',
+    'question.photo.privacyTitle': 'Datenschutz bei Fotoantworten',
+    'question.photo.privacyNotice':
+      'Wir speichern dein Foto für die Auswertung der Rallye. Nur die Organisatoren können es sehen. Wir löschen es spätestens 30 Tage nach dem Upload. Lade Fotos mit erkennbaren Personen nur hoch, wenn sie Aufnahme und Upload zugestimmt haben.',
+    'question.photo.consent':
+      'Ich bin mit dem Upload und der beschriebenen Nutzung des Fotos einverstanden.',
     'question.photo.offlineMessage':
       'Foto-Uploads benötigen eine Internetverbindung.',
     'question.photo.offlineNotice': 'Offline: Foto-Uploads benötigen Internet.',
@@ -345,6 +350,11 @@ export const translations = {
     'question.photo.switch': 'Switch camera',
     'question.photo.new': 'New photo',
     'question.photo.send': 'Send photo',
+    'question.photo.privacyTitle': 'Privacy for photo answers',
+    'question.photo.privacyNotice':
+      'We store your photo to evaluate the rally. Only the organizers can view it. We delete it within 30 days of upload. Upload photos of recognizable people only if they agreed to being photographed and to the upload.',
+    'question.photo.consent':
+      'I agree to the upload and the described use of the photo.',
     'question.photo.offlineMessage':
       'Photo uploads require an internet connection.',
     'question.photo.offlineNotice': 'Offline: photo uploads require internet.',

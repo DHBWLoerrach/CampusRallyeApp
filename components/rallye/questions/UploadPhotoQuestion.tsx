@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Image, ScrollView, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { QuestionProps } from '@/types/rallye';
 import {
@@ -34,6 +41,8 @@ type PhotoCameraProps = {
 };
 
 type ImagePreviewProps = {
+  consented: boolean;
+  onConsentToggle: () => void;
   onNewPhoto: () => void;
   onSubmit: () => Promise<void>;
   onSurrender: () => Promise<void>;
@@ -41,6 +50,7 @@ type ImagePreviewProps = {
   question: QuestionProps['question'];
   sending: boolean;
   showOfflineNotice: boolean;
+  showConsent: boolean;
   s: ReturnType<typeof useAppStyles>;
   t: ReturnType<typeof useLanguage>['t'];
 };
@@ -127,6 +137,8 @@ function PhotoCamera({
 }
 
 function ImagePreview({
+  consented,
+  onConsentToggle,
   onNewPhoto,
   onSubmit,
   onSurrender,
@@ -134,6 +146,7 @@ function ImagePreview({
   question,
   sending,
   showOfflineNotice,
+  showConsent,
   s,
   t,
 }: ImagePreviewProps) {
@@ -161,6 +174,38 @@ function ImagePreview({
             resizeMode="contain"
           />
         </InfoBox>
+        {showConsent ? (
+          <InfoBox mb={0} style={{ maxHeight: undefined }}>
+            <ThemedText style={styles.privacyTitle}>
+              {t('question.photo.privacyTitle')}
+            </ThemedText>
+            <ThemedText style={styles.privacyNotice}>
+              {t('question.photo.privacyNotice')}
+            </ThemedText>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityLabel={t('question.photo.consent')}
+              accessibilityState={{ checked: consented, disabled: sending }}
+              disabled={sending}
+              onPress={onConsentToggle}
+              style={styles.consentRow}
+            >
+              <View
+                style={[
+                  styles.checkbox,
+                  consented ? styles.checkboxChecked : null,
+                ]}
+              >
+                {consented ? (
+                  <ThemedText style={styles.checkmark}>✓</ThemedText>
+                ) : null}
+              </View>
+              <ThemedText style={styles.consentText}>
+                {t('question.photo.consent')}
+              </ThemedText>
+            </Pressable>
+          </InfoBox>
+        ) : null}
         <InfoBox mb={0}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
             <UIButton
@@ -172,7 +217,9 @@ function ImagePreview({
             </UIButton>
             <UIButton
               icon="envelope"
-              disabled={showOfflineNotice || sending}
+              disabled={
+                showOfflineNotice || sending || (showConsent && !consented)
+              }
               loading={sending}
               onPress={onSubmit}
             >
@@ -204,6 +251,7 @@ function ImagePreview({
 
 export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const [picture, setPicture] = useState<Picture | null>(null);
+  const [consented, setConsented] = useState(false);
   const [sending, setSending] = useState(false);
   const cameraRef = useRef<CameraView | null>(null);
   const mountedRef = useRef(true);
@@ -247,14 +295,17 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const handleTakePicture = async () => {
     try {
       const pic = await (cameraRef.current as any)?.takePictureAsync();
-      if (pic) setPicture(pic);
+      if (pic) {
+        setConsented(false);
+        setPicture(pic);
+      }
     } catch (error) {
       console.error('Error taking picture', error);
     }
   };
 
   const handleSubmitPhoto = async () => {
-    if (!picture?.uri) return;
+    if (!picture?.uri || (team?.id && !consented)) return;
     setSending(true);
     try {
       if (!team?.id) {
@@ -288,13 +339,19 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   if (picture) {
     return (
       <ImagePreview
-        onNewPhoto={() => setPicture(null)}
+        consented={consented}
+        onConsentToggle={() => setConsented((current) => !current)}
+        onNewPhoto={() => {
+          setConsented(false);
+          setPicture(null);
+        }}
         onSubmit={handleSubmitPhoto}
         onSurrender={handleSurrender}
         picture={picture}
         question={question}
         sending={sending}
         showOfflineNotice={!!team?.id && !online}
+        showConsent={!!team?.id}
         s={s}
         t={t}
       />
@@ -312,3 +369,39 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
     />
   );
 }
+
+const styles = StyleSheet.create({
+  privacyTitle: {
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  privacyNotice: {
+    marginBottom: 16,
+  },
+  consentRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    minHeight: 44,
+  },
+  checkbox: {
+    alignItems: 'center',
+    borderColor: Colors.dhbwGray,
+    borderRadius: 4,
+    borderWidth: 2,
+    height: 24,
+    justifyContent: 'center',
+    width: 24,
+  },
+  checkboxChecked: {
+    backgroundColor: Colors.dhbwRed,
+    borderColor: Colors.dhbwRed,
+  },
+  checkmark: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  consentText: {
+    flex: 1,
+  },
+});

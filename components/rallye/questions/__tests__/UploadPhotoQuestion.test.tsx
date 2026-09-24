@@ -234,10 +234,36 @@ describe('UploadPhotoQuestion', () => {
     }
 
     it('shows image preview after taking a picture', async () => {
-      const { getByText } = await renderWithPicture();
+      const { getByText, getByRole } = await renderWithPicture();
 
       expect(getByText('question.photo.new')).toBeTruthy();
       expect(getByText('question.photo.send')).toBeTruthy();
+      expect(getByText('question.photo.privacyTitle')).toBeTruthy();
+      expect(getByText('question.photo.privacyNotice')).toBeTruthy();
+      expect(
+        getByRole('checkbox', {
+          name: 'question.photo.consent',
+          checked: false,
+        })
+      ).toBeTruthy();
+    });
+
+    it('sends only after consent is given', async () => {
+      const { getByTestId, getByRole } = await renderWithPicture();
+
+      fireEvent.press(getByTestId('button-envelope'));
+      expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
+
+      const checkbox = getByRole('checkbox', {
+        name: 'question.photo.consent',
+      });
+      fireEvent.press(checkbox);
+      expect(getByRole('checkbox', { checked: true })).toBeTruthy();
+      fireEvent.press(getByTestId('button-envelope'));
+
+      await waitFor(() => {
+        expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('allows taking a new photo', async () => {
@@ -250,9 +276,28 @@ describe('UploadPhotoQuestion', () => {
       });
     });
 
-    it('submits photo with zero points and advances on success', async () => {
-      const { getByTestId } = await renderWithPicture();
+    it('requires fresh consent for a new photo', async () => {
+      const { getByTestId, getByRole, queryByTestId } =
+        await renderWithPicture();
 
+      fireEvent.press(getByRole('checkbox'));
+      fireEvent.press(getByTestId('button-recycle'));
+      await waitFor(() => {
+        expect(queryByTestId('camera-view')).toBeTruthy();
+      });
+      fireEvent.press(getByTestId('button-camera'));
+      await waitFor(() => {
+        expect(getByRole('checkbox', { checked: false })).toBeTruthy();
+      });
+
+      fireEvent.press(getByTestId('button-envelope'));
+      expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
+    });
+
+    it('submits photo with zero points and advances on success', async () => {
+      const { getByTestId, getByRole } = await renderWithPicture();
+
+      fireEvent.press(getByRole('checkbox'));
       fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
@@ -267,8 +312,9 @@ describe('UploadPhotoQuestion', () => {
 
     it('advances without awarding points when no team is selected', async () => {
       jest.mocked(store$.team.get).mockReturnValue(null);
-      const { getByTestId } = await renderWithPicture();
+      const { getByTestId, queryByRole } = await renderWithPicture();
 
+      expect(queryByRole('checkbox')).toBeNull();
       fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
@@ -288,8 +334,9 @@ describe('UploadPhotoQuestion', () => {
         status: 'requires_online',
       });
 
-      const { getByTestId } = await renderWithPicture();
+      const { getByTestId, getByRole } = await renderWithPicture();
 
+      fireEvent.press(getByRole('checkbox'));
       fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
@@ -305,8 +352,9 @@ describe('UploadPhotoQuestion', () => {
         new Error('Upload failed')
       );
 
-      const { getByTestId } = await renderWithPicture();
+      const { getByTestId, getByRole } = await renderWithPicture();
 
+      fireEvent.press(getByRole('checkbox'));
       fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
