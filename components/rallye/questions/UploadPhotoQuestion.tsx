@@ -228,6 +228,7 @@ function ImagePreview({
             <UIButton
               icon="face-frown-open"
               color={Colors.dhbwGray}
+              disabled={sending}
               onPress={onSurrender}
             >
               {t('common.surrender')}
@@ -255,6 +256,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const [sending, setSending] = useState(false);
   const cameraRef = useRef<CameraView | null>(null);
   const mountedRef = useRef(true);
+  const sendingRef = useRef(false);
   const [permission, requestPermission, getPermission] = useCameraPermissions();
   const { t } = useLanguage();
   const { surrender } = useAnswerSubmission(question);
@@ -270,6 +272,9 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   }, []);
 
   const handleSurrender = async () => {
+    // An empty surrender answer saved during the upload would win over the
+    // photo, because the server keeps the first answer for a question.
+    if (sendingRef.current) return;
     await surrender({
       errorMessageKey: 'question.error.surrender',
       onConfirmed: () => setPicture(null),
@@ -305,7 +310,8 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   };
 
   const handleSubmitPhoto = async () => {
-    if (!picture?.uri || (team?.id && !consented)) return;
+    if (!picture?.uri || (team?.id && !consented) || sendingRef.current) return;
+    sendingRef.current = true;
     setSending(true);
     try {
       if (!team?.id) {
@@ -332,6 +338,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
       console.error('Error submitting photo answer:', e);
       Alert.alert(t('common.errorTitle'), t('question.error.submitPhoto'));
     } finally {
+      sendingRef.current = false;
       if (mountedRef.current) setSending(false);
     }
   };

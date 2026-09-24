@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'react-native';
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import UploadPhotoQuestion from '../UploadPhotoQuestion';
 import { Question } from '@/types/rallye';
 import { confirm } from '@/utils/ConfirmAlert';
@@ -345,6 +345,29 @@ describe('UploadPhotoQuestion', () => {
           'question.photo.offlineMessage'
         );
       });
+    });
+
+    it('does not surrender while the photo is being sent', async () => {
+      let finishUpload!: (value: { status: string }) => void;
+      mockSubmitPhotoAnswerAndAdvance.mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishUpload = resolve;
+        })
+      );
+      const { getByTestId, getByRole } = await renderWithPicture();
+
+      fireEvent.press(getByRole('checkbox'));
+      fireEvent.press(getByTestId('button-envelope'));
+      await waitFor(() => {
+        expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledTimes(1);
+      });
+      fireEvent.press(getByTestId('button-face-frown-open'));
+      await act(async () => {
+        finishUpload({ status: 'sent' });
+      });
+
+      expect(mockedConfirm).not.toHaveBeenCalled();
+      expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
     });
 
     it('shows error alert on submit failure', async () => {
