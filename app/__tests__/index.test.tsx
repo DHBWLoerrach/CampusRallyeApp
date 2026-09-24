@@ -257,6 +257,45 @@ describe('Welcome', () => {
     }
   );
 
+  describe('with a resumable participation', () => {
+    const resumeRallye: Rallye = {
+      id: 30,
+      name: 'Finished Rallye',
+      department_id: mockDepartment.id,
+      status: 'voting',
+      rallye_code: '',
+      mode: 'department',
+      rallye_end: null,
+      created_at: '2024-01-01T00:00:00Z',
+    };
+
+    function mockResume(available: boolean) {
+      (store$.resumeAvailable.get as jest.Mock).mockReturnValue(available);
+      (store$.rallye.get as jest.Mock).mockReturnValue(
+        available ? resumeRallye : null
+      );
+      (store$.team.get as jest.Mock).mockReturnValue(
+        available ? { id: 7, name: 'Team' } : null
+      );
+    }
+
+    beforeEach(() => mockResume(true));
+    afterEach(() => mockResume(false));
+
+    it.each([
+      ['no location has joinable rallyes', () => Promise.resolve([])],
+      ['the app is offline', () => Promise.reject(new Error('Offline'))],
+    ])('offers to resume when %s', async (_, loadLocations) => {
+      mockedGetLocationsWithJoinableRallyes.mockImplementation(loadLocations);
+      const { getByText, queryByText } = render(<Welcome />);
+      await waitFor(() => expect(queryByText('common.loading')).toBeNull());
+
+      fireEvent.press(getByText('common.resume'));
+
+      expect(store$.enabled.set).toHaveBeenCalledWith(true);
+    });
+  });
+
   it('shows tour mode when dashboard has only tour mode rallye', async () => {
     const tourModeRallye: Rallye = {
       id: 1,

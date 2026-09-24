@@ -113,6 +113,56 @@ export default function Welcome() {
     await handleJoinRallye(rallye);
   };
 
+  // Resuming only needs local state, so offer it regardless of which rallyes
+  // are currently joinable or whether the network is reachable.
+  const renderResumeCard = () => {
+    if (!resumeAvailable || !resumeRallye || !resumeTeam) return null;
+    return (
+      <Card
+        containerStyle={dashboardCardStyle}
+        title={t('welcome.resume.title')}
+        description={t('welcome.resume.details', {
+          rallye: resumeRallye.name,
+          team: resumeTeam.name,
+        })}
+        icon="clock"
+      >
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flex: 1 }}>
+            <UIButton
+              onPress={() => store$.enabled.set(true)}
+              style={ctaButtonStyle}
+              textStyle={ctaButtonTextStyle}
+            >
+              {t('common.resume')}
+            </UIButton>
+          </View>
+          <View style={{ flex: 1 }}>
+            <UIButton
+              outline
+              color={Colors.dhbwRed}
+              onPress={() => {
+                void (async () => {
+                  const confirmed = await confirm({
+                    title: t('welcome.clearParticipation.title'),
+                    message: t('welcome.clearParticipation.message'),
+                    confirmText: t('welcome.clearParticipation.confirm'),
+                    cancelText: t('common.cancel'),
+                    destructive: true,
+                  });
+                  if (!confirmed) return;
+                  void store$.leaveRallye();
+                })();
+              }}
+            >
+              {t('common.startOver')}
+            </UIButton>
+          </View>
+        </View>
+      </Card>
+    );
+  };
+
   const renderLoadingContent = () => (
     <View
       style={[
@@ -133,19 +183,26 @@ export default function Welcome() {
   const renderOfflineContent = () => (
     <View
       style={[
-        globalStyles.welcomeStyles.offline,
+        globalStyles.welcomeStyles.container,
         { backgroundColor: stateBackground },
       ]}
     >
-      <ThemedText
-        variant="body"
-        style={[globalStyles.welcomeStyles.text, s.muted, { marginBottom: 20 }]}
-      >
-        {t('welcome.offline')}
-      </ThemedText>
-      <UIButton icon="rotate" onPress={() => void initializeSelection()}>
-        {t('common.refresh')}
-      </UIButton>
+      {renderResumeCard()}
+      <View style={globalStyles.welcomeStyles.offline}>
+        <ThemedText
+          variant="body"
+          style={[
+            globalStyles.welcomeStyles.text,
+            s.muted,
+            { marginBottom: 20 },
+          ]}
+        >
+          {t('welcome.offline')}
+        </ThemedText>
+        <UIButton icon="rotate" onPress={() => void initializeSelection()}>
+          {t('common.refresh')}
+        </UIButton>
+      </View>
     </View>
   );
 
@@ -156,6 +213,7 @@ export default function Welcome() {
         { backgroundColor: stateBackground },
       ]}
     >
+      {renderResumeCard()}
       {locations.length === 0 && (
         <Card
           containerStyle={compactCardStyle}
@@ -200,50 +258,7 @@ export default function Welcome() {
         { backgroundColor: stateBackground },
       ]}
     >
-      {resumeAvailable && resumeRallye && resumeTeam && (
-        <Card
-          containerStyle={dashboardCardStyle}
-          title={t('welcome.resume.title')}
-          description={t('welcome.resume.details', {
-            rallye: resumeRallye.name,
-            team: resumeTeam.name,
-          })}
-          icon="clock"
-        >
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <View style={{ flex: 1 }}>
-              <UIButton
-                onPress={() => store$.enabled.set(true)}
-                style={ctaButtonStyle}
-                textStyle={ctaButtonTextStyle}
-              >
-                {t('common.resume')}
-              </UIButton>
-            </View>
-            <View style={{ flex: 1 }}>
-              <UIButton
-                outline
-                color={Colors.dhbwRed}
-                onPress={() => {
-                  void (async () => {
-                    const confirmed = await confirm({
-                      title: t('welcome.clearParticipation.title'),
-                      message: t('welcome.clearParticipation.message'),
-                      confirmText: t('welcome.clearParticipation.confirm'),
-                      cancelText: t('common.cancel'),
-                      destructive: true,
-                    });
-                    if (!confirmed) return;
-                    void store$.leaveRallye();
-                  })();
-                }}
-              >
-                {t('common.startOver')}
-              </UIButton>
-            </View>
-          </View>
-        </Card>
-      )}
+      {renderResumeCard()}
 
       {dashboardData.departmentEntries
         .flatMap((entry) =>
