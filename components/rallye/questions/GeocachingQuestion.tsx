@@ -638,13 +638,19 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
 
   if (phase === 'navigating') {
     return (
-      <ThemedView
+      <ThemedScrollView
         variant="background"
-        style={[globalStyles.default.container, s.screen, { flex: 1 }]}
+        contentContainerStyle={globalStyles.default.refreshContainer}
       >
-        <VStack style={{ width: '100%', flex: 1 }} gap={2}>
-          {/* Question title */}
-          <InfoBox mb={0}>
+        <VStack
+          style={[
+            globalStyles.default.container,
+            { alignItems: 'stretch', flex: 0, flexGrow: 0 },
+          ]}
+          gap={2}
+        >
+          {/* Question title — no maxHeight so long questions are not clipped */}
+          <InfoBox mb={0} style={{ maxHeight: undefined }}>
             <ThemedText
               variant="title"
               style={[
@@ -771,7 +777,7 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
             </UIButton>
           </InfoBox>
         </VStack>
-      </ThemedView>
+      </ThemedScrollView>
     );
   }
 
