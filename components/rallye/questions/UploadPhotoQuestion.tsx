@@ -33,6 +33,7 @@ type Picture = { uri: string };
 
 type PhotoCameraProps = {
   cameraRef: React.RefObject<CameraView | null>;
+  disabled: boolean;
   onSurrender: () => Promise<void>;
   onTakePicture: () => Promise<void>;
   question: QuestionProps['question'];
@@ -77,6 +78,7 @@ function QuestionLayout({ children, hint, s }: QuestionLayoutProps) {
 
 function PhotoCamera({
   cameraRef,
+  disabled,
   onSurrender,
   onTakePicture,
   question,
@@ -110,7 +112,7 @@ function PhotoCamera({
         </InfoBox>
         <InfoBox mb={0}>
           <View style={globalStyles.qrCodeStyles.buttonRow}>
-            <UIButton icon="camera" onPress={onTakePicture}>
+            <UIButton icon="camera" disabled={disabled} onPress={onTakePicture}>
               {t('question.photo.take')}
             </UIButton>
             <UIButton
@@ -125,6 +127,7 @@ function PhotoCamera({
             <UIButton
               icon="face-frown-open"
               color={Colors.dhbwGray}
+              disabled={disabled}
               onPress={onSurrender}
             >
               {t('common.surrender')}
@@ -256,10 +259,12 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   const [sending, setSending] = useState(false);
   const cameraRef = useRef<CameraView | null>(null);
   const mountedRef = useRef(true);
-  const sendingRef = useRef(false);
+  // Photo submit and surrender both save the answer to this question. The
+  // server keeps the first one, so only one of them may run at a time.
+  const submittingRef = useRef(false);
   const [permission, requestPermission, getPermission] = useCameraPermissions();
   const { t } = useLanguage();
-  const { surrender } = useAnswerSubmission(question);
+  const { submitting: surrendering, surrender } = useAnswerSubmission(question);
   const s = useAppStyles();
   const online = useSelector(() => outbox$.online.get());
 
@@ -272,13 +277,16 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   }, []);
 
   const handleSurrender = async () => {
-    // An empty surrender answer saved during the upload would win over the
-    // photo, because the server keeps the first answer for a question.
-    if (sendingRef.current) return;
-    await surrender({
-      errorMessageKey: 'question.error.surrender',
-      onConfirmed: () => setPicture(null),
-    });
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    try {
+      await surrender({
+        errorMessageKey: 'question.error.surrender',
+        onConfirmed: () => setPicture(null),
+      });
+    } finally {
+      submittingRef.current = false;
+    }
   };
 
   if (!permission) return <View />;
@@ -310,8 +318,9 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   };
 
   const handleSubmitPhoto = async () => {
-    if (!picture?.uri || (team?.id && !consented) || sendingRef.current) return;
-    sendingRef.current = true;
+    if (!picture?.uri || (team?.id && !consented) || submittingRef.current)
+      return;
+    submittingRef.current = true;
     setSending(true);
     try {
       if (!team?.id) {
@@ -338,7 +347,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
       console.error('Error submitting photo answer:', e);
       Alert.alert(t('common.errorTitle'), t('question.error.submitPhoto'));
     } finally {
-      sendingRef.current = false;
+      submittingRef.current = false;
       if (mountedRef.current) setSending(false);
     }
   };
@@ -368,6 +377,7 @@ export default function UploadPhotoQuestion({ question }: QuestionProps) {
   return (
     <PhotoCamera
       cameraRef={cameraRef}
+      disabled={surrendering}
       onSurrender={handleSurrender}
       onTakePicture={handleTakePicture}
       question={question}

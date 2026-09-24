@@ -452,5 +452,49 @@ describe('UploadPhotoQuestion', () => {
 
       expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
     });
+
+    it('does not submit a new photo while the surrender is being saved', async () => {
+      mockSubmitAnswerAndAdvance.mockReturnValueOnce(new Promise(() => {}));
+      const { getByTestId, queryByTestId, queryByRole } = render(
+        <UploadPhotoQuestion question={baseQuestion} />
+      );
+
+      fireEvent.press(getByTestId('button-face-frown-open'));
+      await waitFor(() => {
+        expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+      });
+      // Try to answer with a new photo by any path the screen still offers.
+      await act(async () => {
+        fireEvent.press(getByTestId('button-camera'));
+      });
+      const consent = queryByRole('checkbox');
+      if (consent) fireEvent.press(consent);
+      const send = queryByTestId('button-envelope');
+      if (send) {
+        await act(async () => {
+          fireEvent.press(send);
+        });
+      }
+
+      expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
+    });
+
+    it('sends a photo after the surrender was cancelled', async () => {
+      mockedConfirm.mockResolvedValueOnce(false);
+      const { getByTestId, getByRole } = render(
+        <UploadPhotoQuestion question={baseQuestion} />
+      );
+
+      fireEvent.press(getByTestId('button-face-frown-open'));
+      await waitFor(() => expect(mockedConfirm).toHaveBeenCalled());
+      fireEvent.press(getByTestId('button-camera'));
+      await waitFor(() => expect(getByRole('checkbox')).toBeTruthy());
+      fireEvent.press(getByRole('checkbox'));
+      fireEvent.press(getByTestId('button-envelope'));
+
+      await waitFor(() => {
+        expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });
