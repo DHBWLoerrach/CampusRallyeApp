@@ -93,7 +93,10 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
       contentContainerStyle={globalStyles.default.refreshContainer}
     >
       <VStack
-        style={[globalStyles.default.container, { alignItems: 'stretch' }]}
+        style={[
+          globalStyles.default.container,
+          { alignItems: 'stretch', flex: 0, flexGrow: 0 },
+        ]}
         gap={2}
       >
         <InfoBox mb={0}>
@@ -105,7 +108,7 @@ function MultipleChoiceQuestion({ question }: QuestionProps) {
           </ThemedText>
         </InfoBox>
 
-        <InfoBox mb={0}>
+        <InfoBox mb={0} style={{ maxHeight: undefined }}>
           {options.length === 0 ? (
             <ThemedText variant="optionText">
               {t('question.options.loading')}
