@@ -15,7 +15,6 @@ import {
   RallyeStatus,
   AnswerRow,
   Question,
-  TeamId,
 } from '@/types/rallye';
 import { Logger } from '@/utils/Logger';
 
@@ -125,17 +124,6 @@ export async function getSolutionOptions(
     .in('question_id', questionIds);
   if (error) throw error;
   return (data ?? []) as AnswerRow[];
-}
-
-export async function getAnsweredQuestionIds(
-  teamId: TeamId
-): Promise<number[]> {
-  const { data, error } = await supabase
-    .from('team_answers')
-    .select('question_id')
-    .eq('team_id', teamId);
-  if (error) throw error;
-  return (data ?? []).map((row) => row.question_id);
 }
 
 type QuestionDbRow = Omit<Question, 'question' | 'question_type'> & {

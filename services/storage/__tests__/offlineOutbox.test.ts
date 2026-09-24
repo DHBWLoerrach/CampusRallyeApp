@@ -8,6 +8,7 @@ import {
 } from '@/services/storage/asyncStorage';
 import {
   enqueueSaveAnswer,
+  getQueuedAnswers,
   outbox$,
   processOutbox,
   startOutbox,
@@ -184,6 +185,16 @@ describe('offlineOutbox processOutbox', () => {
 
     const queue = await getStorageItem<any[]>(StorageKeys.OFFLINE_QUEUE);
     expect(queue?.map((item) => item.payload.question_id)).toEqual([10, 11]);
+  });
+
+  it('lists the queued answers of one team', async () => {
+    outbox$.online.set(false);
+    await enqueueSaveAnswer({ ...basePayload, question_id: 10 });
+    await enqueueSaveAnswer({ ...basePayload, team_id: 2, question_id: 11 });
+
+    await expect(getQueuedAnswers(1)).resolves.toEqual([
+      { ...basePayload, question_id: 10 },
+    ]);
   });
 
   it('does nothing when offline', async () => {

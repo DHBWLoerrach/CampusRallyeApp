@@ -191,6 +191,15 @@ export async function enqueueSaveAnswer(payload: SaveAnswerPayload) {
   return action;
 }
 
+export async function getQueuedAnswers(
+  teamId: TeamId
+): Promise<SaveAnswerPayload[]> {
+  const queue = await withQueueLock(readQueue);
+  return queue
+    .map((action) => action.payload)
+    .filter((payload) => payload.team_id === teamId);
+}
+
 let syncPromise: Promise<void> | null = null;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 const BACKGROUND_FAILURE_RETRY_MS = 1_000;

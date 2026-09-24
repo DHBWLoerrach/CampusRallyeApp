@@ -16,7 +16,6 @@ jest.mock('@/utils/Logger', () => ({
 import { Logger } from '@/utils/Logger';
 
 import {
-  getAnsweredQuestionIds,
   getQuestionsWithGeocachingMetadata,
   getRallyeQuestionIds,
   getRefreshableRallyeFields,
@@ -44,17 +43,15 @@ function useResults(results: Record<string, Result>) {
 describe('rallye query storage', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('loads rallye question ids, solution options, and answered ids', async () => {
+  it('loads rallye question ids and solution options', async () => {
     const answers = [{ id: 1, question_id: 4, text: 'x', correct: true }];
     useResults({
       rallye_questions: { data: [{ question_id: 4 }], error: null },
       solution_options: { data: answers, error: null },
-      team_answers: { data: [{ question_id: 4 }], error: null },
     });
 
     await expect(getRallyeQuestionIds(2)).resolves.toEqual([4]);
     await expect(getSolutionOptions([4])).resolves.toEqual(answers);
-    await expect(getAnsweredQuestionIds(3)).resolves.toEqual([4]);
   });
 
   it('throws errors from list queries', async () => {

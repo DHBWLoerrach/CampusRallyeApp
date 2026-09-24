@@ -6,7 +6,8 @@ import { store$ } from '@/services/storage/Store';
 
 let mockTeam: { id: number; name: string } | null = null;
 let mockJoinQuestionIds = [{ question_id: 1 }];
-let mockAnsweredQuestionIds: { question_id: number }[] = [];
+let mockAnsweredQuestionIds: { question_id: number; team_points?: number }[] =
+  [];
 let mockQuestionsData = [{ id: 1, content: 'Q1', type: 'knowledge' }];
 let mockSolutionOptionsResults: {
   data: any[] | null;
@@ -349,6 +350,21 @@ describe('RallyeIndex effects', () => {
       }
     }
   );
+
+  it('restores the points of a resumed team from its stored answers', async () => {
+    mockTeam = { id: 7, name: 'Team 7' };
+    mockJoinQuestionIds = [{ question_id: 1 }, { question_id: 2 }];
+    mockAnsweredQuestionIds = [
+      { question_id: 1, team_points: 3 },
+      { question_id: 2, team_points: 2 },
+    ];
+
+    render(<RallyeIndex />);
+
+    await waitFor(() => {
+      expect(store$.points.set).toHaveBeenCalledWith(5);
+    });
+  });
 
   it('clears the stored rallye end when the refreshed rallye has none', async () => {
     render(<RallyeIndex />);

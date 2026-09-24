@@ -3,8 +3,8 @@ import { Alert, RefreshControl } from 'react-native';
 import { observer, useSelector } from '@legendapp/state/react';
 import NetInfo from '@react-native-community/netinfo';
 import { store$ } from '@/services/storage/Store';
+import { getTeamProgress } from '@/services/storage/answerStorage';
 import {
-  getAnsweredQuestionIds,
   getQuestionsWithGeocachingMetadata,
   getRallyeQuestionIds,
   getRefreshableRallyeFields,
@@ -159,8 +159,11 @@ const RallyeIndex = observer(function RallyeIndex() {
       // already answered for team mode
       let answeredIds: number[] = [];
       if (!isTourMode && teamId) {
-        answeredIds = await getAnsweredQuestionIds(teamId);
+        const progress = await getTeamProgress(teamId);
         if (!isActiveRallye(rallyeId)) return;
+        answeredIds = progress.answeredQuestionIds;
+        // Points only live in memory, so restore them after an app restart.
+        store$.points.set(progress.points);
       }
       // Track number of answered questions for progress display
       store$.answeredCount.set(answeredIds.length);

@@ -1,4 +1,5 @@
 import {
+  getTeamProgress,
   saveAnswer,
   uploadPhotoAnswer,
 } from '@/services/storage/answerStorage';
@@ -6,6 +7,7 @@ import {
 const mockFrom = jest.fn();
 const mockUpsert = jest.fn();
 const mockEnqueueSaveAnswer = jest.fn();
+const mockGetQueuedAnswers = jest.fn();
 const mockStorageFrom = jest.fn();
 const mockUpload = jest.fn();
 const mockPreparePhotoUpload = jest.fn();
@@ -23,7 +25,61 @@ jest.mock('@/utils/Supabase', () => ({
 
 jest.mock('@/services/storage/offlineOutbox', () => ({
   enqueueSaveAnswer: (...args: unknown[]) => mockEnqueueSaveAnswer(...args),
+  getQueuedAnswers: (...args: unknown[]) => mockGetQueuedAnswers(...args),
 }));
+
+describe('getTeamProgress', () => {
+  function mockStoredAnswers(result: { data: unknown; error: unknown }) {
+    const eq = jest.fn().mockResolvedValue(result);
+    mockFrom.mockReturnValue({ select: jest.fn(() => ({ eq })) });
+    return eq;
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetQueuedAnswers.mockResolvedValue([]);
+  });
+
+  it('sums stored and still queued points of the team', async () => {
+    const eq = mockStoredAnswers({
+      data: [
+        { question_id: 1, team_points: 3 },
+        { question_id: 2, team_points: 0 },
+      ],
+      error: null,
+    });
+    mockGetQueuedAnswers.mockResolvedValue([
+      { team_id: 7, question_id: 3, team_points: 4, answer: 'queued' },
+    ]);
+
+    await expect(getTeamProgress(7)).resolves.toEqual({
+      answeredQuestionIds: [1, 2],
+      points: 7,
+    });
+    expect(mockFrom).toHaveBeenCalledWith('team_answers');
+    expect(eq).toHaveBeenCalledWith('team_id', 7);
+    expect(mockGetQueuedAnswers).toHaveBeenCalledWith(7);
+  });
+
+  it('counts the stored points when an answer is also still queued', async () => {
+    mockStoredAnswers({
+      data: [{ question_id: 1, team_points: 2 }],
+      error: null,
+    });
+    mockGetQueuedAnswers.mockResolvedValue([
+      { team_id: 7, question_id: 1, team_points: 5, answer: 'duplicate' },
+    ]);
+
+    await expect(getTeamProgress(7)).resolves.toMatchObject({ points: 2 });
+  });
+
+  it('throws when the stored answers cannot be loaded', async () => {
+    const error = new Error('offline');
+    mockStoredAnswers({ data: null, error });
+
+    await expect(getTeamProgress(7)).rejects.toBe(error);
+  });
+});
 
 describe('saveAnswer', () => {
   let consoleErrorSpy: jest.SpyInstance;

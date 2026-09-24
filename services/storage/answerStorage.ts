@@ -1,6 +1,6 @@
 import { supabase } from '@/utils/Supabase';
 import { isMissingTeamError } from './missingTeamError';
-import { enqueueSaveAnswer } from './offlineOutbox';
+import { enqueueSaveAnswer, getQueuedAnswers } from './offlineOutbox';
 import { preparePhotoUpload } from './preparePhotoUpload';
 import type { TeamId } from '@/types/rallye';
 
@@ -41,6 +41,37 @@ export async function saveAnswer(
       throw queueError;
     }
   }
+}
+
+export type TeamProgress = {
+  answeredQuestionIds: number[];
+  points: number;
+};
+
+export async function getTeamProgress(teamId: TeamId): Promise<TeamProgress> {
+  const { data, error } = await supabase
+    .from('team_answers')
+    .select('question_id, team_points')
+    .eq('team_id', teamId);
+  if (error) throw error;
+  const rows = data ?? [];
+
+  // Answers still waiting in the offline queue already count locally. The
+  // server ignores duplicate answers, so a stored row wins over a queued one.
+  const pointsByQuestion = new Map<number, number>();
+  for (const answer of await getQueuedAnswers(teamId)) {
+    pointsByQuestion.set(answer.question_id, answer.team_points);
+  }
+  for (const row of rows) {
+    pointsByQuestion.set(row.question_id, row.team_points ?? 0);
+  }
+
+  let points = 0;
+  for (const value of pointsByQuestion.values()) points += value;
+  return {
+    answeredQuestionIds: rows.map((row) => row.question_id),
+    points,
+  };
 }
 
 export async function uploadPhotoAnswer({
