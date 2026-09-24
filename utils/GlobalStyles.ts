@@ -4,6 +4,11 @@ import Constants from './Constants';
 
 // Display dimensions for dynamic calculations
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const CAMERA_BOX_PADDING = SCREEN_WIDTH * 0.04;
+const CAMERA_PREVIEW_SIZE = Math.min(
+  SCREEN_WIDTH * 0.82,
+  SCREEN_HEIGHT * 0.3 - CAMERA_BOX_PADDING * 2 - 2
+);
 
 // Small screen detection (iPhone SE, older devices)
 const IS_SMALL_SCREEN = SCREEN_HEIGHT < 700;
@@ -211,12 +216,9 @@ export const globalStyles = createGroupedStyles({
   },
   qrCodeStyles: {
     camera: {
-      width: '100%',
-      // Use aspectRatio instead of height: '100%' so the camera gets a
-      // definite height independent of its parent. On Android a percentage
-      // height collapses to 0 when the parent has no definite height, leaving
-      // the camera invisible (iOS resolves this case more leniently).
+      width: CAMERA_PREVIEW_SIZE,
       aspectRatio: 1,
+      alignSelf: 'center',
     },
     buttonRow: {
       flexDirection: 'column',
@@ -225,7 +227,7 @@ export const globalStyles = createGroupedStyles({
     },
     cameraBox: {
       width: '100%',
-      padding: SCREEN_WIDTH * 0.04,
+      padding: CAMERA_BOX_PADDING,
       // backgroundColor handled by themed style
       borderRadius: 10,
       shadowColor: '#000',
@@ -253,14 +255,12 @@ export const globalStyles = createGroupedStyles({
   },
   uploadStyles: {
     camera: {
-      width: '100%',
+      width: CAMERA_PREVIEW_SIZE,
       aspectRatio: 1,
-      maxHeight: '100%',
     },
     image: {
-      width: '100%',
+      width: CAMERA_PREVIEW_SIZE,
       aspectRatio: 1,
-      maxHeight: '100%',
     },
   },
   imprintStyles: {
