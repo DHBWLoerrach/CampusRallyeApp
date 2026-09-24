@@ -1084,6 +1084,77 @@ describe('GeocachingQuestion', () => {
     expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
   });
 
+  describe('when a QR code is scanned again', () => {
+    const qrQuestion = { ...baseQuestion, input_type: 'qr' as const };
+
+    async function renderScanner() {
+      const storeMock = jest.requireMock('@/services/storage/Store');
+      storeMock.store$.answers.get.mockReturnValue([
+        { question_id: 42, text: 'secret code', correct: true },
+      ]);
+      mockWatchPositionAsync.mockImplementation(
+        async (_opts: any, cb: Function) => {
+          cb({
+            coords: {
+              latitude: qrQuestion.target_latitude!,
+              longitude: qrQuestion.target_longitude!,
+              accuracy: 5,
+            },
+          });
+          return { remove: jest.fn() };
+        }
+      );
+      const result = render(<GeocachingQuestion question={qrQuestion} />);
+      await waitFor(() => {
+        expect(result.getByText('question.qr.scan')).toBeTruthy();
+      });
+      const scan = (data: string) => {
+        fireEvent.press(result.getByText('question.qr.scan'));
+        fireEvent(result.getByTestId('camera-view'), 'onBarcodeScanned', {
+          data,
+        });
+      };
+      return scan;
+    }
+
+    function pressLastAlertButton() {
+      const buttons = alertSpy.mock.calls.at(-1)?.[2] as
+        { onPress?: () => void }[] | undefined;
+      act(() => buttons?.[0]?.onPress?.());
+    }
+
+    function alertCount(message: string) {
+      return alertSpy.mock.calls.filter(([, text]) => text === message).length;
+    }
+
+    it('ignores a rescan while the correct answer is still being saved', async () => {
+      mockSubmitAnswerAndAdvance.mockReturnValue(new Promise(() => {}));
+      const scan = await renderScanner();
+
+      scan('secret code');
+      pressLastAlertButton();
+      await waitFor(() => {
+        expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+      });
+      scan('secret code');
+
+      expect(alertCount('question.qr.correctMessage')).toBe(1);
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+    });
+
+    it('accepts a new scan after an incorrect code was acknowledged', async () => {
+      const scan = await renderScanner();
+
+      scan('wrong code');
+      pressLastAlertButton();
+      scan('secret code');
+
+      await waitFor(() => {
+        expect(alertCount('question.qr.correctMessage')).toBe(1);
+      });
+    });
+  });
+
   // -- Hint -------------------------------------------------------------------
 
   it('shows hint in answer phase when hint is provided', async () => {

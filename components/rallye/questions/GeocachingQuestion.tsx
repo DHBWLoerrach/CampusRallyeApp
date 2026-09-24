@@ -429,12 +429,6 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
     ],
   }));
 
-  useEffect(() => {
-    if (!scanMode) {
-      processingRef.current = false;
-    }
-  }, [scanMode]);
-
   // -- Answer submission (text) -----------------------------------------------
 
   const handleTextSubmit = async () => {
@@ -497,12 +491,21 @@ export default function GeocachingQuestion({ question }: QuestionProps) {
       );
       return;
     }
+    // Stays locked until this scan is fully handled; closing the camera alone
+    // must not allow a rescan while the answer is still being saved.
     processingRef.current = true;
     setScanMode(false);
 
     if (correctText !== data.toLowerCase().trim()) {
       Logger.info('Geocaching', 'QR answer incorrect');
-      Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'));
+      Alert.alert(t('common.errorTitle'), t('question.qr.incorrect'), [
+        {
+          text: t('common.ok'),
+          onPress: () => {
+            processingRef.current = false;
+          },
+        },
+      ]);
     } else {
       Logger.info('Geocaching', 'QR answer correct!');
       if (store$.isTourMode.get()) {
