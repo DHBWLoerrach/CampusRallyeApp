@@ -336,11 +336,11 @@ export default function Voting({
           >
             <InfoBox
               mb={2}
-              style={{
-                borderColor:
-                  selectedTeam === item.teamId ? Colors.dhbwRed : 'transparent',
-                borderWidth: selectedTeam === item.teamId ? 2 : 0,
-              }}
+              style={
+                selectedTeam === item.teamId
+                  ? { borderColor: Colors.dhbwRed, borderWidth: 2 }
+                  : undefined
+              }
             >
               <ThemedText
                 variant="title"

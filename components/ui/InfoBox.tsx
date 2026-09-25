@@ -26,14 +26,13 @@ export default function InfoBox({
   const s = useAppStyles();
   const { isDarkMode } = useTheme();
   const palette = isDarkMode ? Colors.darkMode : Colors.lightMode;
-  const surfaceStyle = isDarkMode
-    ? {
-        borderWidth: 1,
-        borderColor: palette.borderSubtle,
-        shadowOpacity: 0,
-        shadowRadius: 0,
-        elevation: 0,
-      }
+  // Dark mode outlines cards instead of casting shadows. Callers may
+  // override the outline (e.g. to mark a selection), but not the shadows.
+  const outlineStyle = isDarkMode
+    ? { borderWidth: 1, borderColor: palette.borderSubtle }
+    : null;
+  const flatSurfaceStyle = isDarkMode
+    ? { shadowOpacity: 0, shadowRadius: 0, elevation: 0 }
     : null;
   return (
     <ThemedView
@@ -43,8 +42,9 @@ export default function InfoBox({
         s.infoBox,
         mb ? { marginBottom: spacing(mb) } : null,
         maxHeight ? { maxHeight } : null,
+        outlineStyle,
         style,
-        surfaceStyle,
+        flatSurfaceStyle,
       ]}
       {...rest}
     >
