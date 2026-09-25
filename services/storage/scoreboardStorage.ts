@@ -4,8 +4,6 @@ import type { TeamId } from '@/types/rallye';
 export type ScoreboardTeamRow = {
   id: TeamId;
   name: string;
-  created_at: string;
-  play_time: string | null;
 };
 
 export type ScoreboardPointsRow = {
@@ -19,7 +17,7 @@ export async function getScoreboardData(rallyeId: number): Promise<{
 }> {
   const { data: teams, error: teamsError } = await supabase
     .from('teams')
-    .select('id, name, created_at, play_time')
+    .select('id, name')
     .eq('rallye_id', rallyeId);
   if (teamsError) throw teamsError;
 

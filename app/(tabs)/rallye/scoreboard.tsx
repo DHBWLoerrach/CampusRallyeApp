@@ -14,35 +14,11 @@ import { useAppStyles } from '@/utils/AppStyles';
 import { useLanguage } from '@/utils/LanguageContext';
 import { ScreenScrollView } from '@/components/ui/Screen';
 import RallyeContextBar from '@/components/rallye/RallyeContextBar';
-import type { Translator } from '@/utils/i18n';
 
 type TeamRow = ScoreboardTeamRow & {
   total_points?: number;
-  time_spent?: number | null;
   rank?: number;
   group_name?: string;
-};
-
-function formatOwnDuration(ms: number, t: Translator): string {
-  const totalMinutes = Math.round(ms / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return hours > 0
-    ? t('scoreboard.durationHoursMinutes', { hours, minutes })
-    : t('scoreboard.durationMinutes', { minutes });
-}
-
-const calculateDuration = (
-  created_at: string,
-  play_time: string | null
-): number | null => {
-  if (!play_time) return null;
-  const start = new Date(created_at).getTime();
-  const end = new Date(play_time).getTime();
-  if (Number.isNaN(start) || Number.isNaN(end) || end < start) {
-    return null;
-  }
-  return end - start;
 };
 
 export default function Scoreboard() {
@@ -86,7 +62,6 @@ export default function Scoreboard() {
             ({
               ...t,
               total_points: pointsByTeamId.get(t.id) ?? 0,
-              time_spent: calculateDuration(t.created_at, t.play_time),
             }) as TeamRow
         );
 
@@ -176,20 +151,11 @@ export default function Scoreboard() {
             rows.map((team) => {
               const isOurTeam =
                 ourTeam?.id !== undefined && team.id === ourTeam.id;
-              const ownDurationText =
-                isOurTeam && team.time_spent != null
-                  ? t('scoreboard.ownDuration', {
-                      time: formatOwnDuration(team.time_spent, t),
-                    })
-                  : null;
-              const baseRowLabel = t('scoreboard.rowLabel', {
+              const rowLabel = t('scoreboard.rowLabel', {
                 rank: team.rank ?? '-',
                 team: team.group_name ?? '-',
                 points: team.total_points ?? '-',
               });
-              const rowLabel = ownDurationText
-                ? `${baseRowLabel}, ${ownDurationText}`
-                : baseRowLabel;
               return (
                 <View
                   key={team.id}
@@ -242,16 +208,6 @@ export default function Scoreboard() {
                     ]}
                   >
                     {team.total_points}
-                    {ownDurationText ? (
-                      <>
-                        {'\n'}
-                        <ThemedText
-                          style={[s.muted, { fontSize: 12, opacity: 0.7 }]}
-                        >
-                          {ownDurationText}
-                        </ThemedText>
-                      </>
-                    ) : null}
                   </ThemedText>
                 </View>
               );
