@@ -46,6 +46,19 @@ const overlayStyle = {
   bottom: 0,
 } as const;
 
+// Once a flip has settled, the remaining face is styled by React props only.
+// Animated updates issued while the activity is paused (e.g. behind the
+// location permission dialog) can get lost on Android, which would leave the
+// face stuck mid-rotation and hidden by backfaceVisibility.
+const settledFaceStyle = {
+  transform: [{ rotateY: '0deg' }],
+  pointerEvents: 'auto',
+} as const;
+
+// Kept on both faces at all times: dropping it when switching between the
+// animated and the settled style resets it to null, which crashes on Android.
+const faceBaseStyle = { backfaceVisibility: 'hidden' } as const;
+
 export default function QuestionRenderer({ question }: { question: any }) {
   const { t } = useLanguage();
   // Flip animation using two faces, based on components/ui/Card.tsx pattern
@@ -201,13 +214,20 @@ export default function QuestionRenderer({ question }: { question: any }) {
     );
   };
 
+  // A flip is in progress only while both faces are mounted
+  const isFlipping = frontQuestion != null && backQuestion != null;
+
   return (
     <Animated.View style={{ flex: 1 }}>
       {/* Front face — overlay when back is active */}
       {frontQuestion ? (
         <Animated.View
           testID="question-face-front"
-          style={[frontStyle, isFlipped && overlayStyle]}
+          style={
+            isFlipping
+              ? [faceBaseStyle, frontStyle, isFlipped && overlayStyle]
+              : [faceBaseStyle, settledFaceStyle]
+          }
         >
           {renderQuestion(frontQuestion)}
         </Animated.View>
@@ -216,7 +236,11 @@ export default function QuestionRenderer({ question }: { question: any }) {
       {backQuestion ? (
         <Animated.View
           testID="question-face-back"
-          style={[backStyle, !isFlipped && overlayStyle]}
+          style={
+            isFlipping
+              ? [faceBaseStyle, backStyle, !isFlipped && overlayStyle]
+              : [faceBaseStyle, settledFaceStyle]
+          }
         >
           {renderQuestion(backQuestion)}
         </Animated.View>
