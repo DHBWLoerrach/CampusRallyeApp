@@ -35,7 +35,6 @@ jest.mock('@/utils/AppStyles', () => ({
   useAppStyles: () => ({
     infoBox: {},
     text: {},
-    muted: {},
     listRow: {},
   }),
 }));
@@ -116,20 +115,14 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'Alpha',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
       {
         id: 2,
         name: 'Beta',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:30:00Z',
       },
       {
         id: 3,
         name: 'Gamma',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T12:00:00Z',
       },
     ];
     mockPoints = [
@@ -154,24 +147,17 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'A',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T12:00:00Z',
       },
       {
         id: 2,
         name: 'B',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T10:30:00Z',
       },
       {
         id: 3,
         name: 'C',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
     ];
-    // A and B tie on points despite different play time; C has fewer points
-    // and must land on rank 3.
+    // A and B tie on points; C has fewer points and must land on rank 3.
     mockPoints = [
       { team_id: 1, team_points: 10 },
       { team_id: 2, team_points: 10 },
@@ -194,8 +180,6 @@ describe('Scoreboard', () => {
       (name, index) => ({
         id: index + 1,
         name,
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: null,
       })
     );
     mockPoints = [30, 30, 30, 20, 20, 10].map((points, index) => ({
@@ -227,14 +211,10 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'Other',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
       {
         id: 2,
         name: 'MyTeam',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
     ];
     mockPoints = [
@@ -259,8 +239,6 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'Other',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
       {
         id: 2,
@@ -293,8 +271,6 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'Solo',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
     ];
     mockPoints = [{ team_id: 1, team_points: 42 }];
@@ -315,8 +291,6 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'Hidden Team',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
     ];
     mockTeamsError = { message: 'denied' };
@@ -344,8 +318,6 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'Sum Team',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
     ];
     mockPoints = [
@@ -367,8 +339,6 @@ describe('Scoreboard', () => {
       {
         id: 1,
         name: 'Zero Team',
-        created_at: '2024-01-01T10:00:00Z',
-        play_time: '2024-01-01T11:00:00Z',
       },
     ];
 
