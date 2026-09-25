@@ -333,7 +333,7 @@ describe('Voting', () => {
 
     expect(queryByText('Only one candidate')).toBeNull();
     fireEvent.press(getByTestId('vote-option-101-3'));
-    fireEvent.press(getByText('voting.next'));
+    fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
       expect(getByText('voting.ended.title')).toBeTruthy();
@@ -354,7 +354,7 @@ describe('Voting', () => {
     });
 
     fireEvent.press(getByTestId('vote-option-101-4'));
-    fireEvent.press(getByText('voting.next'));
+    fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
       expect(rpcCalls).toContainEqual({
@@ -427,8 +427,8 @@ describe('Voting', () => {
     });
 
     fireEvent.press(getByTestId('vote-option-101-3'));
-    fireEvent.press(getByText('voting.next'));
-    fireEvent.press(getByText('voting.next'));
+    fireEvent.press(getByText('voting.submit'));
+    fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
       expect(
@@ -457,7 +457,7 @@ describe('Voting', () => {
     });
 
     fireEvent.press(getByTestId('vote-option-101-3'));
-    fireEvent.press(getByText('voting.next'));
+    fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(

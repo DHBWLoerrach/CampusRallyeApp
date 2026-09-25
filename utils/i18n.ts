@@ -189,7 +189,7 @@ export const translations = {
       'Derzeit stehen nicht genügend Antworten zur Abstimmung bereit.',
     'voting.instruction':
       'Gebt dem Team einen zusätzlichen Punkt, das eurer Meinung nach die oben gestellte Aufgabe am besten gelöst hat.',
-    'voting.next': 'Nächste Abstimmung',
+    'voting.submit': 'Stimme abgeben',
     'voting.error.load': 'Die Abstimmung konnte nicht geladen werden.',
     'voting.error.submit': 'Abstimmung konnte nicht gespeichert werden.',
     'scoreboard.title': 'Endstand',
@@ -391,7 +391,7 @@ export const translations = {
       'There are currently not enough answers available for voting.',
     'voting.instruction':
       'Give an extra point to the team that you think solved the task above the best.',
-    'voting.next': 'Next vote',
+    'voting.submit': 'Submit vote',
     'voting.error.load': 'Voting could not be loaded.',
     'voting.error.submit': 'Vote could not be saved.',
     'scoreboard.title': 'Final standings',

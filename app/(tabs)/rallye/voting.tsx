@@ -389,7 +389,7 @@ export default function Voting({
             disabled={!selectedTeam || sendingResult}
             onPress={handleNextQuestion}
           >
-            {t('voting.next')}
+            {t('voting.submit')}
           </UIButton>
         </InfoBox>
       </View>
