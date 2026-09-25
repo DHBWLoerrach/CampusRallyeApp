@@ -50,10 +50,7 @@ const overlayStyle = {
 // Animated updates issued while the activity is paused (e.g. behind the
 // location permission dialog) can get lost on Android, which would leave the
 // face stuck mid-rotation and hidden by backfaceVisibility.
-const settledFaceStyle = {
-  transform: [{ rotateY: '0deg' }],
-  pointerEvents: 'auto',
-} as const;
+const settledFaceStyle = { transform: [{ rotateY: '0deg' }] } as const;
 
 // Kept on both faces at all times: dropping it when switching between the
 // animated and the settled style resets it to null, which crashes on Android.
@@ -127,7 +124,6 @@ export default function QuestionRenderer({ question }: { question: any }) {
     return {
       transform: [{ rotateY }],
       zIndex: isFlipped ? 0 : 1,
-      pointerEvents: isFlipped ? 'none' : 'auto',
       backfaceVisibility: 'hidden',
     } as const;
   }, [isFlipped]);
@@ -142,7 +138,6 @@ export default function QuestionRenderer({ question }: { question: any }) {
     return {
       transform: [{ rotateY }],
       zIndex: isFlipped ? 1 : 0,
-      pointerEvents: isFlipped ? 'auto' : 'none',
       backfaceVisibility: 'hidden',
     } as const;
   }, [isFlipped]);
@@ -223,6 +218,8 @@ export default function QuestionRenderer({ question }: { question: any }) {
       {frontQuestion ? (
         <Animated.View
           testID="question-face-front"
+          // Not animated: Reanimated would no longer reset it after the flip
+          pointerEvents={isFlipping && isFlipped ? 'none' : 'auto'}
           style={
             isFlipping
               ? [faceBaseStyle, frontStyle, isFlipped && overlayStyle]
@@ -236,6 +233,7 @@ export default function QuestionRenderer({ question }: { question: any }) {
       {backQuestion ? (
         <Animated.View
           testID="question-face-back"
+          pointerEvents={isFlipping && !isFlipped ? 'none' : 'auto'}
           style={
             isFlipping
               ? [faceBaseStyle, backStyle, !isFlipped && overlayStyle]
