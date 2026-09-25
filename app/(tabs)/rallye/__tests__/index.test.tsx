@@ -70,6 +70,7 @@ jest.mock('@/utils/GlobalStyles', () => ({
       infoSubtitle: {},
       meetingPoint: {},
     },
+    teamStyles: { title: {} },
   },
 }));
 
@@ -126,7 +127,6 @@ jest.mock('@/components/ui/UIButton', () => {
   };
 });
 
-jest.mock('../states/Preparation', () => () => null);
 jest.mock('../states/NoQuestions', () => () => null);
 jest.mock('../team-setup', () => () => null);
 jest.mock('../voting', () => () => null);
@@ -202,6 +202,21 @@ describe('RallyeIndex', () => {
     expect(store$.leaveRallye).toHaveBeenCalledTimes(1);
     expect(store$.reset).not.toHaveBeenCalled();
     expect(store$.enabled.set).not.toHaveBeenCalled();
+  });
+
+  it('shows the rallye name above the waiting message', () => {
+    (store$.rallye.get as jest.Mock).mockReturnValue({
+      id: 1,
+      name: 'Campus Rallye',
+      status: 'ready',
+      mode: 'classic',
+      rallye_end: null,
+    });
+
+    const { getByText } = render(<RallyeIndex />);
+
+    expect(getByText('Campus Rallye')).toBeTruthy();
+    expect(getByText('rallye.preparing.title')).toBeTruthy();
   });
 
   it('shows the number of correctly answered questions in tour completion state', () => {

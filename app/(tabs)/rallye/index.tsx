@@ -298,7 +298,13 @@ const RallyeIndex = observer(function RallyeIndex() {
   }
 
   if (isPreparation(rallye.status)) {
-    return <Preparation loading={loading} onRefresh={onRefresh} />;
+    return (
+      <Preparation
+        rallyeName={rallye.name}
+        loading={loading}
+        onRefresh={onRefresh}
+      />
+    );
   }
 
   if (rallye.status === 'voting') {

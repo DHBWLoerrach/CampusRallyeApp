@@ -9,9 +9,11 @@ import VStack from '@/components/ui/VStack';
 import UIButton from '@/components/ui/UIButton';
 
 export default function Preparation({
+  rallyeName,
   loading,
   onRefresh,
 }: {
+  rallyeName: string;
   loading: boolean;
   onRefresh: () => void;
 }) {
@@ -20,16 +22,21 @@ export default function Preparation({
   return (
     <ScreenScrollView
       padding="none"
-      edges={['bottom']}
       contentContainerStyle={[
         globalStyles.default.refreshContainer,
-        globalStyles.rallyeStatesStyles.container,
+        globalStyles.default.container,
       ]}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={onRefresh} />
       }
     >
-      <VStack style={{ width: '100%' }} gap={2}>
+      <ThemedText variant="screenTitle" style={globalStyles.teamStyles.title}>
+        {rallyeName}
+      </ThemedText>
+      <VStack
+        style={{ width: '100%', flex: 1, justifyContent: 'center' }}
+        gap={2}
+      >
         <InfoBox mb={2}>
           <ThemedText
             variant="title"
