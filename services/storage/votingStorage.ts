@@ -4,8 +4,8 @@ import type { TeamId } from '@/types/rallye';
 export type VotingQuestionJoinRow = {
   question_id: number;
   questions:
-    | { id: number; content: string | null; type: string | null }
-    | { id: number; content: string | null; type: string | null }[]
+    | { id: number; content: string | null }
+    | { id: number; content: string | null }[]
     | null;
 };
 
@@ -27,7 +27,7 @@ export async function getVotingSourceData(rallyeId: number, teamId: TeamId) {
     await Promise.all([
       supabase
         .from('rallye_questions')
-        .select('question_id, questions!inner(id, content, type)')
+        .select('question_id, questions!inner(id, content)')
         .eq('rallye_id', rallyeId)
         .eq('is_voting', true),
       supabase.from('teams').select('id, name').eq('rallye_id', rallyeId),

@@ -28,13 +28,11 @@ import RallyeContextBar from '@/components/rallye/RallyeContextBar';
 type VotingCandidate = {
   teamId: number;
   teamName: string;
-  teamAnswer: string;
 };
 
 type VotingQuestionGroup = {
   questionId: number;
   questionContent: string;
-  questionType: string;
   candidates: VotingCandidate[];
 };
 
@@ -52,13 +50,7 @@ function normalizeQuestionRow(
     questionId: row.question_id,
     questionContent:
       typeof question.content === 'string' ? question.content : '',
-    questionType:
-      typeof question.type === 'string' ? question.type : 'knowledge',
   };
-}
-
-function shouldShowAnswerInVoting(questionType: string) {
-  return questionType !== 'upload';
 }
 
 export default function Voting({
@@ -158,7 +150,6 @@ export default function Voting({
           existingForQuestion.push({
             teamId: answer.team_id,
             teamName,
-            teamAnswer,
           });
           groupedCandidates.set(answer.question_id, existingForQuestion);
         }
@@ -351,33 +342,12 @@ export default function Voting({
                 borderWidth: selectedTeam === item.teamId ? 2 : 0,
               }}
             >
-              {currentQuestion &&
-              shouldShowAnswerInVoting(currentQuestion.questionType) ? (
-                <>
-                  <ThemedText
-                    variant="title"
-                    style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-                  >
-                    {item.teamAnswer}
-                  </ThemedText>
-                  <ThemedText
-                    variant="body"
-                    style={[
-                      globalStyles.rallyeStatesStyles.infoSubtitle,
-                      s.muted,
-                    ]}
-                  >
-                    {item.teamName}
-                  </ThemedText>
-                </>
-              ) : (
-                <ThemedText
-                  variant="title"
-                  style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
-                >
-                  {item.teamName}
-                </ThemedText>
-              )}
+              <ThemedText
+                variant="title"
+                style={[globalStyles.rallyeStatesStyles.infoTitle, s.text]}
+              >
+                {item.teamName}
+              </ThemedText>
             </InfoBox>
           </TouchableOpacity>
         )}

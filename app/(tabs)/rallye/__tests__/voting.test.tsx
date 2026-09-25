@@ -119,13 +119,13 @@ function baseFixtures(): Fixtures {
         rallye_id: 1,
         question_id: 101,
         is_voting: true,
-        questions: { id: 101, content: 'Question 1', type: 'knowledge' },
+        questions: { id: 101, content: 'Question 1', type: 'upload' },
       },
       {
         rallye_id: 1,
         question_id: 102,
         is_voting: true,
-        questions: { id: 102, content: 'Question 2', type: 'knowledge' },
+        questions: { id: 102, content: 'Question 2', type: 'upload' },
       },
       {
         rallye_id: 1,
@@ -144,10 +144,10 @@ function baseFixtures(): Fixtures {
       { id: 4, rallye_id: 1, name: 'Team B' },
     ],
     answerRows: [
-      { question_id: 101, team_id: 3, answer: 'Answer A' },
-      { question_id: 101, team_id: 4, answer: 'Answer B' },
+      { question_id: 101, team_id: 3, answer: '3_101.jpg' },
+      { question_id: 101, team_id: 4, answer: '4_101.jpg' },
       { question_id: 102, team_id: 3, answer: '    ' },
-      { question_id: 102, team_id: 4, answer: 'Only one candidate' },
+      { question_id: 102, team_id: 4, answer: '4_102.jpg' },
     ],
     votedQuestions: [],
     voteError: null,
@@ -331,7 +331,6 @@ describe('Voting', () => {
       expect(getByText('Question 1')).toBeTruthy();
     });
 
-    expect(queryByText('Only one candidate')).toBeNull();
     fireEvent.press(getByTestId('vote-option-101-3'));
     fireEvent.press(getByText('voting.submit'));
 
@@ -388,14 +387,14 @@ describe('Voting', () => {
         rallye_id: 1,
         question_id: 103,
         is_voting: true,
-        questions: { id: 103, content: 'Question 3', type: 'knowledge' },
+        questions: { id: 103, content: 'Question 3', type: 'upload' },
       },
     ];
     fixtures.answerRows = [
-      { question_id: 101, team_id: 3, answer: 'Answer A' },
-      { question_id: 101, team_id: 4, answer: 'Answer B' },
-      { question_id: 103, team_id: 3, answer: 'Answer C' },
-      { question_id: 103, team_id: 4, answer: 'Answer D' },
+      { question_id: 101, team_id: 3, answer: '3_101.jpg' },
+      { question_id: 101, team_id: 4, answer: '4_101.jpg' },
+      { question_id: 103, team_id: 3, answer: '3_103.jpg' },
+      { question_id: 103, team_id: 4, answer: '4_103.jpg' },
     ];
 
     let resolveVote: (value: { error: null }) => void = () => {};
@@ -470,34 +469,6 @@ describe('Voting', () => {
     expect(queryByText('voting.voted.title')).toBeNull();
   });
 
-  it('renders geocaching answers as text', async () => {
-    fixtures.joinRows = [
-      {
-        rallye_id: 1,
-        question_id: 201,
-        is_voting: true,
-        questions: {
-          id: 201,
-          content: 'Find the landmark',
-          type: 'geocaching',
-        },
-      },
-    ];
-    fixtures.answerRows = [
-      { question_id: 201, team_id: 3, answer: 'Geocaching Answer A' },
-      { question_id: 201, team_id: 4, answer: 'Geocaching Answer B' },
-    ];
-
-    const { getByText } = render(
-      <Voting onRefresh={jest.fn()} loading={false} />
-    );
-
-    await waitFor(() => {
-      expect(getByText('Geocaching Answer A')).toBeTruthy();
-      expect(getByText('Geocaching Answer B')).toBeTruthy();
-    });
-  });
-
   it('renders upload answers as team choices without loading images', async () => {
     fixtures.joinRows = [
       {
@@ -516,7 +487,7 @@ describe('Voting', () => {
       { question_id: 301, team_id: 4, answer: '4_301.jpg' },
     ];
 
-    const { getByText, UNSAFE_queryByType } = render(
+    const { getByText, queryByText, UNSAFE_queryByType } = render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -526,38 +497,8 @@ describe('Voting', () => {
       expect(getByText('Team B')).toBeTruthy();
     });
 
+    expect(queryByText('3_301.jpg')).toBeNull();
     expect(UNSAFE_queryByType(Image)).toBeNull();
-  });
-
-  it('renders non-upload voting answers as text', async () => {
-    fixtures.joinRows = [
-      {
-        rallye_id: 1,
-        question_id: 302,
-        is_voting: true,
-        questions: {
-          id: 302,
-          content: 'Best non-upload answer',
-          type: 'multiple_choice',
-        },
-      },
-    ];
-    fixtures.answerRows = [
-      { question_id: 302, team_id: 3, answer: 'Choice A' },
-      { question_id: 302, team_id: 4, answer: 'Choice B' },
-    ];
-
-    const { getByText } = render(
-      <Voting onRefresh={jest.fn()} loading={false} />
-    );
-
-    await waitFor(() => {
-      expect(getByText('Best non-upload answer')).toBeTruthy();
-      expect(getByText('Choice A')).toBeTruthy();
-      expect(getByText('Choice B')).toBeTruthy();
-      expect(getByText('Team A')).toBeTruthy();
-      expect(getByText('Team B')).toBeTruthy();
-    });
   });
 
   it('shows an unavailable state when fewer than 3 teams are available', async () => {
