@@ -1,6 +1,6 @@
 # Campus Rallye
 
-Dieser Kontext definiert die gemeinsame Fachsprache für Inhalte, Standorte und Rallyes der Campus-Rallye. Beziehungen, fachliche Zielregeln, Implementierungsstand und offene Fragen stehen im [begleitenden Domänenmodell](docs/domain-model.md).
+Dieser Kontext definiert die gemeinsame Fachsprache für Inhalte, Standorte und Rallyes der Campus-Rallye.
 
 ## Sprache
 
