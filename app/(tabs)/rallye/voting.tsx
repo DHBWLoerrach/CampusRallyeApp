@@ -260,13 +260,13 @@ export default function Voting({
         ? 'common.errorTitle'
         : loadState === 'unavailable'
           ? 'voting.unavailable.title'
-          : 'voting.ended.title';
+          : 'voting.voted.title';
     const messageKey =
       loadState === 'error'
         ? 'voting.error.load'
         : loadState === 'unavailable'
           ? 'voting.unavailable.message'
-          : 'voting.ended.message';
+          : 'voting.voted.message';
 
     return (
       <Screen padding="none" contentStyle={globalStyles.default.container}>

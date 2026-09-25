@@ -182,8 +182,8 @@ export const translations = {
     'confirm.tourExit.message': 'Möchtest du die Erkundung wirklich beenden?',
     'scoreboard.rowLabel': 'Platz {{rank}}, Team {{team}}, Punkte {{points}}',
     'scoreboard.error.load': 'Der Endstand konnte nicht geladen werden.',
-    'voting.ended.title': 'Die Abstimmung wurde beendet.',
-    'voting.ended.message': 'Wartet auf die Beendigung der Rallye.',
+    'voting.voted.title': 'Eure Stimme wurde gespeichert.',
+    'voting.voted.message': 'Wartet auf die Beendigung der Rallye.',
     'voting.unavailable.title': 'Keine Abstimmung verfügbar',
     'voting.unavailable.message':
       'Derzeit stehen nicht genügend Antworten zur Abstimmung bereit.',
@@ -384,8 +384,8 @@ export const translations = {
     'confirm.tourExit.message': 'Do you really want to end the exploration?',
     'scoreboard.rowLabel': 'Rank {{rank}}, Team {{team}}, Points {{points}}',
     'scoreboard.error.load': 'The final standings could not be loaded.',
-    'voting.ended.title': 'Voting has ended.',
-    'voting.ended.message': 'Wait for the rallye to finish.',
+    'voting.voted.title': 'Your vote has been saved.',
+    'voting.voted.message': 'Wait for the rallye to finish.',
     'voting.unavailable.title': 'No voting available',
     'voting.unavailable.message':
       'There are currently not enough answers available for voting.',

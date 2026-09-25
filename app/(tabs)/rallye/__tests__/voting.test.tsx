@@ -290,7 +290,7 @@ describe('Voting', () => {
     );
 
     expect(getByText('common.loading')).toBeTruthy();
-    expect(queryByText('voting.ended.title')).toBeNull();
+    expect(queryByText('voting.voted.title')).toBeNull();
   });
 
   it('loads voting questions from rallye_questions with is_voting=true', async () => {
@@ -336,7 +336,7 @@ describe('Voting', () => {
     fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
-      expect(getByText('voting.ended.title')).toBeTruthy();
+      expect(getByText('voting.voted.title')).toBeTruthy();
     });
 
     expect(queryByText('Question 2')).toBeNull();
@@ -377,7 +377,7 @@ describe('Voting', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('voting.ended.title')).toBeTruthy();
+      expect(getByText('voting.voted.title')).toBeTruthy();
     });
   });
 
@@ -441,7 +441,7 @@ describe('Voting', () => {
     await waitFor(() => {
       expect(getByText('Question 3')).toBeTruthy();
     });
-    expect(queryByText('voting.ended.title')).toBeNull();
+    expect(queryByText('voting.voted.title')).toBeNull();
   });
 
   it('shows an error and keeps the current question when vote RPC fails', async () => {
@@ -467,7 +467,7 @@ describe('Voting', () => {
     });
 
     expect(getByText('Question 1')).toBeTruthy();
-    expect(queryByText('voting.ended.title')).toBeNull();
+    expect(queryByText('voting.voted.title')).toBeNull();
   });
 
   it('renders geocaching answers as text', async () => {
@@ -573,7 +573,7 @@ describe('Voting', () => {
     await waitFor(() => {
       expect(getByText('voting.unavailable.title')).toBeTruthy();
     });
-    expect(queryByText('voting.ended.title')).toBeNull();
+    expect(queryByText('voting.voted.title')).toBeNull();
   });
 
   it('shows an unavailable state when no question has two candidates', async () => {
@@ -588,7 +588,7 @@ describe('Voting', () => {
     await waitFor(() => {
       expect(getByText('voting.unavailable.title')).toBeTruthy();
     });
-    expect(queryByText('voting.ended.title')).toBeNull();
+    expect(queryByText('voting.voted.title')).toBeNull();
   });
 
   it('shows a retryable error state when voting data cannot be loaded', async () => {
@@ -605,7 +605,7 @@ describe('Voting', () => {
       expect(getByText('voting.error.load')).toBeTruthy();
     });
     expect(getByText('common.refresh')).toBeTruthy();
-    expect(queryByText('voting.ended.title')).toBeNull();
+    expect(queryByText('voting.voted.title')).toBeNull();
 
     let resolveRetry!: () => void;
     mockRpc.mockImplementation(
