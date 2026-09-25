@@ -33,7 +33,7 @@ Eine Rallye, die ein Standort als freie Erkundungstour verwendet, ohne Teams, Sp
 _Vermeiden_: Erkundungsmodus, Tour-Mode
 
 **Team-Rallye**:
-Ein konkreter Rallye-Durchlauf, bei dem Teams teilnehmen, Team-Antworten erhalten bleiben und die Spielzeit erfasst wird.
+Ein konkreter Rallye-Durchlauf, bei dem Teams teilnehmen, Team-Antworten erhalten bleiben und die Spielzeit erfasst wird. Eine Team-Rallye enthält höchstens eine Upload-Frage und damit höchstens eine Abstimmungsfrage.
 _Vermeiden_: Team event, Rallye-Durchlauf
 
 **Bereichs-Rallye**:
