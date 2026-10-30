@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from 'expo-router/native-tabs';
 import TabLayout from '../_layout';
 
 type NativeTabsProps = {
@@ -14,7 +14,7 @@ type NativeTabTriggerProps = {
   name: string;
 };
 
-jest.mock('expo-router/unstable-native-tabs', () => ({
+jest.mock('expo-router/native-tabs', () => ({
   NativeTabs: Object.assign(
     jest.fn(({ children }: NativeTabsProps) => children),
     {
