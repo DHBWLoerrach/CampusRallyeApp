@@ -25,7 +25,6 @@
     "@supabase/supabase-js": "^2.87.3",
     "expo": "~58.0.21",
     "expo-application": "~58.1.2",
-    "expo-build-properties": "~58.0.11",
     "expo-camera": "~58.0.14",
     "expo-constants": "~58.0.14",
     "expo-dev-client": "~58.0.17",
