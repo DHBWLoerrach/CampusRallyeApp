@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Alert, AppState, type AppStateStatus } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import {
   clearRallyeCodeSheetSession,
   getRallyeCodeSheetSession,
@@ -42,7 +42,7 @@ export function useLocationDashboard() {
   const [dashboardData, setDashboardData] = useState<LocationDashboardData>(
     () => createEmptyDashboardData()
   );
-  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const appStateRef = useRef(AppState.currentState);
   const isInitializedRef = useRef(false);
   const initialSyncScheduledRef = useRef(false);
 
@@ -156,7 +156,7 @@ export function useLocationDashboard() {
       'change',
       (nextAppState) => {
         const returnedToForeground =
-          !!appStateRef.current.match(/inactive|background/) &&
+          !!appStateRef.current?.match(/inactive|background/) &&
           nextAppState === 'active';
         // Update first: the refresh bails out unless the app is active.
         appStateRef.current = nextAppState;
