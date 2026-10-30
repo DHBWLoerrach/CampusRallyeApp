@@ -42,8 +42,8 @@ describe('Imprint info screen', () => {
     mockLanguage = 'de';
   });
 
-  it('renders the required imprint details in German', () => {
-    const { getByText } = render(<Imprint />);
+  it('renders the required imprint details in German', async () => {
+    const { getByText } = await render(<Imprint />);
 
     expect(
       getByText('Duale Hochschule Baden-Württemberg Lörrach')

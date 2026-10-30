@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Image } from 'react-native';
+import { Alert } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import ImageQuestion from '../ImageQuestion';
 import type { Question } from '@/types/rallye';
@@ -125,41 +125,42 @@ describe('ImageQuestion', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the question text', () => {
-    const { getByText } = render(<ImageQuestion question={baseQuestion} />);
+  it('renders the question text', async () => {
+    const { getByText } = await render(
+      <ImageQuestion question={baseQuestion} />
+    );
 
     expect(getByText('Welches Gebäude ist das?')).toBeTruthy();
   });
 
-  it('renders the question picture from the storage bucket path', () => {
-    const { UNSAFE_getByType } = render(
+  it('renders the question picture from the storage bucket path', async () => {
+    const { container } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    expect(UNSAFE_getByType(Image).props.source.uri).toBe(
-      'https://example.test/building.jpg'
-    );
+    const [picture] = container.queryAll((node) => node.type === 'Image');
+    expect(picture.props.source.uri).toBe('https://example.test/building.jpg');
     expect(getQuestionPictureUrl).toHaveBeenCalledWith('building.jpg');
   });
 
-  it('renders no picture when the question has no bucket path', () => {
-    const { UNSAFE_queryByType } = render(
+  it('renders no picture when the question has no bucket path', async () => {
+    const { container } = await render(
       <ImageQuestion question={{ ...baseQuestion, bucket_path: undefined }} />
     );
 
-    expect(UNSAFE_queryByType(Image)).toBeNull();
+    expect(container.queryAll((node) => node.type === 'Image')).toEqual([]);
   });
 
   it('awards the full point value for a correct answer', async () => {
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Bibliothek'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -173,15 +174,15 @@ describe('ImageQuestion', () => {
   });
 
   it('awards zero points for a wrong answer but still submits', async () => {
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Mensa'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -195,15 +196,15 @@ describe('ImageQuestion', () => {
   });
 
   it('grades case-insensitively and ignores surrounding whitespace', async () => {
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       '  bIBLIOTHEK  '
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -218,15 +219,15 @@ describe('ImageQuestion', () => {
 
   it('does not submit when the confirmation is declined', async () => {
     jest.mocked(confirmAnswer).mockResolvedValue(false);
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Bibliothek'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() => expect(confirmAnswer).toHaveBeenCalled());
     expect(submitAnswerAndAdvance).not.toHaveBeenCalled();
@@ -234,15 +235,15 @@ describe('ImageQuestion', () => {
 
   it('submits with a null teamId in tour mode', async () => {
     mockTeam = null;
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Bibliothek'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -255,13 +256,13 @@ describe('ImageQuestion', () => {
     );
   });
 
-  it('alerts instead of submitting when the answer is empty', () => {
+  it('alerts instead of submitting when the answer is empty', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByPlaceholderText } = render(
+    const { getByPlaceholderText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    fireEvent(
+    await fireEvent(
       getByPlaceholderText('question.placeholder.answer'),
       'submitEditing'
     );
@@ -273,16 +274,16 @@ describe('ImageQuestion', () => {
     expect(submitAnswerAndAdvance).not.toHaveBeenCalled();
   });
 
-  it('alerts instead of submitting while the answer key is still loading', () => {
+  it('alerts instead of submitting while the answer key is still loading', async () => {
     mockAnswers = [];
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByPlaceholderText } = render(
+    const { getByPlaceholderText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
     const input = getByPlaceholderText('question.placeholder.answer');
 
-    fireEvent.changeText(input, 'Bibliothek');
-    fireEvent(input, 'submitEditing');
+    await fireEvent.changeText(input, 'Bibliothek');
+    await fireEvent(input, 'submitEditing');
 
     expect(alertSpy).toHaveBeenCalledWith(
       'question.error.pleaseWaitTitle',
@@ -297,15 +298,15 @@ describe('ImageQuestion', () => {
       .mockRejectedValueOnce(new Error('save failed'));
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <ImageQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Bibliothek'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(alertSpy).toHaveBeenCalledWith(

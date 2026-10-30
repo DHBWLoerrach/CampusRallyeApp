@@ -46,12 +46,15 @@ describe('InfosStackLayout', () => {
   it.each([
     ['de', ['Infos', 'Impressum', 'Über diese App']],
     ['en', ['Info', 'Imprint', 'About this app']],
-  ] as const)('localizes the info stack titles in %s', (language, titles) => {
-    mockLanguage = language;
-    const { getByText } = render(<InfosStackLayout />);
+  ] as const)(
+    'localizes the info stack titles in %s',
+    async (language, titles) => {
+      mockLanguage = language;
+      const { getByText } = await render(<InfosStackLayout />);
 
-    titles.forEach((title) => {
-      expect(getByText(title)).toBeTruthy();
-    });
-  });
+      titles.forEach((title) => {
+        expect(getByText(title)).toBeTruthy();
+      });
+    }
+  );
 });

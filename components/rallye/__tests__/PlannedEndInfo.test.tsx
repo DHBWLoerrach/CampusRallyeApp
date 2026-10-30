@@ -29,29 +29,29 @@ describe('PlannedEndInfo', () => {
     mockLanguage = 'de';
   });
 
-  it('renders nothing when there is no planned end time', () => {
-    const { toJSON } = render(<PlannedEndInfo endTime={null} />);
+  it('renders nothing when there is no planned end time', async () => {
+    const { toJSON } = await render(<PlannedEndInfo endTime={null} />);
     expect(toJSON()).toBeNull();
   });
 
-  it('renders nothing when endTime is undefined', () => {
-    const { toJSON } = render(<PlannedEndInfo endTime={undefined} />);
+  it('renders nothing when endTime is undefined', async () => {
+    const { toJSON } = await render(<PlannedEndInfo endTime={undefined} />);
     expect(toJSON()).toBeNull();
   });
 
-  it('shows the planned end time as calm orientation text', () => {
+  it('shows the planned end time as calm orientation text', async () => {
     const endTime = '14:30:00';
-    const { getByText } = render(<PlannedEndInfo endTime={endTime} />);
+    const { getByText } = await render(<PlannedEndInfo endTime={endTime} />);
 
     expect(getByText('geplant bis 14:30 Uhr')).toBeTruthy();
   });
 
-  it('normalizes PostgreSQL midnight boundary time for both languages', () => {
-    const german = render(<PlannedEndInfo endTime="24:00:00" />);
+  it('normalizes PostgreSQL midnight boundary time for both languages', async () => {
+    const german = await render(<PlannedEndInfo endTime="24:00:00" />);
     expect(german.getByText('geplant bis 00:00 Uhr')).toBeTruthy();
 
     mockLanguage = 'en';
-    const english = render(<PlannedEndInfo endTime="24:00:00" />);
+    const english = await render(<PlannedEndInfo endTime="24:00:00" />);
     expect(english.getByText('planned until 12:00 AM')).toBeTruthy();
   });
 });

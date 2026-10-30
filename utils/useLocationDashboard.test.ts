@@ -51,7 +51,7 @@ describe('useLocationDashboard', () => {
       .mocked(getLocationsWithJoinableRallyes)
       .mockResolvedValue([firstLocation]);
 
-    const { result } = renderHook(() => useLocationDashboard());
+    const { result } = await renderHook(() => useLocationDashboard());
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.locations).toEqual([firstLocation]);
@@ -67,7 +67,7 @@ describe('useLocationDashboard', () => {
       .mocked(getLocationsWithJoinableRallyes)
       .mockResolvedValue([secondLocation, { ...secondLocation, id: 3 }]);
 
-    const { result } = renderHook(() => useLocationDashboard());
+    const { result } = await renderHook(() => useLocationDashboard());
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(clearSelectedLocation).toHaveBeenCalled();
@@ -80,7 +80,7 @@ describe('useLocationDashboard', () => {
       .mocked(getLocationsWithJoinableRallyes)
       .mockRejectedValue(new Error('offline'));
 
-    const { result } = renderHook(() => useLocationDashboard());
+    const { result } = await renderHook(() => useLocationDashboard());
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.online).toBe(false);
@@ -91,7 +91,7 @@ describe('useLocationDashboard', () => {
     jest
       .mocked(getLocationsWithJoinableRallyes)
       .mockResolvedValue([firstLocation]);
-    const { result } = renderHook(() => useLocationDashboard());
+    const { result } = await renderHook(() => useLocationDashboard());
     await waitFor(() => expect(result.current.selectionStep).toBe('dashboard'));
 
     await act(async () => {

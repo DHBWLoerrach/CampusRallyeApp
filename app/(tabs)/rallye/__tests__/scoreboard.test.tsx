@@ -94,7 +94,7 @@ describe('Scoreboard', () => {
       status: 'ended',
     };
 
-    const { getByText } = render(<Scoreboard />);
+    const { getByText } = await render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
@@ -103,9 +103,9 @@ describe('Scoreboard', () => {
     expect(getByText('Test Rallye Name')).toBeTruthy();
   });
 
-  it('does not render rallye name if not present', () => {
+  it('does not render rallye name if not present', async () => {
     mockRallye = null;
-    const { queryByText } = render(<Scoreboard />);
+    const { queryByText } = await render(<Scoreboard />);
     expect(queryByText('Test Rallye Name')).toBeNull();
   });
 
@@ -131,7 +131,7 @@ describe('Scoreboard', () => {
       { team_id: 3, team_points: 10 },
     ];
 
-    const { getByText } = render(<Scoreboard />);
+    const { getByText } = await render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
@@ -164,7 +164,9 @@ describe('Scoreboard', () => {
       { team_id: 3, team_points: 5 },
     ];
 
-    const { getAllByText, getByText, queryByText } = render(<Scoreboard />);
+    const { getAllByText, getByText, queryByText } = await render(
+      <Scoreboard />
+    );
     await act(async () => {
       await flushPromises();
     });
@@ -187,7 +189,7 @@ describe('Scoreboard', () => {
       team_points: points,
     }));
 
-    const { getAllByText, queryByText } = render(<Scoreboard />);
+    const { getAllByText, queryByText } = await render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
@@ -222,7 +224,9 @@ describe('Scoreboard', () => {
       { team_id: 2, team_points: 10 },
     ];
 
-    const { getAllByText, getByText, queryByText } = render(<Scoreboard />);
+    const { getAllByText, getByText, queryByText } = await render(
+      <Scoreboard />
+    );
     await act(async () => {
       await flushPromises();
     });
@@ -252,9 +256,8 @@ describe('Scoreboard', () => {
       { team_id: 2, team_points: 10 },
     ];
 
-    const { getAllByText, getAllByLabelText, getByText, queryByText } = render(
-      <Scoreboard />
-    );
+    const { getAllByText, getAllByLabelText, getByText, queryByText } =
+      await render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
@@ -275,7 +278,7 @@ describe('Scoreboard', () => {
     ];
     mockPoints = [{ team_id: 1, team_points: 42 }];
 
-    const { getByText } = render(<Scoreboard />);
+    const { getByText } = await render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
@@ -299,7 +302,7 @@ describe('Scoreboard', () => {
       .mockImplementation(() => {});
 
     try {
-      const { getByText, queryByText } = render(<Scoreboard />);
+      const { getByText, queryByText } = await render(<Scoreboard />);
       await act(async () => {
         await flushPromises();
       });
@@ -325,7 +328,7 @@ describe('Scoreboard', () => {
       { team_id: 1, team_points: 5 },
     ];
 
-    const { getByText } = render(<Scoreboard />);
+    const { getByText } = await render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });
@@ -342,7 +345,7 @@ describe('Scoreboard', () => {
       },
     ];
 
-    const { getByText } = render(<Scoreboard />);
+    const { getByText } = await render(<Scoreboard />);
     await act(async () => {
       await flushPromises();
     });

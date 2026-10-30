@@ -150,23 +150,23 @@ describe('RootLayout', () => {
     { path: '/info/about', segments: ['info', 'about'] },
   ])(
     'allows the public route $path without a rallye participation',
-    ({ segments }) => {
+    async ({ segments }) => {
       mockSegments = segments;
-      render(<RootLayout />);
+      await render(<RootLayout />);
 
       expect(mockRouterReplace).not.toHaveBeenCalled();
     }
   );
 
-  it('still redirects away from the rallye tabs without a participation', () => {
+  it('still redirects away from the rallye tabs without a participation', async () => {
     mockSegments = ['(tabs)', 'rallye'];
-    render(<RootLayout />);
+    await render(<RootLayout />);
 
     expect(mockRouterReplace).toHaveBeenCalledWith('/');
   });
 
-  it('registers the rallye code entry as a transparent modal instead of a form sheet', () => {
-    render(<RootLayout />);
+  it('registers the rallye code entry as a transparent modal instead of a form sheet', async () => {
+    await render(<RootLayout />);
 
     expect(mockStackScreen).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -191,8 +191,8 @@ describe('RootLayout', () => {
   it('clears rallye session state when recovering from the error fallback', async () => {
     mockErrorBoundaryError = new Error('boom');
 
-    const { getByText } = render(<RootLayout />);
-    fireEvent.press(getByText('rallye.backToStart'));
+    const { getByText } = await render(<RootLayout />);
+    await fireEvent.press(getByText('rallye.backToStart'));
 
     await waitFor(() => {
       expect(store$.leaveRallye).toHaveBeenCalledTimes(1);

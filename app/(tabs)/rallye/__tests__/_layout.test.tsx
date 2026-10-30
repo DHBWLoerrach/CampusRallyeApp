@@ -124,7 +124,7 @@ describe('RallyeStackLayout', () => {
   });
 
   it('renders a native logout toolbar button on iOS', async () => {
-    render(<RallyeStackLayout />);
+    await render(<RallyeStackLayout />);
 
     expect(mockStackToolbar).toHaveBeenCalledWith(
       expect.objectContaining({ placement: 'right' }),
@@ -161,7 +161,7 @@ describe('RallyeStackLayout', () => {
 
   it('renders a header logout button on Android', async () => {
     setPlatform('android');
-    render(<RallyeStackLayout />);
+    await render(<RallyeStackLayout />);
 
     // The Android floating bottom toolbar is intentionally not used.
     expect(mockStackToolbar).not.toHaveBeenCalled();
@@ -170,8 +170,8 @@ describe('RallyeStackLayout', () => {
     const headerRight = getIndexScreenOptions()?.headerRight;
     expect(headerRight).toBeInstanceOf(Function);
 
-    const { getByLabelText } = render(headerRight!());
-    fireEvent.press(getByLabelText('a11y.logoutButton'));
+    const { getByLabelText } = await render(headerRight!());
+    await fireEvent.press(getByLabelText('a11y.logoutButton'));
 
     await waitFor(() => {
       expect(confirm).toHaveBeenCalledWith(
@@ -186,7 +186,7 @@ describe('RallyeStackLayout', () => {
 
   it('uses the exploration confirmation in tour mode', async () => {
     mockIsTourMode = true;
-    render(<RallyeStackLayout />);
+    await render(<RallyeStackLayout />);
 
     const buttonProps = mockStackToolbarButton.mock.calls.at(
       -1
@@ -203,8 +203,8 @@ describe('RallyeStackLayout', () => {
     });
   });
 
-  it('registers the team name confirmation as a native form sheet', () => {
-    render(<RallyeStackLayout />);
+  it('registers the team name confirmation as a native form sheet', async () => {
+    await render(<RallyeStackLayout />);
 
     expect(mockStackScreen).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -221,19 +221,19 @@ describe('RallyeStackLayout', () => {
     );
   });
 
-  it('clears rallye session on unmount after logout disables navigation', () => {
-    const { unmount } = render(<RallyeStackLayout />);
+  it('clears rallye session on unmount after logout disables navigation', async () => {
+    const { unmount } = await render(<RallyeStackLayout />);
 
     mockEnabled = false;
-    unmount();
+    await unmount();
 
     expect(store$.clearRallyeSession).toHaveBeenCalledTimes(1);
   });
 
-  it('does not clear rallye session during regular unmounts', () => {
-    const { unmount } = render(<RallyeStackLayout />);
+  it('does not clear rallye session during regular unmounts', async () => {
+    const { unmount } = await render(<RallyeStackLayout />);
 
-    unmount();
+    await unmount();
 
     expect(store$.clearRallyeSession).not.toHaveBeenCalled();
   });

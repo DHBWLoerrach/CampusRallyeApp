@@ -264,7 +264,7 @@ describe('RallyeIndex effects', () => {
   });
 
   it('reuses cached question ids and does not re-fetch answers/status on team change', async () => {
-    const { rerender } = render(<RallyeIndex />);
+    const { rerender } = await render(<RallyeIndex />);
 
     await waitFor(() => {
       expect(tableCallCount('solution_options')).toBeGreaterThan(0);
@@ -277,7 +277,7 @@ describe('RallyeIndex effects', () => {
     const questionJoinCallsAfterMount = tableCallCount('rallye_questions');
 
     mockTeam = { id: 123, name: 'New Team' };
-    rerender(<RallyeIndex />);
+    await rerender(<RallyeIndex />);
 
     await waitFor(() => {
       expect(tableCallCount('team_answers')).toBeGreaterThan(0);
@@ -298,7 +298,7 @@ describe('RallyeIndex effects', () => {
       { data: options, error: null },
     ];
 
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
     await act(async () => {
       await jest.advanceTimersByTimeAsync(1_000);
     });
@@ -327,12 +327,12 @@ describe('RallyeIndex effects', () => {
       const originalRallyeGet = rallyeGet.getMockImplementation();
 
       try {
-        const { unmount } = render(<RallyeIndex />);
+        const { unmount } = await render(<RallyeIndex />);
         await waitFor(() => expect(tableCallCount(table)).toBeGreaterThan(0));
 
         // Leaving unmounts the rallye tabs; the user then joins another rallye
         // while the request of the previous one is still pending.
-        unmount();
+        await unmount();
         rallyeGet.mockImplementation(() => ({
           id: 2,
           name: 'B',
@@ -360,7 +360,7 @@ describe('RallyeIndex effects', () => {
       { question_id: 2, team_points: 2 },
     ];
 
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
 
     await waitFor(() => {
       expect(store$.points.set).toHaveBeenCalledWith(5);
@@ -384,7 +384,7 @@ describe('RallyeIndex effects', () => {
     ]);
 
     try {
-      render(<RallyeIndex />);
+      await render(<RallyeIndex />);
 
       await waitFor(() => {
         expect(store$.allQuestionsAnswered.set).toHaveBeenCalledWith(true);
@@ -398,12 +398,12 @@ describe('RallyeIndex effects', () => {
 
   it('does not request the rallye status after leaving the screen', async () => {
     jest.useFakeTimers();
-    const { unmount } = render(<RallyeIndex />);
+    const { unmount } = await render(<RallyeIndex />);
     await act(async () => {
       await jest.advanceTimersByTimeAsync(100);
     });
 
-    unmount();
+    await unmount();
     await act(async () => {
       await jest.advanceTimersByTimeAsync(1_000);
     });
@@ -412,7 +412,7 @@ describe('RallyeIndex effects', () => {
   });
 
   it('clears the stored rallye end when the refreshed rallye has none', async () => {
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
 
     await waitFor(() => {
       expect(store$.rallye.rallye_end.set).toHaveBeenCalledWith(null);
@@ -427,7 +427,7 @@ describe('RallyeIndex effects', () => {
       error: new Error('geocaching_questions failed'),
     };
 
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
 
     await waitFor(() => {
       expect(alertSpy).toHaveBeenCalledWith(
@@ -471,7 +471,7 @@ describe('RallyeIndex effects', () => {
       point_value: 1,
     }));
 
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
 
     await waitFor(() => {
       expect(store$.questions.set).toHaveBeenCalled();

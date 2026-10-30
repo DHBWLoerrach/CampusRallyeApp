@@ -99,56 +99,56 @@ describe('Welcome info navigation', () => {
     ['en', 'Imprint', 'About this app'],
   ] as const)(
     'opens the public detail routes in %s',
-    (language, imprint, about) => {
+    async (language, imprint, about) => {
       mockLanguage = language;
-      const { getByRole } = render(<WelcomeInfos />);
+      const { getByRole } = await render(<WelcomeInfos />);
 
-      fireEvent.press(getByRole('button', { name: imprint }));
+      await fireEvent.press(getByRole('button', { name: imprint }));
       expect(mockPush).toHaveBeenLastCalledWith('/info/imprint');
 
-      fireEvent.press(getByRole('button', { name: about }));
+      await fireEvent.press(getByRole('button', { name: about }));
       expect(mockPush).toHaveBeenLastCalledWith('/info/about');
     }
   );
 
-  it('keeps the existing info tab links inside the rallye tabs', () => {
-    const { getByRole } = render(<TabInfos />);
+  it('keeps the existing info tab links inside the rallye tabs', async () => {
+    const { getByRole } = await render(<TabInfos />);
 
-    fireEvent.press(getByRole('button', { name: 'Impressum' }));
+    await fireEvent.press(getByRole('button', { name: 'Impressum' }));
     expect(mockPush).toHaveBeenLastCalledWith('/infos/imprint');
 
-    fireEvent.press(getByRole('button', { name: 'Über diese App' }));
+    await fireEvent.press(getByRole('button', { name: 'Über diese App' }));
     expect(mockPush).toHaveBeenLastCalledWith('/infos/about');
   });
 
-  it('pops back to the existing welcome screen', () => {
-    const { getByRole } = render(<WelcomeInfosLayout />);
+  it('pops back to the existing welcome screen', async () => {
+    const { getByRole } = await render(<WelcomeInfosLayout />);
 
-    fireEvent.press(getByRole('button', { name: 'Zurück' }));
+    await fireEvent.press(getByRole('button', { name: 'Zurück' }));
 
     expect(mockBack).toHaveBeenCalledTimes(1);
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it('returns to welcome when opened without navigation history', () => {
+  it('returns to welcome when opened without navigation history', async () => {
     mockCanGoBack = false;
-    const { getByRole } = render(<WelcomeInfosLayout />);
+    const { getByRole } = await render(<WelcomeInfosLayout />);
 
-    fireEvent.press(getByRole('button', { name: 'Zurück' }));
+    await fireEvent.press(getByRole('button', { name: 'Zurück' }));
 
     expect(mockReplace).toHaveBeenCalledWith('/');
   });
 
-  it('renders imprint content without participation or network access', () => {
-    const { getByText } = render(<Imprint />);
+  it('renders imprint content without participation or network access', async () => {
+    const { getByText } = await render(<Imprint />);
 
     expect(
       getByText('Duale Hochschule Baden-Württemberg Lörrach')
     ).toBeTruthy();
   });
 
-  it('renders project information without participation or network access', () => {
-    const { getByText } = render(<About />);
+  it('renders project information without participation or network access', async () => {
+    const { getByText } = await render(<About />);
 
     expect(getByText('Campus Rallye App der DHBW Lörrach')).toBeTruthy();
   });

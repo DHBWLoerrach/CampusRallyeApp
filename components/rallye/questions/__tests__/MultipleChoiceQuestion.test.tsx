@@ -121,8 +121,8 @@ const baseQuestion: Question = {
 };
 
 describe('MultipleChoiceQuestion', () => {
-  it('lets long option text shrink without forcing short options to grow', () => {
-    const { getByText } = render(
+  it('lets long option text shrink without forcing short options to grow', async () => {
+    const { getByText } = await render(
       <MultipleChoiceQuestion question={baseQuestion} />
     );
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Image } from 'react-native';
+import { Alert } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import Voting from '../voting';
 
@@ -284,8 +284,10 @@ describe('Voting', () => {
     consoleSpy.mockRestore();
   });
 
-  it('shows a loading state before voting data is available', () => {
-    const { getByText, queryByText } = render(
+  it('shows a loading state before voting data is available', async () => {
+    mockRpc.mockReturnValueOnce(new Promise(() => {}));
+
+    const { getByText, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -294,7 +296,7 @@ describe('Voting', () => {
   });
 
   it('loads voting questions from rallye_questions with is_voting=true', async () => {
-    const { getByText, queryByText } = render(
+    const { getByText, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -323,7 +325,7 @@ describe('Voting', () => {
   });
 
   it('shows only real-answer candidates and skips questions with fewer than two candidates', async () => {
-    const { getByText, getByTestId, queryByText } = render(
+    const { getByText, getByTestId, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -331,8 +333,8 @@ describe('Voting', () => {
       expect(getByText('Question 1')).toBeTruthy();
     });
 
-    fireEvent.press(getByTestId('vote-option-101-3'));
-    fireEvent.press(getByText('voting.submit'));
+    await fireEvent.press(getByTestId('vote-option-101-3'));
+    await fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
       expect(getByText('voting.voted.title')).toBeTruthy();
@@ -344,7 +346,7 @@ describe('Voting', () => {
   it('submits vote via cast_voting_vote RPC', async () => {
     fixtures.joinRows = [fixtures.joinRows[0]];
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -352,8 +354,8 @@ describe('Voting', () => {
       expect(getByText('Question 1')).toBeTruthy();
     });
 
-    fireEvent.press(getByTestId('vote-option-101-4'));
-    fireEvent.press(getByText('voting.submit'));
+    await fireEvent.press(getByTestId('vote-option-101-4'));
+    await fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
       expect(rpcCalls).toContainEqual({
@@ -371,7 +373,7 @@ describe('Voting', () => {
   it('shows end state when no votable questions remain', async () => {
     fixtures.votedQuestions = [{ question_id: 101 }, { question_id: 102 }];
 
-    const { getByText } = render(
+    const { getByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -417,7 +419,7 @@ describe('Voting', () => {
       }
     );
 
-    const { getByText, getByTestId, queryByText } = render(
+    const { getByText, getByTestId, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -425,17 +427,22 @@ describe('Voting', () => {
       expect(getByText('Question 1')).toBeTruthy();
     });
 
-    fireEvent.press(getByTestId('vote-option-101-3'));
-    fireEvent.press(getByText('voting.submit'));
-    fireEvent.press(getByText('voting.submit'));
-
+    await fireEvent.press(getByTestId('vote-option-101-3'));
+    // fireEvent settles with the handler, which stays pending here.
+    const firstSubmit = fireEvent.press(getByText('voting.submit'));
     await waitFor(() => {
       expect(
         rpcCalls.filter((call) => call.name === 'cast_voting_vote')
       ).toHaveLength(1);
     });
+    await fireEvent.press(getByText('voting.submit'));
+
+    expect(
+      rpcCalls.filter((call) => call.name === 'cast_voting_vote')
+    ).toHaveLength(1);
 
     resolveVote({ error: null });
+    await firstSubmit;
 
     await waitFor(() => {
       expect(getByText('Question 3')).toBeTruthy();
@@ -447,7 +454,7 @@ describe('Voting', () => {
     fixtures.joinRows = [fixtures.joinRows[0]];
     fixtures.voteError = { message: 'write failed' };
 
-    const { getByText, getByTestId, queryByText } = render(
+    const { getByText, getByTestId, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -455,8 +462,8 @@ describe('Voting', () => {
       expect(getByText('Question 1')).toBeTruthy();
     });
 
-    fireEvent.press(getByTestId('vote-option-101-3'));
-    fireEvent.press(getByText('voting.submit'));
+    await fireEvent.press(getByTestId('vote-option-101-3'));
+    await fireEvent.press(getByText('voting.submit'));
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
@@ -487,7 +494,7 @@ describe('Voting', () => {
       { question_id: 301, team_id: 4, answer: '4_301.jpg' },
     ];
 
-    const { getByText, queryByText, UNSAFE_queryByType } = render(
+    const { container, getByText, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -498,7 +505,7 @@ describe('Voting', () => {
     });
 
     expect(queryByText('3_301.jpg')).toBeNull();
-    expect(UNSAFE_queryByType(Image)).toBeNull();
+    expect(container.queryAll((node) => node.type === 'Image')).toEqual([]);
   });
 
   it('shows an unavailable state when fewer than 3 teams are available', async () => {
@@ -507,7 +514,7 @@ describe('Voting', () => {
       { id: 3, rallye_id: 1, name: 'Team A' },
     ];
 
-    const { getByText, queryByText } = render(
+    const { getByText, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -522,7 +529,7 @@ describe('Voting', () => {
       { question_id: 101, team_id: 3, answer: 'Only one answer' },
     ];
 
-    const { getByText, queryByText } = render(
+    const { getByText, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -538,7 +545,7 @@ describe('Voting', () => {
       error: { message: 'load failed' },
     });
 
-    const { getByText, queryByText } = render(
+    const { getByText, queryByText } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -562,19 +569,23 @@ describe('Voting', () => {
       }
     );
 
-    fireEvent.press(getByText('common.refresh'));
+    // fireEvent settles with the handler, which stays pending here.
+    const retry = fireEvent.press(getByText('common.refresh'));
 
-    expect(getByText('common.loading')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText('common.loading')).toBeTruthy();
+    });
     expect(queryByText('voting.error.load')).toBeNull();
 
     resolveRetry();
+    await retry;
     await waitFor(() => {
       expect(getByText('Question 1')).toBeTruthy();
     });
   });
 
   it('keeps the list visible during a background pull-to-refresh', async () => {
-    const { getByText, queryByText, getByTestId } = render(
+    const { getByText, queryByText, getByTestId } = await render(
       <Voting onRefresh={jest.fn()} loading={false} />
     );
 
@@ -597,7 +608,8 @@ describe('Voting', () => {
       }
     );
 
-    fireEvent(getByTestId('voting-list'), 'refresh');
+    // fireEvent settles with the handler, which stays pending here.
+    const refresh = fireEvent(getByTestId('voting-list'), 'refresh');
 
     await waitFor(() => {
       expect(
@@ -612,6 +624,7 @@ describe('Voting', () => {
 
     // Let the refresh finish so no pending state updates leak between tests.
     resolveVoted();
+    await refresh;
     await waitFor(() => {
       expect(getByText('Question 1')).toBeTruthy();
       expect(getByTestId('voting-list').props.refreshing).toBe(false);

@@ -82,9 +82,9 @@ describe('Hint', () => {
         question_type: questionType,
       });
       mockedConfirm.mockResolvedValue(true);
-      const { getByRole } = render(<Hint hint="Secret hint" />);
+      const { getByRole } = await render(<Hint hint="Secret hint" />);
 
-      fireEvent.press(getByRole('button'));
+      await fireEvent.press(getByRole('button'));
 
       await waitFor(() =>
         expect(Alert.alert).toHaveBeenCalledWith('hint.title', 'Secret hint')
@@ -102,9 +102,9 @@ describe('Hint', () => {
 
   it('does not persist or reveal when confirmation is cancelled', async () => {
     mockedConfirm.mockResolvedValue(false);
-    const { getByRole } = render(<Hint hint="Secret hint" />);
+    const { getByRole } = await render(<Hint hint="Secret hint" />);
 
-    fireEvent.press(getByRole('button'));
+    await fireEvent.press(getByRole('button'));
 
     await waitFor(() => expect(mockedConfirm).toHaveBeenCalledTimes(1));
     expect(mockMarkHintUsed).not.toHaveBeenCalled();
@@ -114,9 +114,9 @@ describe('Hint', () => {
 
   it('persists the full scope before revealing a hint for the first time', async () => {
     mockedConfirm.mockResolvedValue(true);
-    const { getByRole } = render(<Hint hint="Secret hint" />);
+    const { getByRole } = await render(<Hint hint="Secret hint" />);
 
-    fireEvent.press(getByRole('button'));
+    await fireEvent.press(getByRole('button'));
 
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith('hint.title', 'Secret hint')
@@ -134,9 +134,9 @@ describe('Hint', () => {
 
   it('reveals an already-used hint without another confirmation or write', async () => {
     mockUsedHintGet.mockReturnValue(true);
-    const { getByRole } = render(<Hint hint="Secret hint" />);
+    const { getByRole } = await render(<Hint hint="Secret hint" />);
 
-    fireEvent.press(getByRole('button'));
+    await fireEvent.press(getByRole('button'));
 
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith('hint.title', 'Secret hint')
@@ -148,9 +148,9 @@ describe('Hint', () => {
   it('keeps hint usage session-local in tour mode', async () => {
     mockTeamGet.mockReturnValue(null);
     mockedConfirm.mockResolvedValue(true);
-    const { getByRole } = render(<Hint hint="Secret hint" />);
+    const { getByRole } = await render(<Hint hint="Secret hint" />);
 
-    fireEvent.press(getByRole('button'));
+    await fireEvent.press(getByRole('button'));
 
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith('hint.title', 'Secret hint')
@@ -165,9 +165,9 @@ describe('Hint', () => {
     const consoleSpy = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
-    const { getByRole } = render(<Hint hint="Secret hint" />);
+    const { getByRole } = await render(<Hint hint="Secret hint" />);
 
-    fireEvent.press(getByRole('button'));
+    await fireEvent.press(getByRole('button'));
 
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith(
@@ -182,9 +182,9 @@ describe('Hint', () => {
 
   it('does not mutate the accumulated point total directly', async () => {
     mockedConfirm.mockResolvedValue(true);
-    const { getByRole } = render(<Hint hint="Secret hint" />);
+    const { getByRole } = await render(<Hint hint="Secret hint" />);
 
-    fireEvent.press(getByRole('button'));
+    await fireEvent.press(getByRole('button'));
 
     await waitFor(() => expect(mockUsedHintSet).toHaveBeenCalledWith(true));
     expect(mockPointsSet).not.toHaveBeenCalled();

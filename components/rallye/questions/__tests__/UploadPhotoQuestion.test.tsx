@@ -171,8 +171,8 @@ describe('UploadPhotoQuestion', () => {
   });
 
   describe('PhotoCamera', () => {
-    it('renders camera view when permission is granted', () => {
-      const { getByTestId, getByText } = render(
+    it('renders camera view when permission is granted', async () => {
+      const { getByTestId, getByText } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
@@ -184,11 +184,11 @@ describe('UploadPhotoQuestion', () => {
     });
 
     it('takes a picture and switches to preview', async () => {
-      const { getByTestId, queryByTestId } = render(
+      const { getByTestId, queryByTestId } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
-      fireEvent.press(getByTestId('button-camera'));
+      await fireEvent.press(getByTestId('button-camera'));
 
       await waitFor(() => {
         expect(mockTakePictureAsync).toHaveBeenCalled();
@@ -199,23 +199,23 @@ describe('UploadPhotoQuestion', () => {
       });
     });
 
-    it('toggles camera facing direction', () => {
-      const { getByTestId } = render(
+    it('toggles camera facing direction', async () => {
+      const { getByTestId } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
       const switchButton = getByTestId('button-camera-rotate');
-      fireEvent.press(switchButton);
+      await fireEvent.press(switchButton);
       // The facing state is internal, but we verify the button exists and is pressable
       expect(switchButton).toBeTruthy();
     });
 
-    it('renders hint when provided', () => {
+    it('renders hint when provided', async () => {
       const questionWithHint = {
         ...baseQuestion,
         hint: 'Look near the entrance',
       };
-      const { getByTestId } = render(
+      const { getByTestId } = await render(
         <UploadPhotoQuestion question={questionWithHint} />
       );
 
@@ -225,8 +225,10 @@ describe('UploadPhotoQuestion', () => {
 
   describe('ImagePreview', () => {
     async function renderWithPicture() {
-      const result = render(<UploadPhotoQuestion question={baseQuestion} />);
-      fireEvent.press(result.getByTestId('button-camera'));
+      const result = await render(
+        <UploadPhotoQuestion question={baseQuestion} />
+      );
+      await fireEvent.press(result.getByTestId('button-camera'));
       await waitFor(() => {
         expect(result.queryByTestId('camera-view')).toBeNull();
       });
@@ -251,15 +253,15 @@ describe('UploadPhotoQuestion', () => {
     it('sends only after consent is given', async () => {
       const { getByTestId, getByRole } = await renderWithPicture();
 
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByTestId('button-envelope'));
       expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
 
       const checkbox = getByRole('checkbox', {
         name: 'question.photo.consent',
       });
-      fireEvent.press(checkbox);
+      await fireEvent.press(checkbox);
       expect(getByRole('checkbox', { checked: true })).toBeTruthy();
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
         expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledTimes(1);
@@ -269,7 +271,7 @@ describe('UploadPhotoQuestion', () => {
     it('allows taking a new photo', async () => {
       const { getByTestId, queryByTestId } = await renderWithPicture();
 
-      fireEvent.press(getByTestId('button-recycle'));
+      await fireEvent.press(getByTestId('button-recycle'));
 
       await waitFor(() => {
         expect(queryByTestId('camera-view')).toBeTruthy();
@@ -280,25 +282,25 @@ describe('UploadPhotoQuestion', () => {
       const { getByTestId, getByRole, queryByTestId } =
         await renderWithPicture();
 
-      fireEvent.press(getByRole('checkbox'));
-      fireEvent.press(getByTestId('button-recycle'));
+      await fireEvent.press(getByRole('checkbox'));
+      await fireEvent.press(getByTestId('button-recycle'));
       await waitFor(() => {
         expect(queryByTestId('camera-view')).toBeTruthy();
       });
-      fireEvent.press(getByTestId('button-camera'));
+      await fireEvent.press(getByTestId('button-camera'));
       await waitFor(() => {
         expect(getByRole('checkbox', { checked: false })).toBeTruthy();
       });
 
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByTestId('button-envelope'));
       expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
     });
 
     it('submits photo with zero points and advances on success', async () => {
       const { getByTestId, getByRole } = await renderWithPicture();
 
-      fireEvent.press(getByRole('checkbox'));
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByRole('checkbox'));
+      await fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
         expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledWith({
@@ -315,7 +317,7 @@ describe('UploadPhotoQuestion', () => {
       const { getByTestId, queryByRole } = await renderWithPicture();
 
       expect(queryByRole('checkbox')).toBeNull();
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
         expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -336,8 +338,8 @@ describe('UploadPhotoQuestion', () => {
 
       const { getByTestId, getByRole } = await renderWithPicture();
 
-      fireEvent.press(getByRole('checkbox'));
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByRole('checkbox'));
+      await fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
@@ -356,15 +358,17 @@ describe('UploadPhotoQuestion', () => {
       );
       const { getByTestId, getByRole } = await renderWithPicture();
 
-      fireEvent.press(getByRole('checkbox'));
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByRole('checkbox'));
+      // fireEvent settles with the handler, which stays pending here.
+      const send = fireEvent.press(getByTestId('button-envelope'));
       await waitFor(() => {
         expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledTimes(1);
       });
-      fireEvent.press(getByTestId('button-face-frown-open'));
+      await fireEvent.press(getByTestId('button-face-frown-open'));
       await act(async () => {
         finishUpload({ status: 'sent' });
       });
+      await send;
 
       expect(mockedConfirm).not.toHaveBeenCalled();
       expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
@@ -377,8 +381,8 @@ describe('UploadPhotoQuestion', () => {
 
       const { getByTestId, getByRole } = await renderWithPicture();
 
-      fireEvent.press(getByRole('checkbox'));
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByRole('checkbox'));
+      await fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
@@ -390,13 +394,13 @@ describe('UploadPhotoQuestion', () => {
   });
 
   describe('Permission handling', () => {
-    it('shows permission request UI when not granted', () => {
+    it('shows permission request UI when not granted', async () => {
       mockUseCameraPermissions.mockReturnValue([
         { granted: false, canAskAgain: true },
         jest.fn(),
       ]);
 
-      const { getByText } = render(
+      const { getByText } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
@@ -404,10 +408,10 @@ describe('UploadPhotoQuestion', () => {
       expect(getByText('question.camera.allow')).toBeTruthy();
     });
 
-    it('renders empty view while permission is loading', () => {
+    it('renders empty view while permission is loading', async () => {
       mockUseCameraPermissions.mockReturnValue([null, jest.fn()]);
 
-      const { toJSON } = render(
+      const { toJSON } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
@@ -420,11 +424,11 @@ describe('UploadPhotoQuestion', () => {
     it('calls submitAnswerAndAdvance with zero points on surrender', async () => {
       mockedConfirm.mockResolvedValueOnce(true);
 
-      const { getByTestId } = render(
+      const { getByTestId } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
-      fireEvent.press(getByTestId('button-face-frown-open'));
+      await fireEvent.press(getByTestId('button-face-frown-open'));
 
       await waitFor(() => {
         expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -440,11 +444,11 @@ describe('UploadPhotoQuestion', () => {
     it('does not surrender when user cancels confirmation', async () => {
       mockedConfirm.mockResolvedValueOnce(false);
 
-      const { getByTestId } = render(
+      const { getByTestId } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
-      fireEvent.press(getByTestId('button-face-frown-open'));
+      await fireEvent.press(getByTestId('button-face-frown-open'));
 
       await waitFor(() => {
         expect(mockedConfirm).toHaveBeenCalled();
@@ -455,42 +459,37 @@ describe('UploadPhotoQuestion', () => {
 
     it('does not submit a new photo while the surrender is being saved', async () => {
       mockSubmitAnswerAndAdvance.mockReturnValueOnce(new Promise(() => {}));
-      const { getByTestId, queryByTestId, queryByRole } = render(
+      const { getByTestId, queryByTestId, queryByRole } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
-      fireEvent.press(getByTestId('button-face-frown-open'));
+      // fireEvent settles with the handler, which stays pending here.
+      void fireEvent.press(getByTestId('button-face-frown-open'));
       await waitFor(() => {
         expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
       });
       // Try to answer with a new photo by any path the screen still offers.
-      await act(async () => {
-        fireEvent.press(getByTestId('button-camera'));
-      });
+      await fireEvent.press(getByTestId('button-camera'));
       const consent = queryByRole('checkbox');
-      if (consent) fireEvent.press(consent);
+      if (consent) await fireEvent.press(consent);
       const send = queryByTestId('button-envelope');
-      if (send) {
-        await act(async () => {
-          fireEvent.press(send);
-        });
-      }
+      if (send) await fireEvent.press(send);
 
       expect(mockSubmitPhotoAnswerAndAdvance).not.toHaveBeenCalled();
     });
 
     it('sends a photo after the surrender was cancelled', async () => {
       mockedConfirm.mockResolvedValueOnce(false);
-      const { getByTestId, getByRole } = render(
+      const { getByTestId, getByRole } = await render(
         <UploadPhotoQuestion question={baseQuestion} />
       );
 
-      fireEvent.press(getByTestId('button-face-frown-open'));
+      await fireEvent.press(getByTestId('button-face-frown-open'));
       await waitFor(() => expect(mockedConfirm).toHaveBeenCalled());
-      fireEvent.press(getByTestId('button-camera'));
+      await fireEvent.press(getByTestId('button-camera'));
       await waitFor(() => expect(getByRole('checkbox')).toBeTruthy());
-      fireEvent.press(getByRole('checkbox'));
-      fireEvent.press(getByTestId('button-envelope'));
+      await fireEvent.press(getByRole('checkbox'));
+      await fireEvent.press(getByTestId('button-envelope'));
 
       await waitFor(() => {
         expect(mockSubmitPhotoAnswerAndAdvance).toHaveBeenCalledTimes(1);

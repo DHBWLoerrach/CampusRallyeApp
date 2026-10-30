@@ -15,25 +15,27 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('UIButton', () => {
-  it('renders label text', () => {
-    const { getByText } = render(<UIButton>Continue</UIButton>, { wrapper });
+  it('renders label text', async () => {
+    const { getByText } = await render(<UIButton>Continue</UIButton>, {
+      wrapper,
+    });
     expect(getByText('Continue')).toBeTruthy();
   });
 
-  it('calls onPress when pressed', () => {
+  it('calls onPress when pressed', async () => {
     const onPress = jest.fn();
-    const { getByText } = render(
+    const { getByText } = await render(
       <UIButton onPress={onPress}>Click me</UIButton>,
       { wrapper }
     );
 
-    fireEvent.press(getByText('Click me'));
+    await fireEvent.press(getByText('Click me'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call onPress when disabled', () => {
+  it('does not call onPress when disabled', async () => {
     const onPress = jest.fn();
-    const { getByRole } = render(
+    const { getByRole } = await render(
       <UIButton onPress={onPress} disabled>
         Disabled
       </UIButton>,
@@ -41,13 +43,13 @@ describe('UIButton', () => {
     );
 
     const button = getByRole('button');
-    fireEvent.press(button);
+    await fireEvent.press(button);
     expect(onPress).not.toHaveBeenCalled();
   });
 
-  it('does not call onPress when loading', () => {
+  it('does not call onPress when loading', async () => {
     const onPress = jest.fn();
-    const { getByRole } = render(
+    const { getByRole } = await render(
       <UIButton onPress={onPress} loading>
         Loading
       </UIButton>,
@@ -55,12 +57,12 @@ describe('UIButton', () => {
     );
 
     const button = getByRole('button');
-    fireEvent.press(button);
+    await fireEvent.press(button);
     expect(onPress).not.toHaveBeenCalled();
   });
 
-  it('exposes disabled and busy accessibility state when loading', () => {
-    const { getByRole } = render(<UIButton loading>Saving</UIButton>, {
+  it('exposes disabled and busy accessibility state when loading', async () => {
+    const { getByRole } = await render(<UIButton loading>Saving</UIButton>, {
       wrapper,
     });
 
@@ -70,8 +72,8 @@ describe('UIButton', () => {
     );
   });
 
-  it('passes accessibilityLabel and accessibilityHint', () => {
-    const { getByRole } = render(
+  it('passes accessibilityLabel and accessibilityHint', async () => {
+    const { getByRole } = await render(
       <UIButton
         accessibilityLabel="Submit form"
         accessibilityHint="Sends answer"
@@ -86,8 +88,8 @@ describe('UIButton', () => {
     expect(button.props.accessibilityHint).toBe('Sends answer');
   });
 
-  it('renders FontAwesome6 icons with the solid style', () => {
-    render(<UIButton icon="rotate">Refresh</UIButton>, { wrapper });
+  it('renders FontAwesome6 icons with the solid style', async () => {
+    await render(<UIButton icon="rotate">Refresh</UIButton>, { wrapper });
 
     expect(FontAwesome6).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -98,8 +100,8 @@ describe('UIButton', () => {
     );
   });
 
-  it('applies reduced opacity when disabled', () => {
-    const { getByRole } = render(<UIButton disabled>Off</UIButton>, {
+  it('applies reduced opacity when disabled', async () => {
+    const { getByRole } = await render(<UIButton disabled>Off</UIButton>, {
       wrapper,
     });
 

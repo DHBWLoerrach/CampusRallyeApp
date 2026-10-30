@@ -23,29 +23,29 @@ jest.mock('@/utils/LanguageContext', () => ({
 }));
 
 describe('RallyeContextBar', () => {
-  it('renders the full team name without truncation', () => {
+  it('renders the full team name without truncation', async () => {
     mockTeam = { name: 'Invincible Green Sharks with a Very Long Team Name' };
 
-    const { getByText } = render(<RallyeContextBar />);
+    const { getByText } = await render(<RallyeContextBar />);
     const teamName = getByText(mockTeam.name);
 
     expect(teamName.props.numberOfLines).toBeUndefined();
     expect(teamName.props.ellipsizeMode).toBeUndefined();
   });
 
-  it('labels the current team explicitly', () => {
+  it('labels the current team explicitly', async () => {
     mockTeam = { name: 'Crimson Owls' };
 
-    const { getByText } = render(<RallyeContextBar />);
+    const { getByText } = await render(<RallyeContextBar />);
 
     expect(getByText('rallye.currentTeamLabel')).toBeTruthy();
     expect(getByText('Crimson Owls')).toBeTruthy();
   });
 
-  it('renders nothing when no team exists', () => {
+  it('renders nothing when no team exists', async () => {
     mockTeam = null;
 
-    const { toJSON } = render(<RallyeContextBar />);
+    const { toJSON } = await render(<RallyeContextBar />);
 
     expect(toJSON()).toBeNull();
   });

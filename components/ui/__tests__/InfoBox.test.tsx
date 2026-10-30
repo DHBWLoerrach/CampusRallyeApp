@@ -13,8 +13,8 @@ const darkWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('InfoBox', () => {
-  it('keeps a caller-provided border in dark mode', () => {
-    const { getByTestId } = render(
+  it('keeps a caller-provided border in dark mode', async () => {
+    const { getByTestId } = await render(
       <InfoBox testID="box" style={{ borderColor: 'red', borderWidth: 2 }} />,
       { wrapper: darkWrapper }
     );
@@ -24,8 +24,8 @@ describe('InfoBox', () => {
     expect(style.borderWidth).toBe(2);
   });
 
-  it('removes caller-provided shadows in dark mode', () => {
-    const { getByTestId } = render(
+  it('removes caller-provided shadows in dark mode', async () => {
+    const { getByTestId } = await render(
       <InfoBox testID="box" style={{ shadowOpacity: 0.25, elevation: 5 }} />,
       { wrapper: darkWrapper }
     );

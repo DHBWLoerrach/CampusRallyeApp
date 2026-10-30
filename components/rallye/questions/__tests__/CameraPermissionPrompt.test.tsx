@@ -61,7 +61,7 @@ jest.mock('@/components/ui/VStack', () => {
 
 type PermissionResult = { granted: boolean; canAskAgain: boolean };
 
-function renderPrompt(
+async function renderPrompt(
   canAskAgain: boolean,
   requestResult: PermissionResult = { granted: false, canAskAgain }
 ) {
@@ -72,7 +72,7 @@ function renderPrompt(
     onRefreshPermission: jest.fn(),
     onSurrender: jest.fn(),
   };
-  return { props, ...render(<CameraPermissionPrompt {...props} />) };
+  return { props, ...(await render(<CameraPermissionPrompt {...props} />)) };
 }
 
 describe('CameraPermissionPrompt', () => {
@@ -89,38 +89,38 @@ describe('CameraPermissionPrompt', () => {
     jest.restoreAllMocks();
   });
 
-  it('requests the permission while the OS can still ask', () => {
-    const { props, getByText, queryByText } = renderPrompt(true);
+  it('requests the permission while the OS can still ask', async () => {
+    const { props, getByText, queryByText } = await renderPrompt(true);
 
     expect(getByText('Take a group photo')).toBeTruthy();
     expect(getByText('question.camera.needAccess')).toBeTruthy();
     expect(queryByText('common.openSettings')).toBeNull();
 
-    fireEvent.press(getByText('question.camera.allow'));
+    await fireEvent.press(getByText('question.camera.allow'));
 
     expect(props.onRequestPermission).toHaveBeenCalledTimes(1);
     expect(openSettingsSpy).not.toHaveBeenCalled();
   });
 
   it('opens the system settings when the permission is blocked', async () => {
-    const { props, getByText, queryByText } = renderPrompt(false);
+    const { props, getByText, queryByText } = await renderPrompt(false);
 
     expect(getByText('question.camera.deniedInSettings')).toBeTruthy();
     expect(queryByText('question.camera.allow')).toBeNull();
 
-    fireEvent.press(getByText('common.openSettings'));
+    await fireEvent.press(getByText('common.openSettings'));
 
     await waitFor(() => expect(openSettingsSpy).toHaveBeenCalledTimes(1));
     expect(props.onRequestPermission).toHaveBeenCalledTimes(1);
   });
 
   it('stays in the app when the OS can show the dialog again despite a stale block', async () => {
-    const { props, getByText } = renderPrompt(false, {
+    const { props, getByText } = await renderPrompt(false, {
       granted: false,
       canAskAgain: true,
     });
 
-    fireEvent.press(getByText('common.openSettings'));
+    await fireEvent.press(getByText('common.openSettings'));
 
     await waitFor(() =>
       expect(props.onRequestPermission).toHaveBeenCalledTimes(1)
@@ -128,10 +128,10 @@ describe('CameraPermissionPrompt', () => {
     expect(openSettingsSpy).not.toHaveBeenCalled();
   });
 
-  it('lets the team surrender without camera access', () => {
-    const { props, getByText } = renderPrompt(false);
+  it('lets the team surrender without camera access', async () => {
+    const { props, getByText } = await renderPrompt(false);
 
-    fireEvent.press(getByText('common.surrender'));
+    await fireEvent.press(getByText('common.surrender'));
 
     expect(props.onSurrender).toHaveBeenCalledTimes(1);
   });

@@ -158,12 +158,14 @@ describe('QRCodeQuestion', () => {
     ]);
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
-    const { getByText } = render(<QRCodeQuestion question={baseQuestion} />);
+    const { getByText } = await render(
+      <QRCodeQuestion question={baseQuestion} />
+    );
 
     expect(getByText('Scan the hidden marker')).toBeTruthy();
     expect(getByText('question.camera.needAccess')).toBeTruthy();
 
-    fireEvent.press(getByText('common.surrender'));
+    await fireEvent.press(getByText('common.surrender'));
 
     await waitFor(() => {
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
@@ -205,7 +207,7 @@ describe('QRCodeQuestion', () => {
     }
     mockUseCameraPermissions.mockImplementation(usePermissionsAfterSettings);
 
-    const { getByText, getByTestId, queryByText } = render(
+    const { getByText, getByTestId, queryByText } = await render(
       <QRCodeQuestion question={baseQuestion} />
     );
     expect(getByText('common.openSettings')).toBeTruthy();
@@ -218,17 +220,17 @@ describe('QRCodeQuestion', () => {
 
     expect(getByText('question.qr.scan')).toBeTruthy();
     expect(queryByText('common.openSettings')).toBeNull();
-    fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent.press(getByText('question.qr.scan'));
     expect(getByTestId('camera-view')).toBeTruthy();
   });
 
   it('accepts scanned QR values with trailing whitespace', async () => {
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <QRCodeQuestion question={baseQuestion} />
     );
 
-    fireEvent.press(getByText('question.qr.scan'));
-    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+    await fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
       data: 'Secret Code \n',
     });
 
@@ -257,12 +259,12 @@ describe('QRCodeQuestion', () => {
   it('submits a correct tour QR scan without the old success alert', async () => {
     const storeMock = jest.requireMock('@/services/storage/Store');
     storeMock.store$.isTourMode.get.mockReturnValue(true);
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <QRCodeQuestion question={baseQuestion} />
     );
 
-    fireEvent.press(getByText('question.qr.scan'));
-    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+    await fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
       data: 'secret code',
     });
 
@@ -288,12 +290,12 @@ describe('QRCodeQuestion', () => {
         })
     );
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <QRCodeQuestion question={baseQuestion} />
     );
 
-    fireEvent.press(getByText('question.qr.scan'));
-    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+    await fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
       data: 'secret code',
     });
 
@@ -301,12 +303,12 @@ describe('QRCodeQuestion', () => {
       { onPress?: () => void }[] | undefined;
     successButtons?.[0]?.onPress?.();
 
-    act(() => {
+    await act(() => {
       jest.advanceTimersByTime(2_000);
     });
 
-    fireEvent.press(getByText('question.qr.scan'));
-    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+    await fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
       data: 'secret code',
     });
 

@@ -22,9 +22,7 @@ jest.mock('expo-router/unstable-native-tabs', () => ({
         jest.fn(({ children }: NativeTabTriggerProps) => children),
         {
           Icon: jest.fn(() => null),
-          Label: jest.fn(
-            ({ children }: { children: React.ReactNode }) => children
-          ),
+          Label: jest.fn(() => null),
         }
       ),
     }
@@ -48,8 +46,8 @@ describe('TabLayout', () => {
     mockNativeTabsLabel.mockClear();
   });
 
-  it('renders static native tabs for rallye and infos', () => {
-    render(<TabLayout />);
+  it('renders static native tabs for rallye and infos', async () => {
+    await render(<TabLayout />);
 
     expect(mockNativeTabs).toHaveBeenCalledWith(
       expect.objectContaining({

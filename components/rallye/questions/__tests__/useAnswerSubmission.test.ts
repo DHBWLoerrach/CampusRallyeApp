@@ -44,7 +44,7 @@ describe('useAnswerSubmission', () => {
   });
 
   it('submits the full point value for a correct answer', async () => {
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
     let submitted = false;
 
     await act(async () => {
@@ -65,7 +65,7 @@ describe('useAnswerSubmission', () => {
   });
 
   it('submits zero points for an incorrect answer', async () => {
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
     let submitted = false;
 
     await act(async () => {
@@ -87,7 +87,7 @@ describe('useAnswerSubmission', () => {
 
   it('submits with a null team ID in tour mode', async () => {
     mockTeam = null;
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
 
     await act(async () => {
       await result.current.submit({ isCorrect: true, answerText: 'x' });
@@ -104,7 +104,7 @@ describe('useAnswerSubmission', () => {
       .mockRejectedValueOnce(new Error('save failed'));
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
     let submitted = true;
 
     await act(async () => {
@@ -124,7 +124,7 @@ describe('useAnswerSubmission', () => {
       .mockRejectedValueOnce(new Error('save failed'));
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
 
     await act(async () => {
       await result.current.submit({
@@ -140,7 +140,7 @@ describe('useAnswerSubmission', () => {
   });
 
   it('submits zero points after surrender is confirmed', async () => {
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
     let surrendered = false;
 
     await act(async () => {
@@ -162,7 +162,7 @@ describe('useAnswerSubmission', () => {
 
   it('does not submit when surrender is declined', async () => {
     jest.mocked(confirm).mockResolvedValue(false);
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
     let surrendered = true;
 
     await act(async () => {
@@ -184,7 +184,7 @@ describe('useAnswerSubmission', () => {
       return { status: 'sent' };
     });
     const onConfirmed = jest.fn(() => calls.push('onConfirmed'));
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
 
     await act(async () => {
       await result.current.surrender({ onConfirmed });
@@ -202,7 +202,7 @@ describe('useAnswerSubmission', () => {
           resolveSubmission = () => resolve({ status: 'sent' });
         })
     );
-    const { result } = renderHook(() => useAnswerSubmission(question));
+    const { result } = await renderHook(() => useAnswerSubmission(question));
 
     let outcomes: boolean[] = [];
     await act(async () => {

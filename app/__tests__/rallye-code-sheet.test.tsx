@@ -49,8 +49,8 @@ describe('RallyeCodeSheetRoute', () => {
     clearRallyeCodeSheetSession();
   });
 
-  it('dismisses itself when opened without a pending session', () => {
-    render(<RallyeCodeSheetRoute />);
+  it('dismisses itself when opened without a pending session', async () => {
+    await render(<RallyeCodeSheetRoute />);
 
     expect(mockRouterBack).toHaveBeenCalledTimes(1);
   });
@@ -62,19 +62,19 @@ describe('RallyeCodeSheetRoute', () => {
       onJoin,
     });
 
-    const { getByLabelText, getByText, unmount } = render(
+    const { getByLabelText, getByText, unmount } = await render(
       <RallyeCodeSheetRoute />
     );
 
-    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
+    await fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.code.join'));
+      await fireEvent.press(getByText('rallye.code.join'));
     });
 
     expect(onJoin).toHaveBeenCalledWith(protectedRallye);
     expect(mockRouterBack).not.toHaveBeenCalled();
 
-    unmount();
+    await unmount();
     expect(getRallyeCodeSheetSession()).toBeNull();
   });
 
@@ -85,14 +85,16 @@ describe('RallyeCodeSheetRoute', () => {
       onJoin,
     });
 
-    const { getByLabelText, getByText } = render(<RallyeCodeSheetRoute />);
+    const { getByLabelText, getByText } = await render(
+      <RallyeCodeSheetRoute />
+    );
 
-    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
+    await fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.code.join'));
+      await fireEvent.press(getByText('rallye.code.join'));
     });
     await act(async () => {
-      fireEvent.press(getByText('rallye.code.join'));
+      await fireEvent.press(getByText('rallye.code.join'));
     });
 
     expect(onJoin).toHaveBeenCalledTimes(2);
@@ -112,13 +114,15 @@ describe('RallyeCodeSheetRoute', () => {
       onJoin,
     });
 
-    const { getByLabelText, getByText } = render(<RallyeCodeSheetRoute />);
+    const { getByLabelText, getByText } = await render(
+      <RallyeCodeSheetRoute />
+    );
 
-    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
+    await fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.code.join'));
+      await fireEvent.press(getByText('rallye.code.join'));
     });
-    fireEvent.press(getByText('common.cancel'));
+    await fireEvent.press(getByText('common.cancel'));
 
     expect(mockRouterBack).not.toHaveBeenCalled();
 

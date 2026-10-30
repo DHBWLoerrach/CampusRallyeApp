@@ -25,16 +25,16 @@ describe('TeamDeletedNotice', () => {
     alertSpy.mockRestore();
   });
 
-  it('shows no alert while the team exists', () => {
-    render(<TeamDeletedNotice />);
+  it('shows no alert while the team exists', async () => {
+    await render(<TeamDeletedNotice />);
 
     expect(alertSpy).not.toHaveBeenCalled();
   });
 
-  it('shows the alert once when the team gets deleted', () => {
-    render(<TeamDeletedNotice />);
+  it('shows the alert once when the team gets deleted', async () => {
+    await render(<TeamDeletedNotice />);
 
-    act(() => {
+    await act(() => {
       store$.teamDeleted.set(true);
     });
 
@@ -46,10 +46,10 @@ describe('TeamDeletedNotice', () => {
     expect(store$.teamDeleted.get()).toBe(false);
   });
 
-  it('shows the alert for a team deleted before the app became ready', () => {
+  it('shows the alert for a team deleted before the app became ready', async () => {
     store$.teamDeleted.set(true);
 
-    render(<TeamDeletedNotice />);
+    await render(<TeamDeletedNotice />);
 
     expect(alertSpy).toHaveBeenCalledTimes(1);
   });

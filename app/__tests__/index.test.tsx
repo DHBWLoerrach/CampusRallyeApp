@@ -229,10 +229,10 @@ describe('Welcome', () => {
 
   it('opens public infos while the welcome screen is loading', async () => {
     mockedGetSelectedLocation.mockReturnValue(new Promise(() => {}));
-    const { getByRole, getByText } = render(<Welcome />);
+    const { getByRole, getByText } = await render(<Welcome />);
 
     expect(getByText('common.loading')).toBeTruthy();
-    fireEvent.press(getByRole('button', { name: 'welcome.infos' }));
+    await fireEvent.press(getByRole('button', { name: 'welcome.infos' }));
 
     expect(mockRouterPush).toHaveBeenCalledWith('/info');
   });
@@ -247,10 +247,10 @@ describe('Welcome', () => {
           new Error('Offline')
         );
       }
-      const { getByRole, queryByText } = render(<Welcome />);
+      const { getByRole, queryByText } = await render(<Welcome />);
       await waitFor(() => expect(queryByText('common.loading')).toBeNull());
 
-      fireEvent.press(getByRole('button', { name: 'welcome.infos' }));
+      await fireEvent.press(getByRole('button', { name: 'welcome.infos' }));
 
       expect(mockRouterPush).toHaveBeenCalledWith('/info');
       expect(store$.enabled.set).not.toHaveBeenCalled();
@@ -287,10 +287,10 @@ describe('Welcome', () => {
       ['the app is offline', () => Promise.reject(new Error('Offline'))],
     ])('offers to resume when %s', async (_, loadLocations) => {
       mockedGetLocationsWithJoinableRallyes.mockImplementation(loadLocations);
-      const { getByText, queryByText } = render(<Welcome />);
+      const { getByText, queryByText } = await render(<Welcome />);
       await waitFor(() => expect(queryByText('common.loading')).toBeNull());
 
-      fireEvent.press(getByText('common.resume'));
+      await fireEvent.press(getByText('common.resume'));
 
       expect(store$.enabled.set).toHaveBeenCalledWith(true);
     });
@@ -314,7 +314,7 @@ describe('Welcome', () => {
       departmentEntries: [],
     });
 
-    const { getByText, queryByText } = render(<Welcome />);
+    const { getByText, queryByText } = await render(<Welcome />);
 
     await waitFor(() => {
       expect(getByText('welcome.explore.title')).toBeTruthy();
@@ -346,7 +346,7 @@ describe('Welcome', () => {
     });
     mockedSetCurrentRallye.mockResolvedValue();
 
-    const { getByText, queryByText } = render(<Welcome />);
+    const { getByText, queryByText } = await render(<Welcome />);
 
     await waitFor(() => {
       expect(getByText(departmentRallye.name)).toBeTruthy();
@@ -355,7 +355,7 @@ describe('Welcome', () => {
     expect(queryByText(mockDepartment.name)).toBeNull();
 
     await act(async () => {
-      fireEvent.press(getByText('rallye.join'));
+      await fireEvent.press(getByText('rallye.join'));
     });
 
     expect(mockedSetCurrentRallye).toHaveBeenCalledWith(departmentRallye);
@@ -383,7 +383,7 @@ describe('Welcome', () => {
     });
     mockedSetCurrentRallye.mockResolvedValue();
 
-    const { getByText } = render(<Welcome />);
+    const { getByText } = await render(<Welcome />);
 
     await waitFor(() => {
       expect(getByText(mockDepartment.name)).toBeTruthy();
@@ -418,7 +418,7 @@ describe('Welcome', () => {
       fourthLocation,
     ]);
 
-    const { getByText, queryByText } = render(<Welcome />);
+    const { getByText, queryByText } = await render(<Welcome />);
 
     await waitFor(() => {
       expect(getByText('welcome.selectLocation.description')).toBeTruthy();
@@ -454,7 +454,7 @@ describe('Welcome', () => {
     mockedGetCurrentTeam.mockResolvedValue(existingTeam);
     mockedTeamExists.mockResolvedValue('unknown');
 
-    const { getByText, queryByText } = render(<Welcome />);
+    const { getByText, queryByText } = await render(<Welcome />);
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
@@ -463,7 +463,7 @@ describe('Welcome', () => {
     expect(queryByText('welcome.selectDepartment.description')).toBeNull();
 
     await act(async () => {
-      fireEvent.press(getByText('rallye.join'));
+      await fireEvent.press(getByText('rallye.join'));
     });
 
     expect(mockedClearCurrentTeam).not.toHaveBeenCalled();
@@ -490,14 +490,14 @@ describe('Welcome', () => {
       ],
     });
 
-    const { getByText } = render(<Welcome />);
+    const { getByText } = await render(<Welcome />);
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
     expect(getByText('Protected Rallye')).toBeTruthy();
 
     await act(async () => {
-      fireEvent.press(getByText('rallye.join'));
+      await fireEvent.press(getByText('rallye.join'));
     });
 
     expect(mockedSetRallyeCodeSheetSession).toHaveBeenCalledWith(
@@ -531,14 +531,14 @@ describe('Welcome', () => {
       ],
     });
 
-    const { getByText } = render(<Welcome />);
+    const { getByText } = await render(<Welcome />);
     await waitFor(() => {
       expect(getByText('rallye.join')).toBeTruthy();
     });
 
     await act(async () => {
-      fireEvent.press(getByText('rallye.join'));
-      fireEvent.press(getByText('rallye.join'));
+      await fireEvent.press(getByText('rallye.join'));
+      await fireEvent.press(getByText('rallye.join'));
     });
 
     expect(mockedSetRallyeCodeSheetSession).toHaveBeenCalledTimes(1);
@@ -575,7 +575,7 @@ describe('Welcome', () => {
       ],
     });
 
-    const { getAllByText, queryByText, getByText } = render(<Welcome />);
+    const { getAllByText, queryByText, getByText } = await render(<Welcome />);
     await waitFor(() => {
       expect(getByText('Rallye A')).toBeTruthy();
       expect(getByText('Rallye B')).toBeTruthy();
@@ -623,7 +623,7 @@ describe('Welcome', () => {
       ],
     });
 
-    const { getByText, queryByText } = render(<Welcome />);
+    const { getByText, queryByText } = await render(<Welcome />);
     await waitFor(() => {
       expect(getByText(rallyeA.name)).toBeTruthy();
       expect(getByText(rallyeB.name)).toBeTruthy();
@@ -635,7 +635,7 @@ describe('Welcome', () => {
 
   it('refreshes the rallyes when the app returns from the background', async () => {
     jest.useFakeTimers();
-    render(<Welcome />);
+    await render(<Welcome />);
     await waitFor(() => {
       expect(mockedGetLocationsWithJoinableRallyes).toHaveBeenCalledTimes(1);
     });
@@ -657,7 +657,7 @@ describe('Welcome', () => {
 
     mockedGetSelectedLocation.mockResolvedValue(mockLocation);
 
-    render(<Welcome />);
+    await render(<Welcome />);
 
     await waitFor(() => {
       expect(mockedGetLocationsWithJoinableRallyes).toHaveBeenCalledTimes(1);
@@ -708,7 +708,7 @@ describe('Welcome', () => {
         ],
       });
 
-    const { queryByText, getByText } = render(<Welcome />);
+    const { queryByText, getByText } = await render(<Welcome />);
 
     await waitFor(() => {
       expect(mockedGetLocationDashboardData).toHaveBeenCalledTimes(1);
@@ -773,7 +773,7 @@ describe('Welcome', () => {
         ],
       });
 
-    const { getByText } = render(<Welcome />);
+    const { getByText } = await render(<Welcome />);
 
     await waitFor(() => {
       expect(getByText(initialRallye.name)).toBeTruthy();

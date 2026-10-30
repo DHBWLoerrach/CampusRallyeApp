@@ -115,22 +115,24 @@ describe('SkillQuestion', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the question text', () => {
-    const { getByText } = render(<SkillQuestion question={baseQuestion} />);
+  it('renders the question text', async () => {
+    const { getByText } = await render(
+      <SkillQuestion question={baseQuestion} />
+    );
 
     expect(getByText('Wie viele Studiengänge gibt es?')).toBeTruthy();
   });
 
   it('awards the full point value for a correct answer', async () => {
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Zwölf'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -144,15 +146,15 @@ describe('SkillQuestion', () => {
   });
 
   it('awards zero points for a wrong answer but still submits', async () => {
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Drei'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -166,15 +168,15 @@ describe('SkillQuestion', () => {
   });
 
   it('grades case-insensitively and ignores surrounding whitespace', async () => {
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       '  zWÖLF  '
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -189,15 +191,15 @@ describe('SkillQuestion', () => {
 
   it('does not submit when the confirmation is declined', async () => {
     jest.mocked(confirmAnswer).mockResolvedValue(false);
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Zwölf'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() => expect(confirmAnswer).toHaveBeenCalled());
     expect(submitAnswerAndAdvance).not.toHaveBeenCalled();
@@ -205,15 +207,15 @@ describe('SkillQuestion', () => {
 
   it('submits with a null teamId in tour mode', async () => {
     mockTeam = null;
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Zwölf'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(submitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -226,13 +228,13 @@ describe('SkillQuestion', () => {
     );
   });
 
-  it('alerts instead of submitting when the answer is empty', () => {
+  it('alerts instead of submitting when the answer is empty', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByPlaceholderText } = render(
+    const { getByPlaceholderText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
 
-    fireEvent(
+    await fireEvent(
       getByPlaceholderText('question.placeholder.answer'),
       'submitEditing'
     );
@@ -244,16 +246,16 @@ describe('SkillQuestion', () => {
     expect(submitAnswerAndAdvance).not.toHaveBeenCalled();
   });
 
-  it('alerts instead of submitting while the answer key is still loading', () => {
+  it('alerts instead of submitting while the answer key is still loading', async () => {
     mockAnswers = [];
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByPlaceholderText } = render(
+    const { getByPlaceholderText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
     const input = getByPlaceholderText('question.placeholder.answer');
 
-    fireEvent.changeText(input, 'Zwölf');
-    fireEvent(input, 'submitEditing');
+    await fireEvent.changeText(input, 'Zwölf');
+    await fireEvent(input, 'submitEditing');
 
     expect(alertSpy).toHaveBeenCalledWith(
       'question.error.pleaseWaitTitle',
@@ -268,15 +270,15 @@ describe('SkillQuestion', () => {
       .mockRejectedValueOnce(new Error('save failed'));
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { getByPlaceholderText, getByText } = render(
+    const { getByPlaceholderText, getByText } = await render(
       <SkillQuestion question={baseQuestion} />
     );
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'Zwölf'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() =>
       expect(alertSpy).toHaveBeenCalledWith(

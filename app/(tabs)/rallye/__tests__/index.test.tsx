@@ -194,17 +194,17 @@ describe('RallyeIndex', () => {
     (store$.answers.get as jest.Mock).mockReturnValue([]);
   });
 
-  it('calls leaveRallye when pressing back-to-start in tour completion state', () => {
-    const { getByText } = render(<RallyeIndex />);
+  it('calls leaveRallye when pressing back-to-start in tour completion state', async () => {
+    const { getByText } = await render(<RallyeIndex />);
 
-    fireEvent.press(getByText('rallye.backToStart'));
+    await fireEvent.press(getByText('rallye.backToStart'));
 
     expect(store$.leaveRallye).toHaveBeenCalledTimes(1);
     expect(store$.reset).not.toHaveBeenCalled();
     expect(store$.enabled.set).not.toHaveBeenCalled();
   });
 
-  it('shows the rallye name above the waiting message', () => {
+  it('shows the rallye name above the waiting message', async () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,
       name: 'Campus Rallye',
@@ -213,17 +213,17 @@ describe('RallyeIndex', () => {
       rallye_end: null,
     });
 
-    const { getByText } = render(<RallyeIndex />);
+    const { getByText } = await render(<RallyeIndex />);
 
     expect(getByText('Campus Rallye')).toBeTruthy();
     expect(getByText('rallye.preparing.title')).toBeTruthy();
   });
 
-  it('shows the number of correctly answered questions in tour completion state', () => {
+  it('shows the number of correctly answered questions in tour completion state', async () => {
     (store$.correctAnswerCount.get as jest.Mock).mockReturnValue(3);
     (store$.totalQuestions.get as jest.Mock).mockReturnValue(5);
 
-    const { getByText } = render(<RallyeIndex />);
+    const { getByText } = await render(<RallyeIndex />);
 
     expect(getByText('rallye.correctAnswers:3/5')).toBeTruthy();
   });
@@ -238,14 +238,14 @@ describe('RallyeIndex', () => {
       correctAnswer: '',
     });
 
-    const { getByText, queryByText } = render(<RallyeIndex />);
+    const { getByText, queryByText } = await render(<RallyeIndex />);
 
     expect(getByText('tour.feedback.correct')).toBeTruthy();
     expect(queryByText('tour.feedback.correctAnswer:')).toBeNull();
     expect(mockQuestionRenderer).not.toHaveBeenCalled();
     expect(store$.gotoNextQuestion).not.toHaveBeenCalled();
 
-    fireEvent.press(getByText('common.next'));
+    await fireEvent.press(getByText('common.next'));
 
     await waitFor(() => {
       expect(store$.gotoNextQuestion).toHaveBeenCalledTimes(1);
@@ -253,7 +253,7 @@ describe('RallyeIndex', () => {
     });
   });
 
-  it('shows the correct answer after an incorrect tour response', () => {
+  it('shows the correct answer after an incorrect tour response', async () => {
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
     (store$.questions.get as jest.Mock).mockReturnValue([
       { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
@@ -263,14 +263,14 @@ describe('RallyeIndex', () => {
       correctAnswer: 'Bibliothek',
     });
 
-    const { getByText } = render(<RallyeIndex />);
+    const { getByText } = await render(<RallyeIndex />);
 
     expect(getByText('tour.feedback.incorrect')).toBeTruthy();
     expect(getByText('tour.feedback.correctAnswer:Bibliothek')).toBeTruthy();
     expect(store$.gotoNextQuestion).not.toHaveBeenCalled();
   });
 
-  it('does not expose pull-to-refresh while answering questions', () => {
+  it('does not expose pull-to-refresh while answering questions', async () => {
     (store$.allQuestionsAnswered.get as jest.Mock).mockReturnValue(false);
     (store$.questions.get as jest.Mock).mockReturnValue([
       { id: 1, question: 'Q1', question_type: 'knowledge', point_value: 1 },
@@ -282,14 +282,14 @@ describe('RallyeIndex', () => {
       point_value: 1,
     });
 
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
 
     const activeQuestionViewProps = mockScreenScrollView.mock.calls.at(-1)?.[0];
 
     expect(activeQuestionViewProps?.refreshControl).toBeUndefined();
   });
 
-  it('keeps rendering active team questions when an end time is set', () => {
+  it('keeps rendering active team questions when an end time is set', async () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,
       name: 'Campus Rallye',
@@ -310,7 +310,7 @@ describe('RallyeIndex', () => {
       point_value: 1,
     });
 
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
 
     expect(mockQuestionRenderer).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -319,7 +319,7 @@ describe('RallyeIndex', () => {
     );
   });
 
-  it('keeps rendering active tour questions when an end time is set', () => {
+  it('keeps rendering active tour questions when an end time is set', async () => {
     (store$.rallye.get as jest.Mock).mockReturnValue({
       id: 1,
       name: 'Campus Tour',
@@ -339,7 +339,7 @@ describe('RallyeIndex', () => {
       point_value: 1,
     });
 
-    render(<RallyeIndex />);
+    await render(<RallyeIndex />);
 
     expect(mockQuestionRenderer).toHaveBeenCalledWith(
       expect.objectContaining({

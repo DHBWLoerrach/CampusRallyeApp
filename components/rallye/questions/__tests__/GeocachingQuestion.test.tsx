@@ -293,14 +293,14 @@ describe('GeocachingQuestion', () => {
 
   // -- Rendering: missing coordinates ----------------------------------------
 
-  it('shows error when question has no coordinates', () => {
+  it('shows error when question has no coordinates', async () => {
     const q = {
       ...baseQuestion,
       target_latitude: undefined,
       target_longitude: undefined,
     } as any;
 
-    const { getByText } = render(<GeocachingQuestion question={q} />);
+    const { getByText } = await render(<GeocachingQuestion question={q} />);
 
     expect(getByText('geocaching.error.noCoordinates')).toBeTruthy();
     expect(getByText('question.skip')).toBeTruthy();
@@ -312,9 +312,11 @@ describe('GeocachingQuestion', () => {
       target_latitude: undefined,
       target_longitude: undefined,
     } as any;
-    const { getByText } = render(<GeocachingQuestion question={question} />);
+    const { getByText } = await render(
+      <GeocachingQuestion question={question} />
+    );
 
-    fireEvent.press(getByText('question.skip'));
+    await fireEvent.press(getByText('question.skip'));
 
     await waitFor(() =>
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -341,14 +343,21 @@ describe('GeocachingQuestion', () => {
       target_latitude: undefined,
       target_longitude: undefined,
     } as any;
-    const { getByText } = render(<GeocachingQuestion question={question} />);
+    const { getByText } = await render(
+      <GeocachingQuestion question={question} />
+    );
     const skipButton = getByText('question.skip');
 
-    fireEvent.press(skipButton);
-    fireEvent.press(skipButton);
+    // fireEvent settles with the handler, which stays pending here.
+    const firstSkip = fireEvent.press(skipButton);
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
+    });
+    await fireEvent.press(skipButton);
 
     expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
     await act(async () => resolveSubmission?.({ status: 'sent' }));
+    await firstSkip;
   });
 
   it('alerts and keeps the missing-coordinate question visible when skip persistence fails', async () => {
@@ -358,9 +367,11 @@ describe('GeocachingQuestion', () => {
       target_latitude: undefined,
       target_longitude: undefined,
     } as any;
-    const { getByText } = render(<GeocachingQuestion question={question} />);
+    const { getByText } = await render(
+      <GeocachingQuestion question={question} />
+    );
 
-    fireEvent.press(getByText('question.skip'));
+    await fireEvent.press(getByText('question.skip'));
 
     await waitFor(() =>
       expect(alertSpy).toHaveBeenCalledWith(
@@ -377,7 +388,7 @@ describe('GeocachingQuestion', () => {
   it('shows location denied screen when permission is not granted', async () => {
     setupLocationMocks({ permissionStatus: 'denied' });
 
-    const { getByText } = render(
+    const { getByText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -424,7 +435,7 @@ describe('GeocachingQuestion', () => {
     });
 
     it('opens the settings from the blocked screen', async () => {
-      const { findByText } = render(
+      const { findByText } = await render(
         <GeocachingQuestion question={baseQuestion} />
       );
 
@@ -432,19 +443,19 @@ describe('GeocachingQuestion', () => {
         await findByText('geocaching.error.locationDeniedInSettings')
       ).toBeTruthy();
 
-      fireEvent.press(await findByText('common.openSettings'));
+      await fireEvent.press(await findByText('common.openSettings'));
 
       await waitFor(() => expect(openSettingsSpy).toHaveBeenCalledTimes(1));
     });
 
     it('starts navigating instead of opening settings when the block was stale', async () => {
-      const { findByText } = render(
+      const { findByText } = await render(
         <GeocachingQuestion question={baseQuestion} />
       );
       const settingsButton = await findByText('common.openSettings');
 
       grantLocation();
-      fireEvent.press(settingsButton);
+      await fireEvent.press(settingsButton);
 
       expect(await findByText(expectedDistance)).toBeTruthy();
       expect(openSettingsSpy).not.toHaveBeenCalled();
@@ -452,20 +463,20 @@ describe('GeocachingQuestion', () => {
 
     it('does not jump to the settings when a retried dialog is denied again', async () => {
       setupLocationMocks({ permissionStatus: 'denied' });
-      const { findByText } = render(
+      const { findByText } = await render(
         <GeocachingQuestion question={baseQuestion} />
       );
       const retryButton = await findByText('geocaching.retryPermission');
 
       setupLocationMocks({ permissionStatus: 'denied', canAskAgain: false });
-      fireEvent.press(retryButton);
+      await fireEvent.press(retryButton);
 
       expect(await findByText('common.openSettings')).toBeTruthy();
       expect(openSettingsSpy).not.toHaveBeenCalled();
     });
 
     it('resumes navigating when access was granted in the settings', async () => {
-      const { findByText } = render(
+      const { findByText } = await render(
         <GeocachingQuestion question={baseQuestion} />
       );
       await findByText('common.openSettings');
@@ -488,7 +499,7 @@ describe('GeocachingQuestion', () => {
   // -- Rendering: navigation phase -------------------------------------------
 
   it('renders question text and surrender button in navigation phase', async () => {
-    const { getByText } = render(
+    const { getByText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -500,7 +511,7 @@ describe('GeocachingQuestion', () => {
   });
 
   it('explains that the destination must be found before answering', async () => {
-    const { getByText } = render(
+    const { getByText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -510,7 +521,7 @@ describe('GeocachingQuestion', () => {
   });
 
   it('explains that the destination must be found before scanning', async () => {
-    const { getByText } = render(
+    const { getByText } = await render(
       <GeocachingQuestion
         question={{ ...baseQuestion, input_type: 'qr' as const }}
       />
@@ -522,7 +533,7 @@ describe('GeocachingQuestion', () => {
   });
 
   it('shows the arrow without calibration while no heading reading has arrived', async () => {
-    const { findByTestId, queryByText } = render(
+    const { findByTestId, queryByText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -533,13 +544,13 @@ describe('GeocachingQuestion', () => {
   });
 
   it('asks for calibration when the compass reports an unreliable heading', async () => {
-    const { findByText, queryByTestId } = render(
+    const { findByText, queryByTestId } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
     await waitFor(() => expect(mockWatchHeadingAsync).toHaveBeenCalled());
     const headingCallback = mockWatchHeadingAsync.mock.calls[0][0];
-    act(() => {
+    await act(() => {
       headingCallback({ trueHeading: 90, magHeading: 90, accuracy: 0 });
     });
 
@@ -548,7 +559,7 @@ describe('GeocachingQuestion', () => {
   });
 
   it('starts location tracking on mount', async () => {
-    render(<GeocachingQuestion question={baseQuestion} />);
+    await render(<GeocachingQuestion question={baseQuestion} />);
 
     await waitFor(() => {
       expect(mockRequestForegroundPermissionsAsync).toHaveBeenCalled();
@@ -576,7 +587,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByText, getByPlaceholderText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -613,7 +624,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByText, getByPlaceholderText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -622,8 +633,8 @@ describe('GeocachingQuestion', () => {
     });
 
     const input = getByPlaceholderText('question.placeholder.answer');
-    fireEvent.changeText(input, 'secret code');
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.changeText(input, 'secret code');
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() => {
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
@@ -659,7 +670,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByText, getByPlaceholderText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -667,11 +678,11 @@ describe('GeocachingQuestion', () => {
       expect(getByText(/geocaching\.arrived/)).toBeTruthy();
     });
 
-    fireEvent.changeText(
+    await fireEvent.changeText(
       getByPlaceholderText('question.placeholder.answer'),
       'wrong answer'
     );
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     await waitFor(() => {
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith(
@@ -698,7 +709,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText } = render(
+    const { getByText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -708,7 +719,7 @@ describe('GeocachingQuestion', () => {
 
     // Try pressing submit with empty answer — the component disables the button
     // so onPress won't fire and no submission happens
-    fireEvent.press(getByText('question.submit'));
+    await fireEvent.press(getByText('question.submit'));
 
     // Give time for any async action to settle
     await new Promise((r) => setTimeout(r, 50));
@@ -743,7 +754,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByPlaceholderText } = render(
+    const { getByText, getByPlaceholderText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -752,30 +763,26 @@ describe('GeocachingQuestion', () => {
     });
 
     const input = getByPlaceholderText('question.placeholder.answer');
-    fireEvent.changeText(input, 'secret code');
+    await fireEvent.changeText(input, 'secret code');
 
-    await act(async () => {
-      fireEvent(input, 'submitEditing', {
-        nativeEvent: { text: 'secret code' },
-      });
-      await Promise.resolve();
+    // fireEvent settles with the handler, which stays pending here.
+    const firstSubmit = fireEvent(input, 'submitEditing', {
+      nativeEvent: { text: 'secret code' },
+    });
+    await waitFor(() => {
+      expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
     });
 
-    expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
-
-    await act(async () => {
-      fireEvent(input, 'submitEditing', {
-        nativeEvent: { text: 'secret code' },
-      });
-      await Promise.resolve();
+    await fireEvent(input, 'submitEditing', {
+      nativeEvent: { text: 'secret code' },
     });
 
     expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       resolveSubmit({ status: 'sent' });
-      await Promise.resolve();
     });
+    await firstSubmit;
   });
 
   // -- Surrender --------------------------------------------------------------
@@ -783,7 +790,7 @@ describe('GeocachingQuestion', () => {
   it('submits surrender with 0 points', async () => {
     mockSubmitAnswerAndAdvance.mockResolvedValue({ status: 'sent' });
 
-    const { getByText } = render(
+    const { getByText } = await render(
       <GeocachingQuestion question={baseQuestion} />
     );
 
@@ -791,7 +798,7 @@ describe('GeocachingQuestion', () => {
       expect(getByText('common.surrender')).toBeTruthy();
     });
 
-    fireEvent.press(getByText('common.surrender'));
+    await fireEvent.press(getByText('common.surrender'));
 
     await waitFor(() => {
       expect(confirm).toHaveBeenCalled();
@@ -825,7 +832,9 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText } = render(<GeocachingQuestion question={qrQuestion} />);
+    const { getByText } = await render(
+      <GeocachingQuestion question={qrQuestion} />
+    );
 
     await waitFor(() => {
       expect(getByText(/geocaching\.arrived/)).toBeTruthy();
@@ -858,7 +867,9 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText } = render(<GeocachingQuestion question={qrQuestion} />);
+    const { getByText } = await render(
+      <GeocachingQuestion question={qrQuestion} />
+    );
 
     await waitFor(() => {
       expect(getByText('question.camera.needAccess')).toBeTruthy();
@@ -866,7 +877,7 @@ describe('GeocachingQuestion', () => {
 
     expect(getByText('common.surrender')).toBeTruthy();
 
-    fireEvent.press(getByText('common.surrender'));
+    await fireEvent.press(getByText('common.surrender'));
 
     await waitFor(() => {
       expect(confirm).toHaveBeenCalled();
@@ -907,7 +918,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <GeocachingQuestion question={qrQuestion} />
     );
 
@@ -915,8 +926,8 @@ describe('GeocachingQuestion', () => {
       expect(getByText('question.qr.scan')).toBeTruthy();
     });
 
-    fireEvent.press(getByText('question.qr.scan'));
-    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+    await fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
       data: scannedValue,
     });
 
@@ -966,13 +977,13 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <GeocachingQuestion question={qrQuestion} />
     );
     await waitFor(() => expect(getByText('question.qr.scan')).toBeTruthy());
 
-    fireEvent.press(getByText('question.qr.scan'));
-    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+    await fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
       data: 'secret code',
     });
 
@@ -1013,7 +1024,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <GeocachingQuestion question={qrQuestion} />
     );
 
@@ -1021,8 +1032,8 @@ describe('GeocachingQuestion', () => {
       expect(getByText('question.qr.scan')).toBeTruthy();
     });
 
-    fireEvent.press(getByText('question.qr.scan'));
-    fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
+    await fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent(getByTestId('camera-view'), 'onBarcodeScanned', {
       data: 'Secret Code \n',
     });
 
@@ -1059,7 +1070,7 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <GeocachingQuestion question={qrQuestion} />
     );
 
@@ -1067,10 +1078,10 @@ describe('GeocachingQuestion', () => {
       expect(getByText('question.qr.scan')).toBeTruthy();
     });
 
-    fireEvent.press(getByText('question.qr.scan'));
+    await fireEvent.press(getByText('question.qr.scan'));
 
     const camera = getByTestId('camera-view');
-    act(() => {
+    await act(() => {
       camera.props.onBarcodeScanned({ data: 'wrong code' });
       camera.props.onBarcodeScanned({ data: 'wrong code' });
     });
@@ -1104,23 +1115,26 @@ describe('GeocachingQuestion', () => {
           return { remove: jest.fn() };
         }
       );
-      const result = render(<GeocachingQuestion question={qrQuestion} />);
+      const result = await render(<GeocachingQuestion question={qrQuestion} />);
       await waitFor(() => {
         expect(result.getByText('question.qr.scan')).toBeTruthy();
       });
-      const scan = (data: string) => {
-        fireEvent.press(result.getByText('question.qr.scan'));
-        fireEvent(result.getByTestId('camera-view'), 'onBarcodeScanned', {
+      const scan = async (data: string) => {
+        await fireEvent.press(result.getByText('question.qr.scan'));
+        await fireEvent(result.getByTestId('camera-view'), 'onBarcodeScanned', {
           data,
         });
       };
       return scan;
     }
 
-    function pressLastAlertButton() {
+    async function pressLastAlertButton() {
       const buttons = alertSpy.mock.calls.at(-1)?.[2] as
         { onPress?: () => void }[] | undefined;
-      act(() => buttons?.[0]?.onPress?.());
+      // The block body keeps act from waiting for a submission that stays pending.
+      await act(() => {
+        buttons?.[0]?.onPress?.();
+      });
     }
 
     function alertCount(message: string) {
@@ -1131,12 +1145,12 @@ describe('GeocachingQuestion', () => {
       mockSubmitAnswerAndAdvance.mockReturnValue(new Promise(() => {}));
       const scan = await renderScanner();
 
-      scan('secret code');
-      pressLastAlertButton();
+      await scan('secret code');
+      await pressLastAlertButton();
       await waitFor(() => {
         expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
       });
-      scan('secret code');
+      await scan('secret code');
 
       expect(alertCount('question.qr.correctMessage')).toBe(1);
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
@@ -1145,9 +1159,9 @@ describe('GeocachingQuestion', () => {
     it('accepts a new scan after an incorrect code was acknowledged', async () => {
       const scan = await renderScanner();
 
-      scan('wrong code');
-      pressLastAlertButton();
-      scan('secret code');
+      await scan('wrong code');
+      await pressLastAlertButton();
+      await scan('secret code');
 
       await waitFor(() => {
         expect(alertCount('question.qr.correctMessage')).toBe(1);
@@ -1173,7 +1187,9 @@ describe('GeocachingQuestion', () => {
       }
     );
 
-    const { getByText } = render(<GeocachingQuestion question={qWithHint} />);
+    const { getByText } = await render(
+      <GeocachingQuestion question={qWithHint} />
+    );
 
     await waitFor(() => {
       expect(getByText('Look under the bench')).toBeTruthy();
@@ -1185,13 +1201,15 @@ describe('GeocachingQuestion', () => {
   it('removes subscriptions on unmount', async () => {
     const { positionRemove, headingRemove } = setupLocationMocks();
 
-    const { unmount } = render(<GeocachingQuestion question={baseQuestion} />);
+    const { unmount } = await render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
 
     await waitFor(() => {
       expect(mockWatchPositionAsync).toHaveBeenCalled();
     });
 
-    unmount();
+    await unmount();
 
     expect(positionRemove).toHaveBeenCalled();
     expect(headingRemove).toHaveBeenCalled();
@@ -1209,13 +1227,15 @@ describe('GeocachingQuestion', () => {
         })
     );
 
-    const { unmount } = render(<GeocachingQuestion question={baseQuestion} />);
+    const { unmount } = await render(
+      <GeocachingQuestion question={baseQuestion} />
+    );
 
     await waitFor(() => {
       expect(mockWatchPositionAsync).toHaveBeenCalled();
     });
 
-    unmount();
+    await unmount();
 
     if (!resolvePositionSubscription) {
       throw new Error('Expected position subscription resolver');

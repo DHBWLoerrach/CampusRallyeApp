@@ -186,27 +186,30 @@ describe('QuestionRenderer', () => {
     ['multiple_choice', 'MultipleChoiceQuestion'],
     ['picture', 'ImageQuestion'],
     ['geocaching', 'GeocachingQuestion'],
-  ])('renders %s question type as %s component', (type, componentName) => {
-    const question = {
-      id: 1,
-      question_type: type,
-      question: 'Q1',
-      point_value: 5,
-    };
+  ])(
+    'renders %s question type as %s component',
+    async (type, componentName) => {
+      const question = {
+        id: 1,
+        question_type: type,
+        question: 'Q1',
+        point_value: 5,
+      };
 
-    const { getByText, queryAllByText } = render(
-      <QuestionRenderer question={question} />
-    );
+      const { getByText, queryAllByText } = await render(
+        <QuestionRenderer question={question} />
+      );
 
-    expect(getByText(componentName)).toBeTruthy();
-    expect(queryAllByText(componentName)).toHaveLength(1);
-    expect(mockComponents[type]).toHaveBeenCalledWith(
-      expect.objectContaining({ question })
-    );
-    expect(mockComponents[type]).toHaveBeenCalledTimes(1);
-  });
+      expect(getByText(componentName)).toBeTruthy();
+      expect(queryAllByText(componentName)).toHaveLength(1);
+      expect(mockComponents[type]).toHaveBeenCalledWith(
+        expect.objectContaining({ question })
+      );
+      expect(mockComponents[type]).toHaveBeenCalledTimes(1);
+    }
+  );
 
-  it('shows unknown type fallback with skip button for invalid type', () => {
+  it('shows unknown type fallback with skip button for invalid type', async () => {
     const question = {
       id: 1,
       question_type: 'nonexistent_type',
@@ -214,7 +217,9 @@ describe('QuestionRenderer', () => {
       point_value: 5,
     };
 
-    const { getAllByText } = render(<QuestionRenderer question={question} />);
+    const { getAllByText } = await render(
+      <QuestionRenderer question={question} />
+    );
 
     expect(
       getAllByText('question.unknown.title').length
@@ -222,10 +227,12 @@ describe('QuestionRenderer', () => {
     expect(getAllByText('question.skip').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('shows unknown type fallback when question_type is undefined', () => {
+  it('shows unknown type fallback when question_type is undefined', async () => {
     const question = { id: 1, question: 'Q1', point_value: 5 };
 
-    const { getAllByText } = render(<QuestionRenderer question={question} />);
+    const { getAllByText } = await render(
+      <QuestionRenderer question={question} />
+    );
 
     expect(
       getAllByText('question.unknown.title').length
@@ -239,9 +246,11 @@ describe('QuestionRenderer', () => {
       question: 'Q1',
       point_value: 5,
     };
-    const { getByText } = render(<QuestionRenderer question={question} />);
+    const { getByText } = await render(
+      <QuestionRenderer question={question} />
+    );
 
-    fireEvent.press(getByText('question.skip'));
+    await fireEvent.press(getByText('question.skip'));
 
     await waitFor(() =>
       expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledWith({
@@ -263,15 +272,15 @@ describe('QuestionRenderer', () => {
           resolveSubmission = resolve;
         })
     );
-    const { getByText } = render(
+    const { getByText } = await render(
       <QuestionRenderer
         question={{ id: 12, question_type: 'nonexistent_type' }}
       />
     );
     const skipButton = getByText('question.skip');
 
-    fireEvent.press(skipButton);
-    fireEvent.press(skipButton);
+    await fireEvent.press(skipButton);
+    await fireEvent.press(skipButton);
 
     expect(mockSubmitAnswerAndAdvance).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
@@ -281,13 +290,13 @@ describe('QuestionRenderer', () => {
   it('alerts and keeps an unknown question visible when skip persistence fails', async () => {
     mockSubmitAnswerAndAdvance.mockRejectedValue(new Error('save failed'));
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByText } = render(
+    const { getByText } = await render(
       <QuestionRenderer
         question={{ id: 12, question_type: 'nonexistent_type' }}
       />
     );
 
-    fireEvent.press(getByText('question.skip'));
+    await fireEvent.press(getByText('question.skip'));
 
     await waitFor(() =>
       expect(alertSpy).toHaveBeenCalledWith(
@@ -302,13 +311,13 @@ describe('QuestionRenderer', () => {
 
   it('does not submit or advance an unknown question without a numeric ID', async () => {
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByText } = render(
+    const { getByText } = await render(
       <QuestionRenderer
         question={{ id: 'invalid', question_type: 'nonexistent_type' }}
       />
     );
 
-    fireEvent.press(getByText('question.skip'));
+    await fireEvent.press(getByText('question.skip'));
 
     await waitFor(() => expect(alertSpy).toHaveBeenCalled());
     expect(mockSubmitAnswerAndAdvance).not.toHaveBeenCalled();
@@ -316,7 +325,7 @@ describe('QuestionRenderer', () => {
     alertSpy.mockRestore();
   });
 
-  it('keeps the new question visible after flip completes', () => {
+  it('keeps the new question visible after flip completes', async () => {
     const q1 = {
       id: 1,
       question_type: 'knowledge',
@@ -331,10 +340,10 @@ describe('QuestionRenderer', () => {
     };
 
     const { getByTestId, getByText, queryByTestId, queryByText, rerender } =
-      render(<QuestionRenderer question={q1} />);
+      await render(<QuestionRenderer question={q1} />);
 
     // New question triggers flip — both faces mounted during animation
-    rerender(<QuestionRenderer question={q2} />);
+    await rerender(<QuestionRenderer question={q2} />);
     expect(getByText('SkillQuestion')).toBeTruthy();
     expect(getByText('ImageQuestion')).toBeTruthy();
 
@@ -349,7 +358,7 @@ describe('QuestionRenderer', () => {
     expect(backFaceDuringFlip?.position).toBe('absolute');
 
     // Animation completes — old face unmounts, new question stays visible
-    act(() => {
+    await act(() => {
       springCallbacks.at(-1)?.(true);
     });
 
@@ -363,7 +372,7 @@ describe('QuestionRenderer', () => {
     expect(activeFaceAfterFlip?.position).toBeUndefined();
   });
 
-  it('keeps both faces mounted when a flip spring is canceled', () => {
+  it('keeps both faces mounted when a flip spring is canceled', async () => {
     const q1 = {
       id: 1,
       question_type: 'knowledge',
@@ -377,15 +386,15 @@ describe('QuestionRenderer', () => {
       point_value: 5,
     };
 
-    const { getByTestId, getByText, rerender } = render(
+    const { getByTestId, getByText, rerender } = await render(
       <QuestionRenderer question={q1} />
     );
 
-    rerender(<QuestionRenderer question={q2} />);
+    await rerender(<QuestionRenderer question={q2} />);
     expect(getByText('SkillQuestion')).toBeTruthy();
     expect(getByText('ImageQuestion')).toBeTruthy();
 
-    act(() => {
+    await act(() => {
       springCallbacks.at(-1)?.(false);
     });
 

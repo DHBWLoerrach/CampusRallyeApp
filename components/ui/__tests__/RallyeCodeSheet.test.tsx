@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Keyboard, ScrollView, View } from 'react-native';
+import { Alert, Keyboard } from 'react-native';
 import { act, fireEvent, render } from '@testing-library/react-native';
 import RallyeCodeSheet, {
   isRallyeCodeRequired,
@@ -42,8 +42,8 @@ describe('RallyeCodeSheet', () => {
     expect(isRallyeCodeRequired(null)).toBe(false);
   });
 
-  it('truncates long rallye titles in the sheet content', () => {
-    const { getByText } = render(
+  it('truncates long rallye titles in the sheet content', async () => {
+    const { getByText } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
@@ -54,8 +54,8 @@ describe('RallyeCodeSheet', () => {
     expect(getByText(protectedRallye.name).props.numberOfLines).toBe(2);
   });
 
-  it('shows the subtitle explaining the code entry', () => {
-    const { getByText } = render(
+  it('shows the subtitle explaining the code entry', async () => {
+    const { getByText } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
@@ -66,8 +66,8 @@ describe('RallyeCodeSheet', () => {
     expect(getByText('rallye.code.subtitle')).toBeTruthy();
   });
 
-  it('renders the code input unmasked', () => {
-    const { getByLabelText } = render(
+  it('renders the code input unmasked', async () => {
+    const { getByLabelText } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
@@ -80,8 +80,8 @@ describe('RallyeCodeSheet', () => {
     ).toBeFalsy();
   });
 
-  it('keeps the content scrollable when the keyboard reduces available space', () => {
-    const { UNSAFE_getByType } = render(
+  it('keeps the content scrollable when the keyboard reduces available space', async () => {
+    const { container } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
@@ -89,13 +89,15 @@ describe('RallyeCodeSheet', () => {
       />
     );
 
-    const scrollView = UNSAFE_getByType(ScrollView);
+    const [scrollView] = container.queryAll(
+      (node) => node.type === 'RCTScrollView'
+    );
     expect(scrollView.props.keyboardShouldPersistTaps).toBe('handled');
     expect(scrollView.props.automaticallyAdjustKeyboardInsets).toBe(true);
   });
 
-  it('marks the card as modal content for accessibility', () => {
-    const { UNSAFE_getAllByType } = render(
+  it('marks the card as modal content for accessibility', async () => {
+    const { container } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
@@ -103,18 +105,18 @@ describe('RallyeCodeSheet', () => {
       />
     );
 
-    const modalCard = UNSAFE_getAllByType(View).find(
-      (view) => view.props.accessibilityViewIsModal === true
+    const [modalCard] = container.queryAll(
+      (node) => node.props.accessibilityViewIsModal === true
     );
-    expect(modalCard?.props.importantForAccessibility).toBe('yes');
+    expect(modalCard.props.importantForAccessibility).toBe('yes');
   });
 
-  it('dismisses the keyboard before closing from the backdrop', () => {
+  it('dismisses the keyboard before closing from the backdrop', async () => {
     const onClose = jest.fn();
     const dismissSpy = jest
       .spyOn(Keyboard, 'dismiss')
       .mockImplementation(() => undefined);
-    const { UNSAFE_getByProps } = render(
+    const { getByTestId } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={onClose}
@@ -122,15 +124,18 @@ describe('RallyeCodeSheet', () => {
       />
     );
 
-    fireEvent.press(UNSAFE_getByProps({ testID: 'rallye-code-backdrop' }));
+    // The modal card hides its sibling backdrop from screen readers only.
+    await fireEvent.press(
+      getByTestId('rallye-code-backdrop', { includeHiddenElements: true })
+    );
 
     expect(dismissSpy).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('shows an alert when submitting without a code', () => {
+  it('shows an alert when submitting without a code', async () => {
     const onJoin = jest.fn();
-    const { getByText } = render(
+    const { getByText } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
@@ -138,7 +143,7 @@ describe('RallyeCodeSheet', () => {
       />
     );
 
-    fireEvent.press(getByText('rallye.code.join'));
+    await fireEvent.press(getByText('rallye.code.join'));
 
     expect(Alert.alert).toHaveBeenCalledWith(
       'rallye.code.missing.title',
@@ -147,9 +152,9 @@ describe('RallyeCodeSheet', () => {
     expect(onJoin).not.toHaveBeenCalled();
   });
 
-  it('shows an alert when the code is wrong', () => {
+  it('shows an alert when the code is wrong', async () => {
     const onJoin = jest.fn();
-    const { getByLabelText, getByText } = render(
+    const { getByLabelText, getByText } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={jest.fn()}
@@ -157,8 +162,8 @@ describe('RallyeCodeSheet', () => {
       />
     );
 
-    fireEvent.changeText(getByLabelText('rallye.code.label'), 'wrong');
-    fireEvent.press(getByText('rallye.code.join'));
+    await fireEvent.changeText(getByLabelText('rallye.code.label'), 'wrong');
+    await fireEvent.press(getByText('rallye.code.join'));
 
     expect(Alert.alert).toHaveBeenCalledWith(
       'rallye.code.wrong.title',
@@ -170,7 +175,7 @@ describe('RallyeCodeSheet', () => {
   it('joins without closing itself when the code is correct', async () => {
     const onClose = jest.fn();
     const onJoin = jest.fn().mockResolvedValue(true);
-    const { getByLabelText, getByText } = render(
+    const { getByLabelText, getByText } = await render(
       <RallyeCodeSheet
         rallye={protectedRallye}
         onClose={onClose}
@@ -178,9 +183,9 @@ describe('RallyeCodeSheet', () => {
       />
     );
 
-    fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
+    await fireEvent.changeText(getByLabelText('rallye.code.label'), 'secret');
     await act(async () => {
-      fireEvent.press(getByText('rallye.code.join'));
+      await fireEvent.press(getByText('rallye.code.join'));
     });
 
     expect(onJoin).toHaveBeenCalledWith(protectedRallye);

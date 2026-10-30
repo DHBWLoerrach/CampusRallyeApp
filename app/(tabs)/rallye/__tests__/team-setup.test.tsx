@@ -88,9 +88,9 @@ describe('TeamSetup', () => {
   });
 
   it('navigates to the team name sheet route after creating a team', async () => {
-    const { getByText } = render(<TeamSetup />);
+    const { getByText } = await render(<TeamSetup />);
 
-    fireEvent.press(getByText('teamSetup.button'));
+    await fireEvent.press(getByText('teamSetup.button'));
 
     await waitFor(() => {
       expect(createTeam).toHaveBeenCalledWith('Generated Team', 1);

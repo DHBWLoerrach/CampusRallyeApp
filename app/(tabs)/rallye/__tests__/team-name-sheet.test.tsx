@@ -48,27 +48,27 @@ describe('TeamNameSheetScreen', () => {
     jest.useRealTimers();
   });
 
-  it('renders the current team name', () => {
-    const { getByText } = render(<TeamNameSheetScreen />);
+  it('renders the current team name', async () => {
+    const { getByText } = await render(<TeamNameSheetScreen />);
 
     expect(getByText('team.sheetTitle')).toBeTruthy();
     expect(getByText('Noble Purple Dragons')).toBeTruthy();
   });
 
-  it('dismisses itself after the display duration', () => {
-    render(<TeamNameSheetScreen />);
+  it('dismisses itself after the display duration', async () => {
+    await render(<TeamNameSheetScreen />);
 
-    act(() => {
+    await act(() => {
       jest.advanceTimersByTime(3000);
     });
 
     expect(mockRouterBack).toHaveBeenCalledTimes(1);
   });
 
-  it('dismisses itself when no team name is available', () => {
+  it('dismisses itself when no team name is available', async () => {
     mockTeam = null;
 
-    render(<TeamNameSheetScreen />);
+    await render(<TeamNameSheetScreen />);
 
     expect(mockRouterBack).toHaveBeenCalledTimes(1);
   });
